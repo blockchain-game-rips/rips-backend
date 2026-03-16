@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { createCustomError } from 'src/utils/common'
 import {
 	Chain,
@@ -12,13 +12,15 @@ import {
 } from 'viem'
 import * as chains from 'viem/chains'
 import { HttpRpcClientOptions } from 'viem/utils'
-import { EvmClientConfigService } from './evm-client-config.service'
+import { EVM_CLIENT_CONFIG, ResolvedEvmClientConfig } from './types'
 
 const DEFAULT_BATCH_SIZE = 1_000
 
 @Injectable()
 export class EvmClientService {
-	constructor(private readonly config: EvmClientConfigService) {}
+	constructor(
+		@Inject(EVM_CLIENT_CONFIG) private readonly config: ResolvedEvmClientConfig,
+	) {}
 
 	public customError = createCustomError('ChainClientService')
 

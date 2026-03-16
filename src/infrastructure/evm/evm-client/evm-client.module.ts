@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
-import { EvmClientConfigService } from './evm-client-config.service'
+import { evmClientConfigProvider } from './evm-client-config.provider'
 import { EvmClientService } from './evm-client.service'
 
 @Module({
-	providers: [EvmClientConfigService, EvmClientService],
+	providers: [evmClientConfigProvider, EvmClientService],
 	exports: [EvmClientService],
 })
 export class EvmClientModule {}
