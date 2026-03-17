@@ -19,7 +19,8 @@ const DEFAULT_BATCH_SIZE = 1_000
 @Injectable()
 export class EvmClientService {
 	constructor(
-		@Inject(EVM_CLIENT_CONFIG) private readonly config: ResolvedEvmClientConfig,
+		@Inject(EVM_CLIENT_CONFIG)
+		private readonly config: ResolvedEvmClientConfig,
 	) {}
 
 	public customError = createCustomError('ChainClientService')

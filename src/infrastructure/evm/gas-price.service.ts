@@ -1,6 +1,6 @@
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
-import { EvmClientService } from '../evm-client/evm-client.service'
+import { EvmClientService } from './evm-client/evm-client.service'
 
 @Injectable()
 export class GasPriceService {

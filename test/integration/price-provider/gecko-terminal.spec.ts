@@ -59,9 +59,9 @@ describe('GeckoTerminalService', () => {
 		})
 
 		it('should throw for an invalid chain', async () => {
-			await expect(service.getTokenPrice(USDT_ETH, 'invalidChain')).rejects.toThrow(
-				'Chain invalidChain not found',
-			)
+			await expect(
+				service.getTokenPrice(USDT_ETH, 'invalidChain'),
+			).rejects.toThrow('Chain invalidChain not found')
 		})
 	})
 
@@ -80,7 +80,10 @@ describe('GeckoTerminalService', () => {
 		it('should handle batch larger than 30 addresses', async () => {
 			const MIN_LIVE_TOKENS = 25
 
-			const prices = await service.getTokenPrices(OVER_30_TOKENS_ETH, 'eth')
+			const prices = await service.getTokenPrices(
+				OVER_30_TOKENS_ETH,
+				'eth',
+			)
 
 			const liveTokens = prices.filter((t) => t.price > 0)
 			expect(liveTokens.length).toBeGreaterThanOrEqual(MIN_LIVE_TOKENS)

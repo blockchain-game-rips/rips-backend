@@ -5,28 +5,40 @@ import { GeckoTerminalService } from 'src/infrastructure/price-provider/gecko-te
 import { PriceProviderService } from 'src/infrastructure/price-provider/price-provider.service'
 
 const WETH_ARB: Currency = {
-	id: composeCurrencyId('eip155:42161', '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'),
+	id: composeCurrencyId(
+		'eip155:42161',
+		'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+	),
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
 }
 
 const WBTC_ARB: Currency = {
-	id: composeCurrencyId('eip155:42161', '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f'),
+	id: composeCurrencyId(
+		'eip155:42161',
+		'0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
+	),
 	symbol: 'WBTC',
 	name: 'Wrapped Bitcoin',
 	decimals: 8,
 }
 
 const WETH_FUSE: Currency = {
-	id: composeCurrencyId('eip155:122', '0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590'),
+	id: composeCurrencyId(
+		'eip155:122',
+		'0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590',
+	),
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
 }
 
 const ETH_NATIVE_ARB: Currency = {
-	id: composeCurrencyId('eip155:42161', '0x0000000000000000000000000000000000000000'),
+	id: composeCurrencyId(
+		'eip155:42161',
+		'0x0000000000000000000000000000000000000000',
+	),
 	symbol: 'ETH',
 	name: 'Ether',
 	decimals: 18,
@@ -40,7 +52,9 @@ function makeMockGeckoTerminalService(
 	}
 }
 
-function makeMockCurrencyService(): jest.Mocked<Pick<CurrencyService, 'getWrappedNative'>> {
+function makeMockCurrencyService(): jest.Mocked<
+	Pick<CurrencyService, 'getWrappedNative'>
+> {
 	return {
 		getWrappedNative: jest.fn().mockImplementation((chainId: number) => {
 			if (chainId === 42161) return Promise.resolve(WETH_ARB)
@@ -75,7 +89,10 @@ describe('PriceProviderService', () => {
 
 	it('should return price for a token', async () => {
 		const gecko = makeMockGeckoTerminalService([
-			{ address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', price: 2500 },
+			{
+				address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+				price: 2500,
+			},
 		])
 		const service = makeService(gecko, makeMockCurrencyService())
 
@@ -86,8 +103,14 @@ describe('PriceProviderService', () => {
 
 	it('should return prices for multiple tokens', async () => {
 		const gecko = makeMockGeckoTerminalService([
-			{ address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', price: 2500 },
-			{ address: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f', price: 90000 },
+			{
+				address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+				price: 2500,
+			},
+			{
+				address: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f',
+				price: 90000,
+			},
 		])
 		const service = makeService(gecko, makeMockCurrencyService())
 
@@ -99,7 +122,10 @@ describe('PriceProviderService', () => {
 
 	it('should use cached price on second call for same token', async () => {
 		const gecko = makeMockGeckoTerminalService([
-			{ address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', price: 2500 },
+			{
+				address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+				price: 2500,
+			},
 		])
 		const service = makeService(gecko, makeMockCurrencyService())
 
@@ -111,8 +137,14 @@ describe('PriceProviderService', () => {
 
 	it('should refetch when any token is missing from cache', async () => {
 		const gecko = makeMockGeckoTerminalService([
-			{ address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', price: 2500 },
-			{ address: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f', price: 90000 },
+			{
+				address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+				price: 2500,
+			},
+			{
+				address: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f',
+				price: 90000,
+			},
 		])
 		const service = makeService(gecko, makeMockCurrencyService())
 
@@ -124,7 +156,10 @@ describe('PriceProviderService', () => {
 
 	it('should resolve native currency to its wrapped token before fetching', async () => {
 		const gecko = makeMockGeckoTerminalService([
-			{ address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', price: 2500 },
+			{
+				address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+				price: 2500,
+			},
 		])
 		const currencyService = makeMockCurrencyService()
 		const service = makeService(gecko, currencyService)
@@ -140,7 +175,10 @@ describe('PriceProviderService', () => {
 
 	it('should return same price for native and its wrapped native', async () => {
 		const gecko = makeMockGeckoTerminalService([
-			{ address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', price: 2500 },
+			{
+				address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+				price: 2500,
+			},
 		])
 		const service = makeService(gecko, makeMockCurrencyService())
 
@@ -151,7 +189,10 @@ describe('PriceProviderService', () => {
 
 	it('should throw when chainId is not supported', async () => {
 		const unsupportedCurrency: Currency = {
-			id: composeCurrencyId('eip155:99999', '0x1234567890123456789012345678901234567890'),
+			id: composeCurrencyId(
+				'eip155:99999',
+				'0x1234567890123456789012345678901234567890',
+			),
 			symbol: 'TEST',
 			decimals: 18,
 		}

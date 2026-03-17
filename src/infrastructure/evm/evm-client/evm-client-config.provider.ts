@@ -19,7 +19,8 @@ function transformRpcSettings(
 
 	for (const [chainId, settings] of Object.entries(rpcSettings)) {
 		const resolvedUrls = settings.rpcUrls.map((url) => {
-			const rawUrl = url === 'alchemy' ? getAlchemyRpcUrl(Number(chainId)) : url
+			const rawUrl =
+				url === 'alchemy' ? getAlchemyRpcUrl(Number(chainId)) : url
 			return z.url().parse(rawUrl) as RpcUrl
 		})
 
@@ -47,8 +48,9 @@ function transformCustomChains(customChains: CustomChain[]): Chain[] {
 export const evmClientConfigProvider = {
 	provide: EVM_CLIENT_CONFIG,
 	useFactory: (configService: ConfigService): ResolvedEvmClientConfig => {
-		const config =
-			configService.get<ChainClientConfig>(CHAIN_CLIENT_CONFIG_KEY)
+		const config = configService.get<ChainClientConfig>(
+			CHAIN_CLIENT_CONFIG_KEY,
+		)
 
 		return {
 			rpcSettings: config?.rpcSettings

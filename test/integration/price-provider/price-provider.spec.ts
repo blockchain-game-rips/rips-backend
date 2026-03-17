@@ -8,20 +8,28 @@ import { PriceProviderService } from 'src/infrastructure/price-provider/price-pr
 import { wait } from 'src/utils/common'
 
 const WETH_ARB: Currency = {
-	id: composeCurrencyId('eip155:42161', '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'),
+	id: composeCurrencyId(
+		'eip155:42161',
+		'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+	),
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
 }
 
 const ETH_NATIVE_ARB: Currency = {
-	id: composeCurrencyId('eip155:42161', '0x0000000000000000000000000000000000000000'),
+	id: composeCurrencyId(
+		'eip155:42161',
+		'0x0000000000000000000000000000000000000000',
+	),
 	symbol: 'ETH',
 	name: 'Ether',
 	decimals: 18,
 }
 
-function makeMockCurrencyService(): jest.Mocked<Pick<CurrencyService, 'getWrappedNative'>> {
+function makeMockCurrencyService(): jest.Mocked<
+	Pick<CurrencyService, 'getWrappedNative'>
+> {
 	return {
 		getWrappedNative: jest.fn().mockImplementation((chainId: number) => {
 			if (chainId === 42161) return Promise.resolve(WETH_ARB)
@@ -40,7 +48,10 @@ describe('PriceProviderService', () => {
 				PriceProviderService,
 				GeckoTerminalService,
 				Logger,
-				{ provide: CurrencyService, useValue: makeMockCurrencyService() },
+				{
+					provide: CurrencyService,
+					useValue: makeMockCurrencyService(),
+				},
 			],
 		}).compile()
 
