@@ -8,21 +8,21 @@ datasource db {
 }
 
 model User {
-  id         BigInt   @id @default(autoincrement())
-  telegramId BigInt   @unique @map("telegram_id")
-  createdAt  DateTime @default(now()) @map("created_at")
-  wallet     Wallet?
+  id          BigInt   @id @default(autoincrement())
+  telegramId  BigInt   @unique @map("telegram_id")
+  evmWalletId BigInt   @unique @map("evm_wallet_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  evmWallet   EvmWallet @relation(fields: [evmWalletId], references: [id])
 
   @@map("users")
 }
 
-model Wallet {
+model EvmWallet {
   id        BigInt   @id @default(autoincrement())
-  userId    BigInt   @unique @map("user_id")
   address   String   @unique
   kmsKeyId  String   @map("kms_key_id")
   createdAt DateTime @default(now()) @map("created_at")
-  user      User     @relation(fields: [userId], references: [id])
+  user      User?
 
-  @@map("wallets")
+  @@map("evm_wallets")
 }
