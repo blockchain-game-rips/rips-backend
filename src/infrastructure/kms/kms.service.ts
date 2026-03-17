@@ -5,7 +5,7 @@ import {
 } from '@aws-sdk/client-kms'
 import { Injectable } from '@nestjs/common'
 import {
-	KmsKeyResult,
+	type KmsKeyResult,
 	KmsService,
 } from 'src/application/interfaces/kms.service'
 import { getEnvSafe } from 'src/utils/common'
@@ -14,10 +14,11 @@ import { getAddress, keccak256, type Address } from 'viem'
 const DER_UNCOMPRESSED_PUBLIC_KEY_OFFSET = 27
 
 @Injectable()
-export class AwsKmsService implements KmsService {
+export class AwsKmsService extends KmsService {
 	private readonly client: KMSClient
 
 	constructor() {
+		super()
 		this.client = new KMSClient({ region: getEnvSafe('AWS_REGION') })
 	}
 

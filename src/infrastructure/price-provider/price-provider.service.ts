@@ -14,7 +14,7 @@ const PriceProviderError = createCustomError('PriceProviderError')
 const UPDATE_INTERVAL_MS = 1000 * 60 * 5
 
 @Injectable()
-export class PriceProviderService implements PriceProvider {
+export class PriceProviderService extends PriceProvider {
 	private priceCache: Map<CurrencyId, number> = new Map()
 	private trackedCurrencies: Map<CurrencyId, Currency> = new Map()
 	private logger = new Logger(PriceProviderService.name)
@@ -23,6 +23,8 @@ export class PriceProviderService implements PriceProvider {
 		readonly currencyService: CurrencyService,
 		readonly geckoTerminalService: GeckoTerminalService,
 	) {
+		super()
+
 		setInterval(() => {
 			this.refreshTracked().catch((error) =>
 				this.logger.error('Error updating prices:', error),

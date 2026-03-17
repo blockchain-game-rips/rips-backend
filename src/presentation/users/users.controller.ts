@@ -3,18 +3,15 @@ import {
 	ConflictException,
 	Controller,
 	Get,
-	Inject,
 	NotFoundException,
 	Param,
 	Post,
 } from '@nestjs/common'
 import {
-	CREATE_USER_USE_CASE_TOKEN,
 	CreateUserUseCase,
 	UserAlreadyExistsError,
 } from 'src/application/use-cases/create-user/create-user.use-case'
 import {
-	GET_USER_USE_CASE_TOKEN,
 	GetUserUseCase,
 	UserNotFoundError,
 } from 'src/application/use-cases/get-user/get-user.use-case'
@@ -36,9 +33,7 @@ const createUserBodySchema = z.object({
 @Controller('users')
 export class UsersController {
 	constructor(
-		@Inject(GET_USER_USE_CASE_TOKEN)
 		private readonly getUserUseCase: GetUserUseCase,
-		@Inject(CREATE_USER_USE_CASE_TOKEN)
 		private readonly createUserUseCase: CreateUserUseCase,
 	) {}
 

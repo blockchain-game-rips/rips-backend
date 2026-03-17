@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common'
-import { PRICE_PROVIDER_TOKEN } from 'src/application/interfaces/price-service'
+import { PriceProvider } from 'src/application/interfaces/price-service'
 import { EvmModule } from '../evm/evm.module'
 import { GeckoTerminalService } from './gecko-terminal.service'
 import { PriceProviderService } from './price-provider.service'
@@ -9,9 +9,8 @@ import { PriceProviderService } from './price-provider.service'
 	imports: [EvmModule],
 	providers: [
 		GeckoTerminalService,
-		PriceProviderService,
-		{ provide: PRICE_PROVIDER_TOKEN, useExisting: PriceProviderService },
+		{ provide: PriceProvider, useClass: PriceProviderService },
 	],
-	exports: [PRICE_PROVIDER_TOKEN],
+	exports: [PriceProvider],
 })
 export class PriceOracleModule {}

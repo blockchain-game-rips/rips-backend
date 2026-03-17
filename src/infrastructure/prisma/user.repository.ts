@@ -7,8 +7,10 @@ import { Prisma } from '../../../generated/prisma'
 import { PrismaService } from './prisma.service'
 
 @Injectable()
-export class PrismaUserRepository implements UserRepository {
-	constructor(private readonly prisma: PrismaService) {}
+export class PrismaUserRepository extends UserRepository {
+	constructor(private readonly prisma: PrismaService) {
+		super()
+	}
 
 	async findByTelegramId(telegramId: TelegramId): Promise<User | null> {
 		const record = await this.prisma.user.findUnique({

@@ -5,8 +5,6 @@ export interface KmsKeyResult {
 	evmAddress: Address
 }
 
-export interface KmsService {
-	createEvmKey(): Promise<KmsKeyResult>
+export abstract class KmsService {
+	abstract createEvmKey(): Promise<KmsKeyResult>
 }
-
-export const KMS_SERVICE_TOKEN = Symbol('KMS_SERVICE_TOKEN')

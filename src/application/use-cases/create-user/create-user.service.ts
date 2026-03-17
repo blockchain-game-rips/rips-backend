@@ -1,12 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common'
-import {
-	KMS_SERVICE_TOKEN,
-	KmsService,
-} from 'src/application/interfaces/kms.service'
-import {
-	USER_REPOSITORY_TOKEN,
-	UserRepository,
-} from 'src/application/interfaces/repositories/user.repository'
+import { Injectable } from '@nestjs/common'
+import { KmsService } from 'src/application/interfaces/kms.service'
+import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
 import { User } from 'src/domain/entities/user'
 import {
 	CreateUserInput,
@@ -15,14 +9,13 @@ import {
 } from './create-user.use-case'
 
 @Injectable()
-export class CreateUserService implements CreateUserUseCase {
+export class CreateUserService extends CreateUserUseCase {
 	constructor(
-		@Inject(USER_REPOSITORY_TOKEN)
 		private readonly userRepository: UserRepository,
-
-		@Inject(KMS_SERVICE_TOKEN)
 		private readonly kmsService: KmsService,
-	) {}
+	) {
+		super()
+	}
 
 	async execute(input: CreateUserInput): Promise<User> {
 		const existing = await this.userRepository.findByTelegramId(

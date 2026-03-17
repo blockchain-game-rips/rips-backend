@@ -8,8 +8,6 @@ export type GetUserInput = {
 	telegramId: TelegramId
 }
 
-export interface GetUserUseCase {
-	execute(input: GetUserInput): Promise<User>
+export abstract class GetUserUseCase {
+	abstract execute(input: GetUserInput): Promise<User>
 }
-
-export const GET_USER_USE_CASE_TOKEN = Symbol('GET_USER_USE_CASE_TOKEN')
