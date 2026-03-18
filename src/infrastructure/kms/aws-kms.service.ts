@@ -9,7 +9,7 @@ import {
 	type KmsKeyResult,
 } from 'src/application/interfaces/kms.service'
 import { getEnvSafe } from 'src/utils/common'
-import { getAddress, keccak256, type Address } from 'viem'
+import { getAddress, keccak256, type Address, type Hex } from 'viem'
 
 const DER_UNCOMPRESSED_PUBLIC_KEY_OFFSET = 27
 
@@ -40,6 +40,11 @@ export class AwsKmsService extends KmsService {
 		const evmAddress = deriveEvmAddress(publicKeyResult.PublicKey!)
 
 		return { kmsKeyId, evmAddress }
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async signTransaction(_kmsKeyId: string, _hash: Hex, _expectedAddress: Address): Promise<Hex> {
+		throw new Error('signTransaction is not supported for AWS KMS')
 	}
 }
 

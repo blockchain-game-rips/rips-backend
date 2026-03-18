@@ -6,7 +6,7 @@ import {
 	type KmsKeyResult,
 } from 'src/application/interfaces/kms.service'
 import { getEnvSafe } from 'src/utils/common'
-import { getAddress, keccak256, type Address } from 'viem'
+import { getAddress, keccak256, recoverAddress, type Address, type Hex } from 'viem'
 
 const UNCOMPRESSED_PUBLIC_KEY_PREFIX = 0x04
 const UNCOMPRESSED_PUBLIC_KEY_LENGTH = 65
@@ -66,6 +66,28 @@ export class GcKmsService extends KmsService {
 		return { kmsKeyId: versionName, evmAddress }
 	}
 
+	async signTransaction(kmsKeyId: string, hash: Hex, expectedAddress: Address): Promise<Hex> {
+		const [signResponse] = await this.client.asymmetricSign({
+			name: kmsKeyId,
+			digest: { sha256: Buffer.from(hash.slice(2), 'hex') },
+		})
+
+		if (!signResponse.signature) {
+			throw new Error('GC KMS asymmetricSign returned no signature')
+		}
+
+		const derSignature = Buffer.from(signResponse.signature)
+		const { r, s } = decodeDerSignature(derSignature)
+
+		const v = await recoverV(hash, r, s, expectedAddress)
+
+		const rHex = r.toString(16).padStart(64, '0')
+		const sHex = s.toString(16).padStart(64, '0')
+		const vHex = v.toString(16).padStart(2, '0')
+
+		return `0x${rHex}${sHex}${vHex}`
+	}
+
 	private async waitForKeyVersionEnabled(versionName: string): Promise<void> {
 		const MAX_ATTEMPTS = 10
 		const POLL_INTERVAL_MS = 500
@@ -115,4 +137,71 @@ function extractUncompressedPublicKey(derBuffer: Buffer): Buffer {
 	}
 
 	throw new Error('Could not extract uncompressed public key from DER buffer')
+}
+
+interface EcdsaSignature {
+	r: bigint
+	s: bigint
+}
+
+function decodeDerSignature(der: Buffer): EcdsaSignature {
+	// DER structure: 0x30 <total-len> 0x02 <r-len> <r> 0x02 <s-len> <s>
+	const DER_SEQUENCE_TAG = 0x30
+	const DER_INTEGER_TAG = 0x02
+
+	if (der[0] !== DER_SEQUENCE_TAG) {
+		throw new Error('Invalid DER signature: missing SEQUENCE tag')
+	}
+
+	let offset = 2
+
+	if (der[offset] !== DER_INTEGER_TAG) {
+		throw new Error('Invalid DER signature: missing INTEGER tag for r')
+	}
+	offset++
+
+	const rLength = der[offset]
+	offset++
+	const rBytes = der.subarray(offset, offset + rLength)
+	offset += rLength
+
+	if (der[offset] !== DER_INTEGER_TAG) {
+		throw new Error('Invalid DER signature: missing INTEGER tag for s')
+	}
+	offset++
+
+	const sLength = der[offset]
+	offset++
+	const sBytes = der.subarray(offset, offset + sLength)
+
+	const r = BigInt('0x' + Buffer.from(rBytes).toString('hex'))
+	const s = BigInt('0x' + Buffer.from(sBytes).toString('hex'))
+
+	return { r, s }
+}
+
+async function recoverV(
+	hash: Hex,
+	r: bigint,
+	s: bigint,
+	expectedAddress: Address,
+): Promise<number> {
+	const EVM_V_OFFSET = 27
+
+	for (let recovery = 0; recovery <= 1; recovery++) {
+		const v = EVM_V_OFFSET + recovery
+
+		const rHex = r.toString(16).padStart(64, '0')
+		const sHex = s.toString(16).padStart(64, '0')
+		const vHex = v.toString(16).padStart(2, '0')
+		const signature = `0x${rHex}${sHex}${vHex}` as Hex
+
+		const recovered = await recoverAddress({ hash, signature })
+
+		if (recovered.toLowerCase() === expectedAddress.toLowerCase()) {
+			return v
+		}
+	}
+
+	throw new Error('Could not determine recovery value for signature')
 }

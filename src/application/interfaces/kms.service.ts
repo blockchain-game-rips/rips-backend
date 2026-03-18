@@ -1,4 +1,4 @@
-import { type Address } from 'viem'
+import { type Address, type Hex } from 'viem'
 
 export interface KmsKeyResult {
 	kmsKeyId: string
@@ -7,4 +7,5 @@ export interface KmsKeyResult {
 
 export abstract class KmsService {
 	abstract createEvmKey(): Promise<KmsKeyResult>
+	abstract signTransaction(kmsKeyId: string, hash: Hex, expectedAddress: Address): Promise<Hex>
 }
