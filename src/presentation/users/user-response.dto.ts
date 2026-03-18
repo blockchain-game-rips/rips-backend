@@ -1,9 +1,10 @@
 import { User } from 'src/domain/entities/user'
+import { ChainNamespace } from 'src/domain/value-objects/chain-namespace'
 
 export type UserResponseDto = {
 	id: string
 	telegramId: string
-	evmAddress: string
+	wallets: Record<ChainNamespace, string>
 	createdAt: string
 }
 
@@ -11,7 +12,7 @@ export function toUserResponseDto(user: User): UserResponseDto {
 	return {
 		id: user.id.toString(),
 		telegramId: user.telegramId.toString(),
-		evmAddress: user.evmWallet.address,
+		wallets: user.wallets,
 		createdAt: user.createdAt.toISOString(),
 	}
 }

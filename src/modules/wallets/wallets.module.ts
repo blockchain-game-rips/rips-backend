@@ -9,7 +9,7 @@ import { CurrencyServiceImpl } from 'src/infrastructure/currency.service'
 import { EvmModule } from 'src/infrastructure/evm/evm.module'
 import { PrismaUserRepository } from 'src/infrastructure/prisma/user.repository'
 import { WalletsController } from 'src/presentation/wallets/wallets.controller'
-import { MAIN_CURRENCY, MAIN_CURRENCY_VALUE } from './wallets.constants'
+import { MAIN_CURRENCY_ACCOUNT, MAIN_CURRENCY_VALUE } from './wallets.constants'
 
 @Module({
 	imports: [EvmModule],
@@ -17,7 +17,7 @@ import { MAIN_CURRENCY, MAIN_CURRENCY_VALUE } from './wallets.constants'
 	providers: [
 		{ provide: UserRepository, useClass: PrismaUserRepository },
 		{ provide: GetUserUseCase, useClass: GetUserService },
-		{ provide: MAIN_CURRENCY, useValue: MAIN_CURRENCY_VALUE },
+		{ provide: MAIN_CURRENCY_ACCOUNT, useValue: MAIN_CURRENCY_VALUE },
 		{ provide: CurrencyService, useClass: CurrencyServiceImpl },
 		{ provide: GetBalanceUseCase, useClass: GetBalanceService },
 	],

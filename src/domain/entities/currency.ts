@@ -10,5 +10,4 @@ export interface CurrencyMetadata {
 export type Currency = {
 	id: CurrencyId
 	account: Account
-	balanceOf(address: string): Promise<bigint>
 } & CurrencyMetadata

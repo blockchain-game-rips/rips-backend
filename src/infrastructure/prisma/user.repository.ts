@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
+import { EIP155 } from 'src/constants'
 import { User } from 'src/domain/entities/user'
 import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
 import { getAddress, type Address } from 'viem'
@@ -50,9 +51,8 @@ function toDomainUser(record: UserRecord): User {
 	return {
 		id: record.id,
 		telegramId: toTelegramId(record.telegramId),
-		evmWallet: {
-			address: getAddress(record.evmWallet.address),
-			kmsKeyId: record.evmWallet.kmsKeyId,
+		wallets: {
+			[EIP155]: getAddress(record.evmWallet.address),
 		},
 		createdAt: record.createdAt,
 	}
