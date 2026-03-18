@@ -40,4 +40,10 @@ export default tseslint.config(
 			'@typescript-eslint/no-unsafe-argument': 'off',
 		},
 	},
+	{
+		files: ['test/**/*.ts'],
+		rules: {
+			'@typescript-eslint/unbound-method': 'off',
+		},
+	},
 )
