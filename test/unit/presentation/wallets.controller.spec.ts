@@ -1,14 +1,13 @@
 import { GetBalanceUseCase } from 'src/application/use-cases/get-balance/get-balance.use-case'
 import { UserNotFoundError } from 'src/application/use-cases/get-user/get-user.use-case'
+import { EIP155 } from 'src/constants'
 import { composeChainId } from 'src/domain/services/chain-id-utils'
 import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
-import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
 import { CurrencyAmount } from 'src/domain/value-objects/currency-amount'
 import { toTelegramId } from 'src/domain/value-objects/telegram-id'
 import { WalletsController } from 'src/presentation/wallets/wallets.controller'
 
 const TELEGRAM_ID = toTelegramId(123456n)
-const EIP155 = toChainNamespace('eip155')
 const NATIVE_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 const MOCK_BALANCE: CurrencyAmount = {

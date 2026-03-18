@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+import { EIP155 } from 'src/constants'
 import { Currency } from 'src/domain/entities/currency'
 import { composeChainId } from 'src/domain/services/chain-id-utils'
 import { parseCurrencyId, composeCurrencyId } from 'src/domain/services/currency-id-utils'
@@ -18,7 +19,7 @@ function accountFromCurrencyId(id: CurrencyId): Account {
 }
 
 const WETH_ARB_ID = composeCurrencyId(
-	composeChainId(toChainNamespace('eip155'), '42161'),
+	composeChainId(EIP155, '42161'),
 	'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
 )
 const WETH_ARB: Currency = {
@@ -31,7 +32,7 @@ const WETH_ARB: Currency = {
 }
 
 const ETH_NATIVE_ARB_ID = composeCurrencyId(
-	composeChainId(toChainNamespace('eip155'), '42161'),
+	composeChainId(EIP155, '42161'),
 	'0x0000000000000000000000000000000000000000',
 )
 const ETH_NATIVE_ARB: Currency = {

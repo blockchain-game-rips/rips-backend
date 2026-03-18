@@ -9,12 +9,10 @@ import { Currency } from 'src/domain/entities/currency'
 import { User } from 'src/domain/entities/user'
 import { composeChainId } from 'src/domain/services/chain-id-utils'
 import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
-import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
+import { EIP155 } from 'src/constants'
 import { CurrencyAmount } from 'src/domain/value-objects/currency-amount'
 import { toTelegramId } from 'src/domain/value-objects/telegram-id'
 import { MAIN_CURRENCY_VALUE } from 'src/modules/wallets/wallets.constants'
-
-const EIP155 = toChainNamespace('eip155')
 const TELEGRAM_ID = toTelegramId(123456n)
 const EVM_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'
 

@@ -1,14 +1,12 @@
+import { EIP155 } from 'src/constants'
 import { Currency, CurrencyMetadata } from 'src/domain/entities/currency'
 import { composeChainId } from 'src/domain/services/chain-id-utils'
 import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
 import { Account } from 'src/domain/value-objects/account'
-import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
 import { CurrencyId } from 'src/domain/value-objects/currency-id'
 import { Address } from 'viem'
 import { EvmClientService } from '../../evm-client/evm-client.service'
 import { BaseContract } from '../contracts/BaseContract'
-
-const NAMESPACE = toChainNamespace('eip155')
 
 export abstract class EvmCurrency extends BaseContract implements Currency {
 	public readonly symbol: string
@@ -30,10 +28,10 @@ export abstract class EvmCurrency extends BaseContract implements Currency {
 		this.decimals = currencyMetadata.decimals
 		this.name = currencyMetadata.name
 
-		const chain = { namespace: toChainNamespace(NAMESPACE), reference: chainId.toString() }
+		const chain = { namespace: EIP155, reference: chainId.toString() }
 		this.account = { chain, address }
 
-		const caip2ChainId = composeChainId(NAMESPACE, chainId.toString())
+		const caip2ChainId = composeChainId(EIP155, chainId.toString())
 		this.id = composeCurrencyId(caip2ChainId, address)
 	}
 

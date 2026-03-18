@@ -1,3 +1,4 @@
+import { EIP155 } from 'src/constants'
 import { Currency } from 'src/domain/entities/currency'
 import { composeChainId } from 'src/domain/services/chain-id-utils'
 import { parseCurrencyId, composeCurrencyId } from 'src/domain/services/currency-id-utils'
@@ -15,7 +16,7 @@ function accountFromCurrencyId(id: CurrencyId): Account {
 }
 
 const WETH_ARB_ID = composeCurrencyId(
-	composeChainId(toChainNamespace('eip155'), '42161'),
+	composeChainId(EIP155, '42161'),
 	'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
 )
 const WETH_ARB: Currency = {
@@ -28,7 +29,7 @@ const WETH_ARB: Currency = {
 }
 
 const WBTC_ARB_ID = composeCurrencyId(
-	composeChainId(toChainNamespace('eip155'), '42161'),
+	composeChainId(EIP155, '42161'),
 	'0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
 )
 const WBTC_ARB: Currency = {
@@ -41,7 +42,7 @@ const WBTC_ARB: Currency = {
 }
 
 const WETH_FUSE_ID = composeCurrencyId(
-	composeChainId(toChainNamespace('eip155'), '122'),
+	composeChainId(EIP155, '122'),
 	'0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590',
 )
 const WETH_FUSE: Currency = {
@@ -54,7 +55,7 @@ const WETH_FUSE: Currency = {
 }
 
 const ETH_NATIVE_ARB_ID = composeCurrencyId(
-	composeChainId(toChainNamespace('eip155'), '42161'),
+	composeChainId(EIP155, '42161'),
 	'0x0000000000000000000000000000000000000000',
 )
 const ETH_NATIVE_ARB: Currency = {
@@ -211,7 +212,7 @@ describe('PriceProviderService', () => {
 
 	it('should throw when chainId is not supported', async () => {
 		const unsupportedId = composeCurrencyId(
-			composeChainId(toChainNamespace('eip155'), '99999'),
+			composeChainId(EIP155, '99999'),
 			'0x1234567890123456789012345678901234567890',
 		)
 		const unsupportedCurrency: Currency = {
