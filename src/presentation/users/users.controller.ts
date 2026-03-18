@@ -1,23 +1,12 @@
-import {
-	Body,
-	ConflictException,
-	Controller,
-	Get,
-	NotFoundException,
-	Param,
-	Post,
-} from '@nestjs/common'
-import {
-	CreateUserUseCase,
-	UserAlreadyExistsError,
-} from 'src/application/use-cases/create-user/create-user.use-case'
-import {
-	GetUserUseCase,
-	UserNotFoundError,
-} from 'src/application/use-cases/get-user/get-user.use-case'
-import { toTelegramId } from 'src/domain/value-objects/telegram-id'
+import { Body, Controller, Get, Param, Post } from '@nestjs/common'
+import { CreateUserUseCase } from 'src/application/use-cases/create-user/create-user.use-case'
+import { GetUserUseCase } from 'src/application/use-cases/get-user/get-user.use-case'
+import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
+import { ZodValidationPipe } from 'src/presentation/pipes/zod-validation.pipe'
 import { z } from 'zod'
 import { toUserResponseDto, UserResponseDto } from './user-response.dto'
+
+const TELEGRAM_ID_PARAM = 'telegramId'
 
 const telegramIdParamSchema = z
 	.string()
@@ -30,44 +19,32 @@ const createUserBodySchema = z.object({
 		.transform((v) => toTelegramId(BigInt(v))),
 })
 
-@Controller('users')
+@Controller()
 export class UsersController {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly createUserUseCase: CreateUserUseCase,
 	) {}
 
-	@Get(':telegramId')
+	@Get(`:${TELEGRAM_ID_PARAM}`)
 	async getUser(
-		@Param('telegramId') rawId: string,
+		@Param(TELEGRAM_ID_PARAM, new ZodValidationPipe(telegramIdParamSchema))
+		telegramId: TelegramId,
 	): Promise<UserResponseDto> {
-		const telegramId = telegramIdParamSchema.parse(rawId)
+		const user = await this.getUserUseCase.execute({ telegramId })
 
-		try {
-			const user = await this.getUserUseCase.execute({ telegramId })
-
-			return toUserResponseDto(user)
-		} catch (error) {
-			if (error instanceof UserNotFoundError)
-				throw new NotFoundException(error.message)
-
-			throw error
-		}
+		return toUserResponseDto(user)
 	}
 
 	@Post()
-	async createUser(@Body() body: unknown): Promise<UserResponseDto> {
-		const { telegramId } = createUserBodySchema.parse(body)
+	async createUser(
+		@Body(new ZodValidationPipe(createUserBodySchema))
+		body: { telegramId: TelegramId },
+	): Promise<UserResponseDto> {
+		const user = await this.createUserUseCase.execute({
+			telegramId: body.telegramId,
+		})
 
-		try {
-			const user = await this.createUserUseCase.execute({ telegramId })
-
-			return toUserResponseDto(user)
-		} catch (error) {
-			if (error instanceof UserAlreadyExistsError)
-				throw new ConflictException(error.message)
-
-			throw error
-		}
+		return toUserResponseDto(user)
 	}
 }

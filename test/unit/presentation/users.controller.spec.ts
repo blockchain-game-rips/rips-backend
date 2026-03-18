@@ -1,4 +1,3 @@
-import { ConflictException, NotFoundException } from '@nestjs/common'
 import {
 	CreateUserUseCase,
 	UserAlreadyExistsError,
@@ -45,7 +44,7 @@ describe('UsersController', () => {
 		it('should return user response dto', async () => {
 			getUser.execute.mockResolvedValue(MOCK_USER)
 
-			const result = await controller.getUser('123456')
+			const result = await controller.getUser(TELEGRAM_ID)
 
 			expect(result).toEqual({
 				id: '1',
@@ -55,16 +54,12 @@ describe('UsersController', () => {
 			})
 		})
 
-		it('should throw NotFoundException when user not found', async () => {
+		it('should propagate UserNotFoundError', async () => {
 			getUser.execute.mockRejectedValue(new UserNotFoundError('not found'))
 
-			await expect(controller.getUser('123456')).rejects.toThrow(
-				NotFoundException,
+			await expect(controller.getUser(TELEGRAM_ID)).rejects.toThrow(
+				UserNotFoundError,
 			)
-		})
-
-		it('should reject non-numeric telegramId', async () => {
-			await expect(controller.getUser('abc')).rejects.toThrow()
 		})
 	})
 
@@ -72,7 +67,7 @@ describe('UsersController', () => {
 		it('should return created user response dto', async () => {
 			createUser.execute.mockResolvedValue(MOCK_USER)
 
-			const result = await controller.createUser({ telegramId: '123456' })
+			const result = await controller.createUser({ telegramId: TELEGRAM_ID })
 
 			expect(result).toEqual({
 				id: '1',
@@ -82,22 +77,14 @@ describe('UsersController', () => {
 			})
 		})
 
-		it('should accept numeric telegramId in body', async () => {
-			createUser.execute.mockResolvedValue(MOCK_USER)
-
-			const result = await controller.createUser({ telegramId: 123456 })
-
-			expect(result.telegramId).toBe('123456')
-		})
-
-		it('should throw ConflictException when user already exists', async () => {
+		it('should propagate UserAlreadyExistsError', async () => {
 			createUser.execute.mockRejectedValue(
 				new UserAlreadyExistsError('exists'),
 			)
 
 			await expect(
-				controller.createUser({ telegramId: '123456' }),
-			).rejects.toThrow(ConflictException)
+				controller.createUser({ telegramId: TELEGRAM_ID }),
+			).rejects.toThrow(UserAlreadyExistsError)
 		})
 	})
 })
