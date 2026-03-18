@@ -3,9 +3,11 @@ import { UserRepository } from 'src/application/interfaces/repositories/user.rep
 import { CreateUserService } from 'src/application/use-cases/create-user/create-user.service'
 import { UserAlreadyExistsError } from 'src/application/use-cases/create-user/create-user.use-case'
 import { User } from 'src/domain/entities/user'
+import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
 import { toTelegramId } from 'src/domain/value-objects/telegram-id'
 import { getAddress } from 'viem'
 
+const EIP155 = toChainNamespace('eip155')
 const TELEGRAM_ID = toTelegramId(123456n)
 const EVM_ADDRESS = getAddress('0x1234567890abcdef1234567890abcdef12345678')
 const KMS_KEY_ID = 'kms-key-123'
@@ -13,7 +15,7 @@ const KMS_KEY_ID = 'kms-key-123'
 const MOCK_USER: User = {
 	id: 1n,
 	telegramId: TELEGRAM_ID,
-	evmWallet: { address: EVM_ADDRESS, kmsKeyId: KMS_KEY_ID },
+	wallets: { [EIP155]: EVM_ADDRESS },
 	createdAt: new Date('2026-01-01'),
 }
 

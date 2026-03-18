@@ -1,3 +1,4 @@
+import { BalancesService } from 'src/application/interfaces/balances.service'
 import { CurrencyService } from 'src/application/interfaces/currency.service'
 import { GetBalanceService } from 'src/application/use-cases/get-balance/get-balance.service'
 import {
@@ -20,7 +21,7 @@ const EVM_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'
 const MOCK_USER: User = {
 	id: 1n,
 	telegramId: TELEGRAM_ID,
-	evmWallet: { address: EVM_ADDRESS, kmsKeyId: 'kms-key-123' },
+	wallets: { [EIP155]: EVM_ADDRESS },
 	createdAt: new Date('2026-01-01'),
 }
 
@@ -30,7 +31,6 @@ const MOCK_CURRENCY: Currency = {
 	symbol: 'ETH',
 	name: 'ETH',
 	decimals: 18,
-	balanceOf: jest.fn(),
 }
 
 function makeMockGetUserUseCase(): jest.Mocked<GetUserUseCase> {
@@ -41,28 +41,35 @@ function makeMockCurrencyService(): jest.Mocked<CurrencyService> {
 	return { fromAccount: jest.fn() }
 }
 
+function makeMockBalancesService(): jest.Mocked<BalancesService> {
+	return { balanceOf: jest.fn() }
+}
+
 describe('GetBalanceService', () => {
 	let getUserUseCase: jest.Mocked<GetUserUseCase>
 	let currencyService: jest.Mocked<CurrencyService>
+	let balancesService: jest.Mocked<BalancesService>
 	let service: GetBalanceService
 
 	beforeEach(() => {
 		getUserUseCase = makeMockGetUserUseCase()
 		currencyService = makeMockCurrencyService()
-		service = new GetBalanceService(getUserUseCase, currencyService, MAIN_CURRENCY_VALUE)
+		balancesService = makeMockBalancesService()
+		service = new GetBalanceService(getUserUseCase, currencyService, balancesService, MAIN_CURRENCY_VALUE)
 	})
 
 	it('should return currency amount for user wallet', async () => {
 		const balance = 1000000000000000000n
-		const mockCurrency = { ...MOCK_CURRENCY, balanceOf: jest.fn().mockResolvedValue(balance) }
 
 		getUserUseCase.execute.mockResolvedValue(MOCK_USER)
-		currencyService.fromAccount.mockResolvedValue(mockCurrency)
+		currencyService.fromAccount.mockResolvedValue(MOCK_CURRENCY)
+		balancesService.balanceOf.mockResolvedValue(balance)
 
 		const result: CurrencyAmount = await service.execute({ telegramId: TELEGRAM_ID })
 
-		expect(result).toEqual({ currency: mockCurrency, amount: balance })
-		expect(mockCurrency.balanceOf).toHaveBeenCalledWith(EVM_ADDRESS)
+		expect(result).toEqual({ currency: MOCK_CURRENCY, amount: balance })
+		expect(currencyService.fromAccount).toHaveBeenCalledWith(MAIN_CURRENCY_VALUE)
+		expect(balancesService.balanceOf).toHaveBeenCalledWith(MOCK_USER, MOCK_CURRENCY)
 	})
 
 	it('should propagate UserNotFoundError', async () => {

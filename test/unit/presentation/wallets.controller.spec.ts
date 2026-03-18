@@ -19,7 +19,6 @@ const MOCK_BALANCE: CurrencyAmount = {
 		symbol: 'ETH',
 		name: 'ETH',
 		decimals: 18,
-		balanceOf: jest.fn(),
 	},
 }
 

@@ -2,14 +2,16 @@ import { UserRepository } from 'src/application/interfaces/repositories/user.rep
 import { GetUserService } from 'src/application/use-cases/get-user/get-user.service'
 import { UserNotFoundError } from 'src/application/use-cases/get-user/get-user.use-case'
 import { User } from 'src/domain/entities/user'
+import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
 import { toTelegramId } from 'src/domain/value-objects/telegram-id'
 
+const EIP155 = toChainNamespace('eip155')
 const TELEGRAM_ID = toTelegramId(123456n)
 
 const MOCK_USER: User = {
 	id: 1n,
 	telegramId: TELEGRAM_ID,
-	evmWallet: { address: '0x1234567890abcdef1234567890abcdef12345678', kmsKeyId: 'kms-key-123' },
+	wallets: { [EIP155]: '0x1234567890abcdef1234567890abcdef12345678' },
 	createdAt: new Date('2026-01-01'),
 }
 

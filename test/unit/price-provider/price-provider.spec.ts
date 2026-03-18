@@ -24,7 +24,7 @@ const WETH_ARB: Currency = {
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
-	balanceOf: jest.fn(),
+
 }
 
 const WBTC_ARB_ID = composeCurrencyId(
@@ -37,7 +37,7 @@ const WBTC_ARB: Currency = {
 	symbol: 'WBTC',
 	name: 'Wrapped Bitcoin',
 	decimals: 8,
-	balanceOf: jest.fn(),
+
 }
 
 const WETH_FUSE_ID = composeCurrencyId(
@@ -50,7 +50,7 @@ const WETH_FUSE: Currency = {
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
-	balanceOf: jest.fn(),
+
 }
 
 const ETH_NATIVE_ARB_ID = composeCurrencyId(
@@ -63,7 +63,7 @@ const ETH_NATIVE_ARB: Currency = {
 	symbol: 'ETH',
 	name: 'Ether',
 	decimals: 18,
-	balanceOf: jest.fn(),
+
 }
 
 function makeMockGeckoTerminalService(
@@ -219,7 +219,7 @@ describe('PriceProviderService', () => {
 			account: accountFromCurrencyId(unsupportedId),
 			symbol: 'TEST',
 			decimals: 18,
-			balanceOf: jest.fn(),
+		
 		}
 		const service = makeService(
 			makeMockGeckoTerminalService([]),

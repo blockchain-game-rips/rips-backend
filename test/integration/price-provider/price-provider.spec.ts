@@ -27,7 +27,7 @@ const WETH_ARB: Currency = {
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
-	balanceOf: jest.fn(),
+
 }
 
 const ETH_NATIVE_ARB_ID = composeCurrencyId(
@@ -40,7 +40,7 @@ const ETH_NATIVE_ARB: Currency = {
 	symbol: 'ETH',
 	name: 'Ether',
 	decimals: 18,
-	balanceOf: jest.fn(),
+
 }
 
 function makeMockEvmCurrencyService(): jest.Mocked<

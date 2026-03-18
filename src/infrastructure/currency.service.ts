@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { CurrencyService } from 'src/application/interfaces/currency.service'
+import { EIP155 } from 'src/constants'
 import { Currency } from 'src/domain/entities/currency'
 import { Account } from 'src/domain/value-objects/account'
-import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
+import { getAddress } from 'viem'
 import { EvmCurrencyService } from './evm/evm-currency.service'
-
-const EIP155 = toChainNamespace('eip155')
 
 @Injectable()
 export class CurrencyServiceImpl extends CurrencyService {
@@ -16,9 +15,14 @@ export class CurrencyServiceImpl extends CurrencyService {
 	async fromAccount(account: Account): Promise<Currency> {
 		if (account.chain.namespace === EIP155) {
 			const chainId = Number(account.chain.reference)
-			return this.evmCurrencyService.getNative(chainId)
+
+			const address = getAddress(account.address)
+
+			return this.evmCurrencyService.fromAddress(address, chainId)
 		}
 
-		throw new Error(`Unsupported chain namespace: ${account.chain.namespace}`)
+		throw new Error(
+			`Unsupported chain namespace: ${account.chain.namespace}`,
+		)
 	}
 }
