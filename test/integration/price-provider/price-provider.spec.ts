@@ -1,34 +1,50 @@
 import { Logger } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Currency } from 'src/domain/entities/currency'
-import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
-import { CurrencyService } from 'src/infrastructure/evm/currency.service'
+import { composeChainId } from 'src/domain/services/chain-id-utils'
+import { parseCurrencyId, composeCurrencyId } from 'src/domain/services/currency-id-utils'
+import { Account } from 'src/domain/value-objects/account'
+import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
+import { CurrencyId } from 'src/domain/value-objects/currency-id'
+import { EvmCurrencyService } from 'src/infrastructure/evm/evm-currency.service'
 import { GeckoTerminalService } from 'src/infrastructure/price-provider/gecko-terminal.service'
 import { PriceProviderService } from 'src/infrastructure/price-provider/price-provider.service'
 import { wait } from 'src/utils/common'
 
+function accountFromCurrencyId(id: CurrencyId): Account {
+	const { chainId, address } = parseCurrencyId(id)
+	const [namespace, reference] = chainId.split(':')
+	return { chain: { namespace: toChainNamespace(namespace), reference }, address }
+}
+
+const WETH_ARB_ID = composeCurrencyId(
+	composeChainId(toChainNamespace('eip155'), '42161'),
+	'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+)
 const WETH_ARB: Currency = {
-	id: composeCurrencyId(
-		'eip155:42161',
-		'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-	),
+	id: WETH_ARB_ID,
+	account: accountFromCurrencyId(WETH_ARB_ID),
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
+	balanceOf: jest.fn(),
 }
 
+const ETH_NATIVE_ARB_ID = composeCurrencyId(
+	composeChainId(toChainNamespace('eip155'), '42161'),
+	'0x0000000000000000000000000000000000000000',
+)
 const ETH_NATIVE_ARB: Currency = {
-	id: composeCurrencyId(
-		'eip155:42161',
-		'0x0000000000000000000000000000000000000000',
-	),
+	id: ETH_NATIVE_ARB_ID,
+	account: accountFromCurrencyId(ETH_NATIVE_ARB_ID),
 	symbol: 'ETH',
 	name: 'Ether',
 	decimals: 18,
+	balanceOf: jest.fn(),
 }
 
-function makeMockCurrencyService(): jest.Mocked<
-	Pick<CurrencyService, 'getWrappedNative'>
+function makeMockEvmCurrencyService(): jest.Mocked<
+	Pick<EvmCurrencyService, 'getWrappedNative'>
 > {
 	return {
 		getWrappedNative: jest.fn().mockImplementation((chainId: number) => {
@@ -49,8 +65,8 @@ describe('PriceProviderService', () => {
 				GeckoTerminalService,
 				Logger,
 				{
-					provide: CurrencyService,
-					useValue: makeMockCurrencyService(),
+					provide: EvmCurrencyService,
+					useValue: makeMockEvmCurrencyService(),
 				},
 			],
 		}).compile()

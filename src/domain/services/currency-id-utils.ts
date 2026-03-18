@@ -1,5 +1,6 @@
 import { ChainId } from '../value-objects/chain-id'
 import { CurrencyId, tokenIdSchema } from '../value-objects/currency-id'
+import { toChainNamespace } from '../value-objects/chain-namespace'
 
 export function parseCurrencyId(tokenId: CurrencyId): {
 	chainId: ChainId
@@ -9,7 +10,7 @@ export function parseCurrencyId(tokenId: CurrencyId): {
 
 	const [namespace, reference, address] = tokenIdChecked.split(':')
 
-	return { chainId: `${namespace}:${reference}`, address }
+	return { chainId: `${toChainNamespace(namespace)}:${reference}`, address }
 }
 
 export function composeCurrencyId(

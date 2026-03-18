@@ -28,15 +28,12 @@ export class PrismaUserRepository extends UserRepository {
 		address: Address,
 		kmsKeyId: string,
 	): Promise<User> {
-		const record = await this.prisma.$transaction(async (tx) => {
-			const evmWallet = await tx.evmWallet.create({
-				data: { address, kmsKeyId },
-			})
-
-			return tx.user.create({
-				data: { telegramId, evmWalletId: evmWallet.id },
-				include: { evmWallet: true },
-			})
+		const record = await this.prisma.user.create({
+			data: {
+				telegramId,
+				evmWallet: { create: { address, kmsKeyId } },
+			},
+			include: { evmWallet: true },
 		})
 
 		return toDomainUser(record)
@@ -46,10 +43,17 @@ export class PrismaUserRepository extends UserRepository {
 type UserRecord = Prisma.UserGetPayload<{ include: { evmWallet: true } }>
 
 function toDomainUser(record: UserRecord): User {
+	if (!record.evmWallet) {
+		throw new Error(`User ${record.id} has no evmWallet`)
+	}
+
 	return {
 		id: record.id,
 		telegramId: toTelegramId(record.telegramId),
-		evmAddress: getAddress(record.evmWallet.address),
+		evmWallet: {
+			address: getAddress(record.evmWallet.address),
+			kmsKeyId: record.evmWallet.kmsKeyId,
+		},
 		createdAt: record.createdAt,
 	}
 }

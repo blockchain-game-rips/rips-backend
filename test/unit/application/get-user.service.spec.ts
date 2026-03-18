@@ -9,7 +9,7 @@ const TELEGRAM_ID = toTelegramId(123456n)
 const MOCK_USER: User = {
 	id: 1n,
 	telegramId: TELEGRAM_ID,
-	evmAddress: '0x1234567890abcdef1234567890abcdef12345678',
+	evmWallet: { address: '0x1234567890abcdef1234567890abcdef12345678', kmsKeyId: 'kms-key-123' },
 	createdAt: new Date('2026-01-01'),
 }
 

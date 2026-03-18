@@ -1,47 +1,69 @@
 import { Currency } from 'src/domain/entities/currency'
-import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
-import { CurrencyService } from 'src/infrastructure/evm/currency.service'
+import { composeChainId } from 'src/domain/services/chain-id-utils'
+import { parseCurrencyId, composeCurrencyId } from 'src/domain/services/currency-id-utils'
+import { Account } from 'src/domain/value-objects/account'
+import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
+import { CurrencyId } from 'src/domain/value-objects/currency-id'
+import { EvmCurrencyService } from 'src/infrastructure/evm/evm-currency.service'
 import { GeckoTerminalService } from 'src/infrastructure/price-provider/gecko-terminal.service'
 import { PriceProviderService } from 'src/infrastructure/price-provider/price-provider.service'
 
+function accountFromCurrencyId(id: CurrencyId): Account {
+	const { chainId, address } = parseCurrencyId(id)
+	const [namespace, reference] = chainId.split(':')
+	return { chain: { namespace: toChainNamespace(namespace), reference }, address }
+}
+
+const WETH_ARB_ID = composeCurrencyId(
+	composeChainId(toChainNamespace('eip155'), '42161'),
+	'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+)
 const WETH_ARB: Currency = {
-	id: composeCurrencyId(
-		'eip155:42161',
-		'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-	),
+	id: WETH_ARB_ID,
+	account: accountFromCurrencyId(WETH_ARB_ID),
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
+	balanceOf: jest.fn(),
 }
 
+const WBTC_ARB_ID = composeCurrencyId(
+	composeChainId(toChainNamespace('eip155'), '42161'),
+	'0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
+)
 const WBTC_ARB: Currency = {
-	id: composeCurrencyId(
-		'eip155:42161',
-		'0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
-	),
+	id: WBTC_ARB_ID,
+	account: accountFromCurrencyId(WBTC_ARB_ID),
 	symbol: 'WBTC',
 	name: 'Wrapped Bitcoin',
 	decimals: 8,
+	balanceOf: jest.fn(),
 }
 
+const WETH_FUSE_ID = composeCurrencyId(
+	composeChainId(toChainNamespace('eip155'), '122'),
+	'0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590',
+)
 const WETH_FUSE: Currency = {
-	id: composeCurrencyId(
-		'eip155:122',
-		'0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590',
-	),
+	id: WETH_FUSE_ID,
+	account: accountFromCurrencyId(WETH_FUSE_ID),
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
+	balanceOf: jest.fn(),
 }
 
+const ETH_NATIVE_ARB_ID = composeCurrencyId(
+	composeChainId(toChainNamespace('eip155'), '42161'),
+	'0x0000000000000000000000000000000000000000',
+)
 const ETH_NATIVE_ARB: Currency = {
-	id: composeCurrencyId(
-		'eip155:42161',
-		'0x0000000000000000000000000000000000000000',
-	),
+	id: ETH_NATIVE_ARB_ID,
+	account: accountFromCurrencyId(ETH_NATIVE_ARB_ID),
 	symbol: 'ETH',
 	name: 'Ether',
 	decimals: 18,
+	balanceOf: jest.fn(),
 }
 
 function makeMockGeckoTerminalService(
@@ -52,8 +74,8 @@ function makeMockGeckoTerminalService(
 	}
 }
 
-function makeMockCurrencyService(): jest.Mocked<
-	Pick<CurrencyService, 'getWrappedNative'>
+function makeMockEvmCurrencyService(): jest.Mocked<
+	Pick<EvmCurrencyService, 'getWrappedNative'>
 > {
 	return {
 		getWrappedNative: jest.fn().mockImplementation((chainId: number) => {
@@ -66,10 +88,10 @@ function makeMockCurrencyService(): jest.Mocked<
 
 function makeService(
 	geckoMock: jest.Mocked<Pick<GeckoTerminalService, 'getTokenPrices'>>,
-	currencyMock: jest.Mocked<Pick<CurrencyService, 'getWrappedNative'>>,
+	currencyMock: jest.Mocked<Pick<EvmCurrencyService, 'getWrappedNative'>>,
 ): PriceProviderService {
 	return new PriceProviderService(
-		currencyMock as unknown as CurrencyService,
+		currencyMock as unknown as EvmCurrencyService,
 		geckoMock as unknown as GeckoTerminalService,
 	)
 }
@@ -94,7 +116,7 @@ describe('PriceProviderService', () => {
 				price: 2500,
 			},
 		])
-		const service = makeService(gecko, makeMockCurrencyService())
+		const service = makeService(gecko, makeMockEvmCurrencyService())
 
 		const price = await service.getPrice(WETH_ARB)
 
@@ -112,7 +134,7 @@ describe('PriceProviderService', () => {
 				price: 90000,
 			},
 		])
-		const service = makeService(gecko, makeMockCurrencyService())
+		const service = makeService(gecko, makeMockEvmCurrencyService())
 
 		const prices = await service.getPrices([WETH_ARB, WBTC_ARB])
 
@@ -127,7 +149,7 @@ describe('PriceProviderService', () => {
 				price: 2500,
 			},
 		])
-		const service = makeService(gecko, makeMockCurrencyService())
+		const service = makeService(gecko, makeMockEvmCurrencyService())
 
 		await service.getPrice(WETH_ARB)
 		await service.getPrice(WETH_ARB)
@@ -146,7 +168,7 @@ describe('PriceProviderService', () => {
 				price: 90000,
 			},
 		])
-		const service = makeService(gecko, makeMockCurrencyService())
+		const service = makeService(gecko, makeMockEvmCurrencyService())
 
 		await service.getPrices([WETH_ARB])
 		await service.getPrices([WETH_ARB, WBTC_ARB])
@@ -161,7 +183,7 @@ describe('PriceProviderService', () => {
 				price: 2500,
 			},
 		])
-		const currencyService = makeMockCurrencyService()
+		const currencyService = makeMockEvmCurrencyService()
 		const service = makeService(gecko, currencyService)
 
 		await service.getPrice(ETH_NATIVE_ARB)
@@ -180,7 +202,7 @@ describe('PriceProviderService', () => {
 				price: 2500,
 			},
 		])
-		const service = makeService(gecko, makeMockCurrencyService())
+		const service = makeService(gecko, makeMockEvmCurrencyService())
 
 		const prices = await service.getPrices([ETH_NATIVE_ARB, WETH_ARB])
 
@@ -188,17 +210,20 @@ describe('PriceProviderService', () => {
 	})
 
 	it('should throw when chainId is not supported', async () => {
+		const unsupportedId = composeCurrencyId(
+			composeChainId(toChainNamespace('eip155'), '99999'),
+			'0x1234567890123456789012345678901234567890',
+		)
 		const unsupportedCurrency: Currency = {
-			id: composeCurrencyId(
-				'eip155:99999',
-				'0x1234567890123456789012345678901234567890',
-			),
+			id: unsupportedId,
+			account: accountFromCurrencyId(unsupportedId),
 			symbol: 'TEST',
 			decimals: 18,
+			balanceOf: jest.fn(),
 		}
 		const service = makeService(
 			makeMockGeckoTerminalService([]),
-			makeMockCurrencyService(),
+			makeMockEvmCurrencyService(),
 		)
 
 		await expect(service.getPrice(unsupportedCurrency)).rejects.toThrow(

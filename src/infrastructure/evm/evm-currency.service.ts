@@ -26,7 +26,7 @@ import { WrappedNative } from './primitives/currencies/wrapped-native'
 type TokenCacheKey = `${number}:${Address}`
 
 @Injectable()
-export class CurrencyService {
+export class EvmCurrencyService {
 	constructor(private readonly evmClientService: EvmClientService) {}
 	/* ======== STATE ======== */
 

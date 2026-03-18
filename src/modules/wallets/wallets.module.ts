@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common'
+import { CurrencyService } from 'src/application/interfaces/currency.service'
 import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
 import { GetBalanceService } from 'src/application/use-cases/get-balance/get-balance.service'
 import { GetBalanceUseCase } from 'src/application/use-cases/get-balance/get-balance.use-case'
 import { GetUserService } from 'src/application/use-cases/get-user/get-user.service'
 import { GetUserUseCase } from 'src/application/use-cases/get-user/get-user.use-case'
+import { CurrencyServiceImpl } from 'src/infrastructure/currency.service'
 import { EvmModule } from 'src/infrastructure/evm/evm.module'
 import { PrismaUserRepository } from 'src/infrastructure/prisma/user.repository'
 import { WalletsController } from 'src/presentation/wallets/wallets.controller'
-import { MAIN_CHAIN_ID, MAIN_CHAIN_ID_VALUE } from './wallets.constants'
+import { MAIN_CURRENCY, MAIN_CURRENCY_VALUE } from './wallets.constants'
 
 @Module({
 	imports: [EvmModule],
@@ -15,7 +17,8 @@ import { MAIN_CHAIN_ID, MAIN_CHAIN_ID_VALUE } from './wallets.constants'
 	providers: [
 		{ provide: UserRepository, useClass: PrismaUserRepository },
 		{ provide: GetUserUseCase, useClass: GetUserService },
-		{ provide: MAIN_CHAIN_ID, useValue: MAIN_CHAIN_ID_VALUE },
+		{ provide: MAIN_CURRENCY, useValue: MAIN_CURRENCY_VALUE },
+		{ provide: CurrencyService, useClass: CurrencyServiceImpl },
 		{ provide: GetBalanceUseCase, useClass: GetBalanceService },
 	],
 })

@@ -1,6 +1,6 @@
 import { Currency } from '../entities/currency'
 
-export interface CurrencyAmount {
-	token: Currency
+export type CurrencyAmount = {
+	currency: Currency
 	amount: bigint
 }

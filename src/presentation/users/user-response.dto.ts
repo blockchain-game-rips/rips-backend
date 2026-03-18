@@ -11,7 +11,7 @@ export function toUserResponseDto(user: User): UserResponseDto {
 	return {
 		id: user.id.toString(),
 		telegramId: user.telegramId.toString(),
-		evmAddress: user.evmAddress,
+		evmAddress: user.evmWallet.address,
 		createdAt: user.createdAt.toISOString(),
 	}
 }

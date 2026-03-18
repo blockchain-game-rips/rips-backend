@@ -4,7 +4,7 @@ import { Currency } from 'src/domain/entities/currency'
 import { parseCurrencyId } from 'src/domain/services/currency-id-utils'
 import { CurrencyId } from 'src/domain/value-objects/currency-id'
 import { createCustomError } from 'src/utils/common'
-import { CurrencyService } from '../evm/currency.service'
+import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { NATIVE_ADDRESS } from '../evm/primitives/currencies/native-currency'
 import { chainIdToGeckoChainId } from './constants'
 import { GeckoTerminalService } from './gecko-terminal.service'
@@ -20,7 +20,7 @@ export class PriceProviderService extends PriceProvider {
 	private logger = new Logger(PriceProviderService.name)
 
 	constructor(
-		readonly currencyService: CurrencyService,
+		readonly currencyService: EvmCurrencyService,
 		readonly geckoTerminalService: GeckoTerminalService,
 	) {
 		super()

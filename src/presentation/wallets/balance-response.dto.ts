@@ -12,8 +12,8 @@ export function toBalanceResponseDto(
 ): BalanceResponseDto {
 	return {
 		amount: balance.amount.toString(),
-		symbol: balance.token.symbol,
-		name: balance.token.name,
-		decimals: balance.token.decimals,
+		symbol: balance.currency.symbol,
+		name: balance.currency.name,
+		decimals: balance.currency.decimals,
 	}
 }

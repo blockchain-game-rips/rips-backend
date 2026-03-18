@@ -13,7 +13,7 @@ const KMS_KEY_ID = 'kms-key-123'
 const MOCK_USER: User = {
 	id: 1n,
 	telegramId: TELEGRAM_ID,
-	evmAddress: EVM_ADDRESS,
+	evmWallet: { address: EVM_ADDRESS, kmsKeyId: KMS_KEY_ID },
 	createdAt: new Date('2026-01-01'),
 }
 
@@ -31,6 +31,7 @@ function makeMockKmsService(): jest.Mocked<KmsService> {
 			kmsKeyId: KMS_KEY_ID,
 			evmAddress: EVM_ADDRESS,
 		}),
+		signTransaction: jest.fn(),
 	}
 	return mock
 }
