@@ -55,7 +55,9 @@ describe('UsersController', () => {
 		})
 
 		it('should propagate UserNotFoundError', async () => {
-			getUser.execute.mockRejectedValue(new UserNotFoundError('not found'))
+			getUser.execute.mockRejectedValue(
+				new UserNotFoundError('not found'),
+			)
 
 			await expect(controller.getUser(TELEGRAM_ID)).rejects.toThrow(
 				UserNotFoundError,
@@ -67,7 +69,9 @@ describe('UsersController', () => {
 		it('should return created user response dto', async () => {
 			createUser.execute.mockResolvedValue(MOCK_USER)
 
-			const result = await controller.createUser({ telegramId: TELEGRAM_ID })
+			const result = await controller.createUser({
+				telegramId: TELEGRAM_ID,
+			})
 
 			expect(result).toEqual({
 				id: '1',

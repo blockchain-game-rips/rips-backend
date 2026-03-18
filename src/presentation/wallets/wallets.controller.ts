@@ -3,7 +3,10 @@ import { GetBalanceUseCase } from 'src/application/use-cases/get-balance/get-bal
 import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
 import { ZodValidationPipe } from 'src/presentation/pipes/zod-validation.pipe'
 import { z } from 'zod'
-import { BalanceResponseDto, toBalanceResponseDto } from './balance-response.dto'
+import {
+	BalanceResponseDto,
+	toBalanceResponseDto,
+} from './balance-response.dto'
 
 const TELEGRAM_ID_PARAM = 'telegramId'
 

@@ -5,10 +5,10 @@ import {
 	HttpException,
 	HttpStatus,
 } from '@nestjs/common'
+import { Response } from 'express'
 import { UserAlreadyExistsError } from 'src/application/use-cases/create-user/create-user.use-case'
 import { UserNotFoundError } from 'src/application/use-cases/get-user/get-user.use-case'
 import { ContextError } from 'src/utils/common'
-import { Response } from 'express'
 
 type ErrorConstructor = new (...args: never[]) => ContextError
 

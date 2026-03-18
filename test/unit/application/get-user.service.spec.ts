@@ -1,6 +1,6 @@
+import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
 import { GetUserService } from 'src/application/use-cases/get-user/get-user.service'
 import { UserNotFoundError } from 'src/application/use-cases/get-user/get-user.use-case'
-import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
 import { User } from 'src/domain/entities/user'
 import { toTelegramId } from 'src/domain/value-objects/telegram-id'
 

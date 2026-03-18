@@ -16,7 +16,9 @@ export class GetBalanceService extends GetBalanceUseCase {
 	}
 
 	async execute(input: GetBalanceInput): Promise<CurrencyAmount> {
-		const user = await this.getUserUseCase.execute({ telegramId: input.telegramId })
+		const user = await this.getUserUseCase.execute({
+			telegramId: input.telegramId,
+		})
 
 		const token = this.currencyService.getNative(this.chainId)
 		const amount = await token.balanceOf(user.evmAddress)

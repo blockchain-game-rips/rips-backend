@@ -42,11 +42,15 @@ describe('WalletsController', () => {
 				name: 'ETH',
 				decimals: 18,
 			})
-			expect(getBalance.execute).toHaveBeenCalledWith({ telegramId: TELEGRAM_ID })
+			expect(getBalance.execute).toHaveBeenCalledWith({
+				telegramId: TELEGRAM_ID,
+			})
 		})
 
 		it('should propagate UserNotFoundError', async () => {
-			getBalance.execute.mockRejectedValue(new UserNotFoundError('not found'))
+			getBalance.execute.mockRejectedValue(
+				new UserNotFoundError('not found'),
+			)
 
 			await expect(controller.getBalance(TELEGRAM_ID)).rejects.toThrow(
 				UserNotFoundError,

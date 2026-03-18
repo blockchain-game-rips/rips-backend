@@ -5,8 +5,8 @@ import {
 } from '@aws-sdk/client-kms'
 import { Injectable } from '@nestjs/common'
 import {
-	type KmsKeyResult,
 	KmsService,
+	type KmsKeyResult,
 } from 'src/application/interfaces/kms.service'
 import { getEnvSafe } from 'src/utils/common'
 import { getAddress, keccak256, type Address } from 'viem'

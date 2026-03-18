@@ -2,8 +2,8 @@ import { KeyManagementServiceClient } from '@google-cloud/kms'
 import { Injectable } from '@nestjs/common'
 import { createPublicKey } from 'crypto'
 import {
-	type KmsKeyResult,
 	KmsService,
+	type KmsKeyResult,
 } from 'src/application/interfaces/kms.service'
 import { getEnvSafe } from 'src/utils/common'
 import { getAddress, keccak256, type Address } from 'viem'
@@ -54,7 +54,9 @@ export class GcKmsService extends KmsService {
 
 		await this.waitForKeyVersionEnabled(versionName)
 
-		const [publicKey] = await this.client.getPublicKey({ name: versionName })
+		const [publicKey] = await this.client.getPublicKey({
+			name: versionName,
+		})
 		if (!publicKey.pem) {
 			throw new Error('GC KMS getPublicKey returned no PEM')
 		}
@@ -77,7 +79,9 @@ export class GcKmsService extends KmsService {
 				return
 			}
 
-			await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
+			await new Promise((resolve) =>
+				setTimeout(resolve, POLL_INTERVAL_MS),
+			)
 		}
 
 		throw new Error(

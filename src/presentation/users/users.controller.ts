@@ -39,7 +39,9 @@ export class UsersController {
 	@Post()
 	async createUser(
 		@Body(new ZodValidationPipe(createUserBodySchema))
-		body: { telegramId: TelegramId },
+		body: {
+			telegramId: TelegramId
+		},
 	): Promise<UserResponseDto> {
 		const user = await this.createUserUseCase.execute({
 			telegramId: body.telegramId,

@@ -1,5 +1,8 @@
 import { GetBalanceService } from 'src/application/use-cases/get-balance/get-balance.service'
-import { GetUserUseCase, UserNotFoundError } from 'src/application/use-cases/get-user/get-user.use-case'
+import {
+	GetUserUseCase,
+	UserNotFoundError,
+} from 'src/application/use-cases/get-user/get-user.use-case'
 import { User } from 'src/domain/entities/user'
 import { CurrencyAmount } from 'src/domain/value-objects/currency-amount'
 import { toTelegramId } from 'src/domain/value-objects/telegram-id'
@@ -40,7 +43,11 @@ describe('GetBalanceService', () => {
 	beforeEach(() => {
 		getUserUseCase = makeMockGetUserUseCase()
 		currencyService = makeMockCurrencyService()
-		service = new GetBalanceService(getUserUseCase, currencyService, CHAIN_ID)
+		service = new GetBalanceService(
+			getUserUseCase,
+			currencyService,
+			CHAIN_ID,
+		)
 	})
 
 	it('should return currency amount for user wallet', async () => {
@@ -50,7 +57,9 @@ describe('GetBalanceService', () => {
 		currencyService.getNative.mockReturnValue(MOCK_NATIVE)
 		MOCK_NATIVE.balanceOf.mockResolvedValue(balance)
 
-		const result: CurrencyAmount = await service.execute({ telegramId: TELEGRAM_ID })
+		const result: CurrencyAmount = await service.execute({
+			telegramId: TELEGRAM_ID,
+		})
 
 		expect(result).toEqual({ token: MOCK_NATIVE, amount: balance })
 		expect(currencyService.getNative).toHaveBeenCalledWith(CHAIN_ID)
@@ -58,7 +67,9 @@ describe('GetBalanceService', () => {
 	})
 
 	it('should propagate UserNotFoundError', async () => {
-		getUserUseCase.execute.mockRejectedValue(new UserNotFoundError('not found'))
+		getUserUseCase.execute.mockRejectedValue(
+			new UserNotFoundError('not found'),
+		)
 
 		await expect(
 			service.execute({ telegramId: TELEGRAM_ID }),
