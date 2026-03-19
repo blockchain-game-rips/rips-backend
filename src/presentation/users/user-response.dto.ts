@@ -3,7 +3,6 @@ import { ChainNamespace } from 'src/domain/value-objects/chain-namespace'
 
 export type UserResponseDto = {
 	id: string
-	telegramId: string
 	wallets: Record<ChainNamespace, string>
 	createdAt: string
 }
@@ -11,7 +10,6 @@ export type UserResponseDto = {
 export function toUserResponseDto(user: User): UserResponseDto {
 	return {
 		id: user.id.toString(),
-		telegramId: user.telegramId.toString(),
 		wallets: user.wallets,
 		createdAt: user.createdAt.toISOString(),
 	}
