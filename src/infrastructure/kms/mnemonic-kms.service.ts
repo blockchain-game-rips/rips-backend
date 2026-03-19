@@ -48,7 +48,7 @@ export class MnemonicKmsService extends KmsService {
 			addressIndex: keyIndex,
 		})
 
-		const signature = await account.signMessage({ message: { raw: hash } })
+		const signature = await account.sign({ hash })
 
 		return signature
 	}

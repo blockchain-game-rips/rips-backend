@@ -1,6 +1,6 @@
 export type AnvilConfig = {
 	chainId: number
-	rpcUrl: string
+	rpcUrl?: string
 	/** fork runs from this block number, default is latest */
 	blockNumber?: number
 	/** timeout in milliseconds for starting Anvil, default is 5000 */

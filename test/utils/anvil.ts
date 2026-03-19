@@ -144,9 +144,11 @@ export class Anvil {
 	}
 
 	private buildCommand() {
-		const rpcUrlToUse = this.config.rpcUrl
+		let command = `anvil --port ${this.port} --mnemonic "${testMnemonic}"`
 
-		let command = `anvil --fork-url "${rpcUrlToUse}" --port ${this.port} --mnemonic "${testMnemonic}"`
+		if (this.config.rpcUrl) {
+			command += ` --fork-url "${this.config.rpcUrl}"`
+		}
 
 		if (typeof this.config.blockNumber === 'number') {
 			command += ` --fork-block-number ${this.config.blockNumber}`
