@@ -10,7 +10,7 @@ export type UserResponseDto = {
 export function toUserResponseDto(user: User): UserResponseDto {
 	return {
 		id: user.id.toString(),
-		wallets: user.wallets,
+		wallets: user.wallet.namespaceToAddress,
 		createdAt: user.createdAt.toISOString(),
 	}
 }

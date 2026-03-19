@@ -2,7 +2,7 @@ import { EIP155 } from 'src/constants'
 import { Currency, CurrencyMetadata } from 'src/domain/entities/currency'
 import { composeChainId } from 'src/domain/services/chain-id-utils'
 import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
-import { Account } from 'src/domain/value-objects/account'
+import { ChainAddress } from 'src/domain/value-objects/chain-address'
 import { CurrencyId } from 'src/domain/value-objects/currency-id'
 import { Address } from 'viem'
 import { EvmClientService } from '../../evm-client/evm-client.service'
@@ -14,7 +14,7 @@ export abstract class EvmCurrency extends BaseContract implements Currency {
 	public readonly name?: string
 
 	id: CurrencyId
-	account: Account
+	account: ChainAddress
 
 	constructor(
 		evmClientService: EvmClientService,

@@ -1,4 +1,4 @@
-import { Account } from '../value-objects/account'
+import { ChainAddress } from '../value-objects/chain-address'
 import { CurrencyId } from '../value-objects/currency-id'
 
 export interface CurrencyMetadata {
@@ -9,5 +9,5 @@ export interface CurrencyMetadata {
 
 export type Currency = {
 	id: CurrencyId
-	account: Account
+	account: ChainAddress
 } & CurrencyMetadata

@@ -1,6 +1,6 @@
 import { Currency } from 'src/domain/entities/currency'
-import { Account } from 'src/domain/value-objects/account'
+import { ChainAddress } from 'src/domain/value-objects/chain-address'
 
 export abstract class CurrencyService {
-	abstract fromAccount(account: Account): Promise<Currency>
+	abstract fromAccount(account: ChainAddress): Promise<Currency>
 }

@@ -7,5 +7,9 @@ export interface KmsKeyResult {
 
 export abstract class KmsService {
 	abstract createEvmKey(): Promise<KmsKeyResult>
-	abstract signTransaction(kmsKeyId: string, hash: Hex, expectedAddress: Address): Promise<Hex>
+	abstract signTransaction(
+		kmsKeyId: string,
+		hash: Hex,
+		expectedAddress: Address,
+	): Promise<Hex>
 }

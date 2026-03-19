@@ -1,18 +1,24 @@
 import { EIP155 } from 'src/constants'
 import { Currency } from 'src/domain/entities/currency'
 import { composeChainId } from 'src/domain/services/chain-id-utils'
-import { parseCurrencyId, composeCurrencyId } from 'src/domain/services/currency-id-utils'
-import { Account } from 'src/domain/value-objects/account'
+import {
+	composeCurrencyId,
+	parseCurrencyId,
+} from 'src/domain/services/currency-id-utils'
+import { ChainAddress } from 'src/domain/value-objects/chain-address'
 import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
 import { CurrencyId } from 'src/domain/value-objects/currency-id'
 import { EvmCurrencyService } from 'src/infrastructure/evm/evm-currency.service'
 import { GeckoTerminalService } from 'src/infrastructure/price-provider/gecko-terminal.service'
 import { PriceProviderService } from 'src/infrastructure/price-provider/price-provider.service'
 
-function accountFromCurrencyId(id: CurrencyId): Account {
+function accountFromCurrencyId(id: CurrencyId): ChainAddress {
 	const { chainId, address } = parseCurrencyId(id)
 	const [namespace, reference] = chainId.split(':')
-	return { chain: { namespace: toChainNamespace(namespace), reference }, address }
+	return {
+		chain: { namespace: toChainNamespace(namespace), reference },
+		address,
+	}
 }
 
 const WETH_ARB_ID = composeCurrencyId(
@@ -25,7 +31,6 @@ const WETH_ARB: Currency = {
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
-
 }
 
 const WBTC_ARB_ID = composeCurrencyId(
@@ -38,7 +43,6 @@ const WBTC_ARB: Currency = {
 	symbol: 'WBTC',
 	name: 'Wrapped Bitcoin',
 	decimals: 8,
-
 }
 
 const WETH_FUSE_ID = composeCurrencyId(
@@ -51,7 +55,6 @@ const WETH_FUSE: Currency = {
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
-
 }
 
 const ETH_NATIVE_ARB_ID = composeCurrencyId(
@@ -64,7 +67,6 @@ const ETH_NATIVE_ARB: Currency = {
 	symbol: 'ETH',
 	name: 'Ether',
 	decimals: 18,
-
 }
 
 function makeMockGeckoTerminalService(
@@ -220,7 +222,6 @@ describe('PriceProviderService', () => {
 			account: accountFromCurrencyId(unsupportedId),
 			symbol: 'TEST',
 			decimals: 18,
-		
 		}
 		const service = makeService(
 			makeMockGeckoTerminalService([]),

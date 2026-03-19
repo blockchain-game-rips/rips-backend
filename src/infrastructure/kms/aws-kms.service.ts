@@ -43,7 +43,11 @@ export class AwsKmsService extends KmsService {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async signTransaction(_kmsKeyId: string, _hash: Hex, _expectedAddress: Address): Promise<Hex> {
+	async signTransaction(
+		_kmsKeyId: string,
+		_hash: Hex,
+		_expectedAddress: Address,
+	): Promise<Hex> {
 		throw new Error('signTransaction is not supported for AWS KMS')
 	}
 }

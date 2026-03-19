@@ -15,8 +15,8 @@ const EVM_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'
 
 const MOCK_USER: User = {
 	id: 1n,
-	telegramId: TELEGRAM_ID,
-	wallets: { [EIP155]: EVM_ADDRESS },
+	telegramProfile: { telegramId: TELEGRAM_ID },
+	wallet: { namespaceToAddress: { [EIP155]: EVM_ADDRESS } },
 	createdAt: new Date('2026-01-01'),
 }
 
@@ -49,7 +49,6 @@ describe('UsersController', () => {
 
 			expect(result).toEqual({
 				id: '1',
-				telegramId: '123456',
 				wallets: { [EIP155]: EVM_ADDRESS },
 				createdAt: '2026-01-01T00:00:00.000Z',
 			})
@@ -76,7 +75,6 @@ describe('UsersController', () => {
 
 			expect(result).toEqual({
 				id: '1',
-				telegramId: '123456',
 				wallets: { [EIP155]: EVM_ADDRESS },
 				createdAt: '2026-01-01T00:00:00.000Z',
 			})

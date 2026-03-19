@@ -1,0 +1,17 @@
+import { ChainAddress } from 'src/domain/value-objects/chain-address'
+import { TelegramId } from 'src/domain/value-objects/telegram-id'
+import { Transaction } from 'src/domain/value-objects/transaction'
+import { createCustomError } from 'src/utils/common'
+
+export const InsufficientBalanceError = createCustomError('InsufficientBalance')
+export const TransactionFailedError = createCustomError('TransactionFailed')
+
+export type WithdrawInput = {
+	telegramId: TelegramId
+	amount: bigint
+	recipientChainAddress: ChainAddress
+}
+
+export abstract class WithdrawUseCase {
+	abstract execute(input: WithdrawInput): Promise<Transaction>
+}

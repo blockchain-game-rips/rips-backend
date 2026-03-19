@@ -1,7 +1,7 @@
 import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
-import { EvmCurrencyService } from './evm-currency.service'
 import { EvmClientModule } from './evm-client/evm-client.module'
+import { EvmCurrencyService } from './evm-currency.service'
 import { GasPriceService } from './gas-price.service'
 
 @Module({

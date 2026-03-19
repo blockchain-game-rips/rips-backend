@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { BalancesService } from 'src/application/interfaces/balances.service'
 import { CurrencyService } from 'src/application/interfaces/currency.service'
+import { WalletService } from 'src/application/interfaces/wallet.service'
 import { GetUserUseCase } from 'src/application/use-cases/get-user/get-user.use-case'
-import { Account } from 'src/domain/value-objects/account'
+import { ChainAddress } from 'src/domain/value-objects/chain-address'
 import { CurrencyAmount } from 'src/domain/value-objects/currency-amount'
-import { MAIN_CURRENCY_ACCOUNT } from 'src/modules/wallets/wallets.constants'
+import { MAIN_CURRENCY_CHAIN_ADDRESS } from 'src/modules/wallets/wallets.constants'
 import { GetBalanceInput, GetBalanceUseCase } from './get-balance.use-case'
 
 @Injectable()
@@ -12,9 +12,10 @@ export class GetBalanceService extends GetBalanceUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly currencyService: CurrencyService,
-		private readonly balancesService: BalancesService,
-		@Inject(MAIN_CURRENCY_ACCOUNT)
-		private readonly mainCurrencyAccount: Account,
+		private readonly walletService: WalletService,
+
+		@Inject(MAIN_CURRENCY_CHAIN_ADDRESS)
+		private readonly mainCurrencyChainAddress: ChainAddress,
 	) {
 		super()
 	}
@@ -25,10 +26,10 @@ export class GetBalanceService extends GetBalanceUseCase {
 		})
 
 		const currency = await this.currencyService.fromAccount(
-			this.mainCurrencyAccount,
+			this.mainCurrencyChainAddress,
 		)
 
-		const amount = await this.balancesService.balanceOf(user, currency)
+		const amount = await this.walletService.balanceOf(user.wallet, currency)
 
 		return { currency, amount }
 	}

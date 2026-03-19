@@ -1,9 +1,9 @@
-import { Account } from 'src/domain/value-objects/account'
+import { ChainAddress } from 'src/domain/value-objects/chain-address'
 import { CurrencyAmount } from 'src/domain/value-objects/currency-amount'
 
 export type BalanceResponseDto = {
 	currency: {
-		account: Account
+		account: ChainAddress
 		symbol: string
 		name?: string
 		decimals: number

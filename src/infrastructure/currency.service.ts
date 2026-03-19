@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CurrencyService } from 'src/application/interfaces/currency.service'
 import { EIP155 } from 'src/constants'
 import { Currency } from 'src/domain/entities/currency'
-import { Account } from 'src/domain/value-objects/account'
+import { ChainAddress } from 'src/domain/value-objects/chain-address'
 import { getAddress } from 'viem'
 import { EvmCurrencyService } from './evm/evm-currency.service'
 
@@ -12,7 +12,7 @@ export class CurrencyServiceImpl extends CurrencyService {
 		super()
 	}
 
-	async fromAccount(account: Account): Promise<Currency> {
+	async fromAccount(account: ChainAddress): Promise<Currency> {
 		if (account.chain.namespace === EIP155) {
 			const chainId = Number(account.chain.reference)
 

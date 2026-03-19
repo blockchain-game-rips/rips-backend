@@ -1,9 +1,9 @@
-import { ChainNamespace } from '../value-objects/chain-namespace'
-import { TelegramId } from '../value-objects/telegram-id'
+import { TelegramProfile } from '../value-objects/telegram-profile'
+import { Wallet } from '../value-objects/wallet'
 
 export type User = {
 	id: bigint
-	telegramId: TelegramId
-	wallets: Record<ChainNamespace, string>
+	telegramProfile: TelegramProfile
+	wallet: Wallet
 	createdAt: Date
 }

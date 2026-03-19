@@ -1,6 +1,6 @@
 import { ChainId } from '../value-objects/chain-id'
-import { CurrencyId, tokenIdSchema } from '../value-objects/currency-id'
 import { toChainNamespace } from '../value-objects/chain-namespace'
+import { CurrencyId, tokenIdSchema } from '../value-objects/currency-id'
 
 export function parseCurrencyId(tokenId: CurrencyId): {
 	chainId: ChainId

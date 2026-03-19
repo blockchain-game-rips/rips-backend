@@ -6,7 +6,13 @@ import {
 	type KmsKeyResult,
 } from 'src/application/interfaces/kms.service'
 import { getEnvSafe } from 'src/utils/common'
-import { getAddress, keccak256, recoverAddress, type Address, type Hex } from 'viem'
+import {
+	getAddress,
+	keccak256,
+	recoverAddress,
+	type Address,
+	type Hex,
+} from 'viem'
 
 const UNCOMPRESSED_PUBLIC_KEY_PREFIX = 0x04
 const UNCOMPRESSED_PUBLIC_KEY_LENGTH = 65
@@ -66,7 +72,11 @@ export class GcKmsService extends KmsService {
 		return { kmsKeyId: versionName, evmAddress }
 	}
 
-	async signTransaction(kmsKeyId: string, hash: Hex, expectedAddress: Address): Promise<Hex> {
+	async signTransaction(
+		kmsKeyId: string,
+		hash: Hex,
+		expectedAddress: Address,
+	): Promise<Hex> {
 		const [signResponse] = await this.client.asymmetricSign({
 			name: kmsKeyId,
 			digest: { sha256: Buffer.from(hash.slice(2), 'hex') },

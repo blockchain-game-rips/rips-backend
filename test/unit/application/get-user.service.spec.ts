@@ -8,8 +8,12 @@ const TELEGRAM_ID = toTelegramId(123456n)
 
 const MOCK_USER: User = {
 	id: 1n,
-	telegramId: TELEGRAM_ID,
-	wallets: { [EIP155]: '0x1234567890abcdef1234567890abcdef12345678' },
+	telegramProfile: { telegramId: TELEGRAM_ID },
+	wallet: {
+		namespaceToAddress: {
+			[EIP155]: '0x1234567890abcdef1234567890abcdef12345678',
+		},
+	},
 	createdAt: new Date('2026-01-01'),
 }
 

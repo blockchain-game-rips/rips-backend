@@ -1,5 +1,8 @@
 import { ChainId, chainIdSchema } from '../value-objects/chain-id'
-import { ChainNamespace, toChainNamespace } from '../value-objects/chain-namespace'
+import {
+	ChainNamespace,
+	toChainNamespace,
+} from '../value-objects/chain-namespace'
 
 export function parseChainId(chainId: ChainId): {
 	namespace: ChainNamespace
@@ -12,6 +15,9 @@ export function parseChainId(chainId: ChainId): {
 	return { namespace: toChainNamespace(namespace), reference }
 }
 
-export function composeChainId(namespace: ChainNamespace, reference: string): ChainId {
+export function composeChainId(
+	namespace: ChainNamespace,
+	reference: string,
+): ChainId {
 	return `${namespace}:${reference}`
 }

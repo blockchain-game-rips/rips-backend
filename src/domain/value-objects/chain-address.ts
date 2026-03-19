@@ -1,6 +1,6 @@
 import { Chain } from './chain'
 
-export type Account = {
+export type ChainAddress = {
 	chain: Chain
 	address: string
 }

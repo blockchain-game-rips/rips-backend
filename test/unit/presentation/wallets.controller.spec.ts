@@ -14,7 +14,10 @@ const MOCK_BALANCE: CurrencyAmount = {
 	amount: 1000000000000000000n,
 	currency: {
 		id: composeCurrencyId(composeChainId(EIP155, '8453'), NATIVE_ADDRESS),
-		account: { chain: { namespace: EIP155, reference: '8453' }, address: NATIVE_ADDRESS },
+		account: {
+			chain: { namespace: EIP155, reference: '8453' },
+			address: NATIVE_ADDRESS,
+		},
 		symbol: 'ETH',
 		name: 'ETH',
 		decimals: 18,
@@ -41,18 +44,30 @@ describe('WalletsController', () => {
 			const result = await controller.getBalance(TELEGRAM_ID)
 
 			expect(result).toEqual({
+				currency: {
+					account: {
+						chain: { namespace: EIP155, reference: '8453' },
+						address: NATIVE_ADDRESS,
+					},
+					symbol: 'ETH',
+					name: 'ETH',
+					decimals: 18,
+				},
 				amount: '1000000000000000000',
-				symbol: 'ETH',
-				name: 'ETH',
-				decimals: 18,
 			})
-			expect(getBalance.execute).toHaveBeenCalledWith({ telegramId: TELEGRAM_ID })
+			expect(getBalance.execute).toHaveBeenCalledWith({
+				telegramId: TELEGRAM_ID,
+			})
 		})
 
 		it('should propagate UserNotFoundError', async () => {
-			getBalance.execute.mockRejectedValue(new UserNotFoundError('not found'))
+			getBalance.execute.mockRejectedValue(
+				new UserNotFoundError('not found'),
+			)
 
-			await expect(controller.getBalance(TELEGRAM_ID)).rejects.toThrow(UserNotFoundError)
+			await expect(controller.getBalance(TELEGRAM_ID)).rejects.toThrow(
+				UserNotFoundError,
+			)
 		})
 	})
 })

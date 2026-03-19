@@ -50,9 +50,13 @@ function toDomainUser(record: UserRecord): User {
 
 	return {
 		id: record.id,
-		telegramId: toTelegramId(record.telegramId),
-		wallets: {
-			[EIP155]: getAddress(record.evmWallet.address),
+		telegramProfile: {
+			telegramId: toTelegramId(record.telegramId),
+		},
+		wallet: {
+			namespaceToAddress: {
+				[EIP155]: getAddress(record.evmWallet.address),
+			},
 		},
 		createdAt: record.createdAt,
 	}
