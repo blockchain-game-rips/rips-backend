@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
 import { RouterModule } from '@nestjs/core'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
 import { UsersModule } from './modules/users/users.module'
@@ -18,6 +19,7 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 				],
 			},
 		]),
+		ConfigModule.forRoot({ isGlobal: true }),
 		PrismaModule,
 		UsersModule,
 		WalletsModule,

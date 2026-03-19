@@ -7,6 +7,7 @@ const sharedConfig = {
 	},
 	moduleNameMapper: {
 		'^src/(.*)$': '<rootDir>/src/$1',
+		'^generated/(.*)$': '<rootDir>/generated/$1',
 	},
 }
 
@@ -21,6 +22,11 @@ module.exports = {
 			...sharedConfig,
 			displayName: 'integration',
 			testMatch: ['<rootDir>/test/integration/**/*.spec.ts'],
+		},
+		{
+			...sharedConfig,
+			displayName: 'e2e',
+			testMatch: ['<rootDir>/test/e2e/**/*.spec.ts'],
 		},
 	],
 	testTimeout: 30_000,

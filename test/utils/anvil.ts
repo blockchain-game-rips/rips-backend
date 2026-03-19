@@ -56,31 +56,50 @@ function createAnvil(paramsUseAnvil: ParamsUseAnvil) {
 
 	const anvil = new Anvil({
 		...paramsUseAnvil,
-		rpcUrl: paramsUseAnvil.rpcUrl ?? defaultRpcUrl,
+		fork: paramsUseAnvil.fork
+			? {
+					rpcUrl: paramsUseAnvil.fork.rpcUrl ?? defaultRpcUrl,
+					blockNumber: paramsUseAnvil.fork.blockNumber,
+				}
+			: undefined,
 	})
 
 	return { anvil, chain }
 }
 
 function createUnknownChain(anvilConfig: ParamsUseAnvil) {
-	if (!anvilConfig.rpcUrl) {
-		throw new Error(
-			`Chain with id ${anvilConfig.chainId} not found in viem chains and no rpcUrl provided for creating unknown chain`,
-		)
-	}
+	if (anvilConfig.fork) {
+		if (!anvilConfig.fork.rpcUrl)
+			throw new Error(
+				`Chain with id ${anvilConfig.chainId} not found in viem chains and no rpcUrl provided for creating unknown chain`,
+			)
 
-	return defineChain({
-		id: anvilConfig.chainId,
+		return defineChain({
+			...unknowChain(anvilConfig.chainId),
+			rpcUrls: {
+				default: { http: [anvilConfig.fork.rpcUrl] },
+			},
+		})
+	} else {
+		return defineChain({
+			...unknowChain(anvilConfig.chainId),
+			rpcUrls: {
+				default: { http: ['http://localhost:8545'] },
+			},
+		})
+	}
+}
+
+function unknowChain(id: number) {
+	return {
+		id: id,
 		name: 'Unknown chain',
 		nativeCurrency: {
 			name: 'Unknown currency',
 			symbol: 'UNKNOWN',
 			decimals: 18,
 		},
-		rpcUrls: {
-			default: { http: [anvilConfig.rpcUrl] },
-		},
-	})
+	}
 }
 
 export class Anvil {
@@ -144,14 +163,14 @@ export class Anvil {
 	}
 
 	private buildCommand() {
-		let command = `anvil --port ${this.port} --mnemonic "${testMnemonic}"`
+		let command = `anvil --chain-id ${this.config.chainId} --port ${this.port} --mnemonic "${testMnemonic}"`
 
-		if (this.config.rpcUrl) {
-			command += ` --fork-url "${this.config.rpcUrl}"`
-		}
+		if (this.config.fork) {
+			command += ` --fork-url "${this.config.fork.rpcUrl}"`
 
-		if (typeof this.config.blockNumber === 'number') {
-			command += ` --fork-block-number ${this.config.blockNumber}`
+			if (typeof this.config.fork.blockNumber === 'number') {
+				command += ` --fork-block-number ${this.config.fork.blockNumber}`
+			}
 		}
 
 		if (typeof this.config.blockTime === 'number') {

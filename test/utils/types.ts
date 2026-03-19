@@ -1,8 +1,10 @@
 export type AnvilConfig = {
 	chainId: number
-	rpcUrl?: string
-	/** fork runs from this block number, default is latest */
-	blockNumber?: number
+	fork?: {
+		rpcUrl: string
+		/** fork runs from this block number, default is latest */
+		blockNumber?: number
+	}
 	/** timeout in milliseconds for starting Anvil, default is 5000 */
 	timeoutStartAnvil?: number
 	/** block time in seconds, default is mine block for each transaction */
@@ -12,7 +14,11 @@ export type AnvilConfig = {
 	printTraces?: boolean
 }
 
-export type ParamsUseAnvil = Omit<AnvilConfig, 'rpcUrl'> & {
-	/** RPC URL for forking, default is viem's default */
-	rpcUrl?: string
+export type ParamsUseAnvil = Omit<AnvilConfig, 'fork'> & {
+	fork?: {
+		/** RPC URL for forking, default is viem's default */
+		rpcUrl?: string
+		/** fork runs from this block number, default is latest */
+		blockNumber?: number
+	}
 }

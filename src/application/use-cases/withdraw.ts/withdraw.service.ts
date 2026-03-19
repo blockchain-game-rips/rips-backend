@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common'
+import { Injectable, Inject } from '@nestjs/common'
 import { CurrencyService } from 'src/application/interfaces/currency.service'
 import { WalletService } from 'src/application/interfaces/wallet.service'
 import { resolveChainAddress } from 'src/domain/services/wallet-utils'
@@ -12,6 +12,7 @@ import {
 	WithdrawUseCase,
 } from './withdraw.use-case'
 
+@Injectable()
 export class WithdrawService implements WithdrawUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,

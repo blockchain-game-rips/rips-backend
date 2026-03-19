@@ -20,7 +20,7 @@ const DEFAULT_BATCH_SIZE = 1_000
 export class EvmClientService {
 	constructor(
 		@Inject(EVM_CLIENT_CONFIG)
-		private readonly config: ResolvedEvmClientConfig,
+		private readonly config?: ResolvedEvmClientConfig,
 	) {}
 
 	public customError = createCustomError('ChainClientService')
@@ -89,7 +89,7 @@ export class EvmClientService {
 		const transports: Transport[] = []
 
 		const batchSize =
-			this.config.rpcSettings?.[chainId]?.batchSize || DEFAULT_BATCH_SIZE
+			this.config?.rpcSettings?.[chainId]?.batchSize || DEFAULT_BATCH_SIZE
 
 		const defaultTransportConfig: HttpTransportConfig = {
 			timeout: 6_000,
@@ -102,7 +102,7 @@ export class EvmClientService {
 		/* ======== Insert Default Transport ======== */
 
 		const disableDefaultRpcUrl =
-			this.config.rpcSettings?.[chainId]?.disableDefaultRpcUrl
+			this.config?.rpcSettings?.[chainId]?.disableDefaultRpcUrl
 
 		const defaultRpcUrl = chain.rpcUrls.default.http[0]
 
@@ -112,7 +112,7 @@ export class EvmClientService {
 
 		/* ======== Insert Additional Transports ======== */
 
-		const additionalRpcUrls = this.config.rpcSettings?.[chainId]?.rpcUrls
+		const additionalRpcUrls = this.config?.rpcSettings?.[chainId]?.rpcUrls
 
 		if (additionalRpcUrls) {
 			additionalRpcUrls.forEach((rpcUrl) => {
@@ -147,7 +147,7 @@ export class EvmClientService {
 		)
 
 		if (!chain) {
-			chain = this.config.customChains?.find(
+			chain = this.config?.customChains?.find(
 				(chain) => chain.id === chainId,
 			)
 		}
