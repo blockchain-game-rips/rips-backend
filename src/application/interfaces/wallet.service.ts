@@ -12,6 +12,7 @@ export abstract class WalletService {
 			currency: Currency
 			from: ChainAddress
 			to: ChainAddress
+			amount: bigint
 		},
 	): Promise<Transaction>
 }

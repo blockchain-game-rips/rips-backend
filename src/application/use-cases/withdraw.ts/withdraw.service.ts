@@ -48,6 +48,7 @@ export class WithdrawService implements WithdrawUseCase {
 			from: userChainAddress,
 			to: recipientChainAddress,
 			currency,
+			amount,
 		})
 
 		return tx
