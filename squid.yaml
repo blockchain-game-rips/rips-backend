@@ -1,15 +1,15 @@
 manifestVersion: subsquid.io/v0.1
 name: .
 version: 1
-description: 'Basic example of processing evm logs '
-build: 
+description: "Basic example of processing evm logs "
+build:
 deploy:
   secrets:
     - RPC_ENDPOINT
     - CONTRACT_ADDRESS
     - CONTRACT_DEPLOYED_AT
   addons:
-    postgres: 
+    postgres:
   processor:
     cmd:
       - sqd
