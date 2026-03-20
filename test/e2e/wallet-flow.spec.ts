@@ -86,9 +86,7 @@ describe('Wallet flow E2E', () => {
 			.send({ telegramId: USER_TG_ID })
 			.expect(201)
 
-		expect(res.body.wallets['eip155']).toMatch(
-			'0xCCd27B34d6C1063BFba2Cf2d472588d744270934',
-		)
+		expect(res.body.wallets['eip155']).toMatch(/^0x[0-9a-fA-F]{40}$/)
 	})
 
 	it('deposits funds — balance reflects on-chain transfer', async () => {

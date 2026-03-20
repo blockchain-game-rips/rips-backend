@@ -1,45 +1,26 @@
 import { execSync } from 'child_process'
-import getPort from 'get-port'
-
-const POSTGRES_CONTAINER_NAME = 'rips-test-postgres'
-const POSTGRES_PASSWORD = 'test'
-const POSTGRES_DB = 'rips_test'
+import {
+	PostgreSqlContainer,
+	StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql'
 
 export class Postgres {
-	private _port: number | undefined
+	private container: StartedPostgreSqlContainer | undefined
 
-	get port() {
-		if (!this._port) {
+	get databaseUrl() {
+		if (!this.container) {
 			throw new Error('Postgres not started')
 		}
 
-		return this._port
-	}
-
-	get databaseUrl() {
-		return `postgresql://postgres:${POSTGRES_PASSWORD}@localhost:${this.port}/${POSTGRES_DB}`
+		return this.container.getConnectionUri()
 	}
 
 	async start() {
-		this._port = await getPort()
+		this.container = await new PostgreSqlContainer(
+			'postgres:16-alpine',
+		).start()
 
-		execSync(
-			`docker run --rm -d \
-				--name ${POSTGRES_CONTAINER_NAME} \
-				-e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-				-e POSTGRES_DB=${POSTGRES_DB} \
-				-p ${this._port}:5432 \
-				postgres:16-alpine`,
-			{ stdio: 'pipe' },
-		)
-
-		execSync(
-			`until docker exec ${POSTGRES_CONTAINER_NAME} pg_isready -U postgres; do sleep 0.2; done`,
-			{ stdio: 'pipe' },
-		)
-
-		//TODO: rewrite
-		execSync(`yarn prisma db push --force-reset`, {
+		execSync('yarn prisma db push --force-reset', {
 			stdio: 'inherit',
 			env: {
 				...process.env,
@@ -49,8 +30,8 @@ export class Postgres {
 		})
 	}
 
-	stop() {
-		execSync(`docker stop ${POSTGRES_CONTAINER_NAME}`, { stdio: 'pipe' })
+	async stop() {
+		await this.container?.stop()
 	}
 }
 
@@ -62,8 +43,8 @@ export function usePostgres() {
 		process.env.DATABASE_URL = postgres.databaseUrl
 	})
 
-	afterAll(() => {
-		postgres.stop()
+	afterAll(async () => {
+		await postgres.stop()
 	})
 
 	return { postgres }
