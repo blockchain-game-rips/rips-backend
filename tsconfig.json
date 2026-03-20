@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es2020",
+        "target": "es2023",
         "outDir": "lib",
         "strict": true,
         "resolveJsonModule": true,
@@ -11,11 +11,11 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "skipLibCheck": true,
-        "baseUrl": "./"
+        "baseUrl": "./",
+        "rootDir": "src"
     },
     "include": [
-        "src/**/*",
-        "test/**/*"
+        "src/**/*"
     ],
     "exclude": [
         "node_modules"

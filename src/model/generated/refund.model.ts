@@ -1,39 +1,31 @@
-import {
-	BigIntColumn as BigIntColumn_,
-	DateTimeColumn as DateTimeColumn_,
-	Entity as Entity_,
-	Index as Index_,
-	ManyToOne as ManyToOne_,
-	PrimaryColumn as PrimaryColumn_,
-	StringColumn as StringColumn_,
-} from '@subsquid/typeorm-store'
-import { Round } from './round.model'
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
+import {Round} from "./round.model"
 
 @Entity_()
 export class Refund {
-	constructor(props?: Partial<Refund>) {
-		Object.assign(this, props)
-	}
+    constructor(props?: Partial<Refund>) {
+        Object.assign(this, props)
+    }
 
-	@PrimaryColumn_()
-	id!: string
+    @PrimaryColumn_()
+    id!: string
 
-	@Index_()
-	@ManyToOne_(() => Round, { nullable: true })
-	round!: Round
+    @Index_()
+    @ManyToOne_(() => Round, {nullable: true})
+    round!: Round
 
-	@StringColumn_({ nullable: false })
-	user!: string
+    @StringColumn_({nullable: false})
+    user!: string
 
-	@BigIntColumn_({ nullable: false })
-	amount!: bigint
+    @BigIntColumn_({nullable: false})
+    amount!: bigint
 
-	@BigIntColumn_({ nullable: false })
-	blockNumber!: bigint
+    @BigIntColumn_({nullable: false})
+    blockNumber!: bigint
 
-	@DateTimeColumn_({ nullable: false })
-	timestamp!: Date
+    @DateTimeColumn_({nullable: false})
+    timestamp!: Date
 
-	@StringColumn_({ nullable: false })
-	txHash!: string
+    @StringColumn_({nullable: false})
+    txHash!: string
 }
