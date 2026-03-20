@@ -1,51 +1,59 @@
-import {assertNotNull} from '@subsquid/util-internal'
 import {
-    BlockHeader,
-    DataHandlerContext,
-    EvmBatchProcessor,
-    EvmBatchProcessorFields,
-    Log as _Log,
-    Transaction as _Transaction,
+	BlockHeader,
+	DataHandlerContext,
+	EvmBatchProcessor,
+	EvmBatchProcessorFields,
+	Log as _Log,
+	Transaction as _Transaction,
 } from '@subsquid/evm-processor'
-import {Store} from '@subsquid/typeorm-store'
-import * as erc20 from './abi/erc20'
+import { Store } from '@subsquid/typeorm-store'
+import { assertNotNull } from '@subsquid/util-internal'
+import * as rips from './abi/rips'
 
-// Set at .env or replace with a ERC20 contract address
-export const CONTRACT_ADDRESS = assertNotNull(process.env.CONTRACT_ADDRESS)
-export const CONTRACT_DEPLOYED_AT = parseInt(assertNotNull(process.env.CONTRACT_DEPLOYED_AT))
+export const CONTRACT_ADDRESS = assertNotNull(
+	process.env.CONTRACT_ADDRESS,
+).toLowerCase()
+export const CONTRACT_DEPLOYED_AT = parseInt(
+	assertNotNull(process.env.CONTRACT_DEPLOYED_AT),
+)
+
+const TRACKED_EVENTS = [
+	rips.events.StakeCreated.topic,
+	rips.events.StakeDeleted.topic,
+	rips.events.RoundCreated.topic,
+	rips.events.TicketsPurchased.topic,
+	rips.events.RandomnessRequested.topic,
+	rips.events.RoundFinalized.topic,
+	rips.events.PrizesClaimed.topic,
+	rips.events.RefundIssued.topic,
+	rips.events.ProtocolFeeUpdated.topic,
+	rips.events.FeeRecipientUpdated.topic,
+	rips.events.CallbackGasLimitUpdated.topic,
+]
 
 export const processor = new EvmBatchProcessor()
-    // Lookup archive by the network name in Subsquid registry
-    // See https://docs.subsquid.io/evm-indexing/supported-networks/
-    .setGateway('https://v2.archive.subsquid.io/network/ethereum-mainnet')
-    // Chain RPC endpoint is required for
-    //  - indexing unfinalized blocks https://docs.subsquid.io/basics/unfinalized-blocks/
-    //  - querying the contract state https://docs.subsquid.io/evm-indexing/query-state/
-    .setRpcEndpoint({
-        // Set the URL via .env for local runs or via secrets when deploying to Subsquid Cloud
-        // https://docs.subsquid.io/deploy-squid/env-variables/
-        url: assertNotNull(process.env.RPC_ENDPOINT),
-        // More RPC connection options at https://docs.subsquid.io/evm-indexing/configuration/initialization/#set-data-source
-        rateLimit: 10
-    })
-    .setFinalityConfirmation(75)
-    .setFields({
-        log: {
-            topics: true,
-            data: true,
-        },
-        transaction: {
-            hash: true,
-        },
-    })
-    .addLog({
-        address: [CONTRACT_ADDRESS],
-        topic0: [erc20.events.Transfer.topic],
-        transaction: true,
-    })
-    .setBlockRange({
-        from: CONTRACT_DEPLOYED_AT
-    })
+	.setGateway(assertNotNull(process.env.GATEWAY_URL))
+	.setRpcEndpoint({
+		url: assertNotNull(process.env.RPC_ENDPOINT),
+		rateLimit: 10,
+	})
+	.setFinalityConfirmation(75)
+	.setFields({
+		log: {
+			topics: true,
+			data: true,
+		},
+		transaction: {
+			hash: true,
+			input: true,
+		},
+	})
+	.addLog({
+		address: [CONTRACT_ADDRESS],
+		topic0: TRACKED_EVENTS,
+		transaction: true,
+	})
+	.setBlockRange({ from: CONTRACT_DEPLOYED_AT })
 
 export type Fields = EvmBatchProcessorFields<typeof processor>
 export type Context = DataHandlerContext<Store, Fields>

@@ -34,7 +34,7 @@ type Round @entity {
     randomB: BigInt
     vrfRequestId: BigInt
     ticketPurchases: [TicketPurchase!]! @derivedFrom(field: "round")
-    prizesClaimed: [PrizesClaimed!]! @derivedFrom(field: "round")
+    prizesClaimed: [PrizeClaim!]! @derivedFrom(field: "round")
     refunds: [Refund!]! @derivedFrom(field: "round")
 }
 
@@ -42,33 +42,30 @@ type TicketPurchase @entity {
     id: ID!
     round: Round!
     buyer: String!
-    recipient: String!
     count: BigInt!
     blockNumber: BigInt!
     timestamp: DateTime!
-    txHash: Bytes!
+    txHash: String!
 }
 
-type PrizesClaimed @entity {
+type PrizeClaim @entity {
     id: ID!
     round: Round!
     claimer: String!
-    recipient: String!
     amount: BigInt!
     blockNumber: BigInt!
     timestamp: DateTime!
-    txHash: Bytes!
+    txHash: String!
 }
 
 type Refund @entity {
     id: ID!
     round: Round!
     user: String!
-    recipient: String!
     amount: BigInt!
     blockNumber: BigInt!
     timestamp: DateTime!
-    txHash: Bytes!
+    txHash: String!
 }
 
 type ProtocolSettings @entity {
