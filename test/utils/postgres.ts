@@ -17,7 +17,7 @@ export class Postgres {
 
 	async start() {
 		this.container = await new PostgreSqlContainer(
-			'postgres:16-alpine',
+			'postgres:16',
 		).start()
 
 		execSync('yarn prisma db push --force-reset', {
