@@ -189,10 +189,6 @@ export class EvmCurrencyService {
 		return isAddressEqual(address, wrappedToken)
 	}
 
-	isToken(address: Address): boolean {
-		return !this.isNative(address)
-	}
-
 	/* ======== INTERNAL ======== */
 
 	private getCacheKey(address: Address, chainId: number): TokenCacheKey {
