@@ -2,8 +2,8 @@ import {
 	PostgreSqlContainer,
 	StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql'
-import { createOrmConfig } from '@subsquid/typeorm-config'
 import { DataSource } from 'typeorm'
+import path from 'path'
 
 export class Postgres {
 	private container: StartedPostgreSqlContainer | undefined
@@ -16,10 +16,10 @@ export class Postgres {
 	async start() {
 		this.container = await new PostgreSqlContainer('postgres:16').start()
 
-		process.env.DB_URL = this.connectionUrl
-
 		const dataSource = new DataSource({
-			...createOrmConfig(),
+			type: 'postgres',
+			url: this.connectionUrl,
+			migrations: [path.resolve(__dirname, '../../db/migrations/*.js')],
 			subscribers: [],
 			synchronize: false,
 			migrationsRun: false,

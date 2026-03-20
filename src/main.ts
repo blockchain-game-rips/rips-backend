@@ -41,11 +41,17 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 	const feeRecipientUpdates: FeeRecipientUpdated[] = []
 	const callbackGasLimitUpdates: CallbackGasLimitUpdated[] = []
 
-	for (const block of ctx.blocks) {
-		for (const log of block.logs) {
-			const eventCtx: EventContext = {
+	const allLogs = ctx.blocks.flatMap((block) =>
+		block.logs.map((log) => ({ log, header: block.header })),
+	)
+
+	// StakeCreated must be pre-processed before other events because the contract
+	// emits RoundCreated before StakeCreated within the same createStake transaction
+	for (const { log, header } of allLogs) {
+		if (log.topics[0] === rips.events.StakeCreated.topic) {
+			handleStakeCreated({
 				ctx,
-				block: block.header,
+				block: header,
 				log,
 				stakeConfigs,
 				prizeTiers,
@@ -56,53 +62,68 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 				protocolFeeUpdates,
 				feeRecipientUpdates,
 				callbackGasLimitUpdates,
-			}
+			})
+		}
+	}
 
-			switch (log.topics[0]) {
-				case rips.events.StakeCreated.topic:
-					handleStakeCreated(eventCtx)
-					break
+	for (const { log, header } of allLogs) {
+		if (log.topics[0] === rips.events.StakeCreated.topic) continue
 
-				case rips.events.StakeDeleted.topic:
-					await handleStakeDeleted(eventCtx)
-					break
+		const eventCtx: EventContext = {
+			ctx,
+			block: header,
+			log,
+			stakeConfigs,
+			prizeTiers,
+			rounds,
+			ticketPurchases,
+			prizeClaims,
+			refunds,
+			protocolFeeUpdates,
+			feeRecipientUpdates,
+			callbackGasLimitUpdates,
+		}
 
-				case rips.events.RoundCreated.topic:
-					await handleRoundCreated(eventCtx)
-					break
+		switch (log.topics[0]) {
+			case rips.events.StakeDeleted.topic:
+				await handleStakeDeleted(eventCtx)
+				break
 
-				case rips.events.TicketsPurchased.topic:
-					await handleTicketsPurchased(eventCtx)
-					break
+			case rips.events.RoundCreated.topic:
+				await handleRoundCreated(eventCtx)
+				break
 
-				case rips.events.RandomnessRequested.topic:
-					await handleRandomnessRequested(eventCtx)
-					break
+			case rips.events.TicketsPurchased.topic:
+				await handleTicketsPurchased(eventCtx)
+				break
 
-				case rips.events.RoundFinalized.topic:
-					await handleRoundFinalized(eventCtx)
-					break
+			case rips.events.RandomnessRequested.topic:
+				await handleRandomnessRequested(eventCtx)
+				break
 
-				case rips.events.PrizesClaimed.topic:
-					await handlePrizesClaimed(eventCtx)
-					break
+			case rips.events.RoundFinalized.topic:
+				await handleRoundFinalized(eventCtx)
+				break
 
-				case rips.events.RefundIssued.topic:
-					await handleRefundIssued(eventCtx)
-					break
+			case rips.events.PrizesClaimed.topic:
+				await handlePrizesClaimed(eventCtx)
+				break
 
-				case rips.events.ProtocolFeeUpdated.topic:
-					handleProtocolFeeUpdated(eventCtx)
-					break
+			case rips.events.RefundIssued.topic:
+				await handleRefundIssued(eventCtx)
+				break
 
-				case rips.events.FeeRecipientUpdated.topic:
-					handleFeeRecipientUpdated(eventCtx)
-					break
+			case rips.events.ProtocolFeeUpdated.topic:
+				handleProtocolFeeUpdated(eventCtx)
+				break
 
-				case rips.events.CallbackGasLimitUpdated.topic:
-					handleCallbackGasLimitUpdated(eventCtx)
-					break
-			}
+			case rips.events.FeeRecipientUpdated.topic:
+				handleFeeRecipientUpdated(eventCtx)
+				break
+
+			case rips.events.CallbackGasLimitUpdated.topic:
+				handleCallbackGasLimitUpdated(eventCtx)
+				break
 		}
 	}
 

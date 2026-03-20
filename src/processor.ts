@@ -31,12 +31,22 @@ const TRACKED_EVENTS = [
 	rips.events.CallbackGasLimitUpdated.topic,
 ]
 
-export const processor = new EvmBatchProcessor()
-	.setGateway(assertNotNull(process.env.GATEWAY_URL))
-	.setRpcEndpoint({
-		url: assertNotNull(process.env.RPC_ENDPOINT),
-		rateLimit: 10,
-	})
+const gatewayUrl = process.env.GATEWAY_URL
+
+if (!gatewayUrl) {
+	console.warn(
+		'GATEWAY_URL is not set — running in RPC-only mode. This is slower and not recommended for production.',
+	)
+}
+
+const processorBuilder = new EvmBatchProcessor().setRpcEndpoint({
+	url: assertNotNull(process.env.RPC_ENDPOINT),
+	rateLimit: 10,
+})
+
+export const processor = (
+	gatewayUrl ? processorBuilder.setGateway(gatewayUrl) : processorBuilder
+)
 	.setFinalityConfirmation(75)
 	.setFields({
 		log: {
