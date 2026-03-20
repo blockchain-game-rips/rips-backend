@@ -11,6 +11,7 @@ import { WithdrawService } from 'src/application/use-cases/withdraw.ts/withdraw.
 import { WithdrawUseCase } from 'src/application/use-cases/withdraw.ts/withdraw.use-case'
 import { CurrencyServiceImpl } from 'src/infrastructure/currency.service'
 import { EvmModule } from 'src/infrastructure/evm/evm.module'
+import { EvmCurrencyWriteService } from 'src/infrastructure/evm/evm-currency-write.service'
 import { KmsModule } from 'src/infrastructure/kms/kms.module'
 import { PrismaEvmWalletRepository } from 'src/infrastructure/prisma/evm-wallet.repository'
 import { PrismaUserRepository } from 'src/infrastructure/prisma/user.repository'
@@ -34,6 +35,7 @@ import {
 		{ provide: GetBalanceUseCase, useClass: GetBalanceService },
 		{ provide: EvmWalletRepository, useClass: PrismaEvmWalletRepository },
 		SignService,
+		EvmCurrencyWriteService,
 		{ provide: WithdrawUseCase, useClass: WithdrawService },
 	],
 })

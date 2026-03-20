@@ -1,63 +1,30 @@
 import { CurrencyMetadata } from 'src/domain/entities/currency'
-import { Address, erc20Abi, isAddress, isAddressEqual } from 'viem'
-import { EvmClientService } from '../../evm-client/evm-client.service'
-import { EvmCurrency } from './currency'
-import { NATIVE_ADDRESS } from './native-currency'
+import { Address, isAddress, isAddressEqual } from 'viem'
+import { NATIVE_ADDRESS } from './constants'
+import { EvmCurrency } from './evm-currency'
 
 export class Token extends EvmCurrency {
-	constructor(
-		evmClientService: EvmClientService,
-		address: Address,
-		chainId: number,
-		currencyMetadata: CurrencyMetadata,
-	) {
-		super(evmClientService, address, chainId, currencyMetadata)
-		this.validateTokenAddress(address)
-		this.validateDecimals(currencyMetadata.decimals)
+	constructor(address: Address, chainId: number, metadata: CurrencyMetadata) {
+		Token.validateAddress(address, metadata.symbol)
+		Token.validateDecimals(metadata.decimals, metadata.symbol)
+		super(address, chainId, metadata)
 	}
 
-	isNative(): false {
-		return false
-	}
-
-	private validateTokenAddress(address: Address): void {
+	private static validateAddress(address: Address, symbol: string): void {
 		if (!isAddress(address)) {
-			throw new Error(`Invalid address for token ${this.symbol}`)
+			throw new Error(`Invalid address for token ${symbol}`)
 		}
 
 		if (isAddressEqual(address, NATIVE_ADDRESS)) {
-			throw new Error(
-				`Cannot make a token from native currency ${this.symbol}`,
-			)
+			throw new Error(`Cannot make a token from native currency ${symbol}`)
 		}
 	}
 
-	private validateDecimals(decimals: number): void {
+	private static validateDecimals(decimals: number, symbol: string): void {
 		if (decimals < 0 || decimals > 18) {
 			throw new Error(
-				`Invalid token decimals (${decimals}), must be between 0 and 18`,
+				`Invalid decimals (${decimals}) for token ${symbol}, must be between 0 and 18`,
 			)
 		}
-	}
-
-	async balanceOf(address: Address, blockNumber?: bigint): Promise<bigint> {
-		const balance = await this.client.readContract({
-			address: this.address,
-			abi: erc20Abi,
-			functionName: 'balanceOf',
-			args: [address],
-			blockNumber,
-		})
-		return balance
-	}
-
-	async allowance(address: Address, spender: Address): Promise<bigint> {
-		const allowance = await this.client.readContract({
-			address: this.address,
-			abi: erc20Abi,
-			functionName: 'allowance',
-			args: [address, spender],
-		})
-		return allowance
 	}
 }

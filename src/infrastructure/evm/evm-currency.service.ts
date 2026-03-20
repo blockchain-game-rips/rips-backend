@@ -12,25 +12,22 @@ import {
 import { EvmClientService } from './evm-client/evm-client.service'
 import {
 	ETH_METADATA,
+	NATIVE_ADDRESS,
 	NATIVE_CURRENCIES,
 	WRAPPED_TOKENS,
 } from './primitives/currencies/constants'
-import { EvmCurrency } from './primitives/currencies/currency'
-import {
-	NATIVE_ADDRESS,
-	NativeCurrency,
-} from './primitives/currencies/native-currency'
+import { EvmCurrency } from './primitives/currencies/evm-currency'
+import { NativeCurrency } from './primitives/currencies/native-currency'
 import { Token } from './primitives/currencies/token'
 import { WrappedNative } from './primitives/currencies/wrapped-native'
-
-type TokenCacheKey = `${number}:${Address}`
 
 @Injectable()
 export class EvmCurrencyService {
 	constructor(private readonly evmClientService: EvmClientService) {}
+
 	/* ======== STATE ======== */
 
-	private tokenCache: Map<TokenCacheKey, EvmCurrency> = new Map()
+	private cache: Map<CurrencyId, EvmCurrency> = new Map()
 
 	/* ======== PUBLIC ======== */
 
@@ -41,30 +38,23 @@ export class EvmCurrencyService {
 			throw new Error(`Wrapped Native not found for chain ${chainId}`)
 		}
 
-		return this.fromAddress<WrappedNative>(wrappedToken, chainId)
-	}
+		const currency = await this.fromAddress(wrappedToken, chainId)
 
-	async fromAddress<T extends Token | NativeCurrency | WrappedNative>(
-		address: Address,
-		chainId: number,
-	): Promise<T> {
-		const checksumAddress = getAddress(address)
-		const cacheKey = this.getCacheKey(checksumAddress, chainId)
-		const cachedToken = this.tokenCache.get(cacheKey)
-
-		if (cachedToken) {
-			return cachedToken as T
+		if (!(currency instanceof WrappedNative)) {
+			throw new Error(`Expected WrappedNative for chain ${chainId}`)
 		}
 
+		return currency
+	}
+
+	async fromAddress(
+		address: Address,
+		chainId: number,
+	): Promise<NativeCurrency | Token | WrappedNative> {
+		const checksumAddress = getAddress(address)
+
 		if (this.isNative(checksumAddress)) {
-			const token = this.createNative(chainId)
-
-			this.tokenCache.set(
-				this.getCacheKey(NATIVE_ADDRESS, chainId),
-				token,
-			)
-
-			return token as T
+			return this.getNative(chainId)
 		}
 
 		const metadata = await this.getMetadataFromBlockchain(
@@ -72,72 +62,19 @@ export class EvmCurrencyService {
 			chainId,
 		)
 
-		let token: T
+		const currency = this.isWrappedNative(checksumAddress, chainId)
+			? new WrappedNative(chainId, this.getNative(chainId), metadata)
+			: new Token(checksumAddress, chainId, metadata)
 
-		if (this.isWrappedNative(checksumAddress, chainId)) {
-			token = new WrappedNative(
-				this.evmClientService,
-				this.getNative(chainId),
-				chainId,
-				metadata,
-			) as T
-		} else {
-			token = new Token(
-				this.evmClientService,
-				checksumAddress,
-				chainId,
-				metadata,
-			) as T
-		}
-
-		this.tokenCache.set(cacheKey, token)
-
-		return token
-	}
-
-	private async getMetadataFromBlockchain(
-		address: Address,
-		chainId: number,
-	): Promise<CurrencyMetadata> {
-		const client = this.evmClientService.getClient(chainId)
-
-		const contract = getContract({
-			address,
-			abi: erc20Abi,
-			client,
-		})
-
-		const [decimals, name, symbol] = await Promise.all([
-			contract.read.decimals(),
-			contract.read.name(),
-			contract.read.symbol(),
-		])
-
-		const metadata: CurrencyMetadata = {
-			symbol,
-			name,
-			decimals,
-		}
-
-		return metadata
+		return this.getOrCache(currency)
 	}
 
 	getNative(chainId: number): NativeCurrency {
-		const cacheKey = this.getCacheKey(NATIVE_ADDRESS, chainId)
-		const cachedToken = this.tokenCache.get(cacheKey)
-
-		if (cachedToken) {
-			return cachedToken as NativeCurrency
-		}
-
-		const token = this.createNative(chainId)
-
-		this.tokenCache.set(cacheKey, token)
-
-		return token
+		const currency = new NativeCurrency(chainId, NATIVE_CURRENCIES[chainId] ?? ETH_METADATA)
+		return this.getOrCache(currency)
 	}
 
-	isValidTokenId(id: string) {
+	isValidTokenId(id: string): boolean {
 		try {
 			const [chainId, addr] = id.split(':')
 
@@ -159,18 +96,14 @@ export class EvmCurrencyService {
 		}
 	}
 
-	async fromId(
-		id: CurrencyId,
-	): Promise<Token | NativeCurrency | WrappedNative> {
-		const isValid = this.isValidTokenId(id)
-
-		if (!isValid) {
+	async fromId(id: CurrencyId): Promise<NativeCurrency | Token | WrappedNative> {
+		if (!this.isValidTokenId(id)) {
 			throw new Error('Invalid token id')
 		}
 
 		const [chainId, addr] = id.split(':')
 
-		return await this.fromAddress(addr as Address, Number(chainId))
+		return this.fromAddress(getAddress(addr), Number(chainId))
 	}
 
 	/* ======== CHECKERS ======== */
@@ -191,13 +124,36 @@ export class EvmCurrencyService {
 
 	/* ======== INTERNAL ======== */
 
-	private getCacheKey(address: Address, chainId: number): TokenCacheKey {
-		return `${chainId}:${address.toLowerCase() as Address}`
+	private getOrCache<T extends EvmCurrency>(currency: T): T {
+		const cached = this.cache.get(currency.id)
+
+		if (cached) {
+			return cached as T
+		}
+
+		this.cache.set(currency.id, currency)
+
+		return currency
 	}
 
-	private createNative(chainId: number): NativeCurrency {
-		const metadata = NATIVE_CURRENCIES[chainId] ?? ETH_METADATA
+	private async getMetadataFromBlockchain(
+		address: Address,
+		chainId: number,
+	): Promise<CurrencyMetadata> {
+		const client = this.evmClientService.getClient(chainId)
 
-		return new NativeCurrency(this.evmClientService, chainId, metadata)
+		const contract = getContract({
+			address,
+			abi: erc20Abi,
+			client,
+		})
+
+		const [decimals, name, symbol] = await Promise.all([
+			contract.read.decimals(),
+			contract.read.name(),
+			contract.read.symbol(),
+		])
+
+		return { symbol, name, decimals }
 	}
 }

@@ -5,7 +5,7 @@ import { parseCurrencyId } from 'src/domain/services/currency-id-utils'
 import { CurrencyId } from 'src/domain/value-objects/currency-id'
 import { createCustomError } from 'src/utils/common'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
-import { NATIVE_ADDRESS } from '../evm/primitives/currencies/native-currency'
+import { NATIVE_ADDRESS } from '../evm/primitives/currencies/constants'
 import { chainIdToGeckoChainId } from './constants'
 import { GeckoTerminalService } from './gecko-terminal.service'
 

@@ -1,5 +1,6 @@
 import { GetBalanceUseCase } from 'src/application/use-cases/get-balance/get-balance.use-case'
 import { UserNotFoundError } from 'src/application/use-cases/get-user/get-user.use-case'
+import { WithdrawUseCase } from 'src/application/use-cases/withdraw.ts/withdraw.use-case'
 import { EIP155 } from 'src/constants'
 import { composeChainId } from 'src/domain/services/chain-id-utils'
 import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
@@ -28,13 +29,17 @@ function makeMockGetBalanceUseCase(): jest.Mocked<GetBalanceUseCase> {
 	return { execute: jest.fn() }
 }
 
+function makeMockWithdrawUseCase(): jest.Mocked<WithdrawUseCase> {
+	return { execute: jest.fn() }
+}
+
 describe('WalletsController', () => {
 	let getBalance: jest.Mocked<GetBalanceUseCase>
 	let controller: WalletsController
 
 	beforeEach(() => {
 		getBalance = makeMockGetBalanceUseCase()
-		controller = new WalletsController(getBalance)
+		controller = new WalletsController(getBalance, makeMockWithdrawUseCase())
 	})
 
 	describe('GET /users/:telegramId/wallet/balance', () => {

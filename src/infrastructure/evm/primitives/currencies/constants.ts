@@ -1,6 +1,9 @@
 import { CurrencyMetadata } from 'src/domain/entities/currency'
-import { Address } from 'viem'
+import { Address, getAddress } from 'viem'
 import * as chains from 'viem/chains'
+
+export const NATIVE_ADDRESS: Address =
+	'0x0000000000000000000000000000000000000000'
 
 export const ETH_METADATA = {
 	symbol: 'ETH',
@@ -35,7 +38,7 @@ export const NATIVE_CURRENCIES: Record<number, CurrencyMetadata> = {
 	[chains.apeChain.id]: createMetadata('APE', 'APE', 18),
 } as const
 
-export const WRAPPED_TOKENS: Record<number, Address | undefined> = {
+const WRAPPED_TOKENS_RAW: Record<number, Address> = {
 	[chains.arbitrum.id]: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
 	[chains.lightlinkPhoenix.id]: '0x7EbeF2A4b1B09381Ec5B9dF8C5c6f2dBECA59c73',
 	[chains.hemi.id]: '0x4200000000000000000000000000000000000006',
@@ -51,3 +54,12 @@ export const WRAPPED_TOKENS: Record<number, Address | undefined> = {
 	[chains.corn.id]: '0xda5ddd7270381a7c2717ad10d1c0ecb19e3cdfb2',
 	[chains.apeChain.id]: '0x48b62137EdfA95a428D35C09E44256a739F6B557',
 }
+export const WRAPPED_TOKENS: Record<number, Address | undefined> = (() => {
+	const wrappedTokensCheckSum = {}
+
+	for (const [chainId, address] of Object.entries(WRAPPED_TOKENS_RAW)) {
+		wrappedTokensCheckSum[chainId] = getAddress(address)
+	}
+
+	return wrappedTokensCheckSum
+})()
