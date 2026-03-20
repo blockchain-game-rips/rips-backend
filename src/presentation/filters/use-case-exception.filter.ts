@@ -6,8 +6,10 @@ import {
 	HttpStatus,
 } from '@nestjs/common'
 import { Response } from 'express'
-import { UserAlreadyExistsError } from 'src/application/use-cases/create-user/create-user.use-case'
-import { UserNotFoundError } from 'src/application/use-cases/get-user/get-user.use-case'
+import { InsufficientBalanceError } from 'src/domain/errors/insufficient-balance.error'
+import { TransactionFailedError } from 'src/domain/errors/transaction-failed.error'
+import { UserAlreadyExistsError } from 'src/domain/errors/user-already-exists.error'
+import { UserNotFoundError } from 'src/domain/errors/user-not-found.error'
 import { ContextError } from 'src/utils/common'
 
 type ErrorConstructor = new (...args: never[]) => ContextError
@@ -15,6 +17,8 @@ type ErrorConstructor = new (...args: never[]) => ContextError
 const ERROR_STATUS_MAP: Map<ErrorConstructor, HttpStatus> = new Map([
 	[UserNotFoundError, HttpStatus.NOT_FOUND],
 	[UserAlreadyExistsError, HttpStatus.CONFLICT],
+	[InsufficientBalanceError, HttpStatus.UNPROCESSABLE_ENTITY],
+	[TransactionFailedError, HttpStatus.BAD_GATEWAY],
 ])
 
 @Catch()

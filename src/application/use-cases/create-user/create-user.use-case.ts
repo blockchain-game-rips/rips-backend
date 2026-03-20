@@ -1,10 +1,8 @@
+import { UserAlreadyExistsError } from 'src/domain/errors/user-already-exists.error'
 import { User } from 'src/domain/entities/user'
 import { TelegramId } from 'src/domain/value-objects/telegram-id'
-import { createCustomError } from 'src/utils/common'
 
-export const UserAlreadyExistsError = createCustomError(
-	'UserAlreadyExistsError',
-)
+export { UserAlreadyExistsError }
 
 export type CreateUserInput = {
 	telegramId: TelegramId

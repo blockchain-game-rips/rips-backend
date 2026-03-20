@@ -1,9 +1,3 @@
-export class TransactionFailedError extends Error {
-	constructor(
-		message: string,
-		public readonly cause?: unknown,
-	) {
-		super(message)
-		this.name = 'TransactionFailedError'
-	}
-}
+import { createCustomError } from 'src/utils/common'
+
+export const TransactionFailedError = createCustomError('TransactionFailed')
