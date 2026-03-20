@@ -1,25 +1,79 @@
-type Account @entity {
+type StakeConfig @entity {
     id: ID!
-    transfersFrom: [Transfer!] @derivedFrom(field: "from")
-    transfersTo: [Transfer!] @derivedFrom(field: "to")
+    ticketCap: BigInt!
+    duration: BigInt!
+    ticketCost: BigInt!
+    prizeDistribution: [PrizeTier!]! @derivedFrom(field: "stakeConfig")
+    deleted: Boolean!
+    rounds: [Round!]! @derivedFrom(field: "stakeConfig")
 }
 
-type Transfer @entity {
+type PrizeTier @entity {
     id: ID!
-    blockNumber: Int!
+    stakeConfig: StakeConfig!
+    tierIndex: Int!
+    prizeCount: BigInt!
+    minPrize: BigInt!
+    maxPrize: BigInt!
+}
+
+enum RoundStatus {
+    Active
+    SoldOut
+    VRFRequested
+    Finalized
+}
+
+type Round @entity {
+    id: ID!
+    stakeConfig: StakeConfig!
+    startTime: BigInt!
+    ticketsSold: Int!
+    status: RoundStatus!
+    randomA: BigInt
+    randomB: BigInt
+    vrfRequestId: BigInt
+    ticketPurchases: [TicketPurchase!]! @derivedFrom(field: "round")
+    prizesClaimed: [PrizesClaimed!]! @derivedFrom(field: "round")
+    refunds: [Refund!]! @derivedFrom(field: "round")
+}
+
+type TicketPurchase @entity {
+    id: ID!
+    round: Round!
+    buyer: String!
+    recipient: String!
+    count: BigInt!
+    blockNumber: BigInt!
     timestamp: DateTime!
-    txHash: String!
-    from: Account!
-    to: Account!
-    amount: BigInt!
-    token: Token!
+    txHash: Bytes!
 }
 
-type Token @entity {
+type PrizesClaimed @entity {
     id: ID!
-    name: String!
-    symbol: String!
-    totalSupply: BigInt!
-    decimals: Int!
-    transfers: [Transfer!] @derivedFrom(field: "token")
+    round: Round!
+    claimer: String!
+    recipient: String!
+    amount: BigInt!
+    blockNumber: BigInt!
+    timestamp: DateTime!
+    txHash: Bytes!
+}
+
+type Refund @entity {
+    id: ID!
+    round: Round!
+    user: String!
+    recipient: String!
+    amount: BigInt!
+    blockNumber: BigInt!
+    timestamp: DateTime!
+    txHash: Bytes!
+}
+
+type ProtocolSettings @entity {
+    id: ID!
+    feePercent: BigInt!
+    feeRecipient: String!
+    callbackGasLimit: Int!
 }
