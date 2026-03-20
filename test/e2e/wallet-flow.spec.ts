@@ -8,15 +8,15 @@ import { MnemonicKmsService } from 'src/infrastructure/kms/mnemonic-kms.service'
 import { MAIN_CURRENCY_CHAIN_ADDRESS } from 'src/modules/wallets/wallets.constants'
 import { UseCaseExceptionFilter } from 'src/presentation/filters/use-case-exception.filter'
 import request from 'supertest'
-import { createPublicClient, http, parseEther, type Address } from 'viem'
+import { createPublicClient, http, parseEther } from 'viem'
 import { base } from 'viem/chains'
 import { setNativeBalance, useAnvil } from '../utils/anvil'
 import { usePostgres } from '../utils/postgres'
 
-const TEST_MNEMONIC =
+const KMS_MNEMONIC =
 	'spy record fury either collect ill pony monkey praise cool matter state'
 
-const TELEGRAM_ID = '123456789'
+const USER_TG_ID = '123456789'
 const DEPOSIT_AMOUNT = parseEther('1')
 const WITHDRAW_AMOUNT = parseEther('0.1')
 const RECIPIENT_ADDRESS = '0x000000000000000000000000000000000000dEaD'
@@ -41,7 +41,7 @@ describe('Wallet flow E2E', () => {
 			transport: http(rpcUrl),
 		})
 
-		process.env.KMS_MNEMONIC = TEST_MNEMONIC
+		process.env.KMS_MNEMONIC = KMS_MNEMONIC
 
 		const testMainCurrency = {
 			address: '0x0000000000000000000000000000000000000000',
@@ -83,23 +83,25 @@ describe('Wallet flow E2E', () => {
 	it('creates a user and returns an EVM wallet address', async () => {
 		const res = await request(app.getHttpServer())
 			.post('/users')
-			.send({ telegramId: TELEGRAM_ID })
+			.send({ telegramId: USER_TG_ID })
 			.expect(201)
 
-		expect(res.body.wallets['eip155']).toMatch(/^0x[0-9a-fA-F]{40}$/)
+		expect(res.body.wallets['eip155']).toMatch(
+			'0xCCd27B34d6C1063BFba2Cf2d472588d744270934',
+		)
 	})
 
 	it('deposits funds — balance reflects on-chain transfer', async () => {
 		const userRes = await request(app.getHttpServer())
-			.get(`/users/${TELEGRAM_ID}`)
+			.get(`/users/${USER_TG_ID}`)
 			.expect(200)
 
-		const walletAddress = userRes.body.wallets['eip155'] as Address
+		const walletAddress = userRes.body.wallets['eip155']
 
 		await setNativeBalance(publicClient, walletAddress, DEPOSIT_AMOUNT)
 
 		const balanceRes = await request(app.getHttpServer())
-			.get(`/users/${TELEGRAM_ID}/wallet/balance`)
+			.get(`/users/${USER_TG_ID}/wallet/balance`)
 			.expect(200)
 
 		expect(BigInt(balanceRes.body.amount)).toBe(DEPOSIT_AMOUNT)
@@ -111,7 +113,7 @@ describe('Wallet flow E2E', () => {
 		})
 
 		const res = await request(app.getHttpServer())
-			.post(`/users/${TELEGRAM_ID}/wallet/balance/withdraw`)
+			.post(`/users/${USER_TG_ID}/wallet/balance/withdraw`)
 			.send({
 				amount: WITHDRAW_AMOUNT.toString(),
 				recipientAddress: RECIPIENT_ADDRESS,
