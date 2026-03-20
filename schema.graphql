@@ -68,9 +68,26 @@ type Refund @entity {
     txHash: String!
 }
 
-type ProtocolSettings @entity {
+type ProtocolFeeUpdated @entity {
     id: ID!
     feePercent: BigInt!
+    blockNumber: BigInt!
+    timestamp: DateTime!
+    txHash: String!
+}
+
+type FeeRecipientUpdated @entity {
+    id: ID!
     feeRecipient: String!
+    blockNumber: BigInt!
+    timestamp: DateTime!
+    txHash: String!
+}
+
+type CallbackGasLimitUpdated @entity {
+    id: ID!
     callbackGasLimit: Int!
+    blockNumber: BigInt!
+    timestamp: DateTime!
+    txHash: String!
 }

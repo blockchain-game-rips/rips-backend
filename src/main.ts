@@ -1,9 +1,12 @@
 import { TypeormDatabase } from '@subsquid/typeorm-store'
+import { assertNotNull } from '@subsquid/util-internal'
 import * as rips from './abi/rips'
 import {
+	CallbackGasLimitUpdated,
+	FeeRecipientUpdated,
 	PrizeClaim,
 	PrizeTier,
-	ProtocolSettings,
+	ProtocolFeeUpdated,
 	Refund,
 	Round,
 	RoundStatus,
@@ -11,8 +14,6 @@ import {
 	TicketPurchase,
 } from './model'
 import { Block, Context, Log, processor } from './processor'
-
-const PROTOCOL_SETTINGS_ID = 'global'
 
 interface EventContext {
 	ctx: Context
@@ -24,6 +25,9 @@ interface EventContext {
 	ticketPurchases: TicketPurchase[]
 	prizeClaims: PrizeClaim[]
 	refunds: Refund[]
+	protocolFeeUpdates: ProtocolFeeUpdated[]
+	feeRecipientUpdates: FeeRecipientUpdated[]
+	callbackGasLimitUpdates: CallbackGasLimitUpdated[]
 }
 
 processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
@@ -33,7 +37,9 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 	const ticketPurchases: TicketPurchase[] = []
 	const prizeClaims: PrizeClaim[] = []
 	const refunds: Refund[] = []
-	let protocolSettings: ProtocolSettings | undefined
+	const protocolFeeUpdates: ProtocolFeeUpdated[] = []
+	const feeRecipientUpdates: FeeRecipientUpdated[] = []
+	const callbackGasLimitUpdates: CallbackGasLimitUpdated[] = []
 
 	for (const block of ctx.blocks) {
 		for (const log of block.logs) {
@@ -47,6 +53,9 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 				ticketPurchases,
 				prizeClaims,
 				refunds,
+				protocolFeeUpdates,
+				feeRecipientUpdates,
+				callbackGasLimitUpdates,
 			}
 
 			switch (log.topics[0]) {
@@ -83,13 +92,15 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 					break
 
 				case rips.events.ProtocolFeeUpdated.topic:
+					handleProtocolFeeUpdated(eventCtx)
+					break
+
 				case rips.events.FeeRecipientUpdated.topic:
+					handleFeeRecipientUpdated(eventCtx)
+					break
+
 				case rips.events.CallbackGasLimitUpdated.topic:
-					protocolSettings = await getOrCreateProtocolSettings(
-						ctx,
-						protocolSettings,
-					)
-					applyProtocolSettingsEvent(log, protocolSettings)
+					handleCallbackGasLimitUpdated(eventCtx)
 					break
 			}
 		}
@@ -101,10 +112,9 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 	await ctx.store.insert(ticketPurchases)
 	await ctx.store.insert(prizeClaims)
 	await ctx.store.insert(refunds)
-
-	if (protocolSettings !== undefined) {
-		await ctx.store.upsert(protocolSettings)
-	}
+	await ctx.store.insert(protocolFeeUpdates)
+	await ctx.store.insert(feeRecipientUpdates)
+	await ctx.store.insert(callbackGasLimitUpdates)
 })
 
 function handleStakeCreated(eventCtx: EventContext): void {
@@ -155,10 +165,12 @@ async function handleStakeDeleted(eventCtx: EventContext): Promise<void> {
 		stakeConfig = await ctx.store.get(StakeConfig, id)
 	}
 
-	if (stakeConfig !== undefined) {
-		stakeConfig.deleted = true
-		stakeConfigs.set(id, stakeConfig)
+	if (stakeConfig === undefined) {
+		throw new Error(`StakeConfig ${id} not found for StakeDeleted`)
 	}
+
+	stakeConfig.deleted = true
+	stakeConfigs.set(id, stakeConfig)
 }
 
 async function handleRoundCreated(eventCtx: EventContext): Promise<void> {
@@ -212,7 +224,7 @@ async function handleTicketsPurchased(eventCtx: EventContext): Promise<void> {
 			count,
 			blockNumber: BigInt(block.height),
 			timestamp: new Date(block.timestamp),
-			txHash: log.transaction?.hash ?? '',
+			txHash: log.transactionHash,
 		}),
 	)
 }
@@ -276,7 +288,7 @@ async function handlePrizesClaimed(eventCtx: EventContext): Promise<void> {
 			amount,
 			blockNumber: BigInt(block.height),
 			timestamp: new Date(block.timestamp),
-			txHash: log.transaction?.hash ?? '',
+			txHash: log.transactionHash,
 		}),
 	)
 }
@@ -302,7 +314,55 @@ async function handleRefundIssued(eventCtx: EventContext): Promise<void> {
 			amount,
 			blockNumber: BigInt(block.height),
 			timestamp: new Date(block.timestamp),
-			txHash: log.transaction?.hash ?? '',
+			txHash: log.transactionHash,
+		}),
+	)
+}
+
+function handleProtocolFeeUpdated(eventCtx: EventContext): void {
+	const { block, log, protocolFeeUpdates } = eventCtx
+
+	const { newFeePercent } = rips.events.ProtocolFeeUpdated.decode(log)
+
+	protocolFeeUpdates.push(
+		new ProtocolFeeUpdated({
+			id: log.id,
+			feePercent: newFeePercent,
+			blockNumber: BigInt(block.height),
+			timestamp: new Date(block.timestamp),
+			txHash: log.transactionHash,
+		}),
+	)
+}
+
+function handleFeeRecipientUpdated(eventCtx: EventContext): void {
+	const { block, log, feeRecipientUpdates } = eventCtx
+
+	const { newRecipient } = rips.events.FeeRecipientUpdated.decode(log)
+
+	feeRecipientUpdates.push(
+		new FeeRecipientUpdated({
+			id: log.id,
+			feeRecipient: newRecipient.toLowerCase(),
+			blockNumber: BigInt(block.height),
+			timestamp: new Date(block.timestamp),
+			txHash: log.transactionHash,
+		}),
+	)
+}
+
+function handleCallbackGasLimitUpdated(eventCtx: EventContext): void {
+	const { block, log, callbackGasLimitUpdates } = eventCtx
+
+	const { newLimit } = rips.events.CallbackGasLimitUpdated.decode(log)
+
+	callbackGasLimitUpdates.push(
+		new CallbackGasLimitUpdated({
+			id: log.id,
+			callbackGasLimit: newLimit,
+			blockNumber: BigInt(block.height),
+			timestamp: new Date(block.timestamp),
+			txHash: log.transactionHash,
 		}),
 	)
 }
@@ -316,50 +376,11 @@ async function resolveRound(
 }
 
 function decodeCreateStakeInput(log: Log) {
-	const input = log.transaction?.input
-	if (input === undefined) return undefined
-
 	try {
-		return rips.functions.createStake.decode(input).config
+		return rips.functions.createStake.decode(
+			assertNotNull(log.transaction).input,
+		).config
 	} catch {
 		return undefined
-	}
-}
-
-async function getOrCreateProtocolSettings(
-	ctx: Context,
-	current: ProtocolSettings | undefined,
-): Promise<ProtocolSettings> {
-	if (current !== undefined) return current
-
-	const existing = await ctx.store.get(ProtocolSettings, PROTOCOL_SETTINGS_ID)
-	if (existing !== undefined) return existing
-
-	return new ProtocolSettings({
-		id: PROTOCOL_SETTINGS_ID,
-		feePercent: 0n,
-		feeRecipient: '',
-		callbackGasLimit: 0,
-	})
-}
-
-function applyProtocolSettingsEvent(log: Log, settings: ProtocolSettings) {
-	switch (log.topics[0]) {
-		case rips.events.ProtocolFeeUpdated.topic:
-			settings.feePercent =
-				rips.events.ProtocolFeeUpdated.decode(log).newFeePercent
-			break
-
-		case rips.events.FeeRecipientUpdated.topic:
-			settings.feeRecipient =
-				rips.events.FeeRecipientUpdated.decode(
-					log,
-				).newRecipient.toLowerCase()
-			break
-
-		case rips.events.CallbackGasLimitUpdated.topic:
-			settings.callbackGasLimit =
-				rips.events.CallbackGasLimitUpdated.decode(log).newLimit
-			break
 	}
 }

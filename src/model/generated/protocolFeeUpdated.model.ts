@@ -1,14 +1,14 @@
 import {
 	BigIntColumn as BigIntColumn_,
+	DateTimeColumn as DateTimeColumn_,
 	Entity as Entity_,
-	IntColumn as IntColumn_,
 	PrimaryColumn as PrimaryColumn_,
 	StringColumn as StringColumn_,
 } from '@subsquid/typeorm-store'
 
 @Entity_()
-export class ProtocolSettings {
-	constructor(props?: Partial<ProtocolSettings>) {
+export class ProtocolFeeUpdated {
+	constructor(props?: Partial<ProtocolFeeUpdated>) {
 		Object.assign(this, props)
 	}
 
@@ -18,9 +18,12 @@ export class ProtocolSettings {
 	@BigIntColumn_({ nullable: false })
 	feePercent!: bigint
 
-	@StringColumn_({ nullable: false })
-	feeRecipient!: string
+	@BigIntColumn_({ nullable: false })
+	blockNumber!: bigint
 
-	@IntColumn_({ nullable: false })
-	callbackGasLimit!: number
+	@DateTimeColumn_({ nullable: false })
+	timestamp!: Date
+
+	@StringColumn_({ nullable: false })
+	txHash!: string
 }

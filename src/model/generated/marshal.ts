@@ -30,7 +30,7 @@ export const int: Marshal<number, number> = {
 export const float: Marshal<number, number> = {
 	fromJSON(value: unknown): number {
 		assert(typeof value === 'number', 'invalid Float')
-		return value
+		return value as number
 	},
 	toJSON(value) {
 		return value
@@ -124,7 +124,7 @@ export function enumFromJson<E extends object>(
 	enumObject: E,
 ): E[keyof E] {
 	assert(typeof json == 'string', 'invalid enum value')
-	const val = (enumObject as any)[json]
+	let val = (enumObject as any)[json]
 	assert(typeof val == 'string', `invalid enum value`)
 	return val as any
 }
