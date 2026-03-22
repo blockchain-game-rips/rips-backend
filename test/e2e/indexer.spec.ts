@@ -203,4 +203,55 @@ describe('indexer e2e', () => {
 			})
 		})
 	})
+
+	describe('fillRound', () => {
+		const REMAINING_TICKETS = TICKET_CAP - 3n
+
+		beforeAll(async () => {
+			const { ripsAddress, deployer, walletClient, publicClient } = setup
+
+			const hash = await walletClient.writeContract({
+				address: ripsAddress,
+				abi: ripsAbi,
+				functionName: 'buyTickets',
+				args: [1n, REMAINING_TICKETS, deployer.address],
+				value: REMAINING_TICKETS * TICKET_COST,
+				account: deployer,
+				chain: null,
+			})
+
+			await publicClient.waitForTransactionReceipt({ hash })
+		})
+
+		it('marks round 1 as SoldOut', async () => {
+			const round = await waitForRecord(() =>
+				dataSource
+					.query(
+						`SELECT * FROM round WHERE id = '1' AND status = 'SoldOut'`,
+					)
+					.then(([row]: unknown[]) => row ?? null),
+			)
+
+			expect(round).toMatchObject({
+				id: '1',
+				tickets_sold: Number(TICKET_CAP),
+				status: 'SoldOut',
+			})
+		})
+
+		it('creates round 2 for the same stake', async () => {
+			const round = await waitForRecord(() =>
+				dataSource
+					.query(`SELECT * FROM round WHERE id = '2'`)
+					.then(([row]: unknown[]) => row ?? null),
+			)
+
+			expect(round).toMatchObject({
+				id: '2',
+				stake_config_id: '1',
+				tickets_sold: 0,
+				status: 'Active',
+			})
+		})
+	})
 })

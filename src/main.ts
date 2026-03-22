@@ -235,6 +235,11 @@ async function handleTicketsPurchased(eventCtx: EventContext): Promise<void> {
 	}
 
 	round.ticketsSold += Number(count)
+
+	if (BigInt(round.ticketsSold) === round.stakeConfig.ticketCap) {
+		round.status = RoundStatus.SoldOut
+	}
+
 	rounds.set(roundIdStr, round)
 
 	ticketPurchases.push(
@@ -393,7 +398,13 @@ async function resolveRound(
 	rounds: Map<string, Round>,
 	roundId: string,
 ): Promise<Round | undefined> {
-	return rounds.get(roundId) ?? (await ctx.store.get(Round, roundId))
+	return (
+		rounds.get(roundId) ??
+		(await ctx.store.findOne(Round, {
+			where: { id: roundId },
+			relations: { stakeConfig: true },
+		}))
+	)
 }
 
 function decodeCreateStakeInput(log: Log) {
