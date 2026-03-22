@@ -3,6 +3,8 @@ import { parseEther } from 'viem'
 import ripsAbi from '../contracts/abi/Rips.json'
 import vrfAbi from '../contracts/abi/VRFCoordinatorV2_5Mock.json'
 import { increaseTime, useAnvil } from '../utils/anvil'
+import { writeAndWait } from '../utils/contracts'
+import { waitForRecord, waitForRow } from '../utils/db'
 import { usePostgres } from '../utils/postgres'
 import { useProcessor } from '../utils/processor'
 import { SetupResult, setupContracts } from '../utils/setup'
@@ -32,21 +34,6 @@ const PRIZE_TIERS = [
 		maxPrize: parseEther('0.001'),
 	},
 ]
-
-async function waitForRecord<T>(
-	query: () => Promise<T | null | undefined>,
-	timeoutMs = 15_000,
-): Promise<T> {
-	const deadline = Date.now() + timeoutMs
-
-	while (Date.now() < deadline) {
-		const result = await query()
-		if (result != null) return result
-		await new Promise((resolve) => setTimeout(resolve, 500))
-	}
-
-	throw new Error(`Timed out after ${timeoutMs}ms waiting for indexed record`)
-}
 
 describe('indexer e2e', () => {
 	const { postgres } = usePostgres()
@@ -83,7 +70,7 @@ describe('indexer e2e', () => {
 		beforeAll(async () => {
 			const { ripsAddress, owner, walletClient, publicClient } = setup
 
-			const hash = await walletClient.writeContract({
+			await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'createStake',
@@ -96,17 +83,13 @@ describe('indexer e2e', () => {
 					},
 				],
 				account: owner,
-				chain: null,
 			})
-
-			await publicClient.waitForTransactionReceipt({ hash })
 		})
 
 		it('indexes the StakeConfig with correct fields', async () => {
-			const stakeConfig = await waitForRecord(() =>
-				dataSource
-					.query(`SELECT * FROM stake_config WHERE id = '1'`)
-					.then(([row]: unknown[]) => row ?? null),
+			const stakeConfig = await waitForRow(
+				dataSource,
+				`SELECT * FROM stake_config WHERE id = '1'`,
 			)
 
 			expect(stakeConfig).toMatchObject({
@@ -160,25 +143,20 @@ describe('indexer e2e', () => {
 		beforeAll(async () => {
 			const { ripsAddress, deployer, walletClient, publicClient } = setup
 
-			const hash = await walletClient.writeContract({
+			txHash = await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'buyTickets',
 				args: [1n, TICKET_COUNT, deployer.address],
 				value: TICKET_COUNT * TICKET_COST,
 				account: deployer,
-				chain: null,
 			})
-
-			txHash = hash
-			await publicClient.waitForTransactionReceipt({ hash })
 		})
 
 		it('indexes the TicketPurchase with correct fields', async () => {
-			const purchase = await waitForRecord(() =>
-				dataSource
-					.query(`SELECT * FROM ticket_purchase WHERE round_id = '1'`)
-					.then(([row]: unknown[]) => row ?? null),
+			const purchase = await waitForRow(
+				dataSource,
+				`SELECT * FROM ticket_purchase WHERE round_id = '1'`,
 			)
 
 			expect(purchase).toMatchObject({
@@ -190,12 +168,9 @@ describe('indexer e2e', () => {
 		})
 
 		it('updates the round tickets_sold count', async () => {
-			const round = await waitForRecord(() =>
-				dataSource
-					.query(
-						`SELECT * FROM round WHERE id = '1' AND tickets_sold = ${TICKET_COUNT}`,
-					)
-					.then(([row]: unknown[]) => row ?? null),
+			const round = await waitForRow(
+				dataSource,
+				`SELECT * FROM round WHERE id = '1' AND tickets_sold = ${TICKET_COUNT}`,
 			)
 
 			expect(round).toMatchObject({
@@ -211,26 +186,20 @@ describe('indexer e2e', () => {
 		beforeAll(async () => {
 			const { ripsAddress, deployer, walletClient, publicClient } = setup
 
-			const hash = await walletClient.writeContract({
+			await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'buyTickets',
 				args: [1n, REMAINING_TICKETS, deployer.address],
 				value: REMAINING_TICKETS * TICKET_COST,
 				account: deployer,
-				chain: null,
 			})
-
-			await publicClient.waitForTransactionReceipt({ hash })
 		})
 
 		it('marks round 1 as SoldOut', async () => {
-			const round = await waitForRecord(() =>
-				dataSource
-					.query(
-						`SELECT * FROM round WHERE id = '1' AND status = 'SoldOut'`,
-					)
-					.then(([row]: unknown[]) => row ?? null),
+			const round = await waitForRow(
+				dataSource,
+				`SELECT * FROM round WHERE id = '1' AND status = 'SoldOut'`,
 			)
 
 			expect(round).toMatchObject({
@@ -241,10 +210,9 @@ describe('indexer e2e', () => {
 		})
 
 		it('creates round 2 for the same stake', async () => {
-			const round = await waitForRecord(() =>
-				dataSource
-					.query(`SELECT * FROM round WHERE id = '2'`)
-					.then(([row]: unknown[]) => row ?? null),
+			const round = await waitForRow(
+				dataSource,
+				`SELECT * FROM round WHERE id = '2'`,
 			)
 
 			expect(round).toMatchObject({
@@ -260,25 +228,19 @@ describe('indexer e2e', () => {
 		beforeAll(async () => {
 			const { ripsAddress, deployer, walletClient, publicClient } = setup
 
-			const hash = await walletClient.writeContract({
+			await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'requestRandomness',
 				args: [1n],
 				account: deployer,
-				chain: null,
 			})
-
-			await publicClient.waitForTransactionReceipt({ hash })
 		})
 
 		it('marks round 1 as VRFRequested with a vrf_request_id', async () => {
-			const round = (await waitForRecord(() =>
-				dataSource
-					.query(
-						`SELECT * FROM round WHERE id = '1' AND status = 'VRFRequested'`,
-					)
-					.then(([row]: unknown[]) => row ?? null),
+			const round = (await waitForRow(
+				dataSource,
+				`SELECT * FROM round WHERE id = '1' AND status = 'VRFRequested'`,
 			)) as Record<string, unknown>
 
 			expect(round).toMatchObject({
@@ -305,25 +267,19 @@ describe('indexer e2e', () => {
 			const vrfRequestId: string = (round as Record<string, unknown>)
 				.vrf_request_id as string
 
-			const hash = await walletClient.writeContract({
+			await writeAndWait(walletClient, publicClient, {
 				address: vrfAddress,
 				abi: vrfAbi,
 				functionName: 'fulfillRandomWords',
 				args: [BigInt(vrfRequestId), ripsAddress],
 				account: deployer,
-				chain: null,
 			})
-
-			await publicClient.waitForTransactionReceipt({ hash })
 		})
 
 		it('marks round 1 as Finalized with random values', async () => {
-			const round = (await waitForRecord(() =>
-				dataSource
-					.query(
-						`SELECT * FROM round WHERE id = '1' AND status = 'Finalized'`,
-					)
-					.then(([row]: unknown[]) => row ?? null),
+			const round = (await waitForRow(
+				dataSource,
+				`SELECT * FROM round WHERE id = '1' AND status = 'Finalized'`,
 			)) as Record<string, unknown>
 
 			expect(round).toMatchObject({
@@ -341,24 +297,19 @@ describe('indexer e2e', () => {
 		beforeAll(async () => {
 			const { ripsAddress, deployer, walletClient, publicClient } = setup
 
-			const hash = await walletClient.writeContract({
+			txHash = await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'claimPrizes',
 				args: [1n, 0n, 10n, deployer.address],
 				account: deployer,
-				chain: null,
 			})
-
-			txHash = hash
-			await publicClient.waitForTransactionReceipt({ hash })
 		})
 
 		it('indexes the PrizeClaim with correct fields', async () => {
-			const claim = (await waitForRecord(() =>
-				dataSource
-					.query(`SELECT * FROM prize_claim WHERE round_id = '1'`)
-					.then(([row]: unknown[]) => row ?? null),
+			const claim = (await waitForRow(
+				dataSource,
+				`SELECT * FROM prize_claim WHERE round_id = '1'`,
 			)) as Record<string, unknown>
 
 			expect(claim).toMatchObject({
@@ -377,37 +328,30 @@ describe('indexer e2e', () => {
 		beforeAll(async () => {
 			const { ripsAddress, deployer, walletClient, publicClient } = setup
 
-			const buyHash = await walletClient.writeContract({
+			await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'buyTickets',
 				args: [1n, TICKET_COUNT, deployer.address],
 				value: TICKET_COUNT * TICKET_COST,
 				account: deployer,
-				chain: null,
 			})
-			await publicClient.waitForTransactionReceipt({ hash: buyHash })
 
 			await increaseTime(setup.publicClient, Number(DURATION) + 1)
 
-			const refundHash = await walletClient.writeContract({
+			txHash = await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'refund',
 				args: [2n, deployer.address],
 				account: deployer,
-				chain: null,
 			})
-
-			txHash = refundHash
-			await publicClient.waitForTransactionReceipt({ hash: refundHash })
 		})
 
 		it('indexes the Refund with correct fields', async () => {
-			const refund = (await waitForRecord(() =>
-				dataSource
-					.query(`SELECT * FROM refund WHERE round_id = '2'`)
-					.then(([row]: unknown[]) => row ?? null),
+			const refund = (await waitForRow(
+				dataSource,
+				`SELECT * FROM refund WHERE round_id = '2'`,
 			)) as Record<string, unknown>
 
 			expect(refund).toMatchObject({
@@ -434,47 +378,35 @@ describe('indexer e2e', () => {
 
 			newFeeRecipient = deployer.address
 
-			const h1 = await walletClient.writeContract({
+			feeHash = await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'setProtocolFee',
 				args: [NEW_FEE_PERCENT],
 				account: owner,
-				chain: null,
 			})
-			feeHash = h1
-			await publicClient.waitForTransactionReceipt({ hash: h1 })
 
-			const h2 = await walletClient.writeContract({
+			recipientHash = await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'setFeeRecipient',
 				args: [newFeeRecipient],
 				account: owner,
-				chain: null,
 			})
-			recipientHash = h2
-			await publicClient.waitForTransactionReceipt({ hash: h2 })
 
-			const h3 = await walletClient.writeContract({
+			gasLimitHash = await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'updateCallbackGasLimit',
 				args: [NEW_CALLBACK_GAS_LIMIT],
 				account: owner,
-				chain: null,
 			})
-			gasLimitHash = h3
-			await publicClient.waitForTransactionReceipt({ hash: h3 })
 		})
 
 		it('indexes ProtocolFeeUpdated', async () => {
-			const row = await waitForRecord(() =>
-				dataSource
-					.query(
-						`SELECT * FROM protocol_fee_updated WHERE tx_hash = '${feeHash}'`,
-					)
-					.then(([row]: unknown[]) => row ?? null),
+			const row = await waitForRow(
+				dataSource,
+				`SELECT * FROM protocol_fee_updated WHERE tx_hash = '${feeHash}'`,
 			)
 
 			expect(row).toMatchObject({
@@ -484,12 +416,9 @@ describe('indexer e2e', () => {
 		})
 
 		it('indexes FeeRecipientUpdated', async () => {
-			const row = await waitForRecord(() =>
-				dataSource
-					.query(
-						`SELECT * FROM fee_recipient_updated WHERE tx_hash = '${recipientHash}'`,
-					)
-					.then(([row]: unknown[]) => row ?? null),
+			const row = await waitForRow(
+				dataSource,
+				`SELECT * FROM fee_recipient_updated WHERE tx_hash = '${recipientHash}'`,
 			)
 
 			expect(row).toMatchObject({
@@ -499,12 +428,9 @@ describe('indexer e2e', () => {
 		})
 
 		it('indexes CallbackGasLimitUpdated', async () => {
-			const row = await waitForRecord(() =>
-				dataSource
-					.query(
-						`SELECT * FROM callback_gas_limit_updated WHERE tx_hash = '${gasLimitHash}'`,
-					)
-					.then(([row]: unknown[]) => row ?? null),
+			const row = await waitForRow(
+				dataSource,
+				`SELECT * FROM callback_gas_limit_updated WHERE tx_hash = '${gasLimitHash}'`,
 			)
 
 			expect(row).toMatchObject({
@@ -518,25 +444,19 @@ describe('indexer e2e', () => {
 		beforeAll(async () => {
 			const { ripsAddress, owner, walletClient, publicClient } = setup
 
-			const hash = await walletClient.writeContract({
+			await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'deleteStake',
 				args: [1n],
 				account: owner,
-				chain: null,
 			})
-
-			await publicClient.waitForTransactionReceipt({ hash })
 		})
 
 		it('marks StakeConfig 1 as deleted', async () => {
-			const row = await waitForRecord(() =>
-				dataSource
-					.query(
-						`SELECT * FROM stake_config WHERE id = '1' AND deleted = true`,
-					)
-					.then(([row]: unknown[]) => row ?? null),
+			const row = await waitForRow(
+				dataSource,
+				`SELECT * FROM stake_config WHERE id = '1' AND deleted = true`,
 			)
 
 			expect(row).toMatchObject({
