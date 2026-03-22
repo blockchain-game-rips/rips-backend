@@ -118,8 +118,9 @@ describe('Wallet flow E2E', () => {
 			})
 			.expect(201)
 
-		expect(res.body.txHash).toMatch(/^0x[0-9a-fA-F]{64}$/)
-		expect(typeof res.body.gasCost).toBe('string')
+		expect(res.body.txId).toMatch(/^0x[0-9a-fA-F]{64}$/)
+		expect(typeof res.body.cost.amount).toBe('string')
+		expect(typeof res.body.cost.currency.symbol).toBe('string')
 
 		const recipientBalanceAfter = await publicClient.getBalance({
 			address: RECIPIENT_ADDRESS,
