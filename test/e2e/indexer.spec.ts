@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm'
 import { parseEther } from 'viem'
 import ripsAbi from '../contracts/abi/Rips.json'
+import vrfAbi from '../contracts/abi/VRFCoordinatorV2_5Mock.json'
 import { useAnvil } from '../utils/anvil'
 import { usePostgres } from '../utils/postgres'
 import { useProcessor } from '../utils/processor'
@@ -285,6 +286,47 @@ describe('indexer e2e', () => {
 				status: 'VRFRequested',
 			})
 			expect(round.vrf_request_id).not.toBeNull()
+		})
+	})
+
+	describe('fulfillRandomWords', () => {
+		beforeAll(async () => {
+			const { vrfAddress, ripsAddress, deployer, walletClient, publicClient } =
+				setup
+
+			const [round] = await dataSource.query(
+				`SELECT vrf_request_id FROM round WHERE id = '1'`,
+			)
+			const vrfRequestId: string = (round as Record<string, unknown>)
+				.vrf_request_id as string
+
+			const hash = await walletClient.writeContract({
+				address: vrfAddress,
+				abi: vrfAbi,
+				functionName: 'fulfillRandomWords',
+				args: [BigInt(vrfRequestId), ripsAddress],
+				account: deployer,
+				chain: null,
+			})
+
+			await publicClient.waitForTransactionReceipt({ hash })
+		})
+
+		it('marks round 1 as Finalized with random values', async () => {
+			const round = (await waitForRecord(() =>
+				dataSource
+					.query(
+						`SELECT * FROM round WHERE id = '1' AND status = 'Finalized'`,
+					)
+					.then(([row]: unknown[]) => row ?? null),
+			)) as Record<string, unknown>
+
+			expect(round).toMatchObject({
+				id: '1',
+				status: 'Finalized',
+			})
+			expect(round.random_a).not.toBeNull()
+			expect(round.random_b).not.toBeNull()
 		})
 	})
 })

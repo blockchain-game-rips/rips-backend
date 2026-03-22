@@ -55,6 +55,7 @@ const vrfBytecode = toHex(VRFMockArtifact.bytecode.object)
 
 export type SetupResult = {
 	ripsAddress: `0x${string}`
+	vrfAddress: `0x${string}`
 	deployer: ReturnType<typeof mnemonicToAccount>
 	owner: ReturnType<typeof mnemonicToAccount>
 	walletClient: ReturnType<typeof createWalletClient>
@@ -108,7 +109,7 @@ export async function setupContracts(anvilPort: number): Promise<SetupResult> {
 		chain: null,
 	})
 
-	return { ripsAddress, deployer, owner, walletClient, publicClient }
+	return { ripsAddress, vrfAddress, deployer, owner, walletClient, publicClient }
 }
 
 async function deployVrfMock(
@@ -164,7 +165,7 @@ async function setupVrfSubscription(
 		address: vrfAddress,
 		abi: vrfAbi,
 		functionName: 'fundSubscription',
-		args: [subscriptionId, parseEther('10')],
+		args: [subscriptionId, parseEther('100000')],
 		account,
 		chain: null,
 	})
