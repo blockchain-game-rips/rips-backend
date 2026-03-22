@@ -1,5 +1,5 @@
-import { parseEther } from 'viem'
 import { DataSource } from 'typeorm'
+import { parseEther } from 'viem'
 import ripsAbi from '../contracts/abi/Rips.json'
 import { useAnvil } from '../utils/anvil'
 import { usePostgres } from '../utils/postgres'
@@ -148,6 +148,59 @@ describe('indexer e2e', () => {
 					max_prize: PRIZE_TIERS[2].maxPrize.toString(),
 				},
 			])
+		})
+	})
+
+	describe('buyTickets', () => {
+		const TICKET_COUNT = 3n
+
+		let txHash: `0x${string}`
+
+		beforeAll(async () => {
+			const { ripsAddress, deployer, walletClient, publicClient } = setup
+
+			const hash = await walletClient.writeContract({
+				address: ripsAddress,
+				abi: ripsAbi,
+				functionName: 'buyTickets',
+				args: [1n, TICKET_COUNT, deployer.address],
+				value: TICKET_COUNT * TICKET_COST,
+				account: deployer,
+				chain: null,
+			})
+
+			txHash = hash
+			await publicClient.waitForTransactionReceipt({ hash })
+		})
+
+		it('indexes the TicketPurchase with correct fields', async () => {
+			const purchase = await waitForRecord(() =>
+				dataSource
+					.query(`SELECT * FROM ticket_purchase WHERE round_id = '1'`)
+					.then(([row]: unknown[]) => row ?? null),
+			)
+
+			expect(purchase).toMatchObject({
+				round_id: '1',
+				buyer: setup.deployer.address.toLowerCase(),
+				count: TICKET_COUNT.toString(),
+				tx_hash: txHash,
+			})
+		})
+
+		it('updates the round tickets_sold count', async () => {
+			const round = await waitForRecord(() =>
+				dataSource
+					.query(
+						`SELECT * FROM round WHERE id = '1' AND tickets_sold = ${TICKET_COUNT}`,
+					)
+					.then(([row]: unknown[]) => row ?? null),
+			)
+
+			expect(round).toMatchObject({
+				id: '1',
+				tickets_sold: Number(TICKET_COUNT),
+			})
 		})
 	})
 })
