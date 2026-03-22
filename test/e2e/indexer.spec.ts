@@ -254,4 +254,37 @@ describe('indexer e2e', () => {
 			})
 		})
 	})
+
+	describe('requestVrf', () => {
+		beforeAll(async () => {
+			const { ripsAddress, deployer, walletClient, publicClient } = setup
+
+			const hash = await walletClient.writeContract({
+				address: ripsAddress,
+				abi: ripsAbi,
+				functionName: 'requestRandomness',
+				args: [1n],
+				account: deployer,
+				chain: null,
+			})
+
+			await publicClient.waitForTransactionReceipt({ hash })
+		})
+
+		it('marks round 1 as VRFRequested with a vrf_request_id', async () => {
+			const round = (await waitForRecord(() =>
+				dataSource
+					.query(
+						`SELECT * FROM round WHERE id = '1' AND status = 'VRFRequested'`,
+					)
+					.then(([row]: unknown[]) => row ?? null),
+			)) as Record<string, unknown>
+
+			expect(round).toMatchObject({
+				id: '1',
+				status: 'VRFRequested',
+			})
+			expect(round.vrf_request_id).not.toBeNull()
+		})
+	})
 })
