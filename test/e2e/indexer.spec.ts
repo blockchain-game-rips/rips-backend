@@ -413,4 +413,92 @@ describe('indexer e2e', () => {
 			})
 		})
 	})
+
+	describe('admin setters', () => {
+		const NEW_FEE_PERCENT = 1000n
+		const NEW_CALLBACK_GAS_LIMIT = 200_000
+
+		let newFeeRecipient: `0x${string}`
+		let feeHash: `0x${string}`
+		let recipientHash: `0x${string}`
+		let gasLimitHash: `0x${string}`
+
+		beforeAll(async () => {
+			const { ripsAddress, owner, deployer, walletClient, publicClient } = setup
+
+			newFeeRecipient = deployer.address
+
+			const h1 = await walletClient.writeContract({
+				address: ripsAddress,
+				abi: ripsAbi,
+				functionName: 'setProtocolFee',
+				args: [NEW_FEE_PERCENT],
+				account: owner,
+				chain: null,
+			})
+			feeHash = h1
+			await publicClient.waitForTransactionReceipt({ hash: h1 })
+
+			const h2 = await walletClient.writeContract({
+				address: ripsAddress,
+				abi: ripsAbi,
+				functionName: 'setFeeRecipient',
+				args: [newFeeRecipient],
+				account: owner,
+				chain: null,
+			})
+			recipientHash = h2
+			await publicClient.waitForTransactionReceipt({ hash: h2 })
+
+			const h3 = await walletClient.writeContract({
+				address: ripsAddress,
+				abi: ripsAbi,
+				functionName: 'updateCallbackGasLimit',
+				args: [NEW_CALLBACK_GAS_LIMIT],
+				account: owner,
+				chain: null,
+			})
+			gasLimitHash = h3
+			await publicClient.waitForTransactionReceipt({ hash: h3 })
+		})
+
+		it('indexes ProtocolFeeUpdated', async () => {
+			const row = await waitForRecord(() =>
+				dataSource
+					.query(`SELECT * FROM protocol_fee_updated WHERE tx_hash = '${feeHash}'`)
+					.then(([row]: unknown[]) => row ?? null),
+			)
+
+			expect(row).toMatchObject({
+				fee_percent: NEW_FEE_PERCENT.toString(),
+				tx_hash: feeHash,
+			})
+		})
+
+		it('indexes FeeRecipientUpdated', async () => {
+			const row = await waitForRecord(() =>
+				dataSource
+					.query(`SELECT * FROM fee_recipient_updated WHERE tx_hash = '${recipientHash}'`)
+					.then(([row]: unknown[]) => row ?? null),
+			)
+
+			expect(row).toMatchObject({
+				fee_recipient: newFeeRecipient.toLowerCase(),
+				tx_hash: recipientHash,
+			})
+		})
+
+		it('indexes CallbackGasLimitUpdated', async () => {
+			const row = await waitForRecord(() =>
+				dataSource
+					.query(`SELECT * FROM callback_gas_limit_updated WHERE tx_hash = '${gasLimitHash}'`)
+					.then(([row]: unknown[]) => row ?? null),
+			)
+
+			expect(row).toMatchObject({
+				callback_gas_limit: NEW_CALLBACK_GAS_LIMIT,
+				tx_hash: gasLimitHash,
+			})
+		})
+	})
 })
