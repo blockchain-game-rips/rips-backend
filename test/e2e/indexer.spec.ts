@@ -2,7 +2,7 @@ import { DataSource } from 'typeorm'
 import { parseEther } from 'viem'
 import ripsAbi from '../contracts/abi/Rips.json'
 import vrfAbi from '../contracts/abi/VRFCoordinatorV2_5Mock.json'
-import { useAnvil } from '../utils/anvil'
+import { increaseTime, useAnvil } from '../utils/anvil'
 import { usePostgres } from '../utils/postgres'
 import { useProcessor } from '../utils/processor'
 import { SetupResult, setupContracts } from '../utils/setup'
@@ -362,6 +362,55 @@ describe('indexer e2e', () => {
 				tx_hash: txHash,
 			})
 			expect(BigInt(claim.amount as string)).toBeGreaterThan(0n)
+		})
+	})
+
+	describe('refund', () => {
+		const TICKET_COUNT = 2n
+		let txHash: `0x${string}`
+
+		beforeAll(async () => {
+			const { ripsAddress, deployer, walletClient, publicClient } = setup
+
+			const buyHash = await walletClient.writeContract({
+				address: ripsAddress,
+				abi: ripsAbi,
+				functionName: 'buyTickets',
+				args: [1n, TICKET_COUNT, deployer.address],
+				value: TICKET_COUNT * TICKET_COST,
+				account: deployer,
+				chain: null,
+			})
+			await publicClient.waitForTransactionReceipt({ hash: buyHash })
+
+			await increaseTime(setup.publicClient, Number(DURATION) + 1)
+
+			const refundHash = await walletClient.writeContract({
+				address: ripsAddress,
+				abi: ripsAbi,
+				functionName: 'refund',
+				args: [2n, deployer.address],
+				account: deployer,
+				chain: null,
+			})
+
+			txHash = refundHash
+			await publicClient.waitForTransactionReceipt({ hash: refundHash })
+		})
+
+		it('indexes the Refund with correct fields', async () => {
+			const refund = (await waitForRecord(() =>
+				dataSource
+					.query(`SELECT * FROM refund WHERE round_id = '2'`)
+					.then(([row]: unknown[]) => row ?? null),
+			)) as Record<string, unknown>
+
+			expect(refund).toMatchObject({
+				round_id: '2',
+				user: setup.deployer.address.toLowerCase(),
+				amount: (TICKET_COUNT * TICKET_COST).toString(),
+				tx_hash: txHash,
+			})
 		})
 	})
 })

@@ -242,3 +242,16 @@ export async function setNativeBalance(
 		params: [address, toHex(balance, { size: 32 })],
 	})
 }
+
+export async function increaseTime(client: Client, seconds: number) {
+	await client.request({
+		// @ts-expect-error viem doesn't know about this method
+		method: 'evm_increaseTime',
+		params: [toHex(seconds)],
+	})
+	await client.request({
+		// @ts-expect-error viem doesn't know about this method
+		method: 'evm_mine',
+		params: [],
+	})
+}
