@@ -44,7 +44,11 @@ export class Processor {
 	private waitForStartup(): Promise<void> {
 		return new Promise((resolve, reject) => {
 			const timer = setTimeout(() => {
-				reject(new Error(`Processor failed to start within ${STARTUP_TIMEOUT_MS}ms`))
+				reject(
+					new Error(
+						`Processor failed to start within ${STARTUP_TIMEOUT_MS}ms`,
+					),
+				)
 			}, STARTUP_TIMEOUT_MS)
 
 			const checkLogs = (data: Buffer) => {
@@ -59,7 +63,11 @@ export class Processor {
 
 			this._process?.on('exit', (code) => {
 				clearTimeout(timer)
-				reject(new Error(`Processor exited unexpectedly with code ${code}\n${this.logs}`))
+				reject(
+					new Error(
+						`Processor exited unexpectedly with code ${code}\n${this.logs}`,
+					),
+				)
 			})
 		})
 	}

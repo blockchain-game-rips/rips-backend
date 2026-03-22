@@ -109,7 +109,14 @@ export async function setupContracts(anvilPort: number): Promise<SetupResult> {
 		chain: null,
 	})
 
-	return { ripsAddress, vrfAddress, deployer, owner, walletClient, publicClient }
+	return {
+		ripsAddress,
+		vrfAddress,
+		deployer,
+		owner,
+		walletClient,
+		publicClient,
+	}
 }
 
 async function deployVrfMock(

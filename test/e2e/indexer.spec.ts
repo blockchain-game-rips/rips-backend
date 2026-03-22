@@ -291,8 +291,13 @@ describe('indexer e2e', () => {
 
 	describe('fulfillRandomWords', () => {
 		beforeAll(async () => {
-			const { vrfAddress, ripsAddress, deployer, walletClient, publicClient } =
-				setup
+			const {
+				vrfAddress,
+				ripsAddress,
+				deployer,
+				walletClient,
+				publicClient,
+			} = setup
 
 			const [round] = await dataSource.query(
 				`SELECT vrf_request_id FROM round WHERE id = '1'`,
@@ -424,7 +429,8 @@ describe('indexer e2e', () => {
 		let gasLimitHash: `0x${string}`
 
 		beforeAll(async () => {
-			const { ripsAddress, owner, deployer, walletClient, publicClient } = setup
+			const { ripsAddress, owner, deployer, walletClient, publicClient } =
+				setup
 
 			newFeeRecipient = deployer.address
 
@@ -465,7 +471,9 @@ describe('indexer e2e', () => {
 		it('indexes ProtocolFeeUpdated', async () => {
 			const row = await waitForRecord(() =>
 				dataSource
-					.query(`SELECT * FROM protocol_fee_updated WHERE tx_hash = '${feeHash}'`)
+					.query(
+						`SELECT * FROM protocol_fee_updated WHERE tx_hash = '${feeHash}'`,
+					)
 					.then(([row]: unknown[]) => row ?? null),
 			)
 
@@ -478,7 +486,9 @@ describe('indexer e2e', () => {
 		it('indexes FeeRecipientUpdated', async () => {
 			const row = await waitForRecord(() =>
 				dataSource
-					.query(`SELECT * FROM fee_recipient_updated WHERE tx_hash = '${recipientHash}'`)
+					.query(
+						`SELECT * FROM fee_recipient_updated WHERE tx_hash = '${recipientHash}'`,
+					)
 					.then(([row]: unknown[]) => row ?? null),
 			)
 
@@ -491,13 +501,47 @@ describe('indexer e2e', () => {
 		it('indexes CallbackGasLimitUpdated', async () => {
 			const row = await waitForRecord(() =>
 				dataSource
-					.query(`SELECT * FROM callback_gas_limit_updated WHERE tx_hash = '${gasLimitHash}'`)
+					.query(
+						`SELECT * FROM callback_gas_limit_updated WHERE tx_hash = '${gasLimitHash}'`,
+					)
 					.then(([row]: unknown[]) => row ?? null),
 			)
 
 			expect(row).toMatchObject({
 				callback_gas_limit: NEW_CALLBACK_GAS_LIMIT,
 				tx_hash: gasLimitHash,
+			})
+		})
+	})
+
+	describe('deleteStake', () => {
+		beforeAll(async () => {
+			const { ripsAddress, owner, walletClient, publicClient } = setup
+
+			const hash = await walletClient.writeContract({
+				address: ripsAddress,
+				abi: ripsAbi,
+				functionName: 'deleteStake',
+				args: [1n],
+				account: owner,
+				chain: null,
+			})
+
+			await publicClient.waitForTransactionReceipt({ hash })
+		})
+
+		it('marks StakeConfig 1 as deleted', async () => {
+			const row = await waitForRecord(() =>
+				dataSource
+					.query(
+						`SELECT * FROM stake_config WHERE id = '1' AND deleted = true`,
+					)
+					.then(([row]: unknown[]) => row ?? null),
+			)
+
+			expect(row).toMatchObject({
+				id: '1',
+				deleted: true,
 			})
 		})
 	})

@@ -2,8 +2,8 @@ import {
 	PostgreSqlContainer,
 	StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql'
-import { DataSource } from 'typeorm'
 import path from 'path'
+import { DataSource } from 'typeorm'
 
 export class Postgres {
 	private container: StartedPostgreSqlContainer | undefined
