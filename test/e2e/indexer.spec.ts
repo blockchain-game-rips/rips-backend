@@ -329,4 +329,39 @@ describe('indexer e2e', () => {
 			expect(round.random_b).not.toBeNull()
 		})
 	})
+
+	describe('claimPrizes', () => {
+		let txHash: `0x${string}`
+
+		beforeAll(async () => {
+			const { ripsAddress, deployer, walletClient, publicClient } = setup
+
+			const hash = await walletClient.writeContract({
+				address: ripsAddress,
+				abi: ripsAbi,
+				functionName: 'claimPrizes',
+				args: [1n, 0n, 10n, deployer.address],
+				account: deployer,
+				chain: null,
+			})
+
+			txHash = hash
+			await publicClient.waitForTransactionReceipt({ hash })
+		})
+
+		it('indexes the PrizeClaim with correct fields', async () => {
+			const claim = (await waitForRecord(() =>
+				dataSource
+					.query(`SELECT * FROM prize_claim WHERE round_id = '1'`)
+					.then(([row]: unknown[]) => row ?? null),
+			)) as Record<string, unknown>
+
+			expect(claim).toMatchObject({
+				round_id: '1',
+				claimer: setup.deployer.address.toLowerCase(),
+				tx_hash: txHash,
+			})
+			expect(BigInt(claim.amount as string)).toBeGreaterThan(0n)
+		})
+	})
 })
