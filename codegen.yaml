@@ -1,0 +1,12 @@
+schema: ./src/infrastructure/indexer/graphql/schema.graphql
+documents: ./src/infrastructure/indexer/graphql/queries/**/*.graphql
+generates:
+  ./generated/graphql/generated.ts:
+    config:
+      scalars:
+        BigInt: string
+        DateTime: string
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-graphql-request

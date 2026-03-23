@@ -1,0 +1,7 @@
+query GetCurrentFee {
+    protocolFeeUpdateds(orderBy: blockNumber_DESC, limit: 1) {
+      feePercent
+      blockNumber
+      timestamp
+    }
+  }

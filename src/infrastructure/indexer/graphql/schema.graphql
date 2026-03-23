@@ -1,0 +1,1502 @@
+type Query {
+  stakeConfigs(where: StakeConfigWhereInput, orderBy: [StakeConfigOrderByInput!], offset: Int, limit: Int): [StakeConfig!]!
+  stakeConfigById(id: String!): StakeConfig
+  stakeConfigsConnection(orderBy: [StakeConfigOrderByInput!]!, after: String, first: Int, where: StakeConfigWhereInput): StakeConfigsConnection!
+  prizeTiers(where: PrizeTierWhereInput, orderBy: [PrizeTierOrderByInput!], offset: Int, limit: Int): [PrizeTier!]!
+  prizeTierById(id: String!): PrizeTier
+  prizeTiersConnection(orderBy: [PrizeTierOrderByInput!]!, after: String, first: Int, where: PrizeTierWhereInput): PrizeTiersConnection!
+  rounds(where: RoundWhereInput, orderBy: [RoundOrderByInput!], offset: Int, limit: Int): [Round!]!
+  roundById(id: String!): Round
+  roundsConnection(orderBy: [RoundOrderByInput!]!, after: String, first: Int, where: RoundWhereInput): RoundsConnection!
+  ticketPurchases(where: TicketPurchaseWhereInput, orderBy: [TicketPurchaseOrderByInput!], offset: Int, limit: Int): [TicketPurchase!]!
+  ticketPurchaseById(id: String!): TicketPurchase
+  ticketPurchasesConnection(orderBy: [TicketPurchaseOrderByInput!]!, after: String, first: Int, where: TicketPurchaseWhereInput): TicketPurchasesConnection!
+  prizeClaims(where: PrizeClaimWhereInput, orderBy: [PrizeClaimOrderByInput!], offset: Int, limit: Int): [PrizeClaim!]!
+  prizeClaimById(id: String!): PrizeClaim
+  prizeClaimsConnection(orderBy: [PrizeClaimOrderByInput!]!, after: String, first: Int, where: PrizeClaimWhereInput): PrizeClaimsConnection!
+  refunds(where: RefundWhereInput, orderBy: [RefundOrderByInput!], offset: Int, limit: Int): [Refund!]!
+  refundById(id: String!): Refund
+  refundsConnection(orderBy: [RefundOrderByInput!]!, after: String, first: Int, where: RefundWhereInput): RefundsConnection!
+  protocolFeeUpdateds(where: ProtocolFeeUpdatedWhereInput, orderBy: [ProtocolFeeUpdatedOrderByInput!], offset: Int, limit: Int): [ProtocolFeeUpdated!]!
+  protocolFeeUpdatedById(id: String!): ProtocolFeeUpdated
+  protocolFeeUpdatedsConnection(orderBy: [ProtocolFeeUpdatedOrderByInput!]!, after: String, first: Int, where: ProtocolFeeUpdatedWhereInput): ProtocolFeeUpdatedsConnection!
+  feeRecipientUpdateds(where: FeeRecipientUpdatedWhereInput, orderBy: [FeeRecipientUpdatedOrderByInput!], offset: Int, limit: Int): [FeeRecipientUpdated!]!
+  feeRecipientUpdatedById(id: String!): FeeRecipientUpdated
+  feeRecipientUpdatedsConnection(orderBy: [FeeRecipientUpdatedOrderByInput!]!, after: String, first: Int, where: FeeRecipientUpdatedWhereInput): FeeRecipientUpdatedsConnection!
+  callbackGasLimitUpdateds(where: CallbackGasLimitUpdatedWhereInput, orderBy: [CallbackGasLimitUpdatedOrderByInput!], offset: Int, limit: Int): [CallbackGasLimitUpdated!]!
+  callbackGasLimitUpdatedById(id: String!): CallbackGasLimitUpdated
+  callbackGasLimitUpdatedsConnection(orderBy: [CallbackGasLimitUpdatedOrderByInput!]!, after: String, first: Int, where: CallbackGasLimitUpdatedWhereInput): CallbackGasLimitUpdatedsConnection!
+}
+
+type StakeConfig {
+  id: String!
+  ticketCap: BigInt!
+  duration: BigInt!
+  ticketCost: BigInt!
+  prizeDistribution(where: PrizeTierWhereInput, orderBy: [PrizeTierOrderByInput!], offset: Int, limit: Int): [PrizeTier!]!
+  deleted: Boolean!
+  rounds(where: RoundWhereInput, orderBy: [RoundOrderByInput!], offset: Int, limit: Int): [Round!]!
+}
+
+"""Big number integer"""
+scalar BigInt
+
+type PrizeTier {
+  id: String!
+  stakeConfigId: String!
+  stakeConfig: StakeConfig!
+  tierIndex: Int!
+  prizeCount: BigInt!
+  minPrize: BigInt!
+  maxPrize: BigInt!
+}
+
+input PrizeTierWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  stakeConfig_isNull: Boolean
+  stakeConfig: StakeConfigWhereInput
+  stakeConfigId_isNull: Boolean
+  stakeConfigId_eq: String
+  stakeConfigId_not_eq: String
+  stakeConfigId_gt: String
+  stakeConfigId_gte: String
+  stakeConfigId_lt: String
+  stakeConfigId_lte: String
+  stakeConfigId_in: [String!]
+  stakeConfigId_not_in: [String!]
+  stakeConfigId_contains: String
+  stakeConfigId_not_contains: String
+  stakeConfigId_containsInsensitive: String
+  stakeConfigId_not_containsInsensitive: String
+  stakeConfigId_startsWith: String
+  stakeConfigId_not_startsWith: String
+  stakeConfigId_endsWith: String
+  stakeConfigId_not_endsWith: String
+  tierIndex_isNull: Boolean
+  tierIndex_eq: Int
+  tierIndex_not_eq: Int
+  tierIndex_gt: Int
+  tierIndex_gte: Int
+  tierIndex_lt: Int
+  tierIndex_lte: Int
+  tierIndex_in: [Int!]
+  tierIndex_not_in: [Int!]
+  prizeCount_isNull: Boolean
+  prizeCount_eq: BigInt
+  prizeCount_not_eq: BigInt
+  prizeCount_gt: BigInt
+  prizeCount_gte: BigInt
+  prizeCount_lt: BigInt
+  prizeCount_lte: BigInt
+  prizeCount_in: [BigInt!]
+  prizeCount_not_in: [BigInt!]
+  minPrize_isNull: Boolean
+  minPrize_eq: BigInt
+  minPrize_not_eq: BigInt
+  minPrize_gt: BigInt
+  minPrize_gte: BigInt
+  minPrize_lt: BigInt
+  minPrize_lte: BigInt
+  minPrize_in: [BigInt!]
+  minPrize_not_in: [BigInt!]
+  maxPrize_isNull: Boolean
+  maxPrize_eq: BigInt
+  maxPrize_not_eq: BigInt
+  maxPrize_gt: BigInt
+  maxPrize_gte: BigInt
+  maxPrize_lt: BigInt
+  maxPrize_lte: BigInt
+  maxPrize_in: [BigInt!]
+  maxPrize_not_in: [BigInt!]
+  AND: [PrizeTierWhereInput!]
+  OR: [PrizeTierWhereInput!]
+}
+
+input StakeConfigWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  ticketCap_isNull: Boolean
+  ticketCap_eq: BigInt
+  ticketCap_not_eq: BigInt
+  ticketCap_gt: BigInt
+  ticketCap_gte: BigInt
+  ticketCap_lt: BigInt
+  ticketCap_lte: BigInt
+  ticketCap_in: [BigInt!]
+  ticketCap_not_in: [BigInt!]
+  duration_isNull: Boolean
+  duration_eq: BigInt
+  duration_not_eq: BigInt
+  duration_gt: BigInt
+  duration_gte: BigInt
+  duration_lt: BigInt
+  duration_lte: BigInt
+  duration_in: [BigInt!]
+  duration_not_in: [BigInt!]
+  ticketCost_isNull: Boolean
+  ticketCost_eq: BigInt
+  ticketCost_not_eq: BigInt
+  ticketCost_gt: BigInt
+  ticketCost_gte: BigInt
+  ticketCost_lt: BigInt
+  ticketCost_lte: BigInt
+  ticketCost_in: [BigInt!]
+  ticketCost_not_in: [BigInt!]
+  prizeDistribution_every: PrizeTierWhereInput
+  prizeDistribution_some: PrizeTierWhereInput
+  prizeDistribution_none: PrizeTierWhereInput
+  deleted_isNull: Boolean
+  deleted_eq: Boolean
+  deleted_not_eq: Boolean
+  rounds_every: RoundWhereInput
+  rounds_some: RoundWhereInput
+  rounds_none: RoundWhereInput
+  AND: [StakeConfigWhereInput!]
+  OR: [StakeConfigWhereInput!]
+}
+
+input RoundWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  stakeConfig_isNull: Boolean
+  stakeConfig: StakeConfigWhereInput
+  stakeConfigId_isNull: Boolean
+  stakeConfigId_eq: String
+  stakeConfigId_not_eq: String
+  stakeConfigId_gt: String
+  stakeConfigId_gte: String
+  stakeConfigId_lt: String
+  stakeConfigId_lte: String
+  stakeConfigId_in: [String!]
+  stakeConfigId_not_in: [String!]
+  stakeConfigId_contains: String
+  stakeConfigId_not_contains: String
+  stakeConfigId_containsInsensitive: String
+  stakeConfigId_not_containsInsensitive: String
+  stakeConfigId_startsWith: String
+  stakeConfigId_not_startsWith: String
+  stakeConfigId_endsWith: String
+  stakeConfigId_not_endsWith: String
+  startTime_isNull: Boolean
+  startTime_eq: BigInt
+  startTime_not_eq: BigInt
+  startTime_gt: BigInt
+  startTime_gte: BigInt
+  startTime_lt: BigInt
+  startTime_lte: BigInt
+  startTime_in: [BigInt!]
+  startTime_not_in: [BigInt!]
+  ticketsSold_isNull: Boolean
+  ticketsSold_eq: Int
+  ticketsSold_not_eq: Int
+  ticketsSold_gt: Int
+  ticketsSold_gte: Int
+  ticketsSold_lt: Int
+  ticketsSold_lte: Int
+  ticketsSold_in: [Int!]
+  ticketsSold_not_in: [Int!]
+  status_isNull: Boolean
+  status_eq: RoundStatus
+  status_not_eq: RoundStatus
+  status_in: [RoundStatus!]
+  status_not_in: [RoundStatus!]
+  randomA_isNull: Boolean
+  randomA_eq: BigInt
+  randomA_not_eq: BigInt
+  randomA_gt: BigInt
+  randomA_gte: BigInt
+  randomA_lt: BigInt
+  randomA_lte: BigInt
+  randomA_in: [BigInt!]
+  randomA_not_in: [BigInt!]
+  randomB_isNull: Boolean
+  randomB_eq: BigInt
+  randomB_not_eq: BigInt
+  randomB_gt: BigInt
+  randomB_gte: BigInt
+  randomB_lt: BigInt
+  randomB_lte: BigInt
+  randomB_in: [BigInt!]
+  randomB_not_in: [BigInt!]
+  vrfRequestId_isNull: Boolean
+  vrfRequestId_eq: BigInt
+  vrfRequestId_not_eq: BigInt
+  vrfRequestId_gt: BigInt
+  vrfRequestId_gte: BigInt
+  vrfRequestId_lt: BigInt
+  vrfRequestId_lte: BigInt
+  vrfRequestId_in: [BigInt!]
+  vrfRequestId_not_in: [BigInt!]
+  ticketPurchases_every: TicketPurchaseWhereInput
+  ticketPurchases_some: TicketPurchaseWhereInput
+  ticketPurchases_none: TicketPurchaseWhereInput
+  prizesClaimed_every: PrizeClaimWhereInput
+  prizesClaimed_some: PrizeClaimWhereInput
+  prizesClaimed_none: PrizeClaimWhereInput
+  refunds_every: RefundWhereInput
+  refunds_some: RefundWhereInput
+  refunds_none: RefundWhereInput
+  AND: [RoundWhereInput!]
+  OR: [RoundWhereInput!]
+}
+
+enum RoundStatus {
+  Active
+  SoldOut
+  VRFRequested
+  Finalized
+}
+
+input TicketPurchaseWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  round_isNull: Boolean
+  round: RoundWhereInput
+  roundId_isNull: Boolean
+  roundId_eq: String
+  roundId_not_eq: String
+  roundId_gt: String
+  roundId_gte: String
+  roundId_lt: String
+  roundId_lte: String
+  roundId_in: [String!]
+  roundId_not_in: [String!]
+  roundId_contains: String
+  roundId_not_contains: String
+  roundId_containsInsensitive: String
+  roundId_not_containsInsensitive: String
+  roundId_startsWith: String
+  roundId_not_startsWith: String
+  roundId_endsWith: String
+  roundId_not_endsWith: String
+  buyer_isNull: Boolean
+  buyer_eq: String
+  buyer_not_eq: String
+  buyer_gt: String
+  buyer_gte: String
+  buyer_lt: String
+  buyer_lte: String
+  buyer_in: [String!]
+  buyer_not_in: [String!]
+  buyer_contains: String
+  buyer_not_contains: String
+  buyer_containsInsensitive: String
+  buyer_not_containsInsensitive: String
+  buyer_startsWith: String
+  buyer_not_startsWith: String
+  buyer_endsWith: String
+  buyer_not_endsWith: String
+  count_isNull: Boolean
+  count_eq: BigInt
+  count_not_eq: BigInt
+  count_gt: BigInt
+  count_gte: BigInt
+  count_lt: BigInt
+  count_lte: BigInt
+  count_in: [BigInt!]
+  count_not_in: [BigInt!]
+  blockNumber_isNull: Boolean
+  blockNumber_eq: BigInt
+  blockNumber_not_eq: BigInt
+  blockNumber_gt: BigInt
+  blockNumber_gte: BigInt
+  blockNumber_lt: BigInt
+  blockNumber_lte: BigInt
+  blockNumber_in: [BigInt!]
+  blockNumber_not_in: [BigInt!]
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  txHash_isNull: Boolean
+  txHash_eq: String
+  txHash_not_eq: String
+  txHash_gt: String
+  txHash_gte: String
+  txHash_lt: String
+  txHash_lte: String
+  txHash_in: [String!]
+  txHash_not_in: [String!]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_containsInsensitive: String
+  txHash_not_containsInsensitive: String
+  txHash_startsWith: String
+  txHash_not_startsWith: String
+  txHash_endsWith: String
+  txHash_not_endsWith: String
+  AND: [TicketPurchaseWhereInput!]
+  OR: [TicketPurchaseWhereInput!]
+}
+
+"""
+A date-time string in simplified extended ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)
+"""
+scalar DateTime
+
+input PrizeClaimWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  round_isNull: Boolean
+  round: RoundWhereInput
+  roundId_isNull: Boolean
+  roundId_eq: String
+  roundId_not_eq: String
+  roundId_gt: String
+  roundId_gte: String
+  roundId_lt: String
+  roundId_lte: String
+  roundId_in: [String!]
+  roundId_not_in: [String!]
+  roundId_contains: String
+  roundId_not_contains: String
+  roundId_containsInsensitive: String
+  roundId_not_containsInsensitive: String
+  roundId_startsWith: String
+  roundId_not_startsWith: String
+  roundId_endsWith: String
+  roundId_not_endsWith: String
+  claimer_isNull: Boolean
+  claimer_eq: String
+  claimer_not_eq: String
+  claimer_gt: String
+  claimer_gte: String
+  claimer_lt: String
+  claimer_lte: String
+  claimer_in: [String!]
+  claimer_not_in: [String!]
+  claimer_contains: String
+  claimer_not_contains: String
+  claimer_containsInsensitive: String
+  claimer_not_containsInsensitive: String
+  claimer_startsWith: String
+  claimer_not_startsWith: String
+  claimer_endsWith: String
+  claimer_not_endsWith: String
+  amount_isNull: Boolean
+  amount_eq: BigInt
+  amount_not_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
+  amount_not_in: [BigInt!]
+  blockNumber_isNull: Boolean
+  blockNumber_eq: BigInt
+  blockNumber_not_eq: BigInt
+  blockNumber_gt: BigInt
+  blockNumber_gte: BigInt
+  blockNumber_lt: BigInt
+  blockNumber_lte: BigInt
+  blockNumber_in: [BigInt!]
+  blockNumber_not_in: [BigInt!]
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  txHash_isNull: Boolean
+  txHash_eq: String
+  txHash_not_eq: String
+  txHash_gt: String
+  txHash_gte: String
+  txHash_lt: String
+  txHash_lte: String
+  txHash_in: [String!]
+  txHash_not_in: [String!]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_containsInsensitive: String
+  txHash_not_containsInsensitive: String
+  txHash_startsWith: String
+  txHash_not_startsWith: String
+  txHash_endsWith: String
+  txHash_not_endsWith: String
+  AND: [PrizeClaimWhereInput!]
+  OR: [PrizeClaimWhereInput!]
+}
+
+input RefundWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  round_isNull: Boolean
+  round: RoundWhereInput
+  roundId_isNull: Boolean
+  roundId_eq: String
+  roundId_not_eq: String
+  roundId_gt: String
+  roundId_gte: String
+  roundId_lt: String
+  roundId_lte: String
+  roundId_in: [String!]
+  roundId_not_in: [String!]
+  roundId_contains: String
+  roundId_not_contains: String
+  roundId_containsInsensitive: String
+  roundId_not_containsInsensitive: String
+  roundId_startsWith: String
+  roundId_not_startsWith: String
+  roundId_endsWith: String
+  roundId_not_endsWith: String
+  user_isNull: Boolean
+  user_eq: String
+  user_not_eq: String
+  user_gt: String
+  user_gte: String
+  user_lt: String
+  user_lte: String
+  user_in: [String!]
+  user_not_in: [String!]
+  user_contains: String
+  user_not_contains: String
+  user_containsInsensitive: String
+  user_not_containsInsensitive: String
+  user_startsWith: String
+  user_not_startsWith: String
+  user_endsWith: String
+  user_not_endsWith: String
+  amount_isNull: Boolean
+  amount_eq: BigInt
+  amount_not_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
+  amount_not_in: [BigInt!]
+  blockNumber_isNull: Boolean
+  blockNumber_eq: BigInt
+  blockNumber_not_eq: BigInt
+  blockNumber_gt: BigInt
+  blockNumber_gte: BigInt
+  blockNumber_lt: BigInt
+  blockNumber_lte: BigInt
+  blockNumber_in: [BigInt!]
+  blockNumber_not_in: [BigInt!]
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  txHash_isNull: Boolean
+  txHash_eq: String
+  txHash_not_eq: String
+  txHash_gt: String
+  txHash_gte: String
+  txHash_lt: String
+  txHash_lte: String
+  txHash_in: [String!]
+  txHash_not_in: [String!]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_containsInsensitive: String
+  txHash_not_containsInsensitive: String
+  txHash_startsWith: String
+  txHash_not_startsWith: String
+  txHash_endsWith: String
+  txHash_not_endsWith: String
+  AND: [RefundWhereInput!]
+  OR: [RefundWhereInput!]
+}
+
+enum PrizeTierOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  stakeConfig_id_ASC
+  stakeConfig_id_DESC
+  stakeConfig_id_ASC_NULLS_FIRST
+  stakeConfig_id_ASC_NULLS_LAST
+  stakeConfig_id_DESC_NULLS_FIRST
+  stakeConfig_id_DESC_NULLS_LAST
+  stakeConfig_ticketCap_ASC
+  stakeConfig_ticketCap_DESC
+  stakeConfig_ticketCap_ASC_NULLS_FIRST
+  stakeConfig_ticketCap_ASC_NULLS_LAST
+  stakeConfig_ticketCap_DESC_NULLS_FIRST
+  stakeConfig_ticketCap_DESC_NULLS_LAST
+  stakeConfig_duration_ASC
+  stakeConfig_duration_DESC
+  stakeConfig_duration_ASC_NULLS_FIRST
+  stakeConfig_duration_ASC_NULLS_LAST
+  stakeConfig_duration_DESC_NULLS_FIRST
+  stakeConfig_duration_DESC_NULLS_LAST
+  stakeConfig_ticketCost_ASC
+  stakeConfig_ticketCost_DESC
+  stakeConfig_ticketCost_ASC_NULLS_FIRST
+  stakeConfig_ticketCost_ASC_NULLS_LAST
+  stakeConfig_ticketCost_DESC_NULLS_FIRST
+  stakeConfig_ticketCost_DESC_NULLS_LAST
+  stakeConfig_deleted_ASC
+  stakeConfig_deleted_DESC
+  stakeConfig_deleted_ASC_NULLS_FIRST
+  stakeConfig_deleted_ASC_NULLS_LAST
+  stakeConfig_deleted_DESC_NULLS_FIRST
+  stakeConfig_deleted_DESC_NULLS_LAST
+  tierIndex_ASC
+  tierIndex_DESC
+  tierIndex_ASC_NULLS_FIRST
+  tierIndex_ASC_NULLS_LAST
+  tierIndex_DESC_NULLS_FIRST
+  tierIndex_DESC_NULLS_LAST
+  prizeCount_ASC
+  prizeCount_DESC
+  prizeCount_ASC_NULLS_FIRST
+  prizeCount_ASC_NULLS_LAST
+  prizeCount_DESC_NULLS_FIRST
+  prizeCount_DESC_NULLS_LAST
+  minPrize_ASC
+  minPrize_DESC
+  minPrize_ASC_NULLS_FIRST
+  minPrize_ASC_NULLS_LAST
+  minPrize_DESC_NULLS_FIRST
+  minPrize_DESC_NULLS_LAST
+  maxPrize_ASC
+  maxPrize_DESC
+  maxPrize_ASC_NULLS_FIRST
+  maxPrize_ASC_NULLS_LAST
+  maxPrize_DESC_NULLS_FIRST
+  maxPrize_DESC_NULLS_LAST
+}
+
+type Round {
+  id: String!
+  stakeConfigId: String!
+  stakeConfig: StakeConfig!
+  startTime: BigInt!
+  ticketsSold: Int!
+  status: RoundStatus!
+  randomA: BigInt
+  randomB: BigInt
+  vrfRequestId: BigInt
+  ticketPurchases(where: TicketPurchaseWhereInput, orderBy: [TicketPurchaseOrderByInput!], offset: Int, limit: Int): [TicketPurchase!]!
+  prizesClaimed(where: PrizeClaimWhereInput, orderBy: [PrizeClaimOrderByInput!], offset: Int, limit: Int): [PrizeClaim!]!
+  refunds(where: RefundWhereInput, orderBy: [RefundOrderByInput!], offset: Int, limit: Int): [Refund!]!
+}
+
+type TicketPurchase {
+  id: String!
+  roundId: String!
+  round: Round!
+  buyer: String!
+  count: BigInt!
+  blockNumber: BigInt!
+  timestamp: DateTime!
+  txHash: String!
+}
+
+enum TicketPurchaseOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  round_id_ASC
+  round_id_DESC
+  round_id_ASC_NULLS_FIRST
+  round_id_ASC_NULLS_LAST
+  round_id_DESC_NULLS_FIRST
+  round_id_DESC_NULLS_LAST
+  round_startTime_ASC
+  round_startTime_DESC
+  round_startTime_ASC_NULLS_FIRST
+  round_startTime_ASC_NULLS_LAST
+  round_startTime_DESC_NULLS_FIRST
+  round_startTime_DESC_NULLS_LAST
+  round_ticketsSold_ASC
+  round_ticketsSold_DESC
+  round_ticketsSold_ASC_NULLS_FIRST
+  round_ticketsSold_ASC_NULLS_LAST
+  round_ticketsSold_DESC_NULLS_FIRST
+  round_ticketsSold_DESC_NULLS_LAST
+  round_status_ASC
+  round_status_DESC
+  round_status_ASC_NULLS_FIRST
+  round_status_ASC_NULLS_LAST
+  round_status_DESC_NULLS_FIRST
+  round_status_DESC_NULLS_LAST
+  round_randomA_ASC
+  round_randomA_DESC
+  round_randomA_ASC_NULLS_FIRST
+  round_randomA_ASC_NULLS_LAST
+  round_randomA_DESC_NULLS_FIRST
+  round_randomA_DESC_NULLS_LAST
+  round_randomB_ASC
+  round_randomB_DESC
+  round_randomB_ASC_NULLS_FIRST
+  round_randomB_ASC_NULLS_LAST
+  round_randomB_DESC_NULLS_FIRST
+  round_randomB_DESC_NULLS_LAST
+  round_vrfRequestId_ASC
+  round_vrfRequestId_DESC
+  round_vrfRequestId_ASC_NULLS_FIRST
+  round_vrfRequestId_ASC_NULLS_LAST
+  round_vrfRequestId_DESC_NULLS_FIRST
+  round_vrfRequestId_DESC_NULLS_LAST
+  buyer_ASC
+  buyer_DESC
+  buyer_ASC_NULLS_FIRST
+  buyer_ASC_NULLS_LAST
+  buyer_DESC_NULLS_FIRST
+  buyer_DESC_NULLS_LAST
+  count_ASC
+  count_DESC
+  count_ASC_NULLS_FIRST
+  count_ASC_NULLS_LAST
+  count_DESC_NULLS_FIRST
+  count_DESC_NULLS_LAST
+  blockNumber_ASC
+  blockNumber_DESC
+  blockNumber_ASC_NULLS_FIRST
+  blockNumber_ASC_NULLS_LAST
+  blockNumber_DESC_NULLS_FIRST
+  blockNumber_DESC_NULLS_LAST
+  timestamp_ASC
+  timestamp_DESC
+  timestamp_ASC_NULLS_FIRST
+  timestamp_ASC_NULLS_LAST
+  timestamp_DESC_NULLS_FIRST
+  timestamp_DESC_NULLS_LAST
+  txHash_ASC
+  txHash_DESC
+  txHash_ASC_NULLS_FIRST
+  txHash_ASC_NULLS_LAST
+  txHash_DESC_NULLS_FIRST
+  txHash_DESC_NULLS_LAST
+}
+
+type PrizeClaim {
+  id: String!
+  roundId: String!
+  round: Round!
+  claimer: String!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: DateTime!
+  txHash: String!
+}
+
+enum PrizeClaimOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  round_id_ASC
+  round_id_DESC
+  round_id_ASC_NULLS_FIRST
+  round_id_ASC_NULLS_LAST
+  round_id_DESC_NULLS_FIRST
+  round_id_DESC_NULLS_LAST
+  round_startTime_ASC
+  round_startTime_DESC
+  round_startTime_ASC_NULLS_FIRST
+  round_startTime_ASC_NULLS_LAST
+  round_startTime_DESC_NULLS_FIRST
+  round_startTime_DESC_NULLS_LAST
+  round_ticketsSold_ASC
+  round_ticketsSold_DESC
+  round_ticketsSold_ASC_NULLS_FIRST
+  round_ticketsSold_ASC_NULLS_LAST
+  round_ticketsSold_DESC_NULLS_FIRST
+  round_ticketsSold_DESC_NULLS_LAST
+  round_status_ASC
+  round_status_DESC
+  round_status_ASC_NULLS_FIRST
+  round_status_ASC_NULLS_LAST
+  round_status_DESC_NULLS_FIRST
+  round_status_DESC_NULLS_LAST
+  round_randomA_ASC
+  round_randomA_DESC
+  round_randomA_ASC_NULLS_FIRST
+  round_randomA_ASC_NULLS_LAST
+  round_randomA_DESC_NULLS_FIRST
+  round_randomA_DESC_NULLS_LAST
+  round_randomB_ASC
+  round_randomB_DESC
+  round_randomB_ASC_NULLS_FIRST
+  round_randomB_ASC_NULLS_LAST
+  round_randomB_DESC_NULLS_FIRST
+  round_randomB_DESC_NULLS_LAST
+  round_vrfRequestId_ASC
+  round_vrfRequestId_DESC
+  round_vrfRequestId_ASC_NULLS_FIRST
+  round_vrfRequestId_ASC_NULLS_LAST
+  round_vrfRequestId_DESC_NULLS_FIRST
+  round_vrfRequestId_DESC_NULLS_LAST
+  claimer_ASC
+  claimer_DESC
+  claimer_ASC_NULLS_FIRST
+  claimer_ASC_NULLS_LAST
+  claimer_DESC_NULLS_FIRST
+  claimer_DESC_NULLS_LAST
+  amount_ASC
+  amount_DESC
+  amount_ASC_NULLS_FIRST
+  amount_ASC_NULLS_LAST
+  amount_DESC_NULLS_FIRST
+  amount_DESC_NULLS_LAST
+  blockNumber_ASC
+  blockNumber_DESC
+  blockNumber_ASC_NULLS_FIRST
+  blockNumber_ASC_NULLS_LAST
+  blockNumber_DESC_NULLS_FIRST
+  blockNumber_DESC_NULLS_LAST
+  timestamp_ASC
+  timestamp_DESC
+  timestamp_ASC_NULLS_FIRST
+  timestamp_ASC_NULLS_LAST
+  timestamp_DESC_NULLS_FIRST
+  timestamp_DESC_NULLS_LAST
+  txHash_ASC
+  txHash_DESC
+  txHash_ASC_NULLS_FIRST
+  txHash_ASC_NULLS_LAST
+  txHash_DESC_NULLS_FIRST
+  txHash_DESC_NULLS_LAST
+}
+
+type Refund {
+  id: String!
+  roundId: String!
+  round: Round!
+  user: String!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: DateTime!
+  txHash: String!
+}
+
+enum RefundOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  round_id_ASC
+  round_id_DESC
+  round_id_ASC_NULLS_FIRST
+  round_id_ASC_NULLS_LAST
+  round_id_DESC_NULLS_FIRST
+  round_id_DESC_NULLS_LAST
+  round_startTime_ASC
+  round_startTime_DESC
+  round_startTime_ASC_NULLS_FIRST
+  round_startTime_ASC_NULLS_LAST
+  round_startTime_DESC_NULLS_FIRST
+  round_startTime_DESC_NULLS_LAST
+  round_ticketsSold_ASC
+  round_ticketsSold_DESC
+  round_ticketsSold_ASC_NULLS_FIRST
+  round_ticketsSold_ASC_NULLS_LAST
+  round_ticketsSold_DESC_NULLS_FIRST
+  round_ticketsSold_DESC_NULLS_LAST
+  round_status_ASC
+  round_status_DESC
+  round_status_ASC_NULLS_FIRST
+  round_status_ASC_NULLS_LAST
+  round_status_DESC_NULLS_FIRST
+  round_status_DESC_NULLS_LAST
+  round_randomA_ASC
+  round_randomA_DESC
+  round_randomA_ASC_NULLS_FIRST
+  round_randomA_ASC_NULLS_LAST
+  round_randomA_DESC_NULLS_FIRST
+  round_randomA_DESC_NULLS_LAST
+  round_randomB_ASC
+  round_randomB_DESC
+  round_randomB_ASC_NULLS_FIRST
+  round_randomB_ASC_NULLS_LAST
+  round_randomB_DESC_NULLS_FIRST
+  round_randomB_DESC_NULLS_LAST
+  round_vrfRequestId_ASC
+  round_vrfRequestId_DESC
+  round_vrfRequestId_ASC_NULLS_FIRST
+  round_vrfRequestId_ASC_NULLS_LAST
+  round_vrfRequestId_DESC_NULLS_FIRST
+  round_vrfRequestId_DESC_NULLS_LAST
+  user_ASC
+  user_DESC
+  user_ASC_NULLS_FIRST
+  user_ASC_NULLS_LAST
+  user_DESC_NULLS_FIRST
+  user_DESC_NULLS_LAST
+  amount_ASC
+  amount_DESC
+  amount_ASC_NULLS_FIRST
+  amount_ASC_NULLS_LAST
+  amount_DESC_NULLS_FIRST
+  amount_DESC_NULLS_LAST
+  blockNumber_ASC
+  blockNumber_DESC
+  blockNumber_ASC_NULLS_FIRST
+  blockNumber_ASC_NULLS_LAST
+  blockNumber_DESC_NULLS_FIRST
+  blockNumber_DESC_NULLS_LAST
+  timestamp_ASC
+  timestamp_DESC
+  timestamp_ASC_NULLS_FIRST
+  timestamp_ASC_NULLS_LAST
+  timestamp_DESC_NULLS_FIRST
+  timestamp_DESC_NULLS_LAST
+  txHash_ASC
+  txHash_DESC
+  txHash_ASC_NULLS_FIRST
+  txHash_ASC_NULLS_LAST
+  txHash_DESC_NULLS_FIRST
+  txHash_DESC_NULLS_LAST
+}
+
+enum RoundOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  stakeConfig_id_ASC
+  stakeConfig_id_DESC
+  stakeConfig_id_ASC_NULLS_FIRST
+  stakeConfig_id_ASC_NULLS_LAST
+  stakeConfig_id_DESC_NULLS_FIRST
+  stakeConfig_id_DESC_NULLS_LAST
+  stakeConfig_ticketCap_ASC
+  stakeConfig_ticketCap_DESC
+  stakeConfig_ticketCap_ASC_NULLS_FIRST
+  stakeConfig_ticketCap_ASC_NULLS_LAST
+  stakeConfig_ticketCap_DESC_NULLS_FIRST
+  stakeConfig_ticketCap_DESC_NULLS_LAST
+  stakeConfig_duration_ASC
+  stakeConfig_duration_DESC
+  stakeConfig_duration_ASC_NULLS_FIRST
+  stakeConfig_duration_ASC_NULLS_LAST
+  stakeConfig_duration_DESC_NULLS_FIRST
+  stakeConfig_duration_DESC_NULLS_LAST
+  stakeConfig_ticketCost_ASC
+  stakeConfig_ticketCost_DESC
+  stakeConfig_ticketCost_ASC_NULLS_FIRST
+  stakeConfig_ticketCost_ASC_NULLS_LAST
+  stakeConfig_ticketCost_DESC_NULLS_FIRST
+  stakeConfig_ticketCost_DESC_NULLS_LAST
+  stakeConfig_deleted_ASC
+  stakeConfig_deleted_DESC
+  stakeConfig_deleted_ASC_NULLS_FIRST
+  stakeConfig_deleted_ASC_NULLS_LAST
+  stakeConfig_deleted_DESC_NULLS_FIRST
+  stakeConfig_deleted_DESC_NULLS_LAST
+  startTime_ASC
+  startTime_DESC
+  startTime_ASC_NULLS_FIRST
+  startTime_ASC_NULLS_LAST
+  startTime_DESC_NULLS_FIRST
+  startTime_DESC_NULLS_LAST
+  ticketsSold_ASC
+  ticketsSold_DESC
+  ticketsSold_ASC_NULLS_FIRST
+  ticketsSold_ASC_NULLS_LAST
+  ticketsSold_DESC_NULLS_FIRST
+  ticketsSold_DESC_NULLS_LAST
+  status_ASC
+  status_DESC
+  status_ASC_NULLS_FIRST
+  status_ASC_NULLS_LAST
+  status_DESC_NULLS_FIRST
+  status_DESC_NULLS_LAST
+  randomA_ASC
+  randomA_DESC
+  randomA_ASC_NULLS_FIRST
+  randomA_ASC_NULLS_LAST
+  randomA_DESC_NULLS_FIRST
+  randomA_DESC_NULLS_LAST
+  randomB_ASC
+  randomB_DESC
+  randomB_ASC_NULLS_FIRST
+  randomB_ASC_NULLS_LAST
+  randomB_DESC_NULLS_FIRST
+  randomB_DESC_NULLS_LAST
+  vrfRequestId_ASC
+  vrfRequestId_DESC
+  vrfRequestId_ASC_NULLS_FIRST
+  vrfRequestId_ASC_NULLS_LAST
+  vrfRequestId_DESC_NULLS_FIRST
+  vrfRequestId_DESC_NULLS_LAST
+}
+
+enum StakeConfigOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  ticketCap_ASC
+  ticketCap_DESC
+  ticketCap_ASC_NULLS_FIRST
+  ticketCap_ASC_NULLS_LAST
+  ticketCap_DESC_NULLS_FIRST
+  ticketCap_DESC_NULLS_LAST
+  duration_ASC
+  duration_DESC
+  duration_ASC_NULLS_FIRST
+  duration_ASC_NULLS_LAST
+  duration_DESC_NULLS_FIRST
+  duration_DESC_NULLS_LAST
+  ticketCost_ASC
+  ticketCost_DESC
+  ticketCost_ASC_NULLS_FIRST
+  ticketCost_ASC_NULLS_LAST
+  ticketCost_DESC_NULLS_FIRST
+  ticketCost_DESC_NULLS_LAST
+  deleted_ASC
+  deleted_DESC
+  deleted_ASC_NULLS_FIRST
+  deleted_ASC_NULLS_LAST
+  deleted_DESC_NULLS_FIRST
+  deleted_DESC_NULLS_LAST
+}
+
+type StakeConfigsConnection {
+  edges: [StakeConfigEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StakeConfigEdge {
+  node: StakeConfig!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String!
+  endCursor: String!
+}
+
+type PrizeTiersConnection {
+  edges: [PrizeTierEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PrizeTierEdge {
+  node: PrizeTier!
+  cursor: String!
+}
+
+type RoundsConnection {
+  edges: [RoundEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type RoundEdge {
+  node: Round!
+  cursor: String!
+}
+
+type TicketPurchasesConnection {
+  edges: [TicketPurchaseEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type TicketPurchaseEdge {
+  node: TicketPurchase!
+  cursor: String!
+}
+
+type PrizeClaimsConnection {
+  edges: [PrizeClaimEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PrizeClaimEdge {
+  node: PrizeClaim!
+  cursor: String!
+}
+
+type RefundsConnection {
+  edges: [RefundEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type RefundEdge {
+  node: Refund!
+  cursor: String!
+}
+
+type ProtocolFeeUpdated {
+  id: String!
+  feePercent: BigInt!
+  blockNumber: BigInt!
+  timestamp: DateTime!
+  txHash: String!
+}
+
+input ProtocolFeeUpdatedWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  feePercent_isNull: Boolean
+  feePercent_eq: BigInt
+  feePercent_not_eq: BigInt
+  feePercent_gt: BigInt
+  feePercent_gte: BigInt
+  feePercent_lt: BigInt
+  feePercent_lte: BigInt
+  feePercent_in: [BigInt!]
+  feePercent_not_in: [BigInt!]
+  blockNumber_isNull: Boolean
+  blockNumber_eq: BigInt
+  blockNumber_not_eq: BigInt
+  blockNumber_gt: BigInt
+  blockNumber_gte: BigInt
+  blockNumber_lt: BigInt
+  blockNumber_lte: BigInt
+  blockNumber_in: [BigInt!]
+  blockNumber_not_in: [BigInt!]
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  txHash_isNull: Boolean
+  txHash_eq: String
+  txHash_not_eq: String
+  txHash_gt: String
+  txHash_gte: String
+  txHash_lt: String
+  txHash_lte: String
+  txHash_in: [String!]
+  txHash_not_in: [String!]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_containsInsensitive: String
+  txHash_not_containsInsensitive: String
+  txHash_startsWith: String
+  txHash_not_startsWith: String
+  txHash_endsWith: String
+  txHash_not_endsWith: String
+  AND: [ProtocolFeeUpdatedWhereInput!]
+  OR: [ProtocolFeeUpdatedWhereInput!]
+}
+
+enum ProtocolFeeUpdatedOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  feePercent_ASC
+  feePercent_DESC
+  feePercent_ASC_NULLS_FIRST
+  feePercent_ASC_NULLS_LAST
+  feePercent_DESC_NULLS_FIRST
+  feePercent_DESC_NULLS_LAST
+  blockNumber_ASC
+  blockNumber_DESC
+  blockNumber_ASC_NULLS_FIRST
+  blockNumber_ASC_NULLS_LAST
+  blockNumber_DESC_NULLS_FIRST
+  blockNumber_DESC_NULLS_LAST
+  timestamp_ASC
+  timestamp_DESC
+  timestamp_ASC_NULLS_FIRST
+  timestamp_ASC_NULLS_LAST
+  timestamp_DESC_NULLS_FIRST
+  timestamp_DESC_NULLS_LAST
+  txHash_ASC
+  txHash_DESC
+  txHash_ASC_NULLS_FIRST
+  txHash_ASC_NULLS_LAST
+  txHash_DESC_NULLS_FIRST
+  txHash_DESC_NULLS_LAST
+}
+
+type ProtocolFeeUpdatedsConnection {
+  edges: [ProtocolFeeUpdatedEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ProtocolFeeUpdatedEdge {
+  node: ProtocolFeeUpdated!
+  cursor: String!
+}
+
+type FeeRecipientUpdated {
+  id: String!
+  feeRecipient: String!
+  blockNumber: BigInt!
+  timestamp: DateTime!
+  txHash: String!
+}
+
+input FeeRecipientUpdatedWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  feeRecipient_isNull: Boolean
+  feeRecipient_eq: String
+  feeRecipient_not_eq: String
+  feeRecipient_gt: String
+  feeRecipient_gte: String
+  feeRecipient_lt: String
+  feeRecipient_lte: String
+  feeRecipient_in: [String!]
+  feeRecipient_not_in: [String!]
+  feeRecipient_contains: String
+  feeRecipient_not_contains: String
+  feeRecipient_containsInsensitive: String
+  feeRecipient_not_containsInsensitive: String
+  feeRecipient_startsWith: String
+  feeRecipient_not_startsWith: String
+  feeRecipient_endsWith: String
+  feeRecipient_not_endsWith: String
+  blockNumber_isNull: Boolean
+  blockNumber_eq: BigInt
+  blockNumber_not_eq: BigInt
+  blockNumber_gt: BigInt
+  blockNumber_gte: BigInt
+  blockNumber_lt: BigInt
+  blockNumber_lte: BigInt
+  blockNumber_in: [BigInt!]
+  blockNumber_not_in: [BigInt!]
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  txHash_isNull: Boolean
+  txHash_eq: String
+  txHash_not_eq: String
+  txHash_gt: String
+  txHash_gte: String
+  txHash_lt: String
+  txHash_lte: String
+  txHash_in: [String!]
+  txHash_not_in: [String!]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_containsInsensitive: String
+  txHash_not_containsInsensitive: String
+  txHash_startsWith: String
+  txHash_not_startsWith: String
+  txHash_endsWith: String
+  txHash_not_endsWith: String
+  AND: [FeeRecipientUpdatedWhereInput!]
+  OR: [FeeRecipientUpdatedWhereInput!]
+}
+
+enum FeeRecipientUpdatedOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  feeRecipient_ASC
+  feeRecipient_DESC
+  feeRecipient_ASC_NULLS_FIRST
+  feeRecipient_ASC_NULLS_LAST
+  feeRecipient_DESC_NULLS_FIRST
+  feeRecipient_DESC_NULLS_LAST
+  blockNumber_ASC
+  blockNumber_DESC
+  blockNumber_ASC_NULLS_FIRST
+  blockNumber_ASC_NULLS_LAST
+  blockNumber_DESC_NULLS_FIRST
+  blockNumber_DESC_NULLS_LAST
+  timestamp_ASC
+  timestamp_DESC
+  timestamp_ASC_NULLS_FIRST
+  timestamp_ASC_NULLS_LAST
+  timestamp_DESC_NULLS_FIRST
+  timestamp_DESC_NULLS_LAST
+  txHash_ASC
+  txHash_DESC
+  txHash_ASC_NULLS_FIRST
+  txHash_ASC_NULLS_LAST
+  txHash_DESC_NULLS_FIRST
+  txHash_DESC_NULLS_LAST
+}
+
+type FeeRecipientUpdatedsConnection {
+  edges: [FeeRecipientUpdatedEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type FeeRecipientUpdatedEdge {
+  node: FeeRecipientUpdated!
+  cursor: String!
+}
+
+type CallbackGasLimitUpdated {
+  id: String!
+  callbackGasLimit: Int!
+  blockNumber: BigInt!
+  timestamp: DateTime!
+  txHash: String!
+}
+
+input CallbackGasLimitUpdatedWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  callbackGasLimit_isNull: Boolean
+  callbackGasLimit_eq: Int
+  callbackGasLimit_not_eq: Int
+  callbackGasLimit_gt: Int
+  callbackGasLimit_gte: Int
+  callbackGasLimit_lt: Int
+  callbackGasLimit_lte: Int
+  callbackGasLimit_in: [Int!]
+  callbackGasLimit_not_in: [Int!]
+  blockNumber_isNull: Boolean
+  blockNumber_eq: BigInt
+  blockNumber_not_eq: BigInt
+  blockNumber_gt: BigInt
+  blockNumber_gte: BigInt
+  blockNumber_lt: BigInt
+  blockNumber_lte: BigInt
+  blockNumber_in: [BigInt!]
+  blockNumber_not_in: [BigInt!]
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  txHash_isNull: Boolean
+  txHash_eq: String
+  txHash_not_eq: String
+  txHash_gt: String
+  txHash_gte: String
+  txHash_lt: String
+  txHash_lte: String
+  txHash_in: [String!]
+  txHash_not_in: [String!]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_containsInsensitive: String
+  txHash_not_containsInsensitive: String
+  txHash_startsWith: String
+  txHash_not_startsWith: String
+  txHash_endsWith: String
+  txHash_not_endsWith: String
+  AND: [CallbackGasLimitUpdatedWhereInput!]
+  OR: [CallbackGasLimitUpdatedWhereInput!]
+}
+
+enum CallbackGasLimitUpdatedOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  callbackGasLimit_ASC
+  callbackGasLimit_DESC
+  callbackGasLimit_ASC_NULLS_FIRST
+  callbackGasLimit_ASC_NULLS_LAST
+  callbackGasLimit_DESC_NULLS_FIRST
+  callbackGasLimit_DESC_NULLS_LAST
+  blockNumber_ASC
+  blockNumber_DESC
+  blockNumber_ASC_NULLS_FIRST
+  blockNumber_ASC_NULLS_LAST
+  blockNumber_DESC_NULLS_FIRST
+  blockNumber_DESC_NULLS_LAST
+  timestamp_ASC
+  timestamp_DESC
+  timestamp_ASC_NULLS_FIRST
+  timestamp_ASC_NULLS_LAST
+  timestamp_DESC_NULLS_FIRST
+  timestamp_DESC_NULLS_LAST
+  txHash_ASC
+  txHash_DESC
+  txHash_ASC_NULLS_FIRST
+  txHash_ASC_NULLS_LAST
+  txHash_DESC_NULLS_FIRST
+  txHash_DESC_NULLS_LAST
+}
+
+type CallbackGasLimitUpdatedsConnection {
+  edges: [CallbackGasLimitUpdatedEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CallbackGasLimitUpdatedEdge {
+  node: CallbackGasLimitUpdated!
+  cursor: String!
+}
