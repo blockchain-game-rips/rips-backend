@@ -39,7 +39,10 @@ describe('WalletsController', () => {
 
 	beforeEach(() => {
 		getBalance = makeMockGetBalanceUseCase()
-		controller = new WalletsController(getBalance, makeMockWithdrawUseCase())
+		controller = new WalletsController(
+			getBalance,
+			makeMockWithdrawUseCase(),
+		)
 	})
 
 	describe('GET /users/:telegramId/wallet/balance', () => {

@@ -2,10 +2,8 @@ import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { AppModule } from 'src/app.module'
 import { KmsService } from 'src/application/interfaces/kms.service'
-import { EIP155 } from 'src/constants'
 import { EVM_CLIENT_CONFIG } from 'src/infrastructure/evm/evm-client/types'
 import { MnemonicKmsService } from 'src/infrastructure/kms/mnemonic-kms.service'
-import { MAIN_CURRENCY_CHAIN_ADDRESS } from 'src/modules/wallets/wallets.constants'
 import { UseCaseExceptionFilter } from 'src/presentation/filters/use-case-exception.filter'
 import request from 'supertest'
 import { createPublicClient, http, parseEther } from 'viem'
@@ -43,14 +41,6 @@ describe('Wallet flow E2E', () => {
 
 		process.env.KMS_MNEMONIC = KMS_MNEMONIC
 
-		const testMainCurrency = {
-			address: '0x0000000000000000000000000000000000000000',
-			chain: {
-				namespace: EIP155,
-				reference: chain.id.toString(),
-			},
-		}
-
 		const testEvmClientConfig = {
 			rpcSettings: {
 				[chain.id]: {
@@ -65,8 +55,7 @@ describe('Wallet flow E2E', () => {
 		})
 			.overrideProvider(KmsService)
 			.useClass(MnemonicKmsService)
-			.overrideProvider(MAIN_CURRENCY_CHAIN_ADDRESS)
-			.useValue(testMainCurrency)
+			//TODO: figure out how to not overrice this config
 			.overrideProvider(EVM_CLIENT_CONFIG)
 			.useValue(testEvmClientConfig)
 			.compile()

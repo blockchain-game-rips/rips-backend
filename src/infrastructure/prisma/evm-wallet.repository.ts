@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { EvmWalletRepository, EvmWalletRecord } from 'src/application/interfaces/repositories/evm-wallet.repository'
+import {
+	EvmWalletRecord,
+	EvmWalletRepository,
+} from 'src/application/interfaces/repositories/evm-wallet.repository'
 import { getAddress, type Address } from 'viem'
 import { PrismaService } from './prisma.service'
 

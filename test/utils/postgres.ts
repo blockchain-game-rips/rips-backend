@@ -1,8 +1,8 @@
-import { execSync } from 'child_process'
 import {
 	PostgreSqlContainer,
 	StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql'
+import { execSync } from 'child_process'
 
 export class Postgres {
 	private container: StartedPostgreSqlContainer | undefined
@@ -16,9 +16,7 @@ export class Postgres {
 	}
 
 	async start() {
-		this.container = await new PostgreSqlContainer(
-			'postgres:16',
-		).start()
+		this.container = await new PostgreSqlContainer('postgres:16').start()
 
 		execSync('yarn prisma db push --force-reset', {
 			stdio: 'inherit',

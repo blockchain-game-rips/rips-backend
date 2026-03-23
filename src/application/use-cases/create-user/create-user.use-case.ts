@@ -1,5 +1,5 @@
-import { UserAlreadyExistsError } from 'src/domain/errors/user-already-exists.error'
 import { User } from 'src/domain/entities/user'
+import { UserAlreadyExistsError } from 'src/domain/errors/user-already-exists.error'
 import { TelegramId } from 'src/domain/value-objects/telegram-id'
 
 export { UserAlreadyExistsError }

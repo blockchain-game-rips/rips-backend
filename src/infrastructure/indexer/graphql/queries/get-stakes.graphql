@@ -1,0 +1,7 @@
+query GetStakes {
+    stakeConfigs(where: { deleted_eq: false }) {
+        ticketCap
+        ticketCost
+        duration
+    }
+}

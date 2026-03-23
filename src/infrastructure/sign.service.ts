@@ -28,7 +28,9 @@ export class SignService {
 		const evmWallet = await this.evmWalletRepository.findByAddress(address)
 
 		if (!evmWallet) {
-			throw new NotFoundException(`EvmWallet not found for address ${address}`)
+			throw new NotFoundException(
+				`EvmWallet not found for address ${address}`,
+			)
 		}
 
 		const serializedUnsigned = serializeTransaction(tx)

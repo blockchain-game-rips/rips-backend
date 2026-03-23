@@ -16,7 +16,9 @@ export class Token extends EvmCurrency {
 		}
 
 		if (isAddressEqual(address, NATIVE_ADDRESS)) {
-			throw new Error(`Cannot make a token from native currency ${symbol}`)
+			throw new Error(
+				`Cannot make a token from native currency ${symbol}`,
+			)
 		}
 	}
 

@@ -1,4 +1,3 @@
-import { CurrencyService } from 'src/application/interfaces/currency.service'
 import { WalletService } from 'src/application/interfaces/wallet.service'
 import { GetBalanceService } from 'src/application/use-cases/get-balance/get-balance.service'
 import {
@@ -13,7 +12,6 @@ import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
 import { CurrencyAmount } from 'src/domain/value-objects/currency-amount'
 import { toTelegramId } from 'src/domain/value-objects/telegram-id'
 import { Wallet } from 'src/domain/value-objects/wallet'
-import { MAIN_CURRENCY_VALUE } from 'src/modules/wallets/wallets.constants'
 
 const TELEGRAM_ID = toTelegramId(123456n)
 const EVM_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'
@@ -47,29 +45,22 @@ function makeMockGetUserUseCase(): jest.Mocked<GetUserUseCase> {
 	return { execute: jest.fn() }
 }
 
-function makeMockCurrencyService(): jest.Mocked<CurrencyService> {
-	return { fromAccount: jest.fn() }
-}
-
 function makeMockWalletService(): jest.Mocked<WalletService> {
 	return { balanceOf: jest.fn(), transfer: jest.fn() }
 }
 
 describe('GetBalanceService', () => {
 	let getUserUseCase: jest.Mocked<GetUserUseCase>
-	let currencyService: jest.Mocked<CurrencyService>
 	let walletService: jest.Mocked<WalletService>
 	let service: GetBalanceService
 
 	beforeEach(() => {
 		getUserUseCase = makeMockGetUserUseCase()
-		currencyService = makeMockCurrencyService()
 		walletService = makeMockWalletService()
 		service = new GetBalanceService(
 			getUserUseCase,
-			currencyService,
 			walletService,
-			MAIN_CURRENCY_VALUE,
+			MOCK_CURRENCY,
 		)
 	})
 
@@ -77,7 +68,6 @@ describe('GetBalanceService', () => {
 		const balance = 1000000000000000000n
 
 		getUserUseCase.execute.mockResolvedValue(MOCK_USER)
-		currencyService.fromAccount.mockResolvedValue(MOCK_CURRENCY)
 		walletService.balanceOf.mockResolvedValue(balance)
 
 		const result: CurrencyAmount = await service.execute({
@@ -85,9 +75,6 @@ describe('GetBalanceService', () => {
 		})
 
 		expect(result).toEqual({ currency: MOCK_CURRENCY, amount: balance })
-		expect(currencyService.fromAccount).toHaveBeenCalledWith(
-			MAIN_CURRENCY_VALUE,
-		)
 		expect(walletService.balanceOf).toHaveBeenCalledWith(
 			MOCK_WALLET,
 			MOCK_CURRENCY,

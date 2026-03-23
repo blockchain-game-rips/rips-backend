@@ -70,7 +70,10 @@ export class EvmCurrencyService {
 	}
 
 	getNative(chainId: number): NativeCurrency {
-		const currency = new NativeCurrency(chainId, NATIVE_CURRENCIES[chainId] ?? ETH_METADATA)
+		const currency = new NativeCurrency(
+			chainId,
+			NATIVE_CURRENCIES[chainId] ?? ETH_METADATA,
+		)
 		return this.getOrCache(currency)
 	}
 
@@ -96,7 +99,9 @@ export class EvmCurrencyService {
 		}
 	}
 
-	async fromId(id: CurrencyId): Promise<NativeCurrency | Token | WrappedNative> {
+	async fromId(
+		id: CurrencyId,
+	): Promise<NativeCurrency | Token | WrappedNative> {
 		if (!this.isValidTokenId(id)) {
 			throw new Error('Invalid token id')
 		}

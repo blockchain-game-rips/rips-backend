@@ -1,3 +1,5 @@
 import { createCustomError } from 'src/utils/common'
 
-export const UserAlreadyExistsError = createCustomError('UserAlreadyExistsError')
+export const UserAlreadyExistsError = createCustomError(
+	'UserAlreadyExistsError',
+)

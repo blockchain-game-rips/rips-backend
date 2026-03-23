@@ -3,8 +3,8 @@ import { GetBalanceUseCase } from 'src/application/use-cases/get-balance/get-bal
 import { WithdrawUseCase } from 'src/application/use-cases/withdraw.ts/withdraw.use-case'
 import { EIP155 } from 'src/constants'
 import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
+import { MAIN_CURRENCY_VALUE } from 'src/modules/main-currency/main-currency.constants'
 import { ZodValidationPipe } from 'src/presentation/pipes/zod-validation.pipe'
-import { MAIN_CURRENCY_VALUE } from 'src/modules/wallets/wallets.constants'
 import { z } from 'zod'
 import {
 	BalanceResponseDto,
