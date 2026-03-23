@@ -13,32 +13,62 @@ type RoundRaw = Awaited<
 	ReturnType<IndexerService['sdk']['GetRounds']>
 >['rounds'][number]
 
-//TODO: fee is missed, need to expose ticket count to all events or add fee to math or just lookup addresses
+function isExpired(roundRaw: RoundRaw, nowSeconds) {
+	const startTimeSeconds = BigInt(
+		Math.floor(new Date(roundRaw.startTime).getTime() / 1000),
+	)
+
+	const duration = BigInt(roundRaw.stakeConfig.durationSeconds)
+
+	const isExpired = nowSeconds - startTimeSeconds >= duration
+
+	return isExpired
+}
+
+function isRefunding(roundRaw: RoundRaw) {
+	const uniqueRefundedAddresses: Set<string> = new Set()
+
+	for (const refund of roundRaw.refunds) {
+		uniqueRefundedAddresses.add(refund.user)
+	}
+
+	for (const purchase of roundRaw.ticketPurchases) {
+		if (uniqueRefundedAddresses.has(purchase.buyer)) continue
+
+		return true
+	}
+
+	return false
+}
+
+function isClaiming(roundRaw: RoundRaw) {
+	const uniqueClaimedAddresses: Set<string> = new Set()
+
+	for (const claim of roundRaw.prizesClaimed) {
+		uniqueClaimedAddresses.add(claim.claimer)
+	}
+
+	for (const purchase of roundRaw.ticketPurchases) {
+		if (uniqueClaimedAddresses.has(purchase.buyer)) continue
+
+		return true
+	}
+
+	return false
+}
+
 function resolveRoundStatus(
 	roundRaw: RoundRaw,
 	ticketPrice: bigint,
 	nowSeconds: bigint,
 ): RoundStatus {
-	const totalPool = BigInt(roundRaw.ticketsSold) * ticketPrice
-
 	switch (roundRaw.status) {
 		case RoundStatusRaw.Active: {
-			const startTimeSeconds = BigInt(
-				Math.floor(new Date(roundRaw.startTime).getTime() / 1000),
-			)
-			const duration = BigInt(roundRaw.stakeConfig.durationSeconds)
-			const isExpired = nowSeconds - startTimeSeconds >= duration
+			if (!isExpired(roundRaw, nowSeconds)) return RoundStatus.FILLING
 
-			if (!isExpired) return RoundStatus.FILLING
+			if (isRefunding(roundRaw)) return RoundStatus.REFUNDING
 
-			const totalRefunded = roundRaw.refunds.reduce(
-				(sum, r) => sum + BigInt(r.amount),
-				0n,
-			)
-
-			return totalRefunded >= totalPool
-				? RoundStatus.REFUNDED
-				: RoundStatus.REFUNDING
+			return RoundStatus.REFUNDED
 		}
 
 		case RoundStatusRaw.SoldOut:
@@ -48,14 +78,9 @@ function resolveRoundStatus(
 			return RoundStatus.VRFREQUESTED
 
 		case RoundStatusRaw.Finalized: {
-			const totalClaimed = roundRaw.prizesClaimed.reduce(
-				(sum, c) => sum + BigInt(c.amount),
-				0n,
-			)
+			if (isClaiming(roundRaw)) return RoundStatus.CLAIMING
 
-			return totalClaimed >= totalPool
-				? RoundStatus.CLAIMED
-				: RoundStatus.CLAIMING
+			return RoundStatus.CLAIMED
 		}
 	}
 }
@@ -76,16 +101,14 @@ function resolveActions(roundRaw: RoundRaw): AddressesActions {
 
 	for (const refund of roundRaw.refunds) {
 		addressesActions.refunds.push({
-			ticketAmount:
-				BigInt(refund.amount) / BigInt(roundRaw.stakeConfig.ticketCost),
+			amount: BigInt(refund.amount),
 			userAddress: getAddress(refund.user),
 		})
 	}
 
 	for (const claim of roundRaw.prizesClaimed) {
 		addressesActions.claims.push({
-			ticketAmount:
-				BigInt(claim.amount) / BigInt(roundRaw.stakeConfig.ticketCost),
+			amount: BigInt(claim.amount),
 			userAddress: getAddress(claim.claimer),
 		})
 	}

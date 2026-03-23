@@ -31,16 +31,37 @@ const STAKE_CONFIG_RAW = {
 	durationSeconds: '3600',
 }
 
-const EMPTY_COLLECTIONS = {
-	ticketPurchases: [],
-	prizesClaimed: [],
-	refunds: [],
+const BUYER_A = '0x000000000000000000000000000000000000aaaa'
+const BUYER_B = '0x000000000000000000000000000000000000bbbb'
+
+function makeTicketPurchase(buyer: string, count = 1) {
+	return {
+		id: buyer,
+		buyer,
+		count: count.toString(),
+		txHash: '0x0',
+		time: '',
+	}
+}
+
+function makeRefund(user: string, amount: string) {
+	return { id: user, user, amount, txHash: '0x0', time: '' }
+}
+
+function makeClaim(claimer: string, amount: string) {
+	return { id: claimer, claimer, amount, txHash: '0x0', time: '' }
 }
 
 function makeRoundRaw(overrides: {
 	status: RoundStatusRaw
 	startTime?: string
-	ticketsSold?: number
+	ticketPurchases?: {
+		id: string
+		buyer: string
+		count: string
+		txHash: string
+		time: string
+	}[]
 	refunds?: {
 		id: string
 		user: string
@@ -62,9 +83,8 @@ function makeRoundRaw(overrides: {
 		stakeConfigId: '1',
 		stakeConfig: STAKE_CONFIG_RAW,
 		startTime: overrides.startTime ?? new Date().toISOString(),
-		ticketsSold: overrides.ticketsSold ?? 2,
 		status: overrides.status,
-		ticketPurchases: [],
+		ticketPurchases: overrides.ticketPurchases ?? [],
 		prizesClaimed: overrides.prizesClaimed ?? [],
 		refunds: overrides.refunds ?? [],
 	}
@@ -101,30 +121,20 @@ describe('IndexerRoundRepository', () => {
 			expect(round.status).toBe(RoundStatus.FILLING)
 		})
 
-		it('returns REFUNDING when expired and refunds are partial', async () => {
+		it('returns REFUNDING when expired and not all buyers have been refunded', async () => {
 			const startTime = new Date(
 				Date.now() - (DURATION_SECONDS + 60) * 1000,
 			).toISOString()
-			const ticketsSold = 2
-			const partialRefund = (
-				TICKET_PRICE * BigInt(ticketsSold) -
-				1n
-			).toString()
 
 			const indexer = makeMockIndexer([
 				makeRoundRaw({
 					status: RoundStatusRaw.Active,
 					startTime,
-					ticketsSold,
-					refunds: [
-						{
-							id: '1',
-							user: '0xabc',
-							amount: partialRefund,
-							txHash: '0x1',
-							time: '',
-						},
+					ticketPurchases: [
+						makeTicketPurchase(BUYER_A),
+						makeTicketPurchase(BUYER_B),
 					],
+					refunds: [makeRefund(BUYER_A, TICKET_PRICE.toString())],
 				}),
 			])
 
@@ -133,26 +143,22 @@ describe('IndexerRoundRepository', () => {
 			expect(round.status).toBe(RoundStatus.REFUNDING)
 		})
 
-		it('returns REFUNDED when expired and refunds cover the full pool', async () => {
+		it('returns REFUNDED when expired and all buyers have been refunded', async () => {
 			const startTime = new Date(
 				Date.now() - (DURATION_SECONDS + 60) * 1000,
 			).toISOString()
-			const ticketsSold = 2
-			const fullRefund = (TICKET_PRICE * BigInt(ticketsSold)).toString()
 
 			const indexer = makeMockIndexer([
 				makeRoundRaw({
 					status: RoundStatusRaw.Active,
 					startTime,
-					ticketsSold,
+					ticketPurchases: [
+						makeTicketPurchase(BUYER_A),
+						makeTicketPurchase(BUYER_B),
+					],
 					refunds: [
-						{
-							id: '1',
-							user: '0xabc',
-							amount: fullRefund,
-							txHash: '0x1',
-							time: '',
-						},
+						makeRefund(BUYER_A, TICKET_PRICE.toString()),
+						makeRefund(BUYER_B, TICKET_PRICE.toString()),
 					],
 				}),
 			])
@@ -184,25 +190,16 @@ describe('IndexerRoundRepository', () => {
 	})
 
 	describe('Finalized status', () => {
-		it('returns CLAIMING when prizes claimed are partial', async () => {
-			const ticketsSold = 2
-			const partialClaim = (
-				TICKET_PRICE * BigInt(ticketsSold) -
-				1n
-			).toString()
-
+		it('returns CLAIMING when not all buyers have claimed prizes', async () => {
 			const indexer = makeMockIndexer([
 				makeRoundRaw({
 					status: RoundStatusRaw.Finalized,
-					ticketsSold,
+					ticketPurchases: [
+						makeTicketPurchase(BUYER_A),
+						makeTicketPurchase(BUYER_B),
+					],
 					prizesClaimed: [
-						{
-							id: '1',
-							claimer: '0xabc',
-							amount: partialClaim,
-							txHash: '0x1',
-							time: '',
-						},
+						makeClaim(BUYER_A, TICKET_PRICE.toString()),
 					],
 				}),
 			])
@@ -212,22 +209,17 @@ describe('IndexerRoundRepository', () => {
 			expect(round.status).toBe(RoundStatus.CLAIMING)
 		})
 
-		it('returns CLAIMED when prizes claimed cover the full pool', async () => {
-			const ticketsSold = 2
-			const fullClaim = (TICKET_PRICE * BigInt(ticketsSold)).toString()
-
+		it('returns CLAIMED when all buyers have claimed prizes', async () => {
 			const indexer = makeMockIndexer([
 				makeRoundRaw({
 					status: RoundStatusRaw.Finalized,
-					ticketsSold,
+					ticketPurchases: [
+						makeTicketPurchase(BUYER_A),
+						makeTicketPurchase(BUYER_B),
+					],
 					prizesClaimed: [
-						{
-							id: '1',
-							claimer: '0xabc',
-							amount: fullClaim,
-							txHash: '0x1',
-							time: '',
-						},
+						makeClaim(BUYER_A, TICKET_PRICE.toString()),
+						makeClaim(BUYER_B, TICKET_PRICE.toString()),
 					],
 				}),
 			])

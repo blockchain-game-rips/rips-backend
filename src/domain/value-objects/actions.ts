@@ -1,12 +1,22 @@
 import { Address } from 'viem'
 
 export type AddressesActions = {
-	purchases: AddressAction[]
-	claims: AddressAction[]
-	refunds: AddressAction[]
+	purchases: PurchaseAction[]
+	claims: ClaimAction[]
+	refunds: RefundAction[]
 }
 
-export type AddressAction = {
+export type RefundAction = {
+	userAddress: Address
+	amount: bigint
+}
+
+export type ClaimAction = {
+	userAddress: Address
+	amount: bigint
+}
+
+export type PurchaseAction = {
 	userAddress: Address
 	ticketAmount: bigint
 }
