@@ -6,7 +6,12 @@ import { GetUserModule } from 'src/modules/use-cases/get-user.module'
 import { RipsController } from 'src/presentation/rips/rips.controller'
 
 @Module({
-	imports: [GetUserModule, GetStakesModule, GetRoundsModule, BuyTicketsModule],
+	imports: [
+		GetUserModule,
+		GetStakesModule,
+		GetRoundsModule,
+		BuyTicketsModule,
+	],
 	controllers: [RipsController],
 })
 export class RipsModule {}

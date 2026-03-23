@@ -4,8 +4,8 @@ import { SignModule } from 'src/infrastructure/sign/sign.module'
 import { MainCurrencyModule } from 'src/modules/main-currency/main-currency.module'
 import { getEnvSafe } from 'src/utils/common'
 import { RipsKeeperService } from './rips-keeper.service'
-import { KEEPER_PK, RIPS_SC_ADDRESS } from './rips.constants'
 import { RipsWriteService } from './rips-write.service'
+import { KEEPER_PK, RIPS_SC_ADDRESS } from './rips.constants'
 
 @Module({
 	imports: [EvmModule, SignModule, MainCurrencyModule],
