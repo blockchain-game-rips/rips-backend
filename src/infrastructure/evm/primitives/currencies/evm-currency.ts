@@ -14,7 +14,7 @@ export abstract class EvmCurrency implements Currency {
 	}
 	readonly symbol: string
 	readonly decimals: number
-	readonly name?: string
+	readonly name: string
 
 	constructor(address: Address, chainId: number, metadata: CurrencyMetadata) {
 		const checksumAddress = getAddress(address)

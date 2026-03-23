@@ -7,7 +7,7 @@ export type WithdrawResponseDto = {
 		currency: {
 			account: ChainAddress
 			symbol: string
-			name?: string
+			name: string
 			decimals: number
 		}
 		amount: string

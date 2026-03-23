@@ -221,6 +221,7 @@ describe('PriceProviderService', () => {
 			id: unsupportedId,
 			account: accountFromCurrencyId(unsupportedId),
 			symbol: 'TEST',
+			name: 'TEST',
 			decimals: 18,
 		}
 		const service = makeService(

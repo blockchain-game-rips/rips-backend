@@ -1,5 +1,6 @@
 query GetStakes {
     stakeConfigs(where: { deleted_eq: false }) {
+        id
         ticketCap
         ticketCost
         duration

@@ -18,6 +18,7 @@ export class IndexerStakeRepository extends StakeRepository {
 		const { stakeConfigs } = await this.indexer.sdk.GetStakes()
 
 		return stakeConfigs.map((config) => ({
+			id: Number(config.id),
 			ticketCup: Number(config.ticketCap),
 			ticketPrice: {
 				currency: this.mainCurrency,
