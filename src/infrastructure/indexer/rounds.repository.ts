@@ -4,6 +4,8 @@ import { RoundRepository } from 'src/application/interfaces/repositories/round.r
 import { MAIN_CURRENCY } from 'src/application/interfaces/tokens'
 import { Currency } from 'src/domain/entities/currency'
 import { Round, RoundStatus } from 'src/domain/entities/round'
+import { AddressesActions } from 'src/domain/value-objects/actions'
+import { getAddress } from 'viem'
 import { IndexerService } from './indexer.service'
 import { fromStakeRaw } from './utils'
 
@@ -11,6 +13,7 @@ type RoundRaw = Awaited<
 	ReturnType<IndexerService['sdk']['GetRounds']>
 >['rounds'][number]
 
+//TODO: fee is missed, need to expose ticket count to all events or add fee to math or just lookup addresses
 function resolveRoundStatus(
 	roundRaw: RoundRaw,
 	ticketPrice: bigint,
@@ -20,7 +23,9 @@ function resolveRoundStatus(
 
 	switch (roundRaw.status) {
 		case RoundStatusRaw.Active: {
-			const startTimeSeconds = BigInt(Math.floor(new Date(roundRaw.startTime).getTime() / 1000))
+			const startTimeSeconds = BigInt(
+				Math.floor(new Date(roundRaw.startTime).getTime() / 1000),
+			)
 			const duration = BigInt(roundRaw.stakeConfig.durationSeconds)
 			const isExpired = nowSeconds - startTimeSeconds >= duration
 
@@ -82,5 +87,43 @@ export class IndexerRoundRepository extends RoundRepository {
 				),
 			}
 		})
+	}
+
+	async getActions(round: Round): Promise<AddressesActions> {
+		const { ticketPurchases, refunds, prizeClaims } =
+			await this.indexer.sdk.GetRoundActions({
+				roundId: round.id.toString(),
+			})
+
+		const addressesActions: AddressesActions = {
+			claims: [],
+			purchases: [],
+			refunds: [],
+		}
+
+		for (const purchase of ticketPurchases) {
+			addressesActions.purchases.push({
+				ticketAmount: BigInt(purchase.count),
+				userAddress: getAddress(purchase.buyer),
+			})
+		}
+
+		for (const refund of refunds) {
+			addressesActions.refunds.push({
+				ticketAmount:
+					BigInt(refund.amount) / round.stake.ticketPrice.amount,
+				userAddress: getAddress(refund.user),
+			})
+		}
+
+		for (const claim of prizeClaims) {
+			addressesActions.claims.push({
+				ticketAmount:
+					BigInt(claim.amount) / round.stake.ticketPrice.amount,
+				userAddress: getAddress(claim.claimer),
+			})
+		}
+
+		return addressesActions
 	}
 }

@@ -1,0 +1,14 @@
+query GetRoundActions($roundId: String!) {
+    ticketPurchases(where: { roundId_eq: $roundId }) {
+        buyer
+        count
+    }
+    prizeClaims(where: { roundId_eq: $roundId }) {
+        claimer
+        amount
+    }
+    refunds(where: { roundId_eq: $roundId }) {
+        user
+        amount
+    }
+}

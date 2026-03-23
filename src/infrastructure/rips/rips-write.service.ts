@@ -10,6 +10,7 @@ import {
 	decodeEventLog,
 	encodeFunctionData,
 	getAddress,
+	Hex,
 	type Address,
 	type TransactionRequestEIP1559,
 } from 'viem'
@@ -17,15 +18,19 @@ import { EvmClientService } from '../evm/evm-client/evm-client.service'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
 import { SignService } from '../sign.service'
 import { ripsAbi } from './rips-abi'
-import { RIPS_SC_ADDRESS } from './rips.constants'
+import { KEEPER_PK, RIPS_SC_ADDRESS } from './rips.constants'
 
 @Injectable()
 export class RipsWriteService {
 	constructor(
 		private readonly evmClientService: EvmClientService,
 		private readonly signService: SignService,
+
 		@Inject(RIPS_SC_ADDRESS) private readonly contractAddress: Address,
+
 		@Inject(MAIN_CURRENCY) private readonly mainCurrency: Currency,
+
+		@Inject(KEEPER_PK) private readonly keeperPk: Hex,
 	) {}
 
 	async buyTickets(
