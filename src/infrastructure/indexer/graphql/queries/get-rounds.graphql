@@ -1,0 +1,36 @@
+query GetRounds {
+    rounds {
+        id
+        stakeConfigId
+        stakeConfig {
+            id
+            ticketCap
+            ticketCost
+            durationSeconds
+        }
+        startTime
+        ticketsSold
+        status
+        ticketPurchases {
+            id
+            buyer
+            count
+            txHash
+            time
+        }
+        prizesClaimed {
+            id
+            claimer
+            amount
+            txHash
+            time
+        }
+        refunds {
+            id
+            user
+            amount
+            txHash
+            time
+        }
+    }
+}

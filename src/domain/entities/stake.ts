@@ -4,5 +4,5 @@ export type Stake = {
 	id: number
 	ticketCup: number
 	ticketPrice: CurrencyAmount
-	duration: number
+	durationSeconds: number
 }

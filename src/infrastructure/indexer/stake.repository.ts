@@ -4,6 +4,7 @@ import { MAIN_CURRENCY } from 'src/application/interfaces/tokens'
 import { Currency } from 'src/domain/entities/currency'
 import { Stake } from 'src/domain/entities/stake'
 import { IndexerService } from './indexer.service'
+import { fromStakeRaw } from './utils'
 
 @Injectable()
 export class IndexerStakeRepository extends StakeRepository {
@@ -17,14 +18,8 @@ export class IndexerStakeRepository extends StakeRepository {
 	async getStakes(): Promise<Stake[]> {
 		const { stakeConfigs } = await this.indexer.sdk.GetStakes()
 
-		return stakeConfigs.map((config) => ({
-			id: Number(config.id),
-			ticketCup: Number(config.ticketCap),
-			ticketPrice: {
-				currency: this.mainCurrency,
-				amount: BigInt(config.ticketCost),
-			},
-			duration: Number(config.duration),
-		}))
+		return stakeConfigs.map((stakeRaw) =>
+			fromStakeRaw(stakeRaw, this.mainCurrency),
+		)
 	}
 }

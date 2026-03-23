@@ -13,5 +13,5 @@ export enum RoundStatus {
 export type Round = {
 	id: number
 	stake: Stake
-	// status: RoundStatus
+	status: RoundStatus
 }

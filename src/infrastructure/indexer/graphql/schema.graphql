@@ -31,7 +31,7 @@ type Query {
 type StakeConfig {
   id: String!
   ticketCap: BigInt!
-  duration: BigInt!
+  durationSeconds: BigInt!
   ticketCost: BigInt!
   prizeDistribution(where: PrizeTierWhereInput, orderBy: [PrizeTierOrderByInput!], offset: Int, limit: Int): [PrizeTier!]!
   deleted: Boolean!
@@ -155,15 +155,15 @@ input StakeConfigWhereInput {
   ticketCap_lte: BigInt
   ticketCap_in: [BigInt!]
   ticketCap_not_in: [BigInt!]
-  duration_isNull: Boolean
-  duration_eq: BigInt
-  duration_not_eq: BigInt
-  duration_gt: BigInt
-  duration_gte: BigInt
-  duration_lt: BigInt
-  duration_lte: BigInt
-  duration_in: [BigInt!]
-  duration_not_in: [BigInt!]
+  durationSeconds_isNull: Boolean
+  durationSeconds_eq: BigInt
+  durationSeconds_not_eq: BigInt
+  durationSeconds_gt: BigInt
+  durationSeconds_gte: BigInt
+  durationSeconds_lt: BigInt
+  durationSeconds_lte: BigInt
+  durationSeconds_in: [BigInt!]
+  durationSeconds_not_in: [BigInt!]
   ticketCost_isNull: Boolean
   ticketCost_eq: BigInt
   ticketCost_not_eq: BigInt
@@ -224,14 +224,14 @@ input RoundWhereInput {
   stakeConfigId_endsWith: String
   stakeConfigId_not_endsWith: String
   startTime_isNull: Boolean
-  startTime_eq: BigInt
-  startTime_not_eq: BigInt
-  startTime_gt: BigInt
-  startTime_gte: BigInt
-  startTime_lt: BigInt
-  startTime_lte: BigInt
-  startTime_in: [BigInt!]
-  startTime_not_in: [BigInt!]
+  startTime_eq: DateTime
+  startTime_not_eq: DateTime
+  startTime_gt: DateTime
+  startTime_gte: DateTime
+  startTime_lt: DateTime
+  startTime_lte: DateTime
+  startTime_in: [DateTime!]
+  startTime_not_in: [DateTime!]
   ticketsSold_isNull: Boolean
   ticketsSold_eq: Int
   ticketsSold_not_eq: Int
@@ -285,6 +285,11 @@ input RoundWhereInput {
   AND: [RoundWhereInput!]
   OR: [RoundWhereInput!]
 }
+
+"""
+A date-time string in simplified extended ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)
+"""
+scalar DateTime
 
 enum RoundStatus {
   Active
@@ -365,15 +370,15 @@ input TicketPurchaseWhereInput {
   blockNumber_lte: BigInt
   blockNumber_in: [BigInt!]
   blockNumber_not_in: [BigInt!]
-  timestamp_isNull: Boolean
-  timestamp_eq: DateTime
-  timestamp_not_eq: DateTime
-  timestamp_gt: DateTime
-  timestamp_gte: DateTime
-  timestamp_lt: DateTime
-  timestamp_lte: DateTime
-  timestamp_in: [DateTime!]
-  timestamp_not_in: [DateTime!]
+  time_isNull: Boolean
+  time_eq: DateTime
+  time_not_eq: DateTime
+  time_gt: DateTime
+  time_gte: DateTime
+  time_lt: DateTime
+  time_lte: DateTime
+  time_in: [DateTime!]
+  time_not_in: [DateTime!]
   txHash_isNull: Boolean
   txHash_eq: String
   txHash_not_eq: String
@@ -394,11 +399,6 @@ input TicketPurchaseWhereInput {
   AND: [TicketPurchaseWhereInput!]
   OR: [TicketPurchaseWhereInput!]
 }
-
-"""
-A date-time string in simplified extended ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)
-"""
-scalar DateTime
 
 input PrizeClaimWhereInput {
   id_isNull: Boolean
@@ -472,15 +472,15 @@ input PrizeClaimWhereInput {
   blockNumber_lte: BigInt
   blockNumber_in: [BigInt!]
   blockNumber_not_in: [BigInt!]
-  timestamp_isNull: Boolean
-  timestamp_eq: DateTime
-  timestamp_not_eq: DateTime
-  timestamp_gt: DateTime
-  timestamp_gte: DateTime
-  timestamp_lt: DateTime
-  timestamp_lte: DateTime
-  timestamp_in: [DateTime!]
-  timestamp_not_in: [DateTime!]
+  time_isNull: Boolean
+  time_eq: DateTime
+  time_not_eq: DateTime
+  time_gt: DateTime
+  time_gte: DateTime
+  time_lt: DateTime
+  time_lte: DateTime
+  time_in: [DateTime!]
+  time_not_in: [DateTime!]
   txHash_isNull: Boolean
   txHash_eq: String
   txHash_not_eq: String
@@ -574,15 +574,15 @@ input RefundWhereInput {
   blockNumber_lte: BigInt
   blockNumber_in: [BigInt!]
   blockNumber_not_in: [BigInt!]
-  timestamp_isNull: Boolean
-  timestamp_eq: DateTime
-  timestamp_not_eq: DateTime
-  timestamp_gt: DateTime
-  timestamp_gte: DateTime
-  timestamp_lt: DateTime
-  timestamp_lte: DateTime
-  timestamp_in: [DateTime!]
-  timestamp_not_in: [DateTime!]
+  time_isNull: Boolean
+  time_eq: DateTime
+  time_not_eq: DateTime
+  time_gt: DateTime
+  time_gte: DateTime
+  time_lt: DateTime
+  time_lte: DateTime
+  time_in: [DateTime!]
+  time_not_in: [DateTime!]
   txHash_isNull: Boolean
   txHash_eq: String
   txHash_not_eq: String
@@ -623,12 +623,12 @@ enum PrizeTierOrderByInput {
   stakeConfig_ticketCap_ASC_NULLS_LAST
   stakeConfig_ticketCap_DESC_NULLS_FIRST
   stakeConfig_ticketCap_DESC_NULLS_LAST
-  stakeConfig_duration_ASC
-  stakeConfig_duration_DESC
-  stakeConfig_duration_ASC_NULLS_FIRST
-  stakeConfig_duration_ASC_NULLS_LAST
-  stakeConfig_duration_DESC_NULLS_FIRST
-  stakeConfig_duration_DESC_NULLS_LAST
+  stakeConfig_durationSeconds_ASC
+  stakeConfig_durationSeconds_DESC
+  stakeConfig_durationSeconds_ASC_NULLS_FIRST
+  stakeConfig_durationSeconds_ASC_NULLS_LAST
+  stakeConfig_durationSeconds_DESC_NULLS_FIRST
+  stakeConfig_durationSeconds_DESC_NULLS_LAST
   stakeConfig_ticketCost_ASC
   stakeConfig_ticketCost_DESC
   stakeConfig_ticketCost_ASC_NULLS_FIRST
@@ -671,7 +671,7 @@ type Round {
   id: String!
   stakeConfigId: String!
   stakeConfig: StakeConfig!
-  startTime: BigInt!
+  startTime: DateTime!
   ticketsSold: Int!
   status: RoundStatus!
   randomA: BigInt
@@ -689,7 +689,7 @@ type TicketPurchase {
   buyer: String!
   count: BigInt!
   blockNumber: BigInt!
-  timestamp: DateTime!
+  time: DateTime!
   txHash: String!
 }
 
@@ -760,12 +760,12 @@ enum TicketPurchaseOrderByInput {
   blockNumber_ASC_NULLS_LAST
   blockNumber_DESC_NULLS_FIRST
   blockNumber_DESC_NULLS_LAST
-  timestamp_ASC
-  timestamp_DESC
-  timestamp_ASC_NULLS_FIRST
-  timestamp_ASC_NULLS_LAST
-  timestamp_DESC_NULLS_FIRST
-  timestamp_DESC_NULLS_LAST
+  time_ASC
+  time_DESC
+  time_ASC_NULLS_FIRST
+  time_ASC_NULLS_LAST
+  time_DESC_NULLS_FIRST
+  time_DESC_NULLS_LAST
   txHash_ASC
   txHash_DESC
   txHash_ASC_NULLS_FIRST
@@ -781,7 +781,7 @@ type PrizeClaim {
   claimer: String!
   amount: BigInt!
   blockNumber: BigInt!
-  timestamp: DateTime!
+  time: DateTime!
   txHash: String!
 }
 
@@ -852,12 +852,12 @@ enum PrizeClaimOrderByInput {
   blockNumber_ASC_NULLS_LAST
   blockNumber_DESC_NULLS_FIRST
   blockNumber_DESC_NULLS_LAST
-  timestamp_ASC
-  timestamp_DESC
-  timestamp_ASC_NULLS_FIRST
-  timestamp_ASC_NULLS_LAST
-  timestamp_DESC_NULLS_FIRST
-  timestamp_DESC_NULLS_LAST
+  time_ASC
+  time_DESC
+  time_ASC_NULLS_FIRST
+  time_ASC_NULLS_LAST
+  time_DESC_NULLS_FIRST
+  time_DESC_NULLS_LAST
   txHash_ASC
   txHash_DESC
   txHash_ASC_NULLS_FIRST
@@ -873,7 +873,7 @@ type Refund {
   user: String!
   amount: BigInt!
   blockNumber: BigInt!
-  timestamp: DateTime!
+  time: DateTime!
   txHash: String!
 }
 
@@ -944,12 +944,12 @@ enum RefundOrderByInput {
   blockNumber_ASC_NULLS_LAST
   blockNumber_DESC_NULLS_FIRST
   blockNumber_DESC_NULLS_LAST
-  timestamp_ASC
-  timestamp_DESC
-  timestamp_ASC_NULLS_FIRST
-  timestamp_ASC_NULLS_LAST
-  timestamp_DESC_NULLS_FIRST
-  timestamp_DESC_NULLS_LAST
+  time_ASC
+  time_DESC
+  time_ASC_NULLS_FIRST
+  time_ASC_NULLS_LAST
+  time_DESC_NULLS_FIRST
+  time_DESC_NULLS_LAST
   txHash_ASC
   txHash_DESC
   txHash_ASC_NULLS_FIRST
@@ -977,12 +977,12 @@ enum RoundOrderByInput {
   stakeConfig_ticketCap_ASC_NULLS_LAST
   stakeConfig_ticketCap_DESC_NULLS_FIRST
   stakeConfig_ticketCap_DESC_NULLS_LAST
-  stakeConfig_duration_ASC
-  stakeConfig_duration_DESC
-  stakeConfig_duration_ASC_NULLS_FIRST
-  stakeConfig_duration_ASC_NULLS_LAST
-  stakeConfig_duration_DESC_NULLS_FIRST
-  stakeConfig_duration_DESC_NULLS_LAST
+  stakeConfig_durationSeconds_ASC
+  stakeConfig_durationSeconds_DESC
+  stakeConfig_durationSeconds_ASC_NULLS_FIRST
+  stakeConfig_durationSeconds_ASC_NULLS_LAST
+  stakeConfig_durationSeconds_DESC_NULLS_FIRST
+  stakeConfig_durationSeconds_DESC_NULLS_LAST
   stakeConfig_ticketCost_ASC
   stakeConfig_ticketCost_DESC
   stakeConfig_ticketCost_ASC_NULLS_FIRST
@@ -1046,12 +1046,12 @@ enum StakeConfigOrderByInput {
   ticketCap_ASC_NULLS_LAST
   ticketCap_DESC_NULLS_FIRST
   ticketCap_DESC_NULLS_LAST
-  duration_ASC
-  duration_DESC
-  duration_ASC_NULLS_FIRST
-  duration_ASC_NULLS_LAST
-  duration_DESC_NULLS_FIRST
-  duration_DESC_NULLS_LAST
+  durationSeconds_ASC
+  durationSeconds_DESC
+  durationSeconds_ASC_NULLS_FIRST
+  durationSeconds_ASC_NULLS_LAST
+  durationSeconds_DESC_NULLS_FIRST
+  durationSeconds_DESC_NULLS_LAST
   ticketCost_ASC
   ticketCost_DESC
   ticketCost_ASC_NULLS_FIRST
@@ -1143,7 +1143,7 @@ type ProtocolFeeUpdated {
   id: String!
   feePercent: BigInt!
   blockNumber: BigInt!
-  timestamp: DateTime!
+  time: DateTime!
   txHash: String!
 }
 
@@ -1183,15 +1183,15 @@ input ProtocolFeeUpdatedWhereInput {
   blockNumber_lte: BigInt
   blockNumber_in: [BigInt!]
   blockNumber_not_in: [BigInt!]
-  timestamp_isNull: Boolean
-  timestamp_eq: DateTime
-  timestamp_not_eq: DateTime
-  timestamp_gt: DateTime
-  timestamp_gte: DateTime
-  timestamp_lt: DateTime
-  timestamp_lte: DateTime
-  timestamp_in: [DateTime!]
-  timestamp_not_in: [DateTime!]
+  time_isNull: Boolean
+  time_eq: DateTime
+  time_not_eq: DateTime
+  time_gt: DateTime
+  time_gte: DateTime
+  time_lt: DateTime
+  time_lte: DateTime
+  time_in: [DateTime!]
+  time_not_in: [DateTime!]
   txHash_isNull: Boolean
   txHash_eq: String
   txHash_not_eq: String
@@ -1232,12 +1232,12 @@ enum ProtocolFeeUpdatedOrderByInput {
   blockNumber_ASC_NULLS_LAST
   blockNumber_DESC_NULLS_FIRST
   blockNumber_DESC_NULLS_LAST
-  timestamp_ASC
-  timestamp_DESC
-  timestamp_ASC_NULLS_FIRST
-  timestamp_ASC_NULLS_LAST
-  timestamp_DESC_NULLS_FIRST
-  timestamp_DESC_NULLS_LAST
+  time_ASC
+  time_DESC
+  time_ASC_NULLS_FIRST
+  time_ASC_NULLS_LAST
+  time_DESC_NULLS_FIRST
+  time_DESC_NULLS_LAST
   txHash_ASC
   txHash_DESC
   txHash_ASC_NULLS_FIRST
@@ -1261,7 +1261,7 @@ type FeeRecipientUpdated {
   id: String!
   feeRecipient: String!
   blockNumber: BigInt!
-  timestamp: DateTime!
+  time: DateTime!
   txHash: String!
 }
 
@@ -1309,15 +1309,15 @@ input FeeRecipientUpdatedWhereInput {
   blockNumber_lte: BigInt
   blockNumber_in: [BigInt!]
   blockNumber_not_in: [BigInt!]
-  timestamp_isNull: Boolean
-  timestamp_eq: DateTime
-  timestamp_not_eq: DateTime
-  timestamp_gt: DateTime
-  timestamp_gte: DateTime
-  timestamp_lt: DateTime
-  timestamp_lte: DateTime
-  timestamp_in: [DateTime!]
-  timestamp_not_in: [DateTime!]
+  time_isNull: Boolean
+  time_eq: DateTime
+  time_not_eq: DateTime
+  time_gt: DateTime
+  time_gte: DateTime
+  time_lt: DateTime
+  time_lte: DateTime
+  time_in: [DateTime!]
+  time_not_in: [DateTime!]
   txHash_isNull: Boolean
   txHash_eq: String
   txHash_not_eq: String
@@ -1358,12 +1358,12 @@ enum FeeRecipientUpdatedOrderByInput {
   blockNumber_ASC_NULLS_LAST
   blockNumber_DESC_NULLS_FIRST
   blockNumber_DESC_NULLS_LAST
-  timestamp_ASC
-  timestamp_DESC
-  timestamp_ASC_NULLS_FIRST
-  timestamp_ASC_NULLS_LAST
-  timestamp_DESC_NULLS_FIRST
-  timestamp_DESC_NULLS_LAST
+  time_ASC
+  time_DESC
+  time_ASC_NULLS_FIRST
+  time_ASC_NULLS_LAST
+  time_DESC_NULLS_FIRST
+  time_DESC_NULLS_LAST
   txHash_ASC
   txHash_DESC
   txHash_ASC_NULLS_FIRST
@@ -1387,7 +1387,7 @@ type CallbackGasLimitUpdated {
   id: String!
   callbackGasLimit: Int!
   blockNumber: BigInt!
-  timestamp: DateTime!
+  time: DateTime!
   txHash: String!
 }
 
@@ -1427,15 +1427,15 @@ input CallbackGasLimitUpdatedWhereInput {
   blockNumber_lte: BigInt
   blockNumber_in: [BigInt!]
   blockNumber_not_in: [BigInt!]
-  timestamp_isNull: Boolean
-  timestamp_eq: DateTime
-  timestamp_not_eq: DateTime
-  timestamp_gt: DateTime
-  timestamp_gte: DateTime
-  timestamp_lt: DateTime
-  timestamp_lte: DateTime
-  timestamp_in: [DateTime!]
-  timestamp_not_in: [DateTime!]
+  time_isNull: Boolean
+  time_eq: DateTime
+  time_not_eq: DateTime
+  time_gt: DateTime
+  time_gte: DateTime
+  time_lt: DateTime
+  time_lte: DateTime
+  time_in: [DateTime!]
+  time_not_in: [DateTime!]
   txHash_isNull: Boolean
   txHash_eq: String
   txHash_not_eq: String
@@ -1476,12 +1476,12 @@ enum CallbackGasLimitUpdatedOrderByInput {
   blockNumber_ASC_NULLS_LAST
   blockNumber_DESC_NULLS_FIRST
   blockNumber_DESC_NULLS_LAST
-  timestamp_ASC
-  timestamp_DESC
-  timestamp_ASC_NULLS_FIRST
-  timestamp_ASC_NULLS_LAST
-  timestamp_DESC_NULLS_FIRST
-  timestamp_DESC_NULLS_LAST
+  time_ASC
+  time_DESC
+  time_ASC_NULLS_FIRST
+  time_ASC_NULLS_LAST
+  time_DESC_NULLS_FIRST
+  time_DESC_NULLS_LAST
   txHash_ASC
   txHash_DESC
   txHash_ASC_NULLS_FIRST

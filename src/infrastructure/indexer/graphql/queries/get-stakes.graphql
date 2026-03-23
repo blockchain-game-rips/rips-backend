@@ -3,6 +3,6 @@ query GetStakes {
         id
         ticketCap
         ticketCost
-        duration
+        durationSeconds
     }
 }
