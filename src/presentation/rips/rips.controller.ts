@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common'
 import { BuyTicketsUseCase } from 'src/application/use-cases/buy-tickets/buy-tickets.use-case'
+import { GetRoundsUseCase } from 'src/application/use-cases/get-rounds/get-rounds.use-case'
 import { GetStakesUseCase } from 'src/application/use-cases/get-stakes/get-stakes.use-case'
 import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
 import { ZodValidationPipe } from 'src/presentation/pipes/zod-validation.pipe'
@@ -8,6 +9,7 @@ import {
 	BuyTicketsResponseDto,
 	toBuyTicketsResponseDto,
 } from './buy-tickets-response.dto'
+import { RoundResponseDto, toRoundResponseDto } from './round-response.dto'
 import { StakeResponseDto, toStakeResponseDto } from './stake-response.dto'
 
 const telegramIdParamSchema = z
@@ -25,6 +27,7 @@ export class RipsController {
 	constructor(
 		private readonly getStakesUseCase: GetStakesUseCase,
 		private readonly buyTicketsUseCase: BuyTicketsUseCase,
+		private readonly getRoundsUseCase: GetRoundsUseCase,
 	) {}
 
 	@Get('stakes')
@@ -48,5 +51,12 @@ export class RipsController {
 		})
 
 		return toBuyTicketsResponseDto(purchase)
+	}
+
+	@Get('rounds')
+	async getRounds(): Promise<RoundResponseDto[]> {
+		const rounds = await this.getRoundsUseCase.execute()
+
+		return rounds.map(toRoundResponseDto)
 	}
 }
