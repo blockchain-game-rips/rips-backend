@@ -12,6 +12,8 @@ export type AnvilConfig = {
 	/** port for anvil, default is random */
 	port?: number
 	printTraces?: boolean
+	/** path to anvil state file to load on startup */
+	pathToState?: string
 }
 
 export type ParamsUseAnvil = Omit<AnvilConfig, 'fork'> & {

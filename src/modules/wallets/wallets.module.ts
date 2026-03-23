@@ -17,9 +17,10 @@ import { SignService } from 'src/infrastructure/sign.service'
 import { WalletServiceImpl } from 'src/infrastructure/wallet.service'
 import { MainCurrencyModule } from 'src/modules/main-currency/main-currency.module'
 import { WalletsController } from 'src/presentation/wallets/wallets.controller'
+import { RipsModule } from '../rips/rips.module'
 
 @Module({
-	imports: [EvmModule, KmsModule, MainCurrencyModule],
+	imports: [EvmModule, KmsModule, MainCurrencyModule, RipsModule],
 	controllers: [WalletsController],
 	providers: [
 		{ provide: UserRepository, useClass: PrismaUserRepository },

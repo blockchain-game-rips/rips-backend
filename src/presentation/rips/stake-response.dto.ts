@@ -12,7 +12,7 @@ export type StakeResponseDto = {
 			decimals: number
 		}
 	}
-	duration: number
+	durationSeconds: number
 }
 
 export function toStakeResponseDto(stake: Stake): StakeResponseDto {
@@ -27,6 +27,6 @@ export function toStakeResponseDto(stake: Stake): StakeResponseDto {
 				name: stake.ticketPrice.currency.name,
 			},
 		},
-		duration: stake.duration,
+		durationSeconds: stake.durationSeconds,
 	}
 }

@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import { EvmWalletRepository } from 'src/application/interfaces/repositories/evm-wallet.repository'
 import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
 import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
@@ -23,7 +22,7 @@ import { SignService } from 'src/infrastructure/sign.service'
 import { WalletServiceImpl } from 'src/infrastructure/wallet.service'
 import { MainCurrencyModule } from 'src/modules/main-currency/main-currency.module'
 import { RipsController } from 'src/presentation/rips/rips.controller'
-import { getAddress } from 'viem'
+import { getEnvSafe } from 'src/utils/common'
 
 @Module({
 	imports: [MainCurrencyModule, EvmModule, KmsModule],
@@ -39,13 +38,12 @@ import { getAddress } from 'viem'
 		{ provide: BuyTicketsUseCase, useClass: BuyTicketsService },
 		{
 			provide: RIPS_SC_ADDRESS,
-			inject: [ConfigService],
-			useFactory: (config: ConfigService) =>
-				getAddress(config.getOrThrow<string>('RIPS_CONTRACT_ADDRESS')),
+			useFactory: () => getEnvSafe('RIPS_CONTRACT_ADDRESS'),
 		},
 		SignService,
 		EvmCurrencyWriteService,
 		RipsWriteService,
 	],
+	exports: [RipsWriteService],
 })
 export class RipsModule {}

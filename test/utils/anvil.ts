@@ -181,7 +181,10 @@ export class Anvil {
 			command += ` --print-traces`
 		}
 
-		// console.log(command)
+		if (this.config.pathToState) {
+			command += ` --load-state "${this.config.pathToState}"`
+		}
+
 		return command
 	}
 
@@ -240,5 +243,18 @@ export async function setNativeBalance(
 		// @ts-expect-error viem doesn't know about this method
 		method: 'anvil_setBalance',
 		params: [address, toHex(balance, { size: 32 })],
+	})
+}
+
+export async function increaseTime(client: Client, seconds: number) {
+	await client.request({
+		// @ts-expect-error viem doesn't know about this method
+		method: 'evm_increaseTime',
+		params: [toHex(seconds)],
+	})
+	await client.request({
+		// @ts-expect-error viem doesn't know about this method
+		method: 'evm_mine',
+		params: [],
 	})
 }
