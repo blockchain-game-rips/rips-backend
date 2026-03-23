@@ -2,14 +2,11 @@ import { Inject, Injectable } from '@nestjs/common'
 import { MAIN_CURRENCY } from 'src/application/interfaces/tokens'
 import { WalletService } from 'src/application/interfaces/wallet.service'
 import { Currency } from 'src/domain/entities/currency'
+import { InsufficientBalanceError } from 'src/domain/errors/insufficient-balance.error'
 import { resolveChainAddress } from 'src/domain/services/wallet-utils'
 import { Transaction } from 'src/domain/value-objects/transaction'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
-import {
-	InsufficientBalanceError,
-	WithdrawInput,
-	WithdrawUseCase,
-} from './withdraw.use-case'
+import { WithdrawInput, WithdrawUseCase } from './withdraw.use-case'
 
 @Injectable()
 export class WithdrawService implements WithdrawUseCase {

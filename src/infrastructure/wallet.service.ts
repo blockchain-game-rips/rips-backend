@@ -2,19 +2,23 @@ import { Injectable } from '@nestjs/common'
 import { WalletService } from 'src/application/interfaces/wallet.service'
 import { EIP155 } from 'src/constants'
 import { Currency } from 'src/domain/entities/currency'
+import { Stake } from 'src/domain/entities/stake'
 import { ChainAddress } from 'src/domain/value-objects/chain-address'
+import { Purchase } from 'src/domain/value-objects/purchase'
 import { Transaction } from 'src/domain/value-objects/transaction'
 import { Wallet } from 'src/domain/value-objects/wallet'
 import { getAddress } from 'viem'
 import { EvmCurrencyReadService } from './evm/evm-currency-read.service'
 import { EvmCurrencyWriteService } from './evm/evm-currency-write.service'
 import { EvmCurrency } from './evm/primitives/currencies/evm-currency'
+import { RipsWriteService } from './rips/rips-write.service'
 
 @Injectable()
 export class WalletServiceImpl extends WalletService {
 	constructor(
 		private readonly evmCurrencyReadService: EvmCurrencyReadService,
 		private readonly evmCurrencyWriteService: EvmCurrencyWriteService,
+		private readonly ripsWriteService: RipsWriteService,
 	) {
 		super()
 	}
@@ -45,5 +49,12 @@ export class WalletServiceImpl extends WalletService {
 		}
 
 		throw new Error(`Unsupported currency: ${args.currency.id}`)
+	}
+
+	buyTickets(
+		wallet: Wallet,
+		args: { stake: Stake; amount: number },
+	): Promise<Purchase> {
+		return this.ripsWriteService.buyTickets(wallet, args)
 	}
 }

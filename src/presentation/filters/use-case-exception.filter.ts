@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common'
 import { Response } from 'express'
 import { InsufficientBalanceError } from 'src/domain/errors/insufficient-balance.error'
+import { TicketNotFoundError } from 'src/domain/errors/stake-not-found.error'
 import { TransactionFailedError } from 'src/domain/errors/transaction-failed.error'
 import { UserAlreadyExistsError } from 'src/domain/errors/user-already-exists.error'
 import { UserNotFoundError } from 'src/domain/errors/user-not-found.error'
@@ -16,6 +17,7 @@ type ErrorConstructor = new (...args: never[]) => ContextError
 
 const ERROR_STATUS_MAP: Map<ErrorConstructor, HttpStatus> = new Map([
 	[UserNotFoundError, HttpStatus.NOT_FOUND],
+	[TicketNotFoundError, HttpStatus.NOT_FOUND],
 	[UserAlreadyExistsError, HttpStatus.CONFLICT],
 	[InsufficientBalanceError, HttpStatus.UNPROCESSABLE_ENTITY],
 	[TransactionFailedError, HttpStatus.BAD_GATEWAY],
