@@ -5,7 +5,7 @@ export type WithdrawResponseDto = {
 	txId: string
 	cost: {
 		currency: {
-			account: ChainAddress
+			chainAddress: ChainAddress
 			symbol: string
 			name: string
 			decimals: number
@@ -19,7 +19,7 @@ export function toWithdrawResponseDto(tx: Transaction): WithdrawResponseDto {
 		txId: tx.id,
 		cost: {
 			currency: {
-				account: tx.cost.currency.account,
+				chainAddress: tx.cost.currency.chainAddress,
 				symbol: tx.cost.currency.symbol,
 				name: tx.cost.currency.name,
 				decimals: tx.cost.currency.decimals,

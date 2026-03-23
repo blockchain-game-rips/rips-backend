@@ -9,8 +9,8 @@ export class EvmCurrencyReadService {
 	constructor(private readonly evmClientService: EvmClientService) {}
 
 	async balanceOf(currency: EvmCurrency, address: Address): Promise<bigint> {
-		const chainId = Number(currency.account.chain.reference)
-		const currencyAddress = currency.account.address
+		const chainId = Number(currency.chainAddress.chain.reference)
+		const currencyAddress = currency.chainAddress.address
 		const client = this.evmClientService.getClient(chainId)
 
 		if (currency instanceof Token) {
@@ -30,11 +30,11 @@ export class EvmCurrencyReadService {
 		owner: Address,
 		spender: Address,
 	): Promise<bigint> {
-		const chainId = Number(token.account.chain.reference)
+		const chainId = Number(token.chainAddress.chain.reference)
 		const client = this.evmClientService.getClient(chainId)
 
 		return client.readContract({
-			address: token.account.address,
+			address: token.chainAddress.address,
 			abi: erc20Abi,
 			functionName: 'allowance',
 			args: [owner, spender],

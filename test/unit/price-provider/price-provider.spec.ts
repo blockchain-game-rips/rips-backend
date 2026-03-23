@@ -27,7 +27,7 @@ const WETH_ARB_ID = composeCurrencyId(
 )
 const WETH_ARB: Currency = {
 	id: WETH_ARB_ID,
-	account: accountFromCurrencyId(WETH_ARB_ID),
+	chainAddress: accountFromCurrencyId(WETH_ARB_ID),
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
@@ -39,7 +39,7 @@ const WBTC_ARB_ID = composeCurrencyId(
 )
 const WBTC_ARB: Currency = {
 	id: WBTC_ARB_ID,
-	account: accountFromCurrencyId(WBTC_ARB_ID),
+	chainAddress: accountFromCurrencyId(WBTC_ARB_ID),
 	symbol: 'WBTC',
 	name: 'Wrapped Bitcoin',
 	decimals: 8,
@@ -51,7 +51,7 @@ const WETH_FUSE_ID = composeCurrencyId(
 )
 const WETH_FUSE: Currency = {
 	id: WETH_FUSE_ID,
-	account: accountFromCurrencyId(WETH_FUSE_ID),
+	chainAddress: accountFromCurrencyId(WETH_FUSE_ID),
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
@@ -63,7 +63,7 @@ const ETH_NATIVE_ARB_ID = composeCurrencyId(
 )
 const ETH_NATIVE_ARB: Currency = {
 	id: ETH_NATIVE_ARB_ID,
-	account: accountFromCurrencyId(ETH_NATIVE_ARB_ID),
+	chainAddress: accountFromCurrencyId(ETH_NATIVE_ARB_ID),
 	symbol: 'ETH',
 	name: 'Ether',
 	decimals: 18,
@@ -219,7 +219,7 @@ describe('PriceProviderService', () => {
 		)
 		const unsupportedCurrency: Currency = {
 			id: unsupportedId,
-			account: accountFromCurrencyId(unsupportedId),
+			chainAddress: accountFromCurrencyId(unsupportedId),
 			symbol: 'TEST',
 			name: 'TEST',
 			decimals: 18,

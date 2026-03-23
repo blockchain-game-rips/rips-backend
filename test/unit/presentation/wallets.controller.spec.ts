@@ -15,7 +15,7 @@ const MOCK_BALANCE: CurrencyAmount = {
 	amount: 1000000000000000000n,
 	currency: {
 		id: composeCurrencyId(composeChainId(EIP155, '8453'), NATIVE_ADDRESS),
-		account: {
+		chainAddress: {
 			chain: { namespace: EIP155, reference: '8453' },
 			address: NATIVE_ADDRESS,
 		},
@@ -53,7 +53,7 @@ describe('WalletsController', () => {
 
 			expect(result).toEqual({
 				currency: {
-					account: {
+					chainAddress: {
 						chain: { namespace: EIP155, reference: '8453' },
 						address: NATIVE_ADDRESS,
 					},

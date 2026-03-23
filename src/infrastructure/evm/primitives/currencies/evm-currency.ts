@@ -8,7 +8,7 @@ import { Address, getAddress } from 'viem'
 
 export abstract class EvmCurrency implements Currency {
 	readonly id: CurrencyId
-	readonly account: {
+	readonly chainAddress: {
 		chain: Chain
 		address: Address
 	}
@@ -20,7 +20,7 @@ export abstract class EvmCurrency implements Currency {
 		const checksumAddress = getAddress(address)
 
 		const chain = { namespace: EIP155, reference: chainId.toString() }
-		this.account = { chain, address: checksumAddress }
+		this.chainAddress = { chain, address: checksumAddress }
 
 		const caip2ChainId = composeChainId(EIP155, chainId.toString())
 		this.id = composeCurrencyId(caip2ChainId, checksumAddress)

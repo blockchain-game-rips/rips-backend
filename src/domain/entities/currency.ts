@@ -9,5 +9,5 @@ export interface CurrencyMetadata {
 
 export type Currency = {
 	id: CurrencyId
-	account: ChainAddress
+	chainAddress: ChainAddress
 } & CurrencyMetadata

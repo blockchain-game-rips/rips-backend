@@ -6,7 +6,7 @@ export type StakeResponseDto = {
 	ticketPrice: {
 		amount: string
 		currency: {
-			account: ChainAddress
+			chainAddress: ChainAddress
 			symbol: string
 			name: string
 			decimals: number
@@ -23,7 +23,7 @@ export function toStakeResponseDto(stake: Stake): StakeResponseDto {
 			currency: {
 				symbol: stake.ticketPrice.currency.symbol,
 				decimals: stake.ticketPrice.currency.decimals,
-				account: stake.ticketPrice.currency.account,
+				chainAddress: stake.ticketPrice.currency.chainAddress,
 				name: stake.ticketPrice.currency.name,
 			},
 		},

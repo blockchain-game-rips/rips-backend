@@ -3,7 +3,7 @@ import { CurrencyAmount } from 'src/domain/value-objects/currency-amount'
 
 export type BalanceResponseDto = {
 	currency: {
-		account: ChainAddress
+		chainAddress: ChainAddress
 		symbol: string
 		name?: string
 		decimals: number
@@ -16,7 +16,7 @@ export function toBalanceResponseDto(
 ): BalanceResponseDto {
 	return {
 		currency: {
-			account: currencyAmount.currency.account,
+			chainAddress: currencyAmount.currency.chainAddress,
 			symbol: currencyAmount.currency.symbol,
 			name: currencyAmount.currency.name,
 			decimals: currencyAmount.currency.decimals,

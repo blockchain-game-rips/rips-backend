@@ -30,7 +30,7 @@ const WETH_ARB_ID = composeCurrencyId(
 )
 const WETH_ARB: Currency = {
 	id: WETH_ARB_ID,
-	account: ChainAddressFromCurrencyId(WETH_ARB_ID),
+	chainAddress: ChainAddressFromCurrencyId(WETH_ARB_ID),
 	symbol: 'WETH',
 	name: 'Wrapped Ether',
 	decimals: 18,
@@ -42,7 +42,7 @@ const ETH_NATIVE_ARB_ID = composeCurrencyId(
 )
 const ETH_NATIVE_ARB: Currency = {
 	id: ETH_NATIVE_ARB_ID,
-	account: ChainAddressFromCurrencyId(ETH_NATIVE_ARB_ID),
+	chainAddress: ChainAddressFromCurrencyId(ETH_NATIVE_ARB_ID),
 	symbol: 'ETH',
 	name: 'Ether',
 	decimals: 18,

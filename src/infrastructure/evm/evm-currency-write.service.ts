@@ -87,7 +87,7 @@ export class EvmCurrencyWriteService {
 
 		if (currency instanceof Token) {
 			return {
-				to: getAddress(currency.account.address),
+				to: getAddress(currency.chainAddress.address),
 				data: encodeFunctionData({
 					abi: erc20Abi,
 					functionName: 'transfer',

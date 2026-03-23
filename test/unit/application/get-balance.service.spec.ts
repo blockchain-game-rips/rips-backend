@@ -32,7 +32,7 @@ const MOCK_CURRENCY: Currency = {
 		composeChainId(EIP155, '8453'),
 		'0x0000000000000000000000000000000000000000',
 	),
-	account: {
+	chainAddress: {
 		chain: { namespace: EIP155, reference: '8453' },
 		address: '0x0000000000000000000000000000000000000000',
 	},

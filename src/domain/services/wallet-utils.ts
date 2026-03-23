@@ -6,7 +6,7 @@ export function resolveChainAddress(
 	wallet: Wallet,
 	currency: Currency,
 ): ChainAddress {
-	const { namespace } = currency.account.chain
+	const { namespace } = currency.chainAddress.chain
 	const address = wallet.namespaceToAddress[namespace]
 
 	if (!address) {
@@ -14,7 +14,7 @@ export function resolveChainAddress(
 	}
 
 	return {
-		chain: currency.account.chain,
+		chain: currency.chainAddress.chain,
 		address,
 	}
 }
