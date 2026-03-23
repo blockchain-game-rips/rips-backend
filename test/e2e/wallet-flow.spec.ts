@@ -1,18 +1,31 @@
 import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
+import path from 'path'
 import { AppModule } from 'src/app.module'
 import { KmsService } from 'src/application/interfaces/kms.service'
 import { EVM_CLIENT_CONFIG } from 'src/infrastructure/evm/evm-client/types'
+import { IndexerModule } from 'src/infrastructure/indexer/indexer.module'
 import { MnemonicKmsService } from 'src/infrastructure/kms/mnemonic-kms.service'
+import {
+	KEEPER_PK,
+	RIPS_SC_ADDRESS,
+} from 'src/infrastructure/rips/rips.constants'
 import { UseCaseExceptionFilter } from 'src/presentation/filters/use-case-exception.filter'
 import request from 'supertest'
 import { createPublicClient, http, parseEther } from 'viem'
 import { base } from 'viem/chains'
 import { setNativeBalance, useAnvil } from '../utils/anvil'
+import { MockIndexerModule } from '../utils/mock-indexer.module'
 import { usePostgres } from '../utils/postgres'
+import deployments from '../utils/deployments.json'
 
 const KMS_MNEMONIC =
 	'spy record fury either collect ill pony monkey praise cool matter state'
+
+const KEEPER_PRIVATE_KEY =
+	'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+
+const ANVIL_STATE_PATH = path.resolve(__dirname, '../utils/anvil-state.json')
 
 const USER_TG_ID = '123456789'
 const DEPOSIT_AMOUNT = parseEther('1')
@@ -29,7 +42,10 @@ describe('Wallet flow E2E', () => {
 	let rpcUrl: string
 
 	usePostgres()
-	const anvil = useAnvil({ chainId: chain.id }).anvils[0]
+	const anvil = useAnvil({
+		chainId: chain.id,
+		pathToState: ANVIL_STATE_PATH,
+	}).anvils[0]
 
 	beforeAll(async () => {
 		rpcUrl = `http://127.0.0.1:${anvil.port}`
@@ -57,6 +73,12 @@ describe('Wallet flow E2E', () => {
 			.useClass(MnemonicKmsService)
 			.overrideProvider(EVM_CLIENT_CONFIG)
 			.useValue(testEvmClientConfig)
+			.overrideModule(IndexerModule)
+			.useModule(MockIndexerModule)
+			.overrideProvider(RIPS_SC_ADDRESS)
+			.useValue(deployments.rips)
+			.overrideProvider(KEEPER_PK)
+			.useValue(KEEPER_PRIVATE_KEY)
 			.compile()
 
 		app = moduleRef.createNestApplication()
