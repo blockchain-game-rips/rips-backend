@@ -365,6 +365,7 @@ function handleFeeRecipientUpdated(eventCtx: EventContext): void {
 	const { block, log, feeRecipientUpdates } = eventCtx
 
 	const { newRecipient } = rips.events.FeeRecipientUpdated.decode(log)
+	console.log('new fee recipient', newRecipient)
 
 	feeRecipientUpdates.push(
 		new FeeRecipientUpdated({
