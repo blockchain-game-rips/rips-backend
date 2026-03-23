@@ -24,7 +24,7 @@ export class Refund {
     blockNumber!: bigint
 
     @DateTimeColumn_({nullable: false})
-    timestamp!: Date
+    time!: Date
 
     @StringColumn_({nullable: false})
     txHash!: string

@@ -153,7 +153,7 @@ function handleStakeCreated(eventCtx: EventContext): void {
 	const stakeConfig = new StakeConfig({
 		id: stakeId.toString(),
 		ticketCap: config.ticketCap,
-		duration: config.duration,
+		durationSeconds: config.duration,
 		ticketCost: config.ticketCost,
 		deleted: false,
 	})
@@ -216,7 +216,7 @@ async function handleRoundCreated(eventCtx: EventContext): Promise<void> {
 		new Round({
 			id: roundId.toString(),
 			stakeConfig,
-			startTime: BigInt(block.timestamp) / 1000n,
+			startTime: new Date(block.timestamp),
 			ticketsSold: 0,
 			status: RoundStatus.Active,
 		}),
@@ -249,7 +249,7 @@ async function handleTicketsPurchased(eventCtx: EventContext): Promise<void> {
 			buyer: buyer.toLowerCase(),
 			count,
 			blockNumber: BigInt(block.height),
-			timestamp: new Date(block.timestamp),
+			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
 		}),
 	)
@@ -313,7 +313,7 @@ async function handlePrizesClaimed(eventCtx: EventContext): Promise<void> {
 			claimer: claimer.toLowerCase(),
 			amount,
 			blockNumber: BigInt(block.height),
-			timestamp: new Date(block.timestamp),
+			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
 		}),
 	)
@@ -339,7 +339,7 @@ async function handleRefundIssued(eventCtx: EventContext): Promise<void> {
 			user: user.toLowerCase(),
 			amount,
 			blockNumber: BigInt(block.height),
-			timestamp: new Date(block.timestamp),
+			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
 		}),
 	)
@@ -355,7 +355,7 @@ function handleProtocolFeeUpdated(eventCtx: EventContext): void {
 			id: log.id,
 			feePercent: newFeePercent,
 			blockNumber: BigInt(block.height),
-			timestamp: new Date(block.timestamp),
+			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
 		}),
 	)
@@ -372,7 +372,7 @@ function handleFeeRecipientUpdated(eventCtx: EventContext): void {
 			id: log.id,
 			feeRecipient: newRecipient.toLowerCase(),
 			blockNumber: BigInt(block.height),
-			timestamp: new Date(block.timestamp),
+			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
 		}),
 	)
@@ -388,7 +388,7 @@ function handleCallbackGasLimitUpdated(eventCtx: EventContext): void {
 			id: log.id,
 			callbackGasLimit: newLimit,
 			blockNumber: BigInt(block.height),
-			timestamp: new Date(block.timestamp),
+			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
 		}),
 	)

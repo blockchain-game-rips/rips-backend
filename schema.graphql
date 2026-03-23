@@ -1,7 +1,7 @@
 type StakeConfig @entity {
     id: ID!
     ticketCap: BigInt!
-    duration: BigInt!
+    durationSeconds: BigInt!
     ticketCost: BigInt!
     prizeDistribution: [PrizeTier!]! @derivedFrom(field: "stakeConfig")
     deleted: Boolean!
@@ -27,7 +27,7 @@ enum RoundStatus {
 type Round @entity {
     id: ID!
     stakeConfig: StakeConfig!
-    startTime: BigInt!
+    startTime: DateTime!
     ticketsSold: Int!
     status: RoundStatus!
     randomA: BigInt
@@ -44,7 +44,7 @@ type TicketPurchase @entity {
     buyer: String!
     count: BigInt!
     blockNumber: BigInt!
-    timestamp: DateTime!
+    time: DateTime!
     txHash: String!
 }
 
@@ -54,7 +54,7 @@ type PrizeClaim @entity {
     claimer: String!
     amount: BigInt!
     blockNumber: BigInt!
-    timestamp: DateTime!
+    time: DateTime!
     txHash: String!
 }
 
@@ -64,7 +64,7 @@ type Refund @entity {
     user: String!
     amount: BigInt!
     blockNumber: BigInt!
-    timestamp: DateTime!
+    time: DateTime!
     txHash: String!
 }
 
@@ -72,7 +72,7 @@ type ProtocolFeeUpdated @entity {
     id: ID!
     feePercent: BigInt!
     blockNumber: BigInt!
-    timestamp: DateTime!
+    time: DateTime!
     txHash: String!
 }
 
@@ -80,7 +80,7 @@ type FeeRecipientUpdated @entity {
     id: ID!
     feeRecipient: String!
     blockNumber: BigInt!
-    timestamp: DateTime!
+    time: DateTime!
     txHash: String!
 }
 
@@ -88,6 +88,6 @@ type CallbackGasLimitUpdated @entity {
     id: ID!
     callbackGasLimit: Int!
     blockNumber: BigInt!
-    timestamp: DateTime!
+    time: DateTime!
     txHash: String!
 }

@@ -15,7 +15,7 @@ export class StakeConfig {
     ticketCap!: bigint
 
     @BigIntColumn_({nullable: false})
-    duration!: bigint
+    durationSeconds!: bigint
 
     @BigIntColumn_({nullable: false})
     ticketCost!: bigint

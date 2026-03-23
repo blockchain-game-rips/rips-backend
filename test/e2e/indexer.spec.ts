@@ -93,7 +93,7 @@ describe('indexer e2e', () => {
 			expect(stakeConfig).toMatchObject({
 				id: '1',
 				ticket_cap: TICKET_CAP.toString(),
-				duration: DURATION.toString(),
+				duration_seconds: DURATION.toString(),
 				ticket_cost: TICKET_COST.toString(),
 				deleted: false,
 			})
