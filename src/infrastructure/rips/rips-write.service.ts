@@ -16,7 +16,7 @@ import {
 } from 'viem'
 import { EvmClientService } from '../evm/evm-client/evm-client.service'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
-import { SignService } from '../sign.service'
+import { SignService } from '../sign/sign.service'
 import { ripsAbi } from './rips-abi'
 import { KEEPER_PK, RIPS_SC_ADDRESS } from './rips.constants'
 

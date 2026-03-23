@@ -55,7 +55,6 @@ describe('Wallet flow E2E', () => {
 		})
 			.overrideProvider(KmsService)
 			.useClass(MnemonicKmsService)
-			//TODO: figure out how to not overrice this config
 			.overrideProvider(EVM_CLIENT_CONFIG)
 			.useValue(testEvmClientConfig)
 			.compile()

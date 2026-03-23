@@ -10,7 +10,7 @@ import {
 	type Address,
 	type TransactionRequestEIP1559,
 } from 'viem'
-import { SignService } from '../sign.service'
+import { SignService } from '../sign/sign.service'
 import { EvmClientService } from './evm-client/evm-client.service'
 import { EvmCurrency } from './primitives/currencies/evm-currency'
 import { Token } from './primitives/currencies/token'

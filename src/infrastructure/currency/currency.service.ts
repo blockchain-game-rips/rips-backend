@@ -4,7 +4,7 @@ import { EIP155 } from 'src/constants'
 import { Currency } from 'src/domain/entities/currency'
 import { ChainAddress } from 'src/domain/value-objects/chain-address'
 import { getAddress } from 'viem'
-import { EvmCurrencyService } from './evm/evm-currency.service'
+import { EvmCurrencyService } from '../evm/evm-currency.service'
 
 @Injectable()
 export class CurrencyServiceImpl extends CurrencyService {

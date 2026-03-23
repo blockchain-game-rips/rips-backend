@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { CurrencyService } from 'src/application/interfaces/currency.service'
 import { MAIN_CURRENCY } from 'src/application/interfaces/tokens'
-import { CurrencyServiceImpl } from 'src/infrastructure/currency.service'
+import { CurrencyServiceImpl } from 'src/infrastructure/currency/currency.service'
 import { EvmModule } from 'src/infrastructure/evm/evm.module'
 import { MAIN_CURRENCY_VALUE } from './main-currency.constants'
 
