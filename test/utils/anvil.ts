@@ -181,7 +181,10 @@ export class Anvil {
 			command += ` --print-traces`
 		}
 
-		// console.log(command)
+		if (this.config.pathToState) {
+			command += ` --load-state "${this.config.pathToState}"`
+		}
+
 		return command
 	}
 

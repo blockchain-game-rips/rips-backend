@@ -1,5 +1,9 @@
+import path from 'path'
 import { DataSource } from 'typeorm'
 import { parseEther } from 'viem'
+import { createPublicClient, createWalletClient, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import deployments from '../utils/deployments.json'
 import ripsAbi from '../contracts/abi/Rips.json'
 import vrfAbi from '../contracts/abi/VRFCoordinatorV2_5Mock.json'
 import { increaseTime, useAnvil } from '../utils/anvil'
@@ -7,48 +11,61 @@ import { writeAndWait } from '../utils/contracts'
 import { waitForRecord, waitForRow } from '../utils/db'
 import { usePostgres } from '../utils/postgres'
 import { useProcessor } from '../utils/processor'
-import { SetupResult, setupContracts } from '../utils/setup'
 
 const CHAIN_ID = 31337
 
+const ANVIL_STATE_PATH = path.resolve(__dirname, '../utils/anvil-state.json')
+
 const TICKET_CAP = 8n
-const TICKET_COST = parseEther('0.0025')
+const TICKET_COST = parseEther('0.005')
 const DURATION = 86400n
 
-// 1 + 2 + 5 = 8 prizes = ticketCap
-// 1*0.011 + 2*0.002 + 5*0.001 = 0.011 + 0.004 + 0.005 = 0.02 ETH = 8 * 0.0025
+// 5 + 2 + 1 = 8 prizes = ticketCap
 const PRIZE_TIERS = [
 	{
-		prizeCount: 1n,
-		minPrize: parseEther('0.011'),
-		maxPrize: parseEther('0.011'),
+		prizeCount: 5n,
+		minPrize: parseEther('0.0008'),
+		maxPrize: parseEther('0.0012'),
 	},
 	{
 		prizeCount: 2n,
-		minPrize: parseEther('0.002'),
-		maxPrize: parseEther('0.002'),
+		minPrize: parseEther('0.007'),
+		maxPrize: parseEther('0.008'),
 	},
 	{
-		prizeCount: 5n,
-		minPrize: parseEther('0.001'),
-		maxPrize: parseEther('0.001'),
+		prizeCount: 1n,
+		minPrize: parseEther('0.02'),
+		maxPrize: parseEther('0.02'),
 	},
 ]
 
+const DEPLOYER_PRIVATE_KEY =
+	'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+
 describe('indexer e2e', () => {
 	const { postgres } = usePostgres()
-	const { anvils } = useAnvil({ chainId: CHAIN_ID })
+	const { anvils } = useAnvil({ chainId: CHAIN_ID, pathToState: ANVIL_STATE_PATH })
 
-	let setup: SetupResult
 	let dataSource: DataSource
 
-	beforeAll(async () => {
-		setup = await setupContracts(anvils[0].port)
+	const deployer = privateKeyToAccount(DEPLOYER_PRIVATE_KEY)
+
+	const ripsAddress = deployments.rips as `0x${string}`
+	const vrfAddress = deployments.vrfCoordinator as `0x${string}`
+
+	let walletClient: ReturnType<typeof createWalletClient>
+	let publicClient: ReturnType<typeof createPublicClient>
+
+	beforeAll(() => {
+		const rpcUrl = `http://127.0.0.1:${anvils[0].port}`
+
+		walletClient = createWalletClient({ transport: http(rpcUrl) })
+		publicClient = createPublicClient({ transport: http(rpcUrl) })
 	})
 
 	useProcessor(() => ({
 		RPC_ENDPOINT: `http://127.0.0.1:${anvils[0].port}`,
-		CONTRACT_ADDRESS: setup.ripsAddress,
+		CONTRACT_ADDRESS: ripsAddress,
 		CONTRACT_DEPLOYED_AT: '0',
 		DB_URL: postgres.connectionUrl,
 	}))
@@ -67,25 +84,6 @@ describe('indexer e2e', () => {
 	})
 
 	describe('createStake', () => {
-		beforeAll(async () => {
-			const { ripsAddress, owner, walletClient, publicClient } = setup
-
-			await writeAndWait(walletClient, publicClient, {
-				address: ripsAddress,
-				abi: ripsAbi,
-				functionName: 'createStake',
-				args: [
-					{
-						prizeDistribution: PRIZE_TIERS,
-						ticketCap: TICKET_CAP,
-						duration: DURATION,
-						ticketCost: TICKET_COST,
-					},
-				],
-				account: owner,
-			})
-		})
-
 		it('indexes the StakeConfig with correct fields', async () => {
 			const stakeConfig = await waitForRow(
 				dataSource,
@@ -141,8 +139,6 @@ describe('indexer e2e', () => {
 		let txHash: `0x${string}`
 
 		beforeAll(async () => {
-			const { ripsAddress, deployer, walletClient, publicClient } = setup
-
 			txHash = await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
@@ -161,7 +157,7 @@ describe('indexer e2e', () => {
 
 			expect(purchase).toMatchObject({
 				round_id: '1',
-				buyer: setup.deployer.address.toLowerCase(),
+				buyer: deployer.address.toLowerCase(),
 				count: TICKET_COUNT.toString(),
 				tx_hash: txHash,
 			})
@@ -184,8 +180,6 @@ describe('indexer e2e', () => {
 		const REMAINING_TICKETS = TICKET_CAP - 3n
 
 		beforeAll(async () => {
-			const { ripsAddress, deployer, walletClient, publicClient } = setup
-
 			await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
@@ -226,8 +220,6 @@ describe('indexer e2e', () => {
 
 	describe('requestVrf', () => {
 		beforeAll(async () => {
-			const { ripsAddress, deployer, walletClient, publicClient } = setup
-
 			await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
@@ -253,14 +245,6 @@ describe('indexer e2e', () => {
 
 	describe('fulfillRandomWords', () => {
 		beforeAll(async () => {
-			const {
-				vrfAddress,
-				ripsAddress,
-				deployer,
-				walletClient,
-				publicClient,
-			} = setup
-
 			const [round] = await dataSource.query(
 				`SELECT vrf_request_id FROM round WHERE id = '1'`,
 			)
@@ -295,8 +279,6 @@ describe('indexer e2e', () => {
 		let txHash: `0x${string}`
 
 		beforeAll(async () => {
-			const { ripsAddress, deployer, walletClient, publicClient } = setup
-
 			txHash = await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
@@ -314,7 +296,7 @@ describe('indexer e2e', () => {
 
 			expect(claim).toMatchObject({
 				round_id: '1',
-				claimer: setup.deployer.address.toLowerCase(),
+				claimer: deployer.address.toLowerCase(),
 				tx_hash: txHash,
 			})
 			expect(BigInt(claim.amount as string)).toBeGreaterThan(0n)
@@ -326,8 +308,6 @@ describe('indexer e2e', () => {
 		let txHash: `0x${string}`
 
 		beforeAll(async () => {
-			const { ripsAddress, deployer, walletClient, publicClient } = setup
-
 			await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
@@ -337,7 +317,7 @@ describe('indexer e2e', () => {
 				account: deployer,
 			})
 
-			await increaseTime(setup.publicClient, Number(DURATION) + 1)
+			await increaseTime(publicClient, Number(DURATION) + 1)
 
 			txHash = await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
@@ -356,7 +336,7 @@ describe('indexer e2e', () => {
 
 			expect(refund).toMatchObject({
 				round_id: '2',
-				user: setup.deployer.address.toLowerCase(),
+				user: deployer.address.toLowerCase(),
 				amount: (TICKET_COUNT * TICKET_COST).toString(),
 				tx_hash: txHash,
 			})
@@ -373,9 +353,6 @@ describe('indexer e2e', () => {
 		let gasLimitHash: `0x${string}`
 
 		beforeAll(async () => {
-			const { ripsAddress, owner, deployer, walletClient, publicClient } =
-				setup
-
 			newFeeRecipient = deployer.address
 
 			feeHash = await writeAndWait(walletClient, publicClient, {
@@ -383,7 +360,7 @@ describe('indexer e2e', () => {
 				abi: ripsAbi,
 				functionName: 'setProtocolFee',
 				args: [NEW_FEE_PERCENT],
-				account: owner,
+				account: deployer,
 			})
 
 			recipientHash = await writeAndWait(walletClient, publicClient, {
@@ -391,7 +368,7 @@ describe('indexer e2e', () => {
 				abi: ripsAbi,
 				functionName: 'setFeeRecipient',
 				args: [newFeeRecipient],
-				account: owner,
+				account: deployer,
 			})
 
 			gasLimitHash = await writeAndWait(walletClient, publicClient, {
@@ -399,7 +376,7 @@ describe('indexer e2e', () => {
 				abi: ripsAbi,
 				functionName: 'updateCallbackGasLimit',
 				args: [NEW_CALLBACK_GAS_LIMIT],
-				account: owner,
+				account: deployer,
 			})
 		})
 
@@ -442,14 +419,12 @@ describe('indexer e2e', () => {
 
 	describe('deleteStake', () => {
 		beforeAll(async () => {
-			const { ripsAddress, owner, walletClient, publicClient } = setup
-
 			await writeAndWait(walletClient, publicClient, {
 				address: ripsAddress,
 				abi: ripsAbi,
 				functionName: 'deleteStake',
 				args: [1n],
-				account: owner,
+				account: deployer,
 			})
 		})
 

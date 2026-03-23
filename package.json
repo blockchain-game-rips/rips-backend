@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "test": "jest",
+        "test:e2e": "jest --testPathPattern=test/e2e",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "build": "rm -rf lib && tsc -p tsconfig.build.json",
         "update": "npx npm-check-updates --filter /subsquid/ --upgrade && npm i -f",
