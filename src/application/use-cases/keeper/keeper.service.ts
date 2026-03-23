@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { Round, RoundStatus } from 'src/domain/entities/round'
 import { RipsKeeperService } from 'src/infrastructure/rips/rips-keeper.service'
 import { Address } from 'viem'
-import { GetRoundActionsUseCase } from '../get-round-actions/get-round-actions.use-case'
 import { GetRoundsUseCase } from '../get-rounds/get-rounds.use-case'
 import { KeeperUseCase } from './keeper.use-case'
 
@@ -10,7 +9,6 @@ import { KeeperUseCase } from './keeper.use-case'
 export class KeeperService extends KeeperUseCase {
 	constructor(
 		private readonly getRoundsUseCase: GetRoundsUseCase,
-		private readonly getRoundActionsUseCase: GetRoundActionsUseCase,
 		private readonly ripsKeeperService: RipsKeeperService,
 	) {
 		super()
@@ -52,7 +50,7 @@ export class KeeperService extends KeeperUseCase {
 
 	private async handleClaiming(round: Round) {
 		try {
-			const actions = await this.getRoundActionsUseCase.execute(round)
+			const actions = round.actions
 
 			const uniqueClaimedAddresses: Set<Address> = new Set()
 
@@ -79,7 +77,7 @@ export class KeeperService extends KeeperUseCase {
 
 	private async handleRefund(round: Round) {
 		try {
-			const actions = await this.getRoundActionsUseCase.execute(round)
+			const actions = round.actions
 
 			const uniqueRefundedAddresses: Set<Address> = new Set()
 

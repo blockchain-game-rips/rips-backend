@@ -1,3 +1,4 @@
+import { AddressesActions } from '../value-objects/actions'
 import { Stake } from './stake'
 
 export enum RoundStatus {
@@ -13,5 +14,6 @@ export enum RoundStatus {
 export type Round = {
 	id: number
 	stake: Stake
+	actions: AddressesActions
 	status: RoundStatus
 }

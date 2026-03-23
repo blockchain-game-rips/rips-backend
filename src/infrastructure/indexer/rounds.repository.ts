@@ -60,6 +60,39 @@ function resolveRoundStatus(
 	}
 }
 
+function resolveActions(roundRaw: RoundRaw): AddressesActions {
+	const addressesActions: AddressesActions = {
+		claims: [],
+		purchases: [],
+		refunds: [],
+	}
+
+	for (const purchase of roundRaw.ticketPurchases) {
+		addressesActions.purchases.push({
+			ticketAmount: BigInt(purchase.count),
+			userAddress: getAddress(purchase.buyer),
+		})
+	}
+
+	for (const refund of roundRaw.refunds) {
+		addressesActions.refunds.push({
+			ticketAmount:
+				BigInt(refund.amount) / BigInt(roundRaw.stakeConfig.ticketCost),
+			userAddress: getAddress(refund.user),
+		})
+	}
+
+	for (const claim of roundRaw.prizesClaimed) {
+		addressesActions.claims.push({
+			ticketAmount:
+				BigInt(claim.amount) / BigInt(roundRaw.stakeConfig.ticketCost),
+			userAddress: getAddress(claim.claimer),
+		})
+	}
+
+	return addressesActions
+}
+
 @Injectable()
 export class IndexerRoundRepository extends RoundRepository {
 	constructor(
@@ -76,10 +109,12 @@ export class IndexerRoundRepository extends RoundRepository {
 
 		return roundsRaw.map((roundRaw) => {
 			const stake = fromStakeRaw(roundRaw.stakeConfig, this.mainCurrency)
+			const actions = resolveActions(roundRaw)
 
 			return {
 				id: Number(roundRaw.id),
 				stake,
+				actions,
 				status: resolveRoundStatus(
 					roundRaw,
 					stake.ticketPrice.amount,
@@ -87,43 +122,5 @@ export class IndexerRoundRepository extends RoundRepository {
 				),
 			}
 		})
-	}
-
-	async getActions(round: Round): Promise<AddressesActions> {
-		const { ticketPurchases, refunds, prizeClaims } =
-			await this.indexer.sdk.GetRoundActions({
-				roundId: round.id.toString(),
-			})
-
-		const addressesActions: AddressesActions = {
-			claims: [],
-			purchases: [],
-			refunds: [],
-		}
-
-		for (const purchase of ticketPurchases) {
-			addressesActions.purchases.push({
-				ticketAmount: BigInt(purchase.count),
-				userAddress: getAddress(purchase.buyer),
-			})
-		}
-
-		for (const refund of refunds) {
-			addressesActions.refunds.push({
-				ticketAmount:
-					BigInt(refund.amount) / round.stake.ticketPrice.amount,
-				userAddress: getAddress(refund.user),
-			})
-		}
-
-		for (const claim of prizeClaims) {
-			addressesActions.claims.push({
-				ticketAmount:
-					BigInt(claim.amount) / round.stake.ticketPrice.amount,
-				userAddress: getAddress(claim.claimer),
-			})
-		}
-
-		return addressesActions
 	}
 }
