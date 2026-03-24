@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
 import { KmsService } from 'src/application/interfaces/kms.service'
-import { AwsKmsService } from './aws-kms.service'
+import { MnemonicKmsService } from './mnemonic-kms.service'
 
 @Module({
-	providers: [{ provide: KmsService, useClass: AwsKmsService }],
+	providers: [{ provide: KmsService, useClass: MnemonicKmsService }],
 	exports: [KmsService],
 })
 export class KmsModule {}
