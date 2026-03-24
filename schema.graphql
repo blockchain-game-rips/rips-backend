@@ -43,6 +43,7 @@ type TicketPurchase @entity {
     round: Round!
     buyer: String!
     count: BigInt!
+    startTicketIndex: BigInt!
     blockNumber: BigInt!
     time: DateTime!
     txHash: String!

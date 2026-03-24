@@ -1,14 +1,13 @@
 import path from 'path'
 import { DataSource } from 'typeorm'
-import { parseEther } from 'viem'
-import { createPublicClient, createWalletClient, http } from 'viem'
+import { createPublicClient, createWalletClient, http, parseEther } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import deployments from '../utils/deployments.json'
 import ripsAbi from '../contracts/abi/Rips.json'
 import vrfAbi from '../contracts/abi/VRFCoordinatorV2_5Mock.json'
 import { increaseTime, useAnvil } from '../utils/anvil'
 import { writeAndWait } from '../utils/contracts'
 import { waitForRecord, waitForRow } from '../utils/db'
+import deployments from '../utils/deployments.json'
 import { usePostgres } from '../utils/postgres'
 import { useProcessor } from '../utils/processor'
 
@@ -44,7 +43,10 @@ const DEPLOYER_PRIVATE_KEY =
 
 describe('indexer e2e', () => {
 	const { postgres } = usePostgres()
-	const { anvils } = useAnvil({ chainId: CHAIN_ID, pathToState: ANVIL_STATE_PATH })
+	const { anvils } = useAnvil({
+		chainId: CHAIN_ID,
+		pathToState: ANVIL_STATE_PATH,
+	})
 
 	let dataSource: DataSource
 
@@ -159,6 +161,7 @@ describe('indexer e2e', () => {
 				round_id: '1',
 				buyer: deployer.address.toLowerCase(),
 				count: TICKET_COUNT.toString(),
+				start_ticket_index: '0',
 				tx_hash: txHash,
 			})
 		})

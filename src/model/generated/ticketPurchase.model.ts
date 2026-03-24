@@ -21,6 +21,9 @@ export class TicketPurchase {
     count!: bigint
 
     @BigIntColumn_({nullable: false})
+    startTicketIndex!: bigint
+
+    @BigIntColumn_({nullable: false})
     blockNumber!: bigint
 
     @DateTimeColumn_({nullable: false})

@@ -17,7 +17,7 @@ export const events = {
     RoundFinalized: event("0x50175b23949579f5a257c33ccacf5689f481c882821df6a2a9294c7b5c67fc55", "RoundFinalized(uint256,uint256,uint256)", {"roundId": indexed(p.uint256), "randomA": p.uint256, "randomB": p.uint256}),
     StakeCreated: event("0xcb3e2345f6a570dd7e2ea4e558b0f4891ac509659eec8db8f805b23c2376ebbe", "StakeCreated(uint256)", {"stakeId": indexed(p.uint256)}),
     StakeDeleted: event("0xce97243d24406722abc44bd316a8f3a630a3fa4f8178be225d2c224154d022ec", "StakeDeleted(uint256)", {"stakeId": indexed(p.uint256)}),
-    TicketsPurchased: event("0xf7c58d5e745042ae3ed41454214210ae1bca7e4a2087c19a3fb2cfc0ed7648e7", "TicketsPurchased(uint256,address,uint256)", {"roundId": indexed(p.uint256), "buyer": indexed(p.address), "count": p.uint256}),
+    TicketsPurchased: event("0x830c4a183800e86da29c219cdb1ad8e51a4924fd549d8d2ee32d641c3b4e25a5", "TicketsPurchased(uint256,address,uint256,uint256)", {"roundId": indexed(p.uint256), "buyer": indexed(p.address), "count": p.uint256, "startTicketIndex": p.uint256}),
     Unpaused: event("0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa", "Unpaused(address)", {"account": p.address}),
 }
 

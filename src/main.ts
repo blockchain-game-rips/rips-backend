@@ -226,7 +226,8 @@ async function handleRoundCreated(eventCtx: EventContext): Promise<void> {
 async function handleTicketsPurchased(eventCtx: EventContext): Promise<void> {
 	const { ctx, block, log, rounds, ticketPurchases } = eventCtx
 
-	const { roundId, buyer, count } = rips.events.TicketsPurchased.decode(log)
+	const { roundId, buyer, count, startTicketIndex } =
+		rips.events.TicketsPurchased.decode(log)
 	const roundIdStr = roundId.toString()
 
 	const round = await resolveRound(ctx, rounds, roundIdStr)
@@ -248,6 +249,7 @@ async function handleTicketsPurchased(eventCtx: EventContext): Promise<void> {
 			round,
 			buyer: buyer.toLowerCase(),
 			count,
+			startTicketIndex: startTicketIndex,
 			blockNumber: BigInt(block.height),
 			time: new Date(block.timestamp),
 			txHash: log.transactionHash,

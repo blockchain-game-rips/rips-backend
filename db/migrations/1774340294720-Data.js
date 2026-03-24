@@ -1,10 +1,10 @@
-module.exports = class Data1774281856427 {
-    name = 'Data1774281856427'
+module.exports = class Data1774340294720 {
+    name = 'Data1774340294720'
 
     async up(db) {
         await db.query(`CREATE TABLE "prize_tier" ("id" character varying NOT NULL, "tier_index" integer NOT NULL, "prize_count" numeric NOT NULL, "min_prize" numeric NOT NULL, "max_prize" numeric NOT NULL, "stake_config_id" character varying, CONSTRAINT "PK_edefaa73bb27e6bf21aa376c178" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_990d6a22ac5b5e9ccc2bfd7430" ON "prize_tier" ("stake_config_id") `)
-        await db.query(`CREATE TABLE "ticket_purchase" ("id" character varying NOT NULL, "buyer" text NOT NULL, "count" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "round_id" character varying, CONSTRAINT "PK_4872335e775b1dabae9a3772991" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "ticket_purchase" ("id" character varying NOT NULL, "buyer" text NOT NULL, "count" numeric NOT NULL, "start_ticket_index" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "round_id" character varying, CONSTRAINT "PK_4872335e775b1dabae9a3772991" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_7dfa2c8f4213a3b48a49a0efa7" ON "ticket_purchase" ("round_id") `)
         await db.query(`CREATE TABLE "prize_claim" ("id" character varying NOT NULL, "claimer" text NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "round_id" character varying, CONSTRAINT "PK_97c675323b64053b9c8bd7ac1f2" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_5716fcc128026f9424ec88d50f" ON "prize_claim" ("round_id") `)
