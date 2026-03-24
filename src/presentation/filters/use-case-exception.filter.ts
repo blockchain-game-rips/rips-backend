@@ -29,6 +29,8 @@ export class UseCaseExceptionFilter implements ExceptionFilter {
 		const ctx = host.switchToHttp()
 		const response = ctx.getResponse<Response>()
 
+		console.log(error)
+
 		if (error instanceof HttpException) {
 			response.status(error.getStatus()).json(error.getResponse())
 			return
