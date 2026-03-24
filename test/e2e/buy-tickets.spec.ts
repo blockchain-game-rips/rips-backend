@@ -20,6 +20,7 @@ const mockStakeRepository: StakeRepository = {
 				amount: TICKET_COST,
 			},
 			durationSeconds: 86400,
+			prizeDistribution: [],
 		},
 	],
 }

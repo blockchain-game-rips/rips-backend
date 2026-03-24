@@ -26,7 +26,10 @@ export class HandleClaimService extends HandleClaimUseCase {
 			if (uniqueClaimedAddresses.has(purchase.userAddress)) continue
 
 			try {
-				await this.ripsKeeperService.claim(round.id, purchase.userAddress)
+				await this.ripsKeeperService.claim(
+					round.id,
+					purchase.userAddress,
+				)
 				await this.savePrizes(round, purchase)
 			} catch (error) {
 				console.log(error)
@@ -34,24 +37,38 @@ export class HandleClaimService extends HandleClaimUseCase {
 		}
 	}
 
-	private async savePrizes(round: Round, purchase: PurchaseAction): Promise<void> {
+	private async savePrizes(
+		round: Round,
+		purchase: PurchaseAction,
+	): Promise<void> {
 		if (!round.randoms) return
 
-		const user = await this.userRepository.findByEvmAddress(purchase.userAddress)
+		const user = await this.userRepository.findByEvmAddress(
+			purchase.userAddress,
+		)
 		if (!user) return
 
 		const { a, b } = round.randoms
 		const { ticketCup, prizeDistribution } = round.stake
 
-		const prizes = Array.from({ length: Number(purchase.ticketAmount) }, (_, i) => {
-			const ticketNumber = Number(purchase.startTicketIndex) + i + 1
+		const prizes = Array.from(
+			{ length: Number(purchase.ticketAmount) },
+			(_, i) => {
+				const ticketNumber = Number(purchase.startTicketIndex) + i + 1
 
-			return {
-				roundId: round.id,
-				ticketNumber,
-				prizeAmount: resolveTicketPrize(ticketNumber, a, b, ticketCup, prizeDistribution),
-			}
-		})
+				return {
+					roundId: round.id,
+					ticketNumber,
+					prizeAmount: resolveTicketPrize(
+						ticketNumber,
+						a,
+						b,
+						ticketCup,
+						prizeDistribution,
+					),
+				}
+			},
+		)
 
 		await this.ticketPrizeRepository.upsertMany(user.id, prizes)
 	}

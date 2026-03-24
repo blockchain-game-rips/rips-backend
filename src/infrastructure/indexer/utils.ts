@@ -7,7 +7,11 @@ export function fromStakeRaw(
 		ticketCap: string
 		ticketCost: string
 		durationSeconds: string
-		prizeDistribution: { prizeCount: string; minPrize: string; maxPrize: string }[]
+		prizeDistribution: {
+			prizeCount: string
+			minPrize: string
+			maxPrize: string
+		}[]
 	},
 	mainCurrency: Currency,
 ) {

@@ -20,6 +20,7 @@ const MOCK_USER: User = {
 function makeMockUserRepository(): jest.Mocked<UserRepository> {
 	const mock: jest.Mocked<UserRepository> = {
 		findByTelegramId: jest.fn(),
+		findByEvmAddress: jest.fn(),
 		create: jest.fn(),
 	}
 	return mock

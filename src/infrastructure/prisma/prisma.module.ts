@@ -13,7 +13,10 @@ import { PrismaUserRepository } from './user.repository'
 
 		{ provide: UserRepository, useClass: PrismaUserRepository },
 		{ provide: EvmWalletRepository, useClass: PrismaEvmWalletRepository },
-		{ provide: TicketPrizeRepository, useClass: PrismaTicketPrizeRepository },
+		{
+			provide: TicketPrizeRepository,
+			useClass: PrismaTicketPrizeRepository,
+		},
 	],
 	exports: [UserRepository, EvmWalletRepository, TicketPrizeRepository],
 })

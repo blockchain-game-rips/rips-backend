@@ -29,16 +29,25 @@ const STAKE_CONFIG_RAW = {
 	ticketCap: '100',
 	ticketCost: TICKET_PRICE.toString(),
 	durationSeconds: '3600',
+	prizeDistribution: [
+		{ prizeCount: '50', minPrize: '0', maxPrize: '0' },
+		{
+			prizeCount: '50',
+			minPrize: TICKET_PRICE.toString(),
+			maxPrize: TICKET_PRICE.toString(),
+		},
+	],
 }
 
 const BUYER_A = '0x000000000000000000000000000000000000aaaa'
 const BUYER_B = '0x000000000000000000000000000000000000bbbb'
 
-function makeTicketPurchase(buyer: string, count = 1) {
+function makeTicketPurchase(buyer: string, count = 1, startTicketIndex = 0) {
 	return {
 		id: buyer,
 		buyer,
 		count: count.toString(),
+		startTicketIndex: startTicketIndex.toString(),
 		txHash: '0x0',
 		time: '',
 	}
@@ -55,10 +64,13 @@ function makeClaim(claimer: string, amount: string) {
 function makeRoundRaw(overrides: {
 	status: RoundStatusRaw
 	startTime?: string
+	randomA?: string
+	randomB?: string
 	ticketPurchases?: {
 		id: string
 		buyer: string
 		count: string
+		startTicketIndex: string
 		txHash: string
 		time: string
 	}[]
@@ -84,6 +96,8 @@ function makeRoundRaw(overrides: {
 		stakeConfig: STAKE_CONFIG_RAW,
 		startTime: overrides.startTime ?? new Date().toISOString(),
 		status: overrides.status,
+		randomA: overrides.randomA ?? null,
+		randomB: overrides.randomB ?? null,
 		ticketPurchases: overrides.ticketPurchases ?? [],
 		prizesClaimed: overrides.prizesClaimed ?? [],
 		refunds: overrides.refunds ?? [],

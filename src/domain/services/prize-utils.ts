@@ -8,7 +8,7 @@ export function resolveTicketPrize(
 	prizeDistribution: PrizeTier[],
 ): bigint {
 	const n = BigInt(ticketCap)
-	const prizeNumber = (randomA * BigInt(ticketNumber) + randomB) % n + 1n
+	const prizeNumber = ((randomA * BigInt(ticketNumber) + randomB) % n) + 1n
 
 	return resolvePrizeAmount(prizeNumber, prizeDistribution)
 }
