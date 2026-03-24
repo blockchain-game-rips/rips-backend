@@ -85,7 +85,10 @@ export class RipsKeeperService {
 				chainId,
 			})
 			.catch((cause) => {
-				throw new TransactionFailedError('Gas estimation failed', cause)
+				throw new TransactionFailedError(
+					'Transaction simulation failed',
+					cause,
+				)
 			})
 
 		const signedTx = await account.signTransaction(tx)

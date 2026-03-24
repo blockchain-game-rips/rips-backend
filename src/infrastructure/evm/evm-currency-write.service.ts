@@ -50,7 +50,10 @@ export class EvmCurrencyWriteService {
 				chainId,
 			})
 			.catch((cause) => {
-				throw new TransactionFailedError('Gas estimation failed', cause)
+				throw new TransactionFailedError(
+					'Transaction simulation failed',
+					cause,
+				)
 			})
 
 		const signedTx = await this.signService.signTx(wallet, tx)
