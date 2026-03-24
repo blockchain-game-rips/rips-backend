@@ -2,6 +2,7 @@ import {
 	CreateUserUseCase,
 	UserAlreadyExistsError,
 } from 'src/application/use-cases/create-user/create-user.use-case'
+import { GetUnrevealedPrizesUseCase } from 'src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import {
 	GetUserUseCase,
 	UserNotFoundError,
@@ -36,20 +37,28 @@ function makeMockRevealTicketPrizesUseCase(): jest.Mocked<RevealTicketPrizesUseC
 	return mock
 }
 
+function makeMockGetUnrevealedPrizesUseCase(): jest.Mocked<GetUnrevealedPrizesUseCase> {
+	const mock: jest.Mocked<GetUnrevealedPrizesUseCase> = { execute: jest.fn() }
+	return mock
+}
+
 describe('UsersController', () => {
 	let getUser: jest.Mocked<GetUserUseCase>
 	let createUser: jest.Mocked<CreateUserUseCase>
 	let revealTicketPrizes: jest.Mocked<RevealTicketPrizesUseCase>
+	let getUnrevealedPrizes: jest.Mocked<GetUnrevealedPrizesUseCase>
 	let controller: UsersController
 
 	beforeEach(() => {
 		getUser = makeMockGetUserUseCase()
 		createUser = makeMockCreateUserUseCase()
 		revealTicketPrizes = makeMockRevealTicketPrizesUseCase()
+		getUnrevealedPrizes = makeMockGetUnrevealedPrizesUseCase()
 		controller = new UsersController(
 			getUser,
 			createUser,
 			revealTicketPrizes,
+			getUnrevealedPrizes,
 		)
 	})
 

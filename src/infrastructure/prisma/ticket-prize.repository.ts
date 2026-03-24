@@ -32,6 +32,15 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 		)
 	}
 
+	async getUnrevealed(userId: bigint): Promise<TicketPrize[]> {
+		const records = await this.prisma.ticketPrize.findMany({
+			where: { userId, revealed: false },
+			orderBy: { ticketNumber: 'asc' },
+		})
+
+		return records.map(toDomainTicketPrize)
+	}
+
 	async revealAndGet(userId: bigint): Promise<TicketPrize | null> {
 		return this.prisma.$transaction(async (tx) => {
 			const record = await tx.ticketPrize.findFirst({

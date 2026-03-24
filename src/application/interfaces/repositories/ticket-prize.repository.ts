@@ -12,6 +12,8 @@ export abstract class TicketPrizeRepository {
 		prizes: TicketPrizeInput[],
 	): Promise<void>
 
+	abstract getUnrevealed(userId: bigint): Promise<TicketPrize[]>
+
 	abstract revealAndGet(userId: bigint): Promise<TicketPrize | null>
 
 	abstract revealAllAndGet(userId: bigint): Promise<TicketPrize[]>

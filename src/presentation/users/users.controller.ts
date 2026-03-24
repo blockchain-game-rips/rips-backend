@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common'
 import { CreateUserUseCase } from 'src/application/use-cases/create-user/create-user.use-case'
+import { GetUnrevealedPrizesUseCase } from 'src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import { GetUserUseCase } from 'src/application/use-cases/get-user/get-user.use-case'
 import { RevealTicketPrizesUseCase } from 'src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
 import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
@@ -34,6 +35,7 @@ export class UsersController {
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly createUserUseCase: CreateUserUseCase,
 		private readonly revealTicketPrizesUseCase: RevealTicketPrizesUseCase,
+		private readonly getUnrevealedPrizesUseCase: GetUnrevealedPrizesUseCase,
 	) {}
 
 	@Get(`:${TELEGRAM_ID_PARAM}`)
@@ -44,6 +46,18 @@ export class UsersController {
 		const user = await this.getUserUseCase.execute({ telegramId })
 
 		return toUserResponseDto(user)
+	}
+
+	@Get(`:${TELEGRAM_ID_PARAM}/unrevealed-prizes`)
+	async getUnrevealedPrizes(
+		@Param(TELEGRAM_ID_PARAM, new ZodValidationPipe(telegramIdParamSchema))
+		telegramId: TelegramId,
+	): Promise<TicketPrizeResponseDto[]> {
+		const prizes = await this.getUnrevealedPrizesUseCase.execute({
+			telegramId,
+		})
+
+		return prizes.map(toTicketPrizeResponseDto)
 	}
 
 	@Post(`:${TELEGRAM_ID_PARAM}/reveal`)
