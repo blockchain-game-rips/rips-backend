@@ -23,11 +23,6 @@ export const ripsAbi = [
 				internalType: 'uint32',
 			},
 			{
-				name: 'initialOwner',
-				type: 'address',
-				internalType: 'address',
-			},
-			{
 				name: 'initialFeePercent',
 				type: 'uint256',
 				internalType: 'uint256',
@@ -729,6 +724,12 @@ export const ripsAbi = [
 			},
 			{
 				name: 'count',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+			{
+				name: 'startTicketIndex',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
