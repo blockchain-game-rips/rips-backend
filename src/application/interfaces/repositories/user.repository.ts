@@ -5,6 +5,8 @@ import { type Address } from 'viem'
 export abstract class UserRepository {
 	abstract findByTelegramId(telegramId: TelegramId): Promise<User | null>
 
+	abstract findByEvmAddress(address: Address): Promise<User | null>
+
 	abstract create(
 		telegramId: TelegramId,
 		address: Address,

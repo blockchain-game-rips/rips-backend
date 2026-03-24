@@ -7,6 +7,7 @@ export function fromStakeRaw(
 		ticketCap: string
 		ticketCost: string
 		durationSeconds: string
+		prizeDistribution: { prizeCount: string; minPrize: string; maxPrize: string }[]
 	},
 	mainCurrency: Currency,
 ) {
@@ -18,5 +19,10 @@ export function fromStakeRaw(
 			amount: BigInt(stakeRaw.ticketCost),
 		},
 		durationSeconds: Number(stakeRaw.durationSeconds),
+		prizeDistribution: stakeRaw.prizeDistribution.map((tier) => ({
+			prizeCount: BigInt(tier.prizeCount),
+			minPrize: BigInt(tier.minPrize),
+			maxPrize: BigInt(tier.maxPrize),
+		})),
 	}
 }

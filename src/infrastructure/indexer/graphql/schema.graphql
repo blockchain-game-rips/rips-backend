@@ -361,6 +361,15 @@ input TicketPurchaseWhereInput {
   count_lte: BigInt
   count_in: [BigInt!]
   count_not_in: [BigInt!]
+  startTicketIndex_isNull: Boolean
+  startTicketIndex_eq: BigInt
+  startTicketIndex_not_eq: BigInt
+  startTicketIndex_gt: BigInt
+  startTicketIndex_gte: BigInt
+  startTicketIndex_lt: BigInt
+  startTicketIndex_lte: BigInt
+  startTicketIndex_in: [BigInt!]
+  startTicketIndex_not_in: [BigInt!]
   blockNumber_isNull: Boolean
   blockNumber_eq: BigInt
   blockNumber_not_eq: BigInt
@@ -688,6 +697,7 @@ type TicketPurchase {
   round: Round!
   buyer: String!
   count: BigInt!
+  startTicketIndex: BigInt!
   blockNumber: BigInt!
   time: DateTime!
   txHash: String!
@@ -754,6 +764,12 @@ enum TicketPurchaseOrderByInput {
   count_ASC_NULLS_LAST
   count_DESC_NULLS_FIRST
   count_DESC_NULLS_LAST
+  startTicketIndex_ASC
+  startTicketIndex_DESC
+  startTicketIndex_ASC_NULLS_FIRST
+  startTicketIndex_ASC_NULLS_LAST
+  startTicketIndex_DESC_NULLS_FIRST
+  startTicketIndex_DESC_NULLS_LAST
   blockNumber_ASC
   blockNumber_DESC
   blockNumber_ASC_NULLS_FIRST

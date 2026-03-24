@@ -3,6 +3,7 @@ import { Round, RoundStatus } from 'src/domain/entities/round'
 import { RipsKeeperService } from 'src/infrastructure/rips/rips-keeper.service'
 import { Address } from 'viem'
 import { GetRoundsUseCase } from '../get-rounds/get-rounds.use-case'
+import { HandleClaimUseCase } from '../handle-claim/handle-claim.use-case'
 import { KeeperUseCase } from './keeper.use-case'
 
 @Injectable()
@@ -10,6 +11,7 @@ export class KeeperService extends KeeperUseCase {
 	constructor(
 		private readonly getRoundsUseCase: GetRoundsUseCase,
 		private readonly ripsKeeperService: RipsKeeperService,
+		private readonly handleClaimUseCase: HandleClaimUseCase,
 	) {
 		super()
 	}
@@ -50,26 +52,7 @@ export class KeeperService extends KeeperUseCase {
 
 	private async handleClaiming(round: Round) {
 		try {
-			const actions = round.actions
-
-			const uniqueClaimedAddresses: Set<Address> = new Set()
-
-			for (const claim of actions.claims) {
-				uniqueClaimedAddresses.add(claim.userAddress)
-			}
-
-			for (const purchase of actions.purchases) {
-				if (uniqueClaimedAddresses.has(purchase.userAddress)) continue
-
-				try {
-					await this.ripsKeeperService.claim(
-						round.id,
-						purchase.userAddress,
-					)
-				} catch (error) {
-					console.log(error)
-				}
-			}
+			await this.handleClaimUseCase.execute({ round })
 		} catch (error) {
 			console.log(error)
 		}

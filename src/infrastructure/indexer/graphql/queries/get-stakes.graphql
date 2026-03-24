@@ -4,5 +4,10 @@ query GetStakes {
         ticketCap
         ticketCost
         durationSeconds
+        prizeDistribution(orderBy: tierIndex_ASC) {
+            prizeCount
+            minPrize
+            maxPrize
+        }
     }
 }

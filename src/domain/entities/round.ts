@@ -16,4 +16,5 @@ export type Round = {
 	stake: Stake
 	actions: AddressesActions
 	status: RoundStatus
+	randoms?: { a: bigint; b: bigint }
 }

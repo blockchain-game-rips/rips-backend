@@ -8,10 +8,11 @@ datasource db {
 }
 
 model User {
-  id         BigInt    @id @default(autoincrement())
-  telegramId BigInt    @unique @map("telegram_id")
-  createdAt  DateTime  @default(now()) @map("created_at")
-  evmWallet  EvmWallet?
+  id           BigInt        @id @default(autoincrement())
+  telegramId   BigInt        @unique @map("telegram_id")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  evmWallet    EvmWallet?
+  ticketPrizes TicketPrize[]
 
   @@map("users")
 }
@@ -25,4 +26,18 @@ model EvmWallet {
   user      User     @relation(fields: [userId], references: [id])
 
   @@map("evm_wallets")
+}
+
+model TicketPrize {
+  id           BigInt   @id @default(autoincrement())
+  userId       BigInt   @map("user_id")
+  roundId      Int      @map("round_id")
+  ticketNumber Int      @map("ticket_number")
+  prizeAmount  BigInt   @map("prize_amount")
+  revealed     Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@unique([roundId, ticketNumber])
+  @@map("ticket_prizes")
 }

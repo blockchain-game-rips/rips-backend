@@ -24,6 +24,17 @@ export class PrismaUserRepository extends UserRepository {
 		return toDomainUser(record)
 	}
 
+	async findByEvmAddress(address: Address): Promise<User | null> {
+		const record = await this.prisma.user.findFirst({
+			where: { evmWallet: { address } },
+			include: { evmWallet: true },
+		})
+
+		if (!record) return null
+
+		return toDomainUser(record)
+	}
+
 	async create(
 		telegramId: TelegramId,
 		address: Address,

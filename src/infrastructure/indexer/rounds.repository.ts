@@ -96,6 +96,7 @@ function resolveActions(roundRaw: RoundRaw): AddressesActions {
 		addressesActions.purchases.push({
 			ticketAmount: BigInt(purchase.count),
 			userAddress: getAddress(purchase.buyer),
+			startTicketIndex: BigInt(purchase.startTicketIndex),
 		})
 	}
 
@@ -143,6 +144,13 @@ export class IndexerRoundRepository extends RoundRepository {
 					stake.ticketPrice.amount,
 					nowSeconds,
 				),
+				randoms:
+					roundRaw.randomA != null && roundRaw.randomB != null
+						? {
+								a: BigInt(roundRaw.randomA),
+								b: BigInt(roundRaw.randomB),
+							}
+						: undefined,
 			}
 		})
 	}

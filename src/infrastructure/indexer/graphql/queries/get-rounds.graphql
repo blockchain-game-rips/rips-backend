@@ -7,15 +7,23 @@ query GetRounds {
             ticketCap
             ticketCost
             durationSeconds
+            prizeDistribution(orderBy: tierIndex_ASC) {
+                prizeCount
+                minPrize
+                maxPrize
+            }
         }
         startTime
         ticketsSold
         status
+        randomA
+        randomB
         ticketPurchases {
             id
             buyer
             count
             txHash
+            startTicketIndex
             time
         }
         prizesClaimed {
