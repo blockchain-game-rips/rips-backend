@@ -1,43 +1,44 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+    provider = "prisma-client-js"
+    output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+    provider = "postgresql"
 }
 
 model User {
-  id           BigInt        @id @default(autoincrement())
-  telegramId   BigInt        @unique @map("telegram_id")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  evmWallet    EvmWallet?
-  ticketPrizes TicketPrize[]
+    id           BigInt        @id @default(autoincrement())
+    telegramId   BigInt        @unique @map("telegram_id")
+    createdAt    DateTime      @default(now()) @map("created_at")
+    evmWallet    EvmWallet?
+    ticketPrizes TicketPrize[]
 
-  @@map("users")
+    @@map("users")
 }
 
 model EvmWallet {
-  id        BigInt   @id @default(autoincrement())
-  address   String   @unique
-  kmsKeyId  String   @map("kms_key_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  userId    BigInt   @unique @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
+    id        BigInt   @id @default(autoincrement())
+    address   String   @unique
+    kmsKeyId  String   @map("kms_key_id")
+    createdAt DateTime @default(now()) @map("created_at")
+    userId    BigInt   @unique @map("user_id")
+    user      User     @relation(fields: [userId], references: [id])
 
-  @@map("evm_wallets")
+    @@map("evm_wallets")
 }
 
 model TicketPrize {
-  id           BigInt   @id @default(autoincrement())
-  userId       BigInt   @map("user_id")
-  roundId      Int      @map("round_id")
-  ticketNumber Int      @map("ticket_number")
-  prizeAmount  BigInt   @map("prize_amount")
-  revealed     Boolean  @default(false)
-  createdAt    DateTime @default(now()) @map("created_at")
-  user         User     @relation(fields: [userId], references: [id])
+    id           BigInt   @id @default(autoincrement())
+    userId       BigInt   @map("user_id")
+    roundId      Int      @map("round_id")
+    stakeId      Int      @map("stake_id")
+    ticketNumber Int      @map("ticket_number")
+    prizeAmount  BigInt   @map("prize_amount")
+    revealed     Boolean  @default(false)
+    createdAt    DateTime @default(now()) @map("created_at")
+    user         User     @relation(fields: [userId], references: [id])
 
-  @@unique([roundId, ticketNumber])
-  @@map("ticket_prizes")
+    @@unique([roundId, ticketNumber])
+    @@map("ticket_prizes")
 }

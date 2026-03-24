@@ -80,6 +80,7 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 
 function toDomainTicketPrize(record: {
 	roundId: number
+	stakeId: number
 	ticketNumber: number
 	prizeAmount: bigint
 	revealed: boolean
@@ -89,5 +90,6 @@ function toDomainTicketPrize(record: {
 		ticketNumber: record.ticketNumber,
 		prizeAmount: record.prizeAmount,
 		revealed: record.revealed,
+		stakeId: record.stakeId,
 	}
 }

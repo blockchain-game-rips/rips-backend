@@ -59,6 +59,7 @@ export class HandleClaimService extends HandleClaimUseCase {
 				return {
 					roundId: round.id,
 					ticketNumber,
+					stakeId: round.stake.id,
 					prizeAmount: resolveTicketPrize(
 						ticketNumber,
 						a,

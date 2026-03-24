@@ -1,6 +1,7 @@
 import { TicketPrize } from 'src/domain/entities/ticket-prize'
 
 export type TicketPrizeInput = {
+	stakeId: number
 	roundId: number
 	ticketNumber: number
 	prizeAmount: bigint
