@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { RouterModule } from '@nestjs/core'
+import { ScheduleModule } from '@nestjs/schedule'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
 import { RipsModule } from './modules/rips/rips.module'
@@ -26,6 +27,7 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 			},
 		]),
 		ConfigModule.forRoot({ isGlobal: true }),
+		ScheduleModule.forRoot(),
 		PrismaModule,
 		UsersModule,
 		WalletsModule,

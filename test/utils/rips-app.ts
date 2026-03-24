@@ -1,4 +1,5 @@
-import { INestApplication } from '@nestjs/common'
+import { INestApplication, Module } from '@nestjs/common'
+import { ScheduleModule } from '@nestjs/schedule'
 import { Test, TestingModuleBuilder } from '@nestjs/testing'
 import path from 'path'
 import { AppModule } from 'src/app.module'
@@ -17,6 +18,9 @@ import { Anvil, useAnvil } from './anvil'
 import deployments from './deployments.json'
 import { MockIndexerModule } from './mock-indexer.module'
 import { usePostgres } from './postgres'
+
+@Module({})
+class NoopScheduleModule {}
 
 const KMS_MNEMONIC =
 	'spy record fury either collect ill pony monkey praise cool matter state'
@@ -71,6 +75,8 @@ export function useRipsApp(
 		}
 
 		let builder = Test.createTestingModule({ imports: [AppModule] })
+			.overrideModule(ScheduleModule)
+			.useModule(NoopScheduleModule)
 			.overrideProvider(KmsService)
 			.useClass(MnemonicKmsService)
 			.overrideProvider(EVM_CLIENT_CONFIG)
