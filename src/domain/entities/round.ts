@@ -2,13 +2,13 @@ import { AddressesActions } from '../value-objects/actions'
 import { Stake } from './stake'
 
 export enum RoundStatus {
-	FILLING,
-	SEALED,
-	VRFREQUESTED,
-	CLAIMING,
-	CLAIMED,
-	REFUNDING,
-	REFUNDED,
+	FILLING = 'FILLING',
+	SEALED = 'SEALED',
+	VRFREQUESTED = 'VRFREQUESTED',
+	CLAIMING = 'CLAIMING',
+	CLAIMED = 'CLAIMED',
+	REFUNDING = 'REFUNDING',
+	REFUNDED = 'REFUNDED',
 }
 
 export type Round = {

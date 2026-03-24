@@ -2,6 +2,7 @@ import { Stake } from 'src/domain/entities/stake'
 import { ChainAddress } from 'src/domain/value-objects/chain-address'
 
 export type StakeResponseDto = {
+	id: number
 	ticketCup: number
 	ticketPrice: {
 		amount: string
@@ -17,6 +18,7 @@ export type StakeResponseDto = {
 
 export function toStakeResponseDto(stake: Stake): StakeResponseDto {
 	return {
+		id: stake.id,
 		ticketCup: stake.ticketCup,
 		ticketPrice: {
 			amount: stake.ticketPrice.amount.toString(),
