@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { RouterModule } from '@nestjs/core'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
+import { KeeperModule } from './modules/keeper/keeper.module'
 import { RipsModule } from './modules/rips/rips.module'
 import { UsersModule } from './modules/users/users.module'
 import { WalletsModule } from './modules/wallets/wallets.module'
@@ -29,6 +30,7 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 		UsersModule,
 		WalletsModule,
 		RipsModule,
+		KeeperModule,
 	],
 })
 export class AppModule {}
