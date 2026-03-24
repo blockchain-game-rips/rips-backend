@@ -6,6 +6,7 @@ import {
 	GetUserUseCase,
 	UserNotFoundError,
 } from 'src/application/use-cases/get-user/get-user.use-case'
+import { RevealTicketPrizesUseCase } from 'src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
 import { EIP155 } from 'src/constants'
 import { User } from 'src/domain/entities/user'
 import { toTelegramId } from 'src/domain/value-objects/telegram-id'
@@ -30,15 +31,26 @@ function makeMockCreateUserUseCase(): jest.Mocked<CreateUserUseCase> {
 	return mock
 }
 
+function makeMockRevealTicketPrizesUseCase(): jest.Mocked<RevealTicketPrizesUseCase> {
+	const mock: jest.Mocked<RevealTicketPrizesUseCase> = { execute: jest.fn() }
+	return mock
+}
+
 describe('UsersController', () => {
 	let getUser: jest.Mocked<GetUserUseCase>
 	let createUser: jest.Mocked<CreateUserUseCase>
+	let revealTicketPrizes: jest.Mocked<RevealTicketPrizesUseCase>
 	let controller: UsersController
 
 	beforeEach(() => {
 		getUser = makeMockGetUserUseCase()
 		createUser = makeMockCreateUserUseCase()
-		controller = new UsersController(getUser, createUser)
+		revealTicketPrizes = makeMockRevealTicketPrizesUseCase()
+		controller = new UsersController(
+			getUser,
+			createUser,
+			revealTicketPrizes,
+		)
 	})
 
 	describe('GET /users/:telegramId', () => {
