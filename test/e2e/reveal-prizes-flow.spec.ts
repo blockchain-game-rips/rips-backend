@@ -158,6 +158,7 @@ describe('Reveal prizes flow E2E', () => {
 				id: roundId,
 				stake: STAKE,
 				status: RoundStatus.SEALED,
+				startTime: new Date(),
 				actions: { purchases: [], claims: [], refunds: [] },
 			},
 		])
@@ -262,6 +263,7 @@ describe('Reveal prizes flow E2E', () => {
 				id: roundId,
 				stake: STAKE,
 				status: RoundStatus.CLAIMING,
+				startTime: new Date(),
 				actions: {
 					purchases: [
 						{

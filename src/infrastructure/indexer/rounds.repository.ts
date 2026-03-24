@@ -144,6 +144,7 @@ export class IndexerRoundRepository extends RoundRepository {
 					stake.ticketPrice.amount,
 					nowSeconds,
 				),
+				startTime: new Date(roundRaw.startTime),
 				randoms:
 					roundRaw.randomA != null && roundRaw.randomB != null
 						? {

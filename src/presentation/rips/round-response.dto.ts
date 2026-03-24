@@ -7,6 +7,7 @@ export type RoundResponseDto = {
 	stake: StakeResponseDto
 	actions: AddressesActions
 	status: RoundStatus
+	startTime: string //ISO date
 }
 
 export function toRoundResponseDto(round: Round): RoundResponseDto {
@@ -15,5 +16,6 @@ export function toRoundResponseDto(round: Round): RoundResponseDto {
 		stake: toStakeResponseDto(round.stake),
 		actions: round.actions,
 		status: round.status,
+		startTime: round.startTime.toISOString(),
 	}
 }
