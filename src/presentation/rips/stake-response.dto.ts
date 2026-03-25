@@ -1,6 +1,12 @@
 import { Stake } from 'src/domain/entities/stake'
 import { ChainAddress } from 'src/domain/value-objects/chain-address'
 
+type PrizeTierDto = {
+	prizeCount: string
+	minPrize: string
+	maxPrize: string
+}
+
 export type StakeResponseDto = {
 	id: number
 	ticketCup: number
@@ -14,6 +20,7 @@ export type StakeResponseDto = {
 		}
 	}
 	durationSeconds: number
+	prizeDistribution: PrizeTierDto[]
 }
 
 export function toStakeResponseDto(stake: Stake): StakeResponseDto {
@@ -30,5 +37,10 @@ export function toStakeResponseDto(stake: Stake): StakeResponseDto {
 			},
 		},
 		durationSeconds: stake.durationSeconds,
+		prizeDistribution: stake.prizeDistribution.map((tier) => ({
+			prizeCount: tier.prizeCount.toString(),
+			minPrize: tier.minPrize.toString(),
+			maxPrize: tier.maxPrize.toString(),
+		})),
 	}
 }
