@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { getSdk, Sdk } from 'generated/graphql/generated'
 import { GraphQLClient } from 'graphql-request'
+import { Sdk, getSdk } from 'src/generated/graphql/generated'
 import { getEnvSafe } from 'src/utils/common'
 
 @Injectable()

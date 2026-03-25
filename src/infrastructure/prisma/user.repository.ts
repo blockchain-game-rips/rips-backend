@@ -3,8 +3,8 @@ import { UserRepository } from 'src/application/interfaces/repositories/user.rep
 import { EIP155 } from 'src/constants'
 import { User } from 'src/domain/entities/user'
 import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
+import { Prisma } from 'src/generated/prisma'
 import { getAddress, type Address } from 'viem'
-import { Prisma } from '../../../generated/prisma'
 import { PrismaService } from './prisma.service'
 
 @Injectable()

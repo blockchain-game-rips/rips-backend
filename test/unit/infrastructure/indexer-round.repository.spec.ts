@@ -1,9 +1,9 @@
-import { RoundStatus as RoundStatusRaw } from 'generated/graphql/generated'
 import { EIP155 } from 'src/constants'
 import { Currency } from 'src/domain/entities/currency'
 import { RoundStatus } from 'src/domain/entities/round'
 import { composeChainId } from 'src/domain/services/chain-id-utils'
 import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
+import { RoundStatus as RoundStatusRaw } from 'src/generated/graphql/generated'
 import { IndexerService } from 'src/infrastructure/indexer/indexer.service'
 import { IndexerRoundRepository } from 'src/infrastructure/indexer/rounds.repository'
 
