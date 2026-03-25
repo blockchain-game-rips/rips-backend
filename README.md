@@ -1,36 +1,65 @@
-# ERC20 indexing template
+# Rips Protocol Indexer
 
-A squid template indexing ERC20 transfers. The squid fetches the historical `Transfer` event, decodes and persists to a `Transfer` table. A new entry is created in the `Account` table for each address that has interacted with the contract so that one can query the transfer history for each EVM address.
+A [Subsquid](https://subsquid.io)-based indexer for the Rips Protocol — an EVM game. It processes on-chain events from the Rips smart contract and stores them in a PostgreSQL database, exposing the data through a GraphQL API.
 
-Dependencies: NodeJS v16 or newer, Git, Docker.
+**Indexed data:**
+- Stake configurations and prize tiers
+- Round lifecycle (Active → SoldOut → VRFRequested → Finalized)
+- Ticket purchases, prize claims, and refunds
+- VRF randomness requests and finalization
+- Protocol configuration changes (fees, recipients, callback gas limits)
 
-## Setup
+## Requirements
 
-- Install Squid CLI:
+- Node.js v20+
+- Docker
+- Yarn
+- [Squid CLI](https://docs.subsquid.io/squid-cli/): `npm i -g @subsquid/cli`
+
+## Install
 
 ```bash
-npm i -g @subsquid/cli
+yarn
 ```
-
-- Update the `CONTRACT_ADDRESS` and `CONTRACT_DEPLOYED_AT` in `.env`. By default, the [USDC contract](https://etherscan.io/token/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48) is indexed
-- Inspect the list of the available archives with `sqd archives:ls` and choose the network if necessary
-Set the `RPC_ENDPOINT` env variable to a chain node RPC URL. Use [secrets](https://docs.subsquid.io/deploy-squid/env-variables/#secrets) when deploying the squid to Subsquid Cloud.
 
 ## Run
 
 ```bash
-npm ci
 # start a local Postgres
 sqd up
-# build the squid
+
+# build and start both the processor and GraphQL server
 sqd build
-# start both the squid processor and the GraphQL server
 sqd run .
 ```
-A GraphiQL playground will be available at [localhost:4350/graphql](http://localhost:4350/graphql).
 
-You can also start squid services one by one:
+The GraphiQL playground will be available at [localhost:4350/graphql](http://localhost:4350/graphql).
+
+You can also start services individually:
+
 ```bash
 sqd process
 sqd serve
 ```
+
+## Configuration
+
+Set the following environment variables (see `.env`):
+
+| Variable | Description |
+|---|---|
+| `CONTRACT_ADDRESS` | Rips contract address |
+| `CONTRACT_DEPLOYED_AT` | Block number the contract was deployed at |
+| `RPC_ENDPOINT` | EVM node RPC URL |
+
+## Tests
+
+```bash
+# run all tests
+yarn test
+
+# run e2e tests only
+yarn test:e2e
+```
+
+E2E tests spin up a local Anvil chain and a PostgreSQL container via Testcontainers — Docker must be running.
