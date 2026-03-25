@@ -19,9 +19,11 @@
         "test:all": "jest",
         "test:watch": "jest --selectProjects=unit --watch",
         "test:cov": "jest --selectProjects=unit --coverage",
-        "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
+        "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+        "gen-config-schema": "ts-node -r tsconfig-paths/register utils/generate-configuration-schema.ts"
     },
     "dependencies": {
+        "js-yaml": "4.1.0",
         "@nestjs/schedule": "6.0.0",
         "@aws-sdk/client-kms": "^3.1010.0",
         "@google-cloud/kms": "^5.4.0",
@@ -44,6 +46,7 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
+        "@types/js-yaml": "4.0.9",
         "@eslint/eslintrc": "^3.2.0",
         "@eslint/js": "^9.18.0",
         "@graphql-codegen/cli": "^6.2.1",

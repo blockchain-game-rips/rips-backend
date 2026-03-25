@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { RouterModule } from '@nestjs/core'
 import { ScheduleModule } from '@nestjs/schedule'
+import { loadConfig } from './configuration/configuration'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
 import { PriceModule } from './modules/price/price.module'
@@ -31,7 +32,7 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 				module: PriceModule,
 			},
 		]),
-		ConfigModule.forRoot({ isGlobal: true }),
+		ConfigModule.forRoot({ isGlobal: true, load: [loadConfig] }),
 		ScheduleModule.forRoot(),
 		PrismaModule,
 		UsersModule,
