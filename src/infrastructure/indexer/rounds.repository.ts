@@ -13,7 +13,7 @@ type RoundRaw = Awaited<
 	ReturnType<IndexerService['sdk']['GetRounds']>
 >['rounds'][number]
 
-function isExpired(roundRaw: RoundRaw, nowSeconds) {
+function isExpired(roundRaw: RoundRaw, nowSeconds: bigint) {
 	const startTimeSeconds = BigInt(
 		Math.floor(new Date(roundRaw.startTime).getTime() / 1000),
 	)
