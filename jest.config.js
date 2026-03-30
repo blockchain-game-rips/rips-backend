@@ -8,6 +8,7 @@ const sharedConfig = {
 	moduleNameMapper: {
 		'^src/(.*)$': '<rootDir>/src/$1',
 		'^generated/(.*)$': '<rootDir>/generated/$1',
+		'^test/(.*)$': '<rootDir>/test/$1',
 	},
 }
 

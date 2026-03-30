@@ -15,7 +15,10 @@ export class PrizeClaim {
     round!: Round
 
     @StringColumn_({nullable: false})
-    claimer!: string
+    user!: string
+
+    @BigIntColumn_({nullable: false})
+    ticketCount!: bigint
 
     @BigIntColumn_({nullable: false})
     amount!: bigint

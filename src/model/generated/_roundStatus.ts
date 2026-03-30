@@ -1,6 +1,8 @@
 export enum RoundStatus {
-    Active = "Active",
-    SoldOut = "SoldOut",
+    Unsettled = "Unsettled",
+    Sealed = "Sealed",
     VRFRequested = "VRFRequested",
-    Finalized = "Finalized",
+    Claiming = "Claiming",
+    Claimed = "Claimed",
+    Refunded = "Refunded",
 }

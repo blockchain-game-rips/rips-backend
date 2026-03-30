@@ -1,6 +1,7 @@
 type StakeConfig @entity {
     id: ID!
     ticketCap: BigInt!
+    currency: String!
     durationSeconds: BigInt!
     ticketCost: BigInt!
     prizeDistribution: [PrizeTier!]! @derivedFrom(field: "stakeConfig")
@@ -18,10 +19,12 @@ type PrizeTier @entity {
 }
 
 enum RoundStatus {
-    Active
-    SoldOut
+    Unsettled
+    Sealed
     VRFRequested
-    Finalized
+    Claiming
+    Claimed
+    Refunded
 }
 
 type Round @entity {
@@ -29,6 +32,8 @@ type Round @entity {
     stakeConfig: StakeConfig!
     startTime: DateTime!
     ticketsSold: Int!
+    ticketsClaimed: Int!
+    ticketsRefunded: Int!
     status: RoundStatus!
     randomA: BigInt
     randomB: BigInt
@@ -41,8 +46,8 @@ type Round @entity {
 type TicketPurchase @entity {
     id: ID!
     round: Round!
-    buyer: String!
-    count: BigInt!
+    user: String!
+    ticketCount: BigInt!
     startTicketIndex: BigInt!
     blockNumber: BigInt!
     time: DateTime!
@@ -52,7 +57,8 @@ type TicketPurchase @entity {
 type PrizeClaim @entity {
     id: ID!
     round: Round!
-    claimer: String!
+    user: String!
+    ticketCount: BigInt! 
     amount: BigInt!
     blockNumber: BigInt!
     time: DateTime!
@@ -63,6 +69,7 @@ type Refund @entity {
     id: ID!
     round: Round!
     user: String!
+    ticketCount: BigInt! 
     amount: BigInt!
     blockNumber: BigInt!
     time: DateTime!

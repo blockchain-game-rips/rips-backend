@@ -1,37 +1,12 @@
-import type { Account, Address, WriteContractParameters } from 'viem'
-import { createPublicClient, createWalletClient } from 'viem'
+import { Hash, PublicClient } from 'viem'
 
-export type ContractCallParams = {
-	address: Address
-	abi: readonly unknown[]
-	functionName: string
-	args?: unknown[]
-	account: Account
-	value?: bigint
-}
+export async function waitForReceipt(client: PublicClient, hash: Hash) {
+	const receipt = await client.waitForTransactionReceipt({
+		hash,
+	})
 
-export async function writeAndWait(
-	walletClient: ReturnType<typeof createWalletClient>,
-	publicClient: ReturnType<typeof createPublicClient>,
-	params: ContractCallParams,
-): Promise<`0x${string}`> {
-	const { abi, address, functionName, args, account, value } = params
-
-	const callParams = {
-		abi,
-		address,
-		functionName,
-		args,
-		account,
-		chain: null,
-		value,
+	if (receipt.status === 'reverted') {
+		console.log('tx reverted, receipt:', receipt)
+		throw new Error('Tx reverted')
 	}
-
-	const hash = await walletClient.writeContract(
-		callParams as WriteContractParameters,
-	)
-
-	await publicClient.waitForTransactionReceipt({ hash })
-
-	return hash
 }

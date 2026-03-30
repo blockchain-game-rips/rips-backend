@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BigIntColumn as BigIntColumn_, OneToMany as OneToMany_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BigIntColumn as BigIntColumn_, StringColumn as StringColumn_, OneToMany as OneToMany_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
 import {PrizeTier} from "./prizeTier.model"
 import {Round} from "./round.model"
 
@@ -13,6 +13,9 @@ export class StakeConfig {
 
     @BigIntColumn_({nullable: false})
     ticketCap!: bigint
+
+    @StringColumn_({nullable: false})
+    currency!: string
 
     @BigIntColumn_({nullable: false})
     durationSeconds!: bigint

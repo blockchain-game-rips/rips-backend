@@ -159,6 +159,11 @@
                         ]
                     },
                     {
+                        "name": "currency",
+                        "type": "address",
+                        "internalType": "address"
+                    },
+                    {
                         "name": "ticketCap",
                         "type": "uint256",
                         "internalType": "uint256"
@@ -565,13 +570,19 @@
                 "internalType": "uint256"
             },
             {
-                "name": "claimer",
+                "name": "user",
                 "type": "address",
                 "indexed": true,
                 "internalType": "address"
             },
             {
-                "name": "amount",
+                "name": "ticketCount",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            },
+            {
+                "name": "prizeAmount",
                 "type": "uint256",
                 "indexed": false,
                 "internalType": "uint256"
@@ -628,7 +639,7 @@
                 "internalType": "address"
             },
             {
-                "name": "amount",
+                "name": "ticketCount",
                 "type": "uint256",
                 "indexed": false,
                 "internalType": "uint256"
@@ -717,13 +728,13 @@
                 "internalType": "uint256"
             },
             {
-                "name": "buyer",
+                "name": "user",
                 "type": "address",
                 "indexed": true,
                 "internalType": "address"
             },
             {
-                "name": "count",
+                "name": "ticketCount",
                 "type": "uint256",
                 "indexed": false,
                 "internalType": "uint256"
@@ -767,6 +778,11 @@
     },
     {
         "type": "error",
+        "name": "EthSentForERC20",
+        "inputs": []
+    },
+    {
+        "type": "error",
         "name": "ExpectedPause",
         "inputs": []
     },
@@ -793,6 +809,11 @@
     {
         "type": "error",
         "name": "InvalidStartIndex",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "NativePaymentRequired",
         "inputs": []
     },
     {
@@ -864,6 +885,11 @@
     },
     {
         "type": "error",
+        "name": "ReturnExcessFailed",
+        "inputs": []
+    },
+    {
+        "type": "error",
         "name": "RoundNotExist",
         "inputs": []
     },
@@ -881,6 +907,17 @@
         "type": "error",
         "name": "RoundNotSoldOut",
         "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "SafeERC20FailedOperation",
+        "inputs": [
+            {
+                "name": "token",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
     },
     {
         "type": "error",

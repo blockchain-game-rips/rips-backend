@@ -155,6 +155,7 @@ function handleStakeCreated(eventCtx: EventContext): void {
 		ticketCap: config.ticketCap,
 		durationSeconds: config.duration,
 		ticketCost: config.ticketCost,
+		currency: config.currency,
 		deleted: false,
 	})
 
@@ -218,7 +219,9 @@ async function handleRoundCreated(eventCtx: EventContext): Promise<void> {
 			stakeConfig,
 			startTime: new Date(block.timestamp),
 			ticketsSold: 0,
-			status: RoundStatus.Active,
+			ticketsClaimed: 0,
+			ticketsRefunded: 0,
+			status: RoundStatus.Unsettled,
 		}),
 	)
 }
@@ -226,7 +229,7 @@ async function handleRoundCreated(eventCtx: EventContext): Promise<void> {
 async function handleTicketsPurchased(eventCtx: EventContext): Promise<void> {
 	const { ctx, block, log, rounds, ticketPurchases } = eventCtx
 
-	const { roundId, buyer, count, startTicketIndex } =
+	const { roundId, user, ticketCount, startTicketIndex } =
 		rips.events.TicketsPurchased.decode(log)
 	const roundIdStr = roundId.toString()
 
@@ -235,10 +238,10 @@ async function handleTicketsPurchased(eventCtx: EventContext): Promise<void> {
 		throw new Error(`Round ${roundIdStr} not found for TicketsPurchased`)
 	}
 
-	round.ticketsSold += Number(count)
+	round.ticketsSold += Number(ticketCount)
 
 	if (BigInt(round.ticketsSold) === round.stakeConfig.ticketCap) {
-		round.status = RoundStatus.SoldOut
+		round.status = RoundStatus.Sealed
 	}
 
 	rounds.set(roundIdStr, round)
@@ -247,9 +250,9 @@ async function handleTicketsPurchased(eventCtx: EventContext): Promise<void> {
 		new TicketPurchase({
 			id: log.id,
 			round,
-			buyer: buyer.toLowerCase(),
-			count,
-			startTicketIndex: startTicketIndex,
+			user: user.toLowerCase(),
+			ticketCount: ticketCount,
+			startTicketIndex,
 			blockNumber: BigInt(block.height),
 			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
@@ -288,7 +291,7 @@ async function handleRoundFinalized(eventCtx: EventContext): Promise<void> {
 		throw new Error(`Round ${roundIdStr} not found for RoundFinalized`)
 	}
 
-	round.status = RoundStatus.Finalized
+	round.status = RoundStatus.Claiming
 	round.randomA = randomA
 	round.randomB = randomB
 
@@ -298,12 +301,19 @@ async function handleRoundFinalized(eventCtx: EventContext): Promise<void> {
 async function handlePrizesClaimed(eventCtx: EventContext): Promise<void> {
 	const { ctx, block, log, rounds, prizeClaims } = eventCtx
 
-	const { roundId, claimer, amount } = rips.events.PrizesClaimed.decode(log)
+	const { roundId, user, ticketCount, prizeAmount } =
+		rips.events.PrizesClaimed.decode(log)
 	const roundIdStr = roundId.toString()
 
 	const round = await resolveRound(ctx, rounds, roundIdStr)
 	if (round === undefined) {
 		throw new Error(`Round ${roundIdStr} not found for PrizesClaimed`)
+	}
+
+	round.ticketsClaimed += Number(ticketCount)
+
+	if (round.ticketsClaimed === round.ticketsSold) {
+		round.status = RoundStatus.Claimed
 	}
 
 	rounds.set(roundIdStr, round)
@@ -312,8 +322,9 @@ async function handlePrizesClaimed(eventCtx: EventContext): Promise<void> {
 		new PrizeClaim({
 			id: log.id,
 			round,
-			claimer: claimer.toLowerCase(),
-			amount,
+			user: user.toLowerCase(),
+			ticketCount,
+			amount: prizeAmount,
 			blockNumber: BigInt(block.height),
 			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
@@ -324,12 +335,18 @@ async function handlePrizesClaimed(eventCtx: EventContext): Promise<void> {
 async function handleRefundIssued(eventCtx: EventContext): Promise<void> {
 	const { ctx, block, log, rounds, refunds } = eventCtx
 
-	const { roundId, user, amount } = rips.events.RefundIssued.decode(log)
+	const { roundId, user, ticketCount } = rips.events.RefundIssued.decode(log)
 	const roundIdStr = roundId.toString()
 
 	const round = await resolveRound(ctx, rounds, roundIdStr)
 	if (round === undefined) {
 		throw new Error(`Round ${roundIdStr} not found for RefundIssued`)
+	}
+
+	round.ticketsRefunded += Number(ticketCount)
+
+	if (round.ticketsRefunded === round.ticketsSold) {
+		round.status = RoundStatus.Refunded
 	}
 
 	rounds.set(roundIdStr, round)
@@ -339,7 +356,8 @@ async function handleRefundIssued(eventCtx: EventContext): Promise<void> {
 			id: log.id,
 			round,
 			user: user.toLowerCase(),
-			amount,
+			ticketCount,
+			amount: ticketCount * round.stakeConfig.ticketCost,
 			blockNumber: BigInt(block.height),
 			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
@@ -367,7 +385,6 @@ function handleFeeRecipientUpdated(eventCtx: EventContext): void {
 	const { block, log, feeRecipientUpdates } = eventCtx
 
 	const { newRecipient } = rips.events.FeeRecipientUpdated.decode(log)
-	console.log('new fee recipient', newRecipient)
 
 	feeRecipientUpdates.push(
 		new FeeRecipientUpdated({

@@ -12,13 +12,11 @@
         "emitDecoratorMetadata": true,
         "skipLibCheck": true,
         "baseUrl": "./",
-        "rootDir": "."
-    },
-    "include": [
-        "src/**/*",
-        "test/**/*"
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+        "rootDir": ".",
+        "paths": {
+            "src/*": ["src/*"],
+            "generated/*": ["generated/*"],
+            "test/*": ["test/*"]
+        }
+    }
 }

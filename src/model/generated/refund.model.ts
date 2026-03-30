@@ -18,6 +18,9 @@ export class Refund {
     user!: string
 
     @BigIntColumn_({nullable: false})
+    ticketCount!: bigint
+
+    @BigIntColumn_({nullable: false})
     amount!: bigint
 
     @BigIntColumn_({nullable: false})

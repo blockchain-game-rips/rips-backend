@@ -24,6 +24,12 @@ export class Round {
     @IntColumn_({nullable: false})
     ticketsSold!: number
 
+    @IntColumn_({nullable: false})
+    ticketsClaimed!: number
+
+    @IntColumn_({nullable: false})
+    ticketsRefunded!: number
+
     @Column_("varchar", {length: 12, nullable: false})
     status!: RoundStatus
 

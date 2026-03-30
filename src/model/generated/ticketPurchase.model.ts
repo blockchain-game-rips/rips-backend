@@ -15,10 +15,10 @@ export class TicketPurchase {
     round!: Round
 
     @StringColumn_({nullable: false})
-    buyer!: string
+    user!: string
 
     @BigIntColumn_({nullable: false})
-    count!: bigint
+    ticketCount!: bigint
 
     @BigIntColumn_({nullable: false})
     startTicketIndex!: bigint
