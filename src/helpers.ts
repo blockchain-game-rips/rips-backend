@@ -1,5 +1,22 @@
-import { Round, Stake, StakeConfig, StakeConfigStatus } from './model'
+import { PrizeTier, Round, Stake, StakeConfig, StakeConfigStatus } from './model'
 import { Context } from './processor'
+
+export function buildPrizeTiers(
+	stakeConfig: StakeConfig,
+	prizeDistribution: { prizeCount: bigint; minPrize: bigint; maxPrize: bigint }[],
+): PrizeTier[] {
+	return prizeDistribution.map(
+		(tier, i) =>
+			new PrizeTier({
+				id: `${stakeConfig.id}-${i}`,
+				stakeConfig,
+				tierIndex: i,
+				prizeCount: tier.prizeCount,
+				minPrize: tier.minPrize,
+				maxPrize: tier.maxPrize,
+			}),
+	)
+}
 
 export async function resolveRoundOrThrow(
 	ctx: Context,
