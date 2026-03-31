@@ -17,6 +17,9 @@ export class PrizeClaim {
     @StringColumn_({nullable: false})
     user!: string
 
+    @StringColumn_({nullable: false})
+    referrer!: string
+
     @BigIntColumn_({nullable: false})
     ticketCount!: bigint
 

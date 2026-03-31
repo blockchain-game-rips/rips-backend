@@ -26,7 +26,6 @@ const TRACKED_EVENTS = [
 	rips.events.RoundFinalized.topic,
 	rips.events.PrizesClaimed.topic,
 	rips.events.RefundIssued.topic,
-	rips.events.ProtocolFeeUpdated.topic,
 	rips.events.FeeRecipientUpdated.topic,
 	rips.events.CallbackGasLimitUpdated.topic,
 ]

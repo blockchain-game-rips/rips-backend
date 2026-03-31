@@ -4,6 +4,7 @@ type StakeConfig @entity {
     currency: String!
     durationSeconds: BigInt!
     ticketCost: BigInt!
+    feePercent: BigInt!
     prizeDistribution: [PrizeTier!]! @derivedFrom(field: "stakeConfig")
     deleted: Boolean!
     rounds: [Round!]! @derivedFrom(field: "stakeConfig")
@@ -58,6 +59,7 @@ type PrizeClaim @entity {
     id: ID!
     round: Round!
     user: String!
+    referrer: String!
     ticketCount: BigInt! 
     amount: BigInt!
     blockNumber: BigInt!
@@ -71,14 +73,6 @@ type Refund @entity {
     user: String!
     ticketCount: BigInt! 
     amount: BigInt!
-    blockNumber: BigInt!
-    time: DateTime!
-    txHash: String!
-}
-
-type ProtocolFeeUpdated @entity {
-    id: ID!
-    feePercent: BigInt!
     blockNumber: BigInt!
     time: DateTime!
     txHash: String!

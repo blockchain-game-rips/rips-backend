@@ -22,11 +22,6 @@ export const ripsAbi = [
 				type: 'uint32',
 				internalType: 'uint32',
 			},
-			{
-				name: 'initialFeePercent',
-				type: 'uint256',
-				internalType: 'uint256',
-			},
 		],
 		stateMutability: 'nonpayable',
 	},
@@ -123,6 +118,11 @@ export const ripsAbi = [
 				type: 'address',
 				internalType: 'address',
 			},
+			{
+				name: 'referrer',
+				type: 'address',
+				internalType: 'address',
+			},
 		],
 		outputs: [],
 		stateMutability: 'nonpayable',
@@ -175,6 +175,11 @@ export const ripsAbi = [
 					},
 					{
 						name: 'ticketCost',
+						type: 'uint256',
+						internalType: 'uint256',
+					},
+					{
+						name: 'feePercent',
 						type: 'uint256',
 						internalType: 'uint256',
 					},
@@ -292,19 +297,6 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 'protocolFeePercent',
-		inputs: [],
-		outputs: [
-			{
-				name: '',
-				type: 'uint256',
-				internalType: 'uint256',
-			},
-		],
-		stateMutability: 'view',
-	},
-	{
-		type: 'function',
 		name: 'rawFulfillRandomWords',
 		inputs: [
 			{
@@ -399,19 +391,6 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 'setProtocolFee',
-		inputs: [
-			{
-				name: 'newFeePercent',
-				type: 'uint256',
-				internalType: 'uint256',
-			},
-		],
-		outputs: [],
-		stateMutability: 'nonpayable',
-	},
-	{
-		type: 'function',
 		name: 'transferOwnership',
 		inputs: [
 			{
@@ -438,6 +417,73 @@ export const ripsAbi = [
 				name: 'newLimit',
 				type: 'uint32',
 				internalType: 'uint32',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'updateStake',
+		inputs: [
+			{
+				name: 'stakeId',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'config',
+				type: 'tuple',
+				internalType: 'struct IRips.StakeConfig',
+				components: [
+					{
+						name: 'prizeDistribution',
+						type: 'tuple[]',
+						internalType: 'struct IRips.PrizeTier[]',
+						components: [
+							{
+								name: 'prizeCount',
+								type: 'uint64',
+								internalType: 'uint64',
+							},
+							{
+								name: 'minPrize',
+								type: 'uint128',
+								internalType: 'uint128',
+							},
+							{
+								name: 'maxPrize',
+								type: 'uint128',
+								internalType: 'uint128',
+							},
+						],
+					},
+					{
+						name: 'currency',
+						type: 'address',
+						internalType: 'address',
+					},
+					{
+						name: 'ticketCap',
+						type: 'uint256',
+						internalType: 'uint256',
+					},
+					{
+						name: 'duration',
+						type: 'uint256',
+						internalType: 'uint256',
+					},
+					{
+						name: 'ticketCost',
+						type: 'uint256',
+						internalType: 'uint256',
+					},
+					{
+						name: 'feePercent',
+						type: 'uint256',
+						internalType: 'uint256',
+					},
+				],
 			},
 		],
 		outputs: [],
@@ -576,6 +622,12 @@ export const ripsAbi = [
 				internalType: 'address',
 			},
 			{
+				name: 'referrer',
+				type: 'address',
+				indexed: false,
+				internalType: 'address',
+			},
+			{
 				name: 'ticketCount',
 				type: 'uint256',
 				indexed: false,
@@ -583,19 +635,6 @@ export const ripsAbi = [
 			},
 			{
 				name: 'prizeAmount',
-				type: 'uint256',
-				indexed: false,
-				internalType: 'uint256',
-			},
-		],
-		anonymous: false,
-	},
-	{
-		type: 'event',
-		name: 'ProtocolFeeUpdated',
-		inputs: [
-			{
-				name: 'newFeePercent',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
@@ -707,6 +746,19 @@ export const ripsAbi = [
 	{
 		type: 'event',
 		name: 'StakeDeleted',
+		inputs: [
+			{
+				name: 'stakeId',
+				type: 'uint256',
+				indexed: true,
+				internalType: 'uint256',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'StakeUpdated',
 		inputs: [
 			{
 				name: 'stakeId',

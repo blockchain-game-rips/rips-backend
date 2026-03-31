@@ -23,6 +23,9 @@ export class StakeConfig {
     @BigIntColumn_({nullable: false})
     ticketCost!: bigint
 
+    @BigIntColumn_({nullable: false})
+    feePercent!: bigint
+
     @OneToMany_(() => PrizeTier, e => e.stakeConfig)
     prizeDistribution!: PrizeTier[]
 

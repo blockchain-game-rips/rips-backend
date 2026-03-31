@@ -6,7 +6,6 @@ import {
 	FeeRecipientUpdated,
 	PrizeClaim,
 	PrizeTier,
-	ProtocolFeeUpdated,
 	Refund,
 	Round,
 	RoundStatus,
@@ -25,7 +24,6 @@ interface EventContext {
 	ticketPurchases: TicketPurchase[]
 	prizeClaims: PrizeClaim[]
 	refunds: Refund[]
-	protocolFeeUpdates: ProtocolFeeUpdated[]
 	feeRecipientUpdates: FeeRecipientUpdated[]
 	callbackGasLimitUpdates: CallbackGasLimitUpdated[]
 }
@@ -37,7 +35,6 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 	const ticketPurchases: TicketPurchase[] = []
 	const prizeClaims: PrizeClaim[] = []
 	const refunds: Refund[] = []
-	const protocolFeeUpdates: ProtocolFeeUpdated[] = []
 	const feeRecipientUpdates: FeeRecipientUpdated[] = []
 	const callbackGasLimitUpdates: CallbackGasLimitUpdated[] = []
 
@@ -59,7 +56,6 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 				ticketPurchases,
 				prizeClaims,
 				refunds,
-				protocolFeeUpdates,
 				feeRecipientUpdates,
 				callbackGasLimitUpdates,
 			})
@@ -79,7 +75,6 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 			ticketPurchases,
 			prizeClaims,
 			refunds,
-			protocolFeeUpdates,
 			feeRecipientUpdates,
 			callbackGasLimitUpdates,
 		}
@@ -113,10 +108,6 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 				await handleRefundIssued(eventCtx)
 				break
 
-			case rips.events.ProtocolFeeUpdated.topic:
-				handleProtocolFeeUpdated(eventCtx)
-				break
-
 			case rips.events.FeeRecipientUpdated.topic:
 				handleFeeRecipientUpdated(eventCtx)
 				break
@@ -133,7 +124,6 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 	await ctx.store.insert(ticketPurchases)
 	await ctx.store.insert(prizeClaims)
 	await ctx.store.insert(refunds)
-	await ctx.store.insert(protocolFeeUpdates)
 	await ctx.store.insert(feeRecipientUpdates)
 	await ctx.store.insert(callbackGasLimitUpdates)
 })
@@ -152,6 +142,7 @@ function handleStakeCreated(eventCtx: EventContext): void {
 
 	const stakeConfig = new StakeConfig({
 		id: stakeId.toString(),
+		feePercent: config.feePercent,
 		ticketCap: config.ticketCap,
 		durationSeconds: config.duration,
 		ticketCost: config.ticketCost,
@@ -358,22 +349,6 @@ async function handleRefundIssued(eventCtx: EventContext): Promise<void> {
 			user: user.toLowerCase(),
 			ticketCount,
 			amount: ticketCount * round.stakeConfig.ticketCost,
-			blockNumber: BigInt(block.height),
-			time: new Date(block.timestamp),
-			txHash: log.transactionHash,
-		}),
-	)
-}
-
-function handleProtocolFeeUpdated(eventCtx: EventContext): void {
-	const { block, log, protocolFeeUpdates } = eventCtx
-
-	const { newFeePercent } = rips.events.ProtocolFeeUpdated.decode(log)
-
-	protocolFeeUpdates.push(
-		new ProtocolFeeUpdated({
-			id: log.id,
-			feePercent: newFeePercent,
 			blockNumber: BigInt(block.height),
 			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
