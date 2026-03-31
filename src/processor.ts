@@ -19,6 +19,7 @@ export const CONTRACT_DEPLOYED_AT = parseInt(
 
 const TRACKED_EVENTS = [
 	rips.events.StakeCreated.topic,
+	rips.events.StakeUpdated.topic,
 	rips.events.StakeDeleted.topic,
 	rips.events.RoundCreated.topic,
 	rips.events.TicketsPurchased.topic,

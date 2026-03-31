@@ -1,4 +1,6 @@
+export * from "./stake.model"
 export * from "./stakeConfig.model"
+export * from "./_stakeConfigStatus"
 export * from "./prizeTier.model"
 export * from "./round.model"
 export * from "./_roundStatus"

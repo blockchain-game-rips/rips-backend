@@ -1,6 +1,16 @@
 import { TypeormDatabase } from '@subsquid/typeorm-store'
-import { assertNotNull } from '@subsquid/util-internal'
 import * as rips from './abi/rips'
+import { handleCallbackGasLimitUpdated } from './handlers/handle-callback-gas-limit-updated'
+import { handleFeeRecipientUpdated } from './handlers/handle-fee-recipient-updated'
+import { handlePrizesClaimed } from './handlers/handle-prizes-claimed'
+import { handleRandomnessRequested } from './handlers/handle-randomness-requested'
+import { handleRefundIssued } from './handlers/handle-refund-issued'
+import { handleRoundCreated } from './handlers/handle-round-created'
+import { handleRoundFinalized } from './handlers/handle-round-finalized'
+import { handleStakeCreated } from './handlers/handle-stake-created'
+import { handleStakeDeleted } from './handlers/handle-stake-deleted'
+import { handleStakeUpdated } from './handlers/handle-stake-updated'
+import { handleTicketsPurchased } from './handlers/handle-tickets-purchased'
 import {
 	CallbackGasLimitUpdated,
 	FeeRecipientUpdated,
@@ -8,27 +18,15 @@ import {
 	PrizeTier,
 	Refund,
 	Round,
-	RoundStatus,
+	Stake,
 	StakeConfig,
 	TicketPurchase,
 } from './model'
-import { Block, Context, Log, processor } from './processor'
-
-interface EventContext {
-	ctx: Context
-	block: Block
-	log: Log
-	stakeConfigs: Map<string, StakeConfig>
-	prizeTiers: PrizeTier[]
-	rounds: Map<string, Round>
-	ticketPurchases: TicketPurchase[]
-	prizeClaims: PrizeClaim[]
-	refunds: Refund[]
-	feeRecipientUpdates: FeeRecipientUpdated[]
-	callbackGasLimitUpdates: CallbackGasLimitUpdated[]
-}
+import { processor } from './processor'
+import { EventContext } from './types'
 
 processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
+	const stakes = new Map<string, Stake>()
 	const stakeConfigs = new Map<string, StakeConfig>()
 	const prizeTiers: PrizeTier[] = []
 	const rounds = new Map<string, Round>()
@@ -38,37 +36,27 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 	const feeRecipientUpdates: FeeRecipientUpdated[] = []
 	const callbackGasLimitUpdates: CallbackGasLimitUpdated[] = []
 
+	const stakeConfigCount = await ctx.store.count(StakeConfig)
+	const stakeConfigIdCounter = { value: stakeConfigCount + 1 }
+
 	const allLogs = ctx.blocks.flatMap((block) =>
 		block.logs.map((log) => ({ log, header: block.header })),
 	)
 
-	// StakeCreated must be pre-processed before other events because the contract
-	// emits RoundCreated before StakeCreated within the same createStake transaction
+	// StakeCreated and StakeUpdated must be pre-processed before other events
+	// because the contract emits RoundCreated before StakeCreated within the
+	// same createStake transaction
 	for (const { log, header } of allLogs) {
-		if (log.topics[0] === rips.events.StakeCreated.topic) {
-			handleStakeCreated({
-				ctx,
-				block: header,
-				log,
-				stakeConfigs,
-				prizeTiers,
-				rounds,
-				ticketPurchases,
-				prizeClaims,
-				refunds,
-				feeRecipientUpdates,
-				callbackGasLimitUpdates,
-			})
-		}
-	}
+		const isStakeCreated = log.topics[0] === rips.events.StakeCreated.topic
+		const isStakeUpdated = log.topics[0] === rips.events.StakeUpdated.topic
 
-	for (const { log, header } of allLogs) {
-		if (log.topics[0] === rips.events.StakeCreated.topic) continue
+		if (!isStakeCreated && !isStakeUpdated) continue
 
 		const eventCtx: EventContext = {
 			ctx,
 			block: header,
 			log,
+			stakes,
 			stakeConfigs,
 			prizeTiers,
 			rounds,
@@ -77,9 +65,43 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 			refunds,
 			feeRecipientUpdates,
 			callbackGasLimitUpdates,
+			stakeConfigIdCounter,
 		}
 
-		switch (log.topics[0]) {
+		if (isStakeCreated) {
+			await handleStakeCreated(eventCtx)
+		} else {
+			await handleStakeUpdated(eventCtx)
+		}
+	}
+
+	for (const { log, header } of allLogs) {
+		const topic = log.topics[0]
+
+		if (
+			topic === rips.events.StakeCreated.topic ||
+			topic === rips.events.StakeUpdated.topic
+		) {
+			continue
+		}
+
+		const eventCtx: EventContext = {
+			ctx,
+			block: header,
+			log,
+			stakes,
+			stakeConfigs,
+			prizeTiers,
+			rounds,
+			ticketPurchases,
+			prizeClaims,
+			refunds,
+			feeRecipientUpdates,
+			callbackGasLimitUpdates,
+			stakeConfigIdCounter,
+		}
+
+		switch (topic) {
 			case rips.events.StakeDeleted.topic:
 				await handleStakeDeleted(eventCtx)
 				break
@@ -118,6 +140,7 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 		}
 	}
 
+	await ctx.store.upsert([...stakes.values()])
 	await ctx.store.upsert([...stakeConfigs.values()])
 	await ctx.store.insert(prizeTiers)
 	await ctx.store.upsert([...rounds.values()])
@@ -127,287 +150,3 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 	await ctx.store.insert(feeRecipientUpdates)
 	await ctx.store.insert(callbackGasLimitUpdates)
 })
-
-function handleStakeCreated(eventCtx: EventContext): void {
-	const { log, stakeConfigs, prizeTiers } = eventCtx
-
-	const { stakeId } = rips.events.StakeCreated.decode(log)
-	const config = decodeCreateStakeInput(log)
-
-	if (config === undefined) {
-		throw new Error(
-			`Could not decode createStake input for stakeId ${stakeId}`,
-		)
-	}
-
-	const stakeConfig = new StakeConfig({
-		id: stakeId.toString(),
-		feePercent: config.feePercent,
-		ticketCap: config.ticketCap,
-		durationSeconds: config.duration,
-		ticketCost: config.ticketCost,
-		currency: config.currency,
-		deleted: false,
-	})
-
-	stakeConfigs.set(stakeConfig.id, stakeConfig)
-
-	for (let i = 0; i < config.prizeDistribution.length; i++) {
-		const tier = config.prizeDistribution[i]
-		prizeTiers.push(
-			new PrizeTier({
-				id: `${stakeId}-${i}`,
-				stakeConfig,
-				tierIndex: i,
-				prizeCount: tier.prizeCount,
-				minPrize: tier.minPrize,
-				maxPrize: tier.maxPrize,
-			}),
-		)
-	}
-}
-
-async function handleStakeDeleted(eventCtx: EventContext): Promise<void> {
-	const { ctx, log, stakeConfigs } = eventCtx
-
-	const { stakeId } = rips.events.StakeDeleted.decode(log)
-	const id = stakeId.toString()
-
-	let stakeConfig = stakeConfigs.get(id)
-	if (stakeConfig === undefined) {
-		stakeConfig = await ctx.store.get(StakeConfig, id)
-	}
-
-	if (stakeConfig === undefined) {
-		throw new Error(`StakeConfig ${id} not found for StakeDeleted`)
-	}
-
-	stakeConfig.deleted = true
-	stakeConfigs.set(id, stakeConfig)
-}
-
-async function handleRoundCreated(eventCtx: EventContext): Promise<void> {
-	const { ctx, block, log, stakeConfigs, rounds } = eventCtx
-
-	const { roundId, stakeId } = rips.events.RoundCreated.decode(log)
-	const stakeConfigId = stakeId.toString()
-
-	let stakeConfig = stakeConfigs.get(stakeConfigId)
-	if (stakeConfig === undefined) {
-		stakeConfig = await ctx.store.get(StakeConfig, stakeConfigId)
-	}
-
-	if (stakeConfig === undefined) {
-		throw new Error(
-			`StakeConfig ${stakeConfigId} not found for round ${roundId}`,
-		)
-	}
-
-	rounds.set(
-		roundId.toString(),
-		new Round({
-			id: roundId.toString(),
-			stakeConfig,
-			startTime: new Date(block.timestamp),
-			ticketsSold: 0,
-			ticketsClaimed: 0,
-			ticketsRefunded: 0,
-			status: RoundStatus.Unsettled,
-		}),
-	)
-}
-
-async function handleTicketsPurchased(eventCtx: EventContext): Promise<void> {
-	const { ctx, block, log, rounds, ticketPurchases } = eventCtx
-
-	const { roundId, user, ticketCount, startTicketIndex } =
-		rips.events.TicketsPurchased.decode(log)
-	const roundIdStr = roundId.toString()
-
-	const round = await resolveRound(ctx, rounds, roundIdStr)
-	if (round === undefined) {
-		throw new Error(`Round ${roundIdStr} not found for TicketsPurchased`)
-	}
-
-	round.ticketsSold += Number(ticketCount)
-
-	if (BigInt(round.ticketsSold) === round.stakeConfig.ticketCap) {
-		round.status = RoundStatus.Sealed
-	}
-
-	rounds.set(roundIdStr, round)
-
-	ticketPurchases.push(
-		new TicketPurchase({
-			id: log.id,
-			round,
-			user: user.toLowerCase(),
-			ticketCount: ticketCount,
-			startTicketIndex,
-			blockNumber: BigInt(block.height),
-			time: new Date(block.timestamp),
-			txHash: log.transactionHash,
-		}),
-	)
-}
-
-async function handleRandomnessRequested(
-	eventCtx: EventContext,
-): Promise<void> {
-	const { ctx, log, rounds } = eventCtx
-
-	const { roundId, vrfRequestId } =
-		rips.events.RandomnessRequested.decode(log)
-	const roundIdStr = roundId.toString()
-
-	const round = await resolveRound(ctx, rounds, roundIdStr)
-	if (round === undefined) {
-		throw new Error(`Round ${roundIdStr} not found for RandomnessRequested`)
-	}
-
-	round.status = RoundStatus.VRFRequested
-	round.vrfRequestId = vrfRequestId
-
-	rounds.set(roundIdStr, round)
-}
-
-async function handleRoundFinalized(eventCtx: EventContext): Promise<void> {
-	const { ctx, log, rounds } = eventCtx
-
-	const { roundId, randomA, randomB } = rips.events.RoundFinalized.decode(log)
-	const roundIdStr = roundId.toString()
-
-	const round = await resolveRound(ctx, rounds, roundIdStr)
-	if (round === undefined) {
-		throw new Error(`Round ${roundIdStr} not found for RoundFinalized`)
-	}
-
-	round.status = RoundStatus.Claiming
-	round.randomA = randomA
-	round.randomB = randomB
-
-	rounds.set(roundIdStr, round)
-}
-
-async function handlePrizesClaimed(eventCtx: EventContext): Promise<void> {
-	const { ctx, block, log, rounds, prizeClaims } = eventCtx
-
-	const { roundId, user, ticketCount, prizeAmount } =
-		rips.events.PrizesClaimed.decode(log)
-	const roundIdStr = roundId.toString()
-
-	const round = await resolveRound(ctx, rounds, roundIdStr)
-	if (round === undefined) {
-		throw new Error(`Round ${roundIdStr} not found for PrizesClaimed`)
-	}
-
-	round.ticketsClaimed += Number(ticketCount)
-
-	if (round.ticketsClaimed === round.ticketsSold) {
-		round.status = RoundStatus.Claimed
-	}
-
-	rounds.set(roundIdStr, round)
-
-	prizeClaims.push(
-		new PrizeClaim({
-			id: log.id,
-			round,
-			user: user.toLowerCase(),
-			ticketCount,
-			amount: prizeAmount,
-			blockNumber: BigInt(block.height),
-			time: new Date(block.timestamp),
-			txHash: log.transactionHash,
-		}),
-	)
-}
-
-async function handleRefundIssued(eventCtx: EventContext): Promise<void> {
-	const { ctx, block, log, rounds, refunds } = eventCtx
-
-	const { roundId, user, ticketCount } = rips.events.RefundIssued.decode(log)
-	const roundIdStr = roundId.toString()
-
-	const round = await resolveRound(ctx, rounds, roundIdStr)
-	if (round === undefined) {
-		throw new Error(`Round ${roundIdStr} not found for RefundIssued`)
-	}
-
-	round.ticketsRefunded += Number(ticketCount)
-
-	if (round.ticketsRefunded === round.ticketsSold) {
-		round.status = RoundStatus.Refunded
-	}
-
-	rounds.set(roundIdStr, round)
-
-	refunds.push(
-		new Refund({
-			id: log.id,
-			round,
-			user: user.toLowerCase(),
-			ticketCount,
-			amount: ticketCount * round.stakeConfig.ticketCost,
-			blockNumber: BigInt(block.height),
-			time: new Date(block.timestamp),
-			txHash: log.transactionHash,
-		}),
-	)
-}
-
-function handleFeeRecipientUpdated(eventCtx: EventContext): void {
-	const { block, log, feeRecipientUpdates } = eventCtx
-
-	const { newRecipient } = rips.events.FeeRecipientUpdated.decode(log)
-
-	feeRecipientUpdates.push(
-		new FeeRecipientUpdated({
-			id: log.id,
-			feeRecipient: newRecipient.toLowerCase(),
-			blockNumber: BigInt(block.height),
-			time: new Date(block.timestamp),
-			txHash: log.transactionHash,
-		}),
-	)
-}
-
-function handleCallbackGasLimitUpdated(eventCtx: EventContext): void {
-	const { block, log, callbackGasLimitUpdates } = eventCtx
-
-	const { newLimit } = rips.events.CallbackGasLimitUpdated.decode(log)
-
-	callbackGasLimitUpdates.push(
-		new CallbackGasLimitUpdated({
-			id: log.id,
-			callbackGasLimit: newLimit,
-			blockNumber: BigInt(block.height),
-			time: new Date(block.timestamp),
-			txHash: log.transactionHash,
-		}),
-	)
-}
-
-async function resolveRound(
-	ctx: Context,
-	rounds: Map<string, Round>,
-	roundId: string,
-): Promise<Round | undefined> {
-	return (
-		rounds.get(roundId) ??
-		(await ctx.store.findOne(Round, {
-			where: { id: roundId },
-			relations: { stakeConfig: true },
-		}))
-	)
-}
-
-function decodeCreateStakeInput(log: Log) {
-	try {
-		return rips.functions.createStake.decode(
-			assertNotNull(log.transaction).input,
-		).config
-	} catch {
-		return undefined
-	}
-}

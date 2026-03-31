@@ -1,12 +1,25 @@
+type Stake @entity {
+    id: ID!
+    deleted: Boolean!
+    configs: [StakeConfig!]! @derivedFrom(field: "stake")
+}
+
+enum StakeConfigStatus {
+    Active
+    Pending
+    Superseded
+}
+
 type StakeConfig @entity {
     id: ID!
+    stake: Stake!
+    status: StakeConfigStatus!
     ticketCap: BigInt!
     currency: String!
     durationSeconds: BigInt!
     ticketCost: BigInt!
     feePercent: BigInt!
     prizeDistribution: [PrizeTier!]! @derivedFrom(field: "stakeConfig")
-    deleted: Boolean!
     rounds: [Round!]! @derivedFrom(field: "stakeConfig")
 }
 
