@@ -33,6 +33,9 @@ const DURATION = 300n // 5 minutes
 const STAKE_1_ID = '1'
 const STAKE_2_ID = '2'
 
+const STAKE_1_CONFIG_ID = '1'
+const STAKE_2_CONFIG_ID = '2'
+
 const UNSETTLED_STAKE_1_ROUND_ID = '1'
 const UNSETTLED_STAKE_2_ROUND_ID = '2'
 
@@ -141,30 +144,46 @@ describe('indexer e2e', () => {
 	describe('createStake', () => {
 		const TOTAL_STAKES = 2
 
-		it('indexes all stake configs', async () => {
+		it('indexes all stakes', async () => {
 			const stakes = await waitForRecord(async () => {
+				const rows: unknown[] = await dataSource.query(
+					'SELECT * FROM stake ORDER BY id',
+				)
+				return rows.length === TOTAL_STAKES ? rows : null
+			})
+
+			expect(stakes).toMatchObject([
+				{ id: STAKE_1_ID, deleted: false },
+				{ id: STAKE_2_ID, deleted: false },
+			])
+		})
+
+		it('indexes all stake configs', async () => {
+			const configs = await waitForRecord(async () => {
 				const rows: unknown[] = await dataSource.query(
 					'SELECT * FROM stake_config ORDER BY id',
 				)
 				return rows.length === TOTAL_STAKES ? rows : null
 			})
 
-			expect(stakes).toMatchObject([
+			expect(configs).toMatchObject([
 				{
-					id: STAKE_1_ID,
+					id: STAKE_1_CONFIG_ID,
+					stake_id: STAKE_1_ID,
+					status: 'Active',
 					ticket_cap: STAKE_1_TICKET_CAP.toString(),
 					duration_seconds: DURATION.toString(),
 					ticket_cost: STAKE_1_TICKET_COST.toString(),
 					currency: NATIVE_CURRENCY,
-					deleted: false,
 				},
 				{
-					id: STAKE_2_ID,
+					id: STAKE_2_CONFIG_ID,
+					stake_id: STAKE_2_ID,
+					status: 'Active',
 					ticket_cap: STAKE_2_TICKET_CAP.toString(),
 					duration_seconds: DURATION.toString(),
 					ticket_cost: STAKE_2_TICKET_COST.toString(),
 					currency: NATIVE_CURRENCY,
-					deleted: false,
 				},
 			])
 		})
@@ -182,14 +201,16 @@ describe('indexer e2e', () => {
 
 			expect(tiers).toMatchObject([
 				...STAKE_1_PRIZE_TIERS.map((tier, i) => ({
-					id: `${STAKE_1_ID}-${i}`,
+					id: `${STAKE_1_CONFIG_ID}-${i}`,
+					stake_config_id: STAKE_1_CONFIG_ID,
 					tier_index: i,
 					prize_count: tier.prizeCount.toString(),
 					min_prize: tier.minPrize.toString(),
 					max_prize: tier.maxPrize.toString(),
 				})),
 				...STAKE_2_PRIZE_TIERS.map((tier, i) => ({
-					id: `${STAKE_2_ID}-${i}`,
+					id: `${STAKE_2_CONFIG_ID}-${i}`,
+					stake_config_id: STAKE_2_CONFIG_ID,
 					tier_index: i,
 					prize_count: tier.prizeCount.toString(),
 					min_prize: tier.minPrize.toString(),
@@ -209,13 +230,13 @@ describe('indexer e2e', () => {
 			expect(rounds).toMatchObject([
 				{
 					id: UNSETTLED_STAKE_1_ROUND_ID,
-					stake_config_id: STAKE_1_ID,
+					stake_config_id: STAKE_1_CONFIG_ID,
 					tickets_sold: 0,
 					status: 'Unsettled',
 				},
 				{
 					id: UNSETTLED_STAKE_2_ROUND_ID,
-					stake_config_id: STAKE_2_ID,
+					stake_config_id: STAKE_2_CONFIG_ID,
 					tickets_sold: 0,
 					status: 'Unsettled',
 				},
@@ -288,7 +309,7 @@ describe('indexer e2e', () => {
 
 			expect(round).toMatchObject({
 				id: STAKE_1_NEXT_ROUND_ID,
-				stake_config_id: STAKE_1_ID,
+				stake_config_id: STAKE_1_CONFIG_ID,
 				tickets_sold: 0,
 				status: 'Unsettled',
 			})
@@ -364,6 +385,7 @@ describe('indexer e2e', () => {
 					BigInt(STAKE_1_FILL_ROUND_ID),
 					0n,
 					10n,
+					deployer.address,
 					deployer.address,
 				],
 				gas: DEFAULT_GAS,
@@ -449,29 +471,16 @@ describe('indexer e2e', () => {
 	})
 
 	describe('admin setters', () => {
-		const NEW_FEE_PERCENT = 1000n
 		const NEW_CALLBACK_GAS_LIMIT = 200_000
 
-		let newFeeRecipient: `0x${string}`
-		let feeHash: `0x${string}`
 		let recipientHash: `0x${string}`
 		let gasLimitHash: `0x${string}`
 
 		beforeAll(async () => {
-			newFeeRecipient = deployer.address
-
-			feeHash = await walletClient.writeContract({
-				...ripsAbiAndAddress,
-				functionName: 'setProtocolFee',
-				args: [NEW_FEE_PERCENT],
-				gas: DEFAULT_GAS,
-			})
-			await waitForReceipt(publicClient, feeHash)
-
 			recipientHash = await walletClient.writeContract({
 				...ripsAbiAndAddress,
 				functionName: 'setFeeRecipient',
-				args: [newFeeRecipient],
+				args: [deployer.address],
 				gas: DEFAULT_GAS,
 			})
 			await waitForReceipt(publicClient, recipientHash)
@@ -485,18 +494,6 @@ describe('indexer e2e', () => {
 			await waitForReceipt(publicClient, gasLimitHash)
 		})
 
-		it('indexes ProtocolFeeUpdated', async () => {
-			const row = await waitForRow(
-				dataSource,
-				`SELECT * FROM protocol_fee_updated WHERE tx_hash = '${feeHash}'`,
-			)
-
-			expect(row).toMatchObject({
-				fee_percent: NEW_FEE_PERCENT.toString(),
-				tx_hash: feeHash,
-			})
-		})
-
 		it('indexes FeeRecipientUpdated', async () => {
 			const row = await waitForRow(
 				dataSource,
@@ -504,7 +501,7 @@ describe('indexer e2e', () => {
 			)
 
 			expect(row).toMatchObject({
-				fee_recipient: newFeeRecipient.toLowerCase(),
+				fee_recipient: deployer.address.toLowerCase(),
 				tx_hash: recipientHash,
 			})
 		})
@@ -533,10 +530,10 @@ describe('indexer e2e', () => {
 			await waitForReceipt(publicClient, txHash)
 		})
 
-		it('marks StakeConfig 1 as deleted', async () => {
+		it('marks stake 1 as deleted', async () => {
 			const row = await waitForRow(
 				dataSource,
-				`SELECT * FROM stake_config WHERE id = '${STAKE_1_ID}' AND deleted = true`,
+				`SELECT * FROM stake WHERE id = '${STAKE_1_ID}' AND deleted = true`,
 			)
 
 			expect(row).toMatchObject({

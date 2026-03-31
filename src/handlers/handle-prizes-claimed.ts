@@ -27,6 +27,7 @@ export async function handlePrizesClaimed(
 			id: log.id,
 			round,
 			user: user.toLowerCase(),
+			referrer: user.toLowerCase(),
 			ticketCount,
 			amount: prizeAmount,
 			blockNumber: BigInt(block.height),

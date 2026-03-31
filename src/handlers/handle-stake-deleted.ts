@@ -1,4 +1,4 @@
-import { resolveStakeOrThrow } from 'src/helpers'
+import { resolveStakeOrThrow } from '../helpers'
 import * as rips from '../abi/rips'
 import { EventContext } from '../types'
 
