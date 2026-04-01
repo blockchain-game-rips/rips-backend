@@ -7,10 +7,10 @@ import { KeeperUseCase } from 'src/application/use-cases/keeper/keeper.use-case'
 import { PrismaExecutorRepository } from 'src/infrastructure/prisma/executor.repository'
 import { PrismaModule } from 'src/infrastructure/prisma/prisma.module'
 import { RipsInfraModule } from 'src/infrastructure/rips/rips.module'
-import { GetRoundsModule } from './get-rounds.module'
+import { GetOngoingRoundsModule } from './get-ongoing-rounds.module'
 
 @Module({
-	imports: [GetRoundsModule, RipsInfraModule, PrismaModule],
+	imports: [GetOngoingRoundsModule, RipsInfraModule, PrismaModule],
 	providers: [
 		{ provide: ExecutorRepository, useClass: PrismaExecutorRepository },
 		{ provide: HandleClaimUseCase, useClass: HandleClaimService },

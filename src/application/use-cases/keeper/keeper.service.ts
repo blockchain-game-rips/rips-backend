@@ -3,7 +3,7 @@ import { ExecutorRepository } from 'src/application/interfaces/repositories/exec
 import { RipsService } from 'src/application/interfaces/rips.service'
 import { Executor } from 'src/domain/entities/executor'
 import { OngoingRound, Round, RoundStatus } from 'src/domain/entities/round'
-import { GetRoundsUseCase } from '../get-rounds/get-rounds.use-case'
+import { GetOngoingRoundsUseCase } from '../get-ongoing-rounds/get-ongoing-rounds.use-case'
 import { HandleClaimUseCase } from '../handle-claim/handle-claim.use-case'
 import { KeeperUseCase } from './keeper.use-case'
 
@@ -15,7 +15,7 @@ type KeeperAction =
 @Injectable()
 export class KeeperService extends KeeperUseCase {
 	constructor(
-		private readonly getRoundsUseCase: GetRoundsUseCase,
+		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly executorRepository: ExecutorRepository,
 		private readonly ripsService: RipsService,
 		private readonly handleClaimUseCase: HandleClaimUseCase,
@@ -25,7 +25,7 @@ export class KeeperService extends KeeperUseCase {
 
 	async execute(): Promise<void> {
 		const [rounds, executors] = await Promise.all([
-			this.getRoundsUseCase.execute(),
+			this.getOngoingRoundsUseCase.execute(),
 			this.executorRepository.getAll(),
 		])
 
@@ -33,7 +33,10 @@ export class KeeperService extends KeeperUseCase {
 
 		const actions = this.collectActions(rounds)
 
-		const actionsByExecutor = this.groupByExecutor(actions, executors.length)
+		const actionsByExecutor = this.groupByExecutor(
+			actions,
+			executors.length,
+		)
 
 		await Promise.all(
 			executors.map((executor, i) =>
@@ -46,7 +49,10 @@ export class KeeperService extends KeeperUseCase {
 		actions: KeeperAction[],
 		executorCount: number,
 	): KeeperAction[][] {
-		const groups: KeeperAction[][] = Array.from({ length: executorCount }, () => [])
+		const groups: KeeperAction[][] = Array.from(
+			{ length: executorCount },
+			() => [],
+		)
 
 		actions.forEach((action, i) => groups[i % executorCount].push(action))
 

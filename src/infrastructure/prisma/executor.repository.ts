@@ -16,15 +16,19 @@ export class PrismaExecutorRepository extends ExecutorRepository {
 			include: { executorWallet: true },
 		})
 
-		return records
-			.filter((r) => r.executorWallet !== null)
-			.map(toExecutor)
+		return records.filter((r) => r.executorWallet !== null).map(toExecutor)
 	}
 }
 
-type ExecutorRecord = Prisma.ExecutorGetPayload<{ include: { executorWallet: true } }>
+type ExecutorRecord = Prisma.ExecutorGetPayload<{
+	include: { executorWallet: true }
+}>
 
-function toExecutor(record: ExecutorRecord & { executorWallet: NonNullable<ExecutorRecord['executorWallet']> }): Executor {
+function toExecutor(
+	record: ExecutorRecord & {
+		executorWallet: NonNullable<ExecutorRecord['executorWallet']>
+	},
+): Executor {
 	return {
 		id: record.id,
 		wallet: {
