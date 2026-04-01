@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { TicketPrizeRepository } from 'src/application/interfaces/repositories/ticket-prize.repository'
 import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
+import { RipsService } from 'src/application/interfaces/rips.service'
 import { Round } from 'src/domain/entities/round'
 import { resolveTicketPrize } from 'src/domain/services/prize-utils'
 import { PurchaseAction } from 'src/domain/value-objects/actions'
-import { RipsKeeperService } from 'src/infrastructure/rips/rips-keeper.service'
 import { HandleClaimInput, HandleClaimUseCase } from './handle-claim.use-case'
 
 @Injectable()
@@ -12,12 +12,12 @@ export class HandleClaimService extends HandleClaimUseCase {
 	constructor(
 		private readonly userRepository: UserRepository,
 		private readonly ticketPrizeRepository: TicketPrizeRepository,
-		private readonly ripsKeeperService: RipsKeeperService,
+		private readonly ripsService: RipsService,
 	) {
 		super()
 	}
 
-	async execute({ round }: HandleClaimInput): Promise<void> {
+	async execute({ round, executor }: HandleClaimInput): Promise<void> {
 		const uniqueClaimedAddresses = new Set(
 			round.actions.claims.map((c) => c.userAddress),
 		)
@@ -26,10 +26,10 @@ export class HandleClaimService extends HandleClaimUseCase {
 			if (uniqueClaimedAddresses.has(purchase.userAddress)) continue
 
 			try {
-				await this.ripsKeeperService.claim(
-					round.id,
-					purchase.userAddress,
-				)
+				await this.ripsService.claim(executor.wallet, {
+					roundId: round.id,
+					userAddress: purchase.userAddress,
+				})
 				await this.savePrizes(round, purchase)
 			} catch (error) {
 				console.log(error)
@@ -71,6 +71,6 @@ export class HandleClaimService extends HandleClaimUseCase {
 			},
 		)
 
-		await this.ticketPrizeRepository.upsertMany(user.id, prizes)
+		await this.ticketPrizeRepository.upsertMany(user.id, prizes) //TODO: why upsert, what if prize is revealed
 	}
 }

@@ -1,10 +1,8 @@
-import { type Address } from 'viem'
-
 export type EvmWalletRecord = {
 	kmsKeyId: string
-	address: Address
+	address: string
 }
 
 export abstract class EvmWalletRepository {
-	abstract findByAddress(address: Address): Promise<EvmWalletRecord | null>
+	abstract findByAddress(address: string): Promise<EvmWalletRecord | null>
 }

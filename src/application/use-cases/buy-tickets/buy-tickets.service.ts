@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { WalletService } from 'src/application/interfaces/wallet.service'
+import { RipsService } from 'src/application/interfaces/rips.service'
 import { TicketNotFoundError } from 'src/domain/errors/stake-not-found.error'
 import { Purchase } from 'src/domain/value-objects/purchase'
 import { GetStakesUseCase } from '../get-stakes/get-stakes.use-case'
@@ -11,7 +11,7 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly getStakesUseCase: GetStakesUseCase,
-		private readonly walletService: WalletService,
+		private readonly ripsService: RipsService,
 	) {
 		super()
 	}
@@ -30,6 +30,6 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 			throw new TicketNotFoundError(`Stake with id ${stakeId} not found`)
 		}
 
-		return this.walletService.buyTickets(user.wallet, { stake, amount })
+		return this.ripsService.buyTickets(user.wallet, { stake, amount })
 	}
 }
