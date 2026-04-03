@@ -3,8 +3,13 @@ import { CreateUserUseCase } from 'src/application/use-cases/create-user/create-
 import { GetUnrevealedPrizesUseCase } from 'src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import { GetUserUseCase } from 'src/application/use-cases/get-user/get-user.use-case'
 import { RevealTicketPrizesUseCase } from 'src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
-import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
+import { TelegramId } from 'src/domain/value-objects/telegram-id'
 import { ZodValidationPipe } from 'src/presentation/pipes/zod-validation.pipe'
+import {
+	createUserBodySchema,
+	revealBodySchema,
+	telegramIdParamSchema,
+} from 'src/presentation/validation'
 import { z } from 'zod'
 import {
 	TicketPrizeResponseDto,
@@ -13,21 +18,6 @@ import {
 import { toUserResponseDto, UserResponseDto } from './user-response.dto'
 
 const TELEGRAM_ID_PARAM = 'telegramId'
-
-const telegramIdParamSchema = z
-	.string()
-	.regex(/^\d+$/)
-	.transform((v) => toTelegramId(BigInt(v)))
-
-const revealBodySchema = z.object({
-	revealAll: z.boolean(),
-})
-
-const createUserBodySchema = z.object({
-	telegramId: z
-		.union([z.string(), z.number()])
-		.transform((v) => toTelegramId(BigInt(v))),
-})
 
 @Controller()
 export class UsersController {
@@ -65,7 +55,7 @@ export class UsersController {
 		@Param(TELEGRAM_ID_PARAM, new ZodValidationPipe(telegramIdParamSchema))
 		telegramId: TelegramId,
 		@Body(new ZodValidationPipe(revealBodySchema))
-		body: { revealAll: boolean },
+		body: z.infer<typeof revealBodySchema>,
 	): Promise<TicketPrizeResponseDto[]> {
 		const prizes = await this.revealTicketPrizesUseCase.execute({
 			telegramId,
@@ -78,9 +68,7 @@ export class UsersController {
 	@Post()
 	async createUser(
 		@Body(new ZodValidationPipe(createUserBodySchema))
-		body: {
-			telegramId: TelegramId
-		},
+		body: z.infer<typeof createUserBodySchema>,
 	): Promise<UserResponseDto> {
 		const user = await this.createUserUseCase.execute({
 			telegramId: body.telegramId,

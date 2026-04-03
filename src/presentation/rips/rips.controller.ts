@@ -3,8 +3,13 @@ import { BuyTicketsUseCase } from 'src/application/use-cases/buy-tickets/buy-tic
 import { GetCompletedRoundsUseCase } from 'src/application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
 import { GetOngoingRoundsUseCase } from 'src/application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
 import { GetStakesUseCase } from 'src/application/use-cases/get-stakes/get-stakes.use-case'
-import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
+import { TelegramId } from 'src/domain/value-objects/telegram-id'
 import { ZodValidationPipe } from 'src/presentation/pipes/zod-validation.pipe'
+import {
+	buyTicketsBodySchema,
+	completedRoundsQuerySchema,
+	telegramIdParamSchema,
+} from 'src/presentation/validation'
 import { z } from 'zod'
 import {
 	BuyTicketsResponseDto,
@@ -18,27 +23,7 @@ import {
 } from './round-response.dto'
 import { StakeResponseDto, toStakeResponseDto } from './stake-response.dto'
 
-const DEFAULT_COMPLETED_ROUNDS_LIMIT = 20
-
-const telegramIdParamSchema = z
-	.string()
-	.regex(/^\d+$/)
-	.transform((v) => toTelegramId(BigInt(v)))
-
-const buyTicketsBodySchema = z.object({
-	stakeId: z.number().int().positive(),
-	amount: z.number().int().positive(),
-})
-
-const completedRoundsQuerySchema = z.object({
-	limit: z.coerce
-		.number()
-		.int()
-		.positive()
-		.optional()
-		.default(DEFAULT_COMPLETED_ROUNDS_LIMIT),
-	cursor: z.coerce.number().int().positive().optional(),
-})
+const TELEGRAM_ID_PARAM = 'telegramId'
 
 @Controller()
 export class RipsController {
@@ -56,9 +41,9 @@ export class RipsController {
 		return stakes.map(toStakeResponseDto)
 	}
 
-	@Post('users/:telegramId/buy-tickets')
+	@Post(`users/:${TELEGRAM_ID_PARAM}/buy-tickets`)
 	async buyTickets(
-		@Param('telegramId', new ZodValidationPipe(telegramIdParamSchema))
+		@Param(TELEGRAM_ID_PARAM, new ZodValidationPipe(telegramIdParamSchema))
 		telegramId: TelegramId,
 		@Body(new ZodValidationPipe(buyTicketsBodySchema))
 		body: z.infer<typeof buyTicketsBodySchema>,
