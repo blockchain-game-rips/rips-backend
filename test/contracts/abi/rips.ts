@@ -27,13 +27,104 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 'MAX_TICKETS_PER_RANGE',
+		name: 'DEFAULT_ADMIN_ROLE',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'FEE_BASE',
 		inputs: [],
 		outputs: [
 			{
 				name: '',
 				type: 'uint256',
 				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'MAX_REFERRAL_TIER_COUNT',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'MAX_TICKETS_PER_RANGE',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'MAX_TIER_COUNT',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'OPERATOR_ROLE',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'REFERRAL_PERIOD',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint40',
+				internalType: 'uint40',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'VRF_COORDINATOR_ROLE',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'bytes32',
+				internalType: 'bytes32',
 			},
 		],
 		stateMutability: 'view',
@@ -53,37 +144,17 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 'VRF_REQUEST_CONFIRMATIONS',
-		inputs: [],
-		outputs: [
-			{
-				name: '',
-				type: 'uint16',
-				internalType: 'uint16',
-			},
-		],
-		stateMutability: 'view',
-	},
-	{
-		type: 'function',
-		name: 'acceptOwnership',
-		inputs: [],
-		outputs: [],
-		stateMutability: 'nonpayable',
-	},
-	{
-		type: 'function',
 		name: 'buyTickets',
 		inputs: [
 			{
 				name: 'stakeId',
-				type: 'uint256',
-				internalType: 'uint256',
+				type: 'uint64',
+				internalType: 'uint64',
 			},
 			{
 				name: 'ticketCount',
-				type: 'uint256',
-				internalType: 'uint256',
+				type: 'uint64',
+				internalType: 'uint64',
 			},
 			{
 				name: 'recipient',
@@ -93,6 +164,19 @@ export const ripsAbi = [
 		],
 		outputs: [],
 		stateMutability: 'payable',
+	},
+	{
+		type: 'function',
+		name: 'callbackGasLimit',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint32',
+				internalType: 'uint32',
+			},
+		],
+		stateMutability: 'view',
 	},
 	{
 		type: 'function',
@@ -129,15 +213,78 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
+		name: 'configIdToConfig',
+		inputs: [
+			{
+				name: 'configId',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+		],
+		outputs: [
+			{
+				name: 'currency',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'ticketCap',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+			{
+				name: 'duration',
+				type: 'uint32',
+				internalType: 'uint32',
+			},
+			{
+				name: 'ticketCost',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'feePercent',
+				type: 'uint16',
+				internalType: 'uint16',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'configIdToTierBoundaries',
+		inputs: [
+			{
+				name: 'configId',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+			{
+				name: '',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		outputs: [
+			{
+				name: 'boundaries',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
 		name: 'createStake',
 		inputs: [
 			{
 				name: 'config',
 				type: 'tuple',
-				internalType: 'struct IRips.StakeConfig',
+				internalType: 'struct IRips.Config',
 				components: [
 					{
-						name: 'prizeDistribution',
+						name: 'tiers',
 						type: 'tuple[]',
 						internalType: 'struct IRips.PrizeTier[]',
 						components: [
@@ -165,13 +312,13 @@ export const ripsAbi = [
 					},
 					{
 						name: 'ticketCap',
-						type: 'uint256',
-						internalType: 'uint256',
+						type: 'uint64',
+						internalType: 'uint64',
 					},
 					{
 						name: 'duration',
-						type: 'uint256',
-						internalType: 'uint256',
+						type: 'uint32',
+						internalType: 'uint32',
 					},
 					{
 						name: 'ticketCost',
@@ -180,8 +327,8 @@ export const ripsAbi = [
 					},
 					{
 						name: 'feePercent',
-						type: 'uint256',
-						internalType: 'uint256',
+						type: 'uint16',
+						internalType: 'uint16',
 					},
 				],
 			},
@@ -189,11 +336,24 @@ export const ripsAbi = [
 		outputs: [
 			{
 				name: 'stakeId',
-				type: 'uint256',
-				internalType: 'uint256',
+				type: 'uint64',
+				internalType: 'uint64',
 			},
 		],
 		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'defaultReferralFee',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint16',
+				internalType: 'uint16',
+			},
+		],
+		stateMutability: 'view',
 	},
 	{
 		type: 'function',
@@ -201,8 +361,8 @@ export const ripsAbi = [
 		inputs: [
 			{
 				name: 'stakeId',
-				type: 'uint256',
-				internalType: 'uint256',
+				type: 'uint64',
+				internalType: 'uint64',
 			},
 		],
 		outputs: [],
@@ -217,6 +377,25 @@ export const ripsAbi = [
 				name: '',
 				type: 'address',
 				internalType: 'address',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'getRoleAdmin',
+		inputs: [
+			{
+				name: 'role',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+		],
+		outputs: [
+			{
+				name: '',
+				type: 'bytes32',
+				internalType: 'bytes32',
 			},
 		],
 		stateMutability: 'view',
@@ -244,13 +423,13 @@ export const ripsAbi = [
 				components: [
 					{
 						name: 'start',
-						type: 'uint96',
-						internalType: 'uint96',
+						type: 'uint64',
+						internalType: 'uint64',
 					},
 					{
 						name: 'count',
-						type: 'uint96',
-						internalType: 'uint96',
+						type: 'uint64',
+						internalType: 'uint64',
 					},
 					{
 						name: 'claimed',
@@ -264,13 +443,104 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 'owner',
-		inputs: [],
+		name: 'grantRole',
+		inputs: [
+			{
+				name: 'role',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+			{
+				name: 'account',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'hasRefunded',
+		inputs: [
+			{
+				name: 'roundId',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'user',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [
+			{
+				name: 'refunded',
+				type: 'bool',
+				internalType: 'bool',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'hasRole',
+		inputs: [
+			{
+				name: 'role',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+			{
+				name: 'account',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
 		outputs: [
 			{
 				name: '',
+				type: 'bool',
+				internalType: 'bool',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'isReferrerFrozen',
+		inputs: [
+			{
+				name: 'referrer',
 				type: 'address',
 				internalType: 'address',
+			},
+		],
+		outputs: [
+			{
+				name: 'frozen',
+				type: 'bool',
+				internalType: 'bool',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'isStakeDeleted',
+		inputs: [
+			{
+				name: 'stakeId',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+		],
+		outputs: [
+			{
+				name: 'deleted',
+				type: 'bool',
+				internalType: 'bool',
 			},
 		],
 		stateMutability: 'view',
@@ -297,6 +567,25 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
+		name: 'protocolFeeAccrued',
+		inputs: [
+			{
+				name: 'currency',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [
+			{
+				name: 'amount',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
 		name: 'rawFulfillRandomWords',
 		inputs: [
 			{
@@ -315,6 +604,88 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
+		name: 'referralTiers',
+		inputs: [
+			{
+				name: '',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		outputs: [
+			{
+				name: 'minVolume',
+				type: 'uint128',
+				internalType: 'uint128',
+			},
+			{
+				name: 'feePercent',
+				type: 'uint16',
+				internalType: 'uint16',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'referrerFeeAccrued',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'currency',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [
+			{
+				name: 'amount',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'referrerToReferrerStats',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [
+			{
+				name: 'activeFeePercent',
+				type: 'uint16',
+				internalType: 'uint16',
+			},
+			{
+				name: 'customFeePercent',
+				type: 'uint16',
+				internalType: 'uint16',
+			},
+			{
+				name: 'monthStartTimestamp',
+				type: 'uint40',
+				internalType: 'uint40',
+			},
+			{
+				name: 'currMonthVolume',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
 		name: 'refund',
 		inputs: [
 			{
@@ -324,6 +695,24 @@ export const ripsAbi = [
 			},
 			{
 				name: 'recipient',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'renounceRole',
+		inputs: [
+			{
+				name: 'role',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+			{
+				name: 'callerConfirmation',
 				type: 'address',
 				internalType: 'address',
 			},
@@ -352,25 +741,110 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 's_vrfCoordinator',
-		inputs: [],
+		name: 'revokeRole',
+		inputs: [
+			{
+				name: 'role',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+			{
+				name: 'account',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'roundIdToRound',
+		inputs: [
+			{
+				name: 'roundId',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
 		outputs: [
 			{
-				name: '',
-				type: 'address',
-				internalType: 'contract IVRFCoordinatorV2Plus',
+				name: 'stakeId',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+			{
+				name: 'configId',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+			{
+				name: 'startTime',
+				type: 'uint40',
+				internalType: 'uint40',
+			},
+			{
+				name: 'ticketsSold',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+			{
+				name: 'vrfRequestStatus',
+				type: 'uint8',
+				internalType: 'enum IRips.VrfRequestStatus',
+			},
+			{
+				name: 'randomA',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+			{
+				name: 'randomB',
+				type: 'uint64',
+				internalType: 'uint64',
 			},
 		],
 		stateMutability: 'view',
 	},
 	{
 		type: 'function',
+		name: 'seizeReferrerFee',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'currency',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
 		name: 'setCoordinator',
 		inputs: [
 			{
-				name: '_vrfCoordinator',
+				name: 'newVrfCoordinator',
 				type: 'address',
 				internalType: 'address',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'setDefaultReferralFee',
+		inputs: [
+			{
+				name: 'newDefaultReferralFee',
+				type: 'uint16',
+				internalType: 'uint16',
 			},
 		],
 		outputs: [],
@@ -391,16 +865,121 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 'transferOwnership',
+		name: 'setReferralTiers',
 		inputs: [
 			{
-				name: 'to',
-				type: 'address',
-				internalType: 'address',
+				name: 'tiers',
+				type: 'tuple[]',
+				internalType: 'struct IRips.ReferralTier[]',
+				components: [
+					{
+						name: 'minVolume',
+						type: 'uint128',
+						internalType: 'uint128',
+					},
+					{
+						name: 'feePercent',
+						type: 'uint16',
+						internalType: 'uint16',
+					},
+				],
 			},
 		],
 		outputs: [],
 		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'setReferrerCustomFee',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'customFeePercent',
+				type: 'uint16',
+				internalType: 'uint16',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'setReferrerFrozen',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'frozen',
+				type: 'bool',
+				internalType: 'bool',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'stakeIdToCurrentConfigId',
+		inputs: [
+			{
+				name: 'stakeId',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+		],
+		outputs: [
+			{
+				name: 'configId',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'stakeIdToCurrentRoundId',
+		inputs: [
+			{
+				name: 'stakeId',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+		],
+		outputs: [
+			{
+				name: 'roundId',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'supportsInterface',
+		inputs: [
+			{
+				name: 'interfaceId',
+				type: 'bytes4',
+				internalType: 'bytes4',
+			},
+		],
+		outputs: [
+			{
+				name: '',
+				type: 'bool',
+				internalType: 'bool',
+			},
+		],
+		stateMutability: 'view',
 	},
 	{
 		type: 'function',
@@ -428,16 +1007,16 @@ export const ripsAbi = [
 		inputs: [
 			{
 				name: 'stakeId',
-				type: 'uint256',
-				internalType: 'uint256',
+				type: 'uint64',
+				internalType: 'uint64',
 			},
 			{
 				name: 'config',
 				type: 'tuple',
-				internalType: 'struct IRips.StakeConfig',
+				internalType: 'struct IRips.Config',
 				components: [
 					{
-						name: 'prizeDistribution',
+						name: 'tiers',
 						type: 'tuple[]',
 						internalType: 'struct IRips.PrizeTier[]',
 						components: [
@@ -465,13 +1044,13 @@ export const ripsAbi = [
 					},
 					{
 						name: 'ticketCap',
-						type: 'uint256',
-						internalType: 'uint256',
+						type: 'uint64',
+						internalType: 'uint64',
 					},
 					{
 						name: 'duration',
-						type: 'uint256',
-						internalType: 'uint256',
+						type: 'uint32',
+						internalType: 'uint32',
 					},
 					{
 						name: 'ticketCost',
@@ -480,14 +1059,66 @@ export const ripsAbi = [
 					},
 					{
 						name: 'feePercent',
-						type: 'uint256',
-						internalType: 'uint256',
+						type: 'uint16',
+						internalType: 'uint16',
 					},
 				],
 			},
 		],
 		outputs: [],
 		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'updateVrfKeyHash',
+		inputs: [
+			{
+				name: 'newKeyHash',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'updateVrfRequestConfirmations',
+		inputs: [
+			{
+				name: 'newConfirmations',
+				type: 'uint16',
+				internalType: 'uint16',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'updateVrfSubscriptionId',
+		inputs: [
+			{
+				name: 'newSubscriptionId',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'vrfCoordinator',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'address',
+				internalType: 'contract IVRFCoordinatorV2Plus',
+			},
+		],
+		stateMutability: 'view',
 	},
 	{
 		type: 'function',
@@ -504,6 +1135,19 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
+		name: 'vrfRequestConfirmations',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint16',
+				internalType: 'uint16',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
 		name: 'vrfSubscriptionId',
 		inputs: [],
 		outputs: [
@@ -514,6 +1158,37 @@ export const ripsAbi = [
 			},
 		],
 		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'withdrawProtocolFee',
+		inputs: [
+			{
+				name: 'currency',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
+		name: 'withdrawReferrerFee',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'currency',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
 	},
 	{
 		type: 'event',
@@ -543,50 +1218,25 @@ export const ripsAbi = [
 	},
 	{
 		type: 'event',
+		name: 'DefaultReferralFeeUpdated',
+		inputs: [
+			{
+				name: 'newDefaultReferralFee',
+				type: 'uint16',
+				indexed: false,
+				internalType: 'uint16',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
 		name: 'FeeRecipientUpdated',
 		inputs: [
 			{
 				name: 'newRecipient',
 				type: 'address',
 				indexed: false,
-				internalType: 'address',
-			},
-		],
-		anonymous: false,
-	},
-	{
-		type: 'event',
-		name: 'OwnershipTransferRequested',
-		inputs: [
-			{
-				name: 'from',
-				type: 'address',
-				indexed: true,
-				internalType: 'address',
-			},
-			{
-				name: 'to',
-				type: 'address',
-				indexed: true,
-				internalType: 'address',
-			},
-		],
-		anonymous: false,
-	},
-	{
-		type: 'event',
-		name: 'OwnershipTransferred',
-		inputs: [
-			{
-				name: 'from',
-				type: 'address',
-				indexed: true,
-				internalType: 'address',
-			},
-			{
-				name: 'to',
-				type: 'address',
-				indexed: true,
 				internalType: 'address',
 			},
 		],
@@ -629,12 +1279,81 @@ export const ripsAbi = [
 			},
 			{
 				name: 'ticketCount',
+				type: 'uint64',
+				indexed: false,
+				internalType: 'uint64',
+			},
+			{
+				name: 'prizeAmount',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'ProtocolFeeAccrued',
+		inputs: [
+			{
+				name: 'roundId',
+				type: 'uint256',
+				indexed: true,
+				internalType: 'uint256',
+			},
+			{
+				name: 'amount',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'ProtocolFeeWithdrawn',
+		inputs: [
+			{
+				name: 'recipient',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'currency',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'amount',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'RandomnessFulfilled',
+		inputs: [
+			{
+				name: 'roundId',
+				type: 'uint256',
+				indexed: true,
+				internalType: 'uint256',
+			},
+			{
+				name: 'randomA',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
 			},
 			{
-				name: 'prizeAmount',
+				name: 'randomB',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
@@ -663,6 +1382,144 @@ export const ripsAbi = [
 	},
 	{
 		type: 'event',
+		name: 'ReferralFeeAccrued',
+		inputs: [
+			{
+				name: 'roundId',
+				type: 'uint256',
+				indexed: true,
+				internalType: 'uint256',
+			},
+			{
+				name: 'referrer',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'amount',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'ReferralTiersUpdated',
+		inputs: [
+			{
+				name: 'tiers',
+				type: 'tuple[]',
+				indexed: false,
+				internalType: 'struct IRips.ReferralTier[]',
+				components: [
+					{
+						name: 'minVolume',
+						type: 'uint128',
+						internalType: 'uint128',
+					},
+					{
+						name: 'feePercent',
+						type: 'uint16',
+						internalType: 'uint16',
+					},
+				],
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'ReferrerCustomFeeSet',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'customFeePercent',
+				type: 'uint16',
+				indexed: false,
+				internalType: 'uint16',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'ReferrerFeeSeized',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'currency',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'amount',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'ReferrerFeeWithdrawn',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'currency',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'amount',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'ReferrerFreezeUpdated',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'frozen',
+				type: 'bool',
+				indexed: false,
+				internalType: 'bool',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
 		name: 'RefundIssued',
 		inputs: [
 			{
@@ -679,9 +1536,84 @@ export const ripsAbi = [
 			},
 			{
 				name: 'ticketCount',
-				type: 'uint256',
+				type: 'uint64',
 				indexed: false,
-				internalType: 'uint256',
+				internalType: 'uint64',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'RoleAdminChanged',
+		inputs: [
+			{
+				name: 'role',
+				type: 'bytes32',
+				indexed: true,
+				internalType: 'bytes32',
+			},
+			{
+				name: 'previousAdminRole',
+				type: 'bytes32',
+				indexed: true,
+				internalType: 'bytes32',
+			},
+			{
+				name: 'newAdminRole',
+				type: 'bytes32',
+				indexed: true,
+				internalType: 'bytes32',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'RoleGranted',
+		inputs: [
+			{
+				name: 'role',
+				type: 'bytes32',
+				indexed: true,
+				internalType: 'bytes32',
+			},
+			{
+				name: 'account',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'sender',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'RoleRevoked',
+		inputs: [
+			{
+				name: 'role',
+				type: 'bytes32',
+				indexed: true,
+				internalType: 'bytes32',
+			},
+			{
+				name: 'account',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'sender',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
 			},
 		],
 		anonymous: false,
@@ -698,34 +1630,15 @@ export const ripsAbi = [
 			},
 			{
 				name: 'stakeId',
-				type: 'uint256',
+				type: 'uint64',
 				indexed: true,
-				internalType: 'uint256',
-			},
-		],
-		anonymous: false,
-	},
-	{
-		type: 'event',
-		name: 'RoundFinalized',
-		inputs: [
-			{
-				name: 'roundId',
-				type: 'uint256',
-				indexed: true,
-				internalType: 'uint256',
+				internalType: 'uint64',
 			},
 			{
-				name: 'randomA',
-				type: 'uint256',
+				name: 'configId',
+				type: 'uint64',
 				indexed: false,
-				internalType: 'uint256',
-			},
-			{
-				name: 'randomB',
-				type: 'uint256',
-				indexed: false,
-				internalType: 'uint256',
+				internalType: 'uint64',
 			},
 		],
 		anonymous: false,
@@ -736,9 +1649,15 @@ export const ripsAbi = [
 		inputs: [
 			{
 				name: 'stakeId',
-				type: 'uint256',
+				type: 'uint64',
 				indexed: true,
-				internalType: 'uint256',
+				internalType: 'uint64',
+			},
+			{
+				name: 'configId',
+				type: 'uint64',
+				indexed: false,
+				internalType: 'uint64',
 			},
 		],
 		anonymous: false,
@@ -749,9 +1668,9 @@ export const ripsAbi = [
 		inputs: [
 			{
 				name: 'stakeId',
-				type: 'uint256',
+				type: 'uint64',
 				indexed: true,
-				internalType: 'uint256',
+				internalType: 'uint64',
 			},
 		],
 		anonymous: false,
@@ -762,9 +1681,15 @@ export const ripsAbi = [
 		inputs: [
 			{
 				name: 'stakeId',
-				type: 'uint256',
+				type: 'uint64',
 				indexed: true,
-				internalType: 'uint256',
+				internalType: 'uint64',
+			},
+			{
+				name: 'configId',
+				type: 'uint64',
+				indexed: false,
+				internalType: 'uint64',
 			},
 		],
 		anonymous: false,
@@ -787,9 +1712,9 @@ export const ripsAbi = [
 			},
 			{
 				name: 'ticketCount',
-				type: 'uint256',
+				type: 'uint64',
 				indexed: false,
-				internalType: 'uint256',
+				internalType: 'uint64',
 			},
 			{
 				name: 'startTicketIndex',
@@ -814,13 +1739,68 @@ export const ripsAbi = [
 		anonymous: false,
 	},
 	{
+		type: 'event',
+		name: 'VrfKeyHashUpdated',
+		inputs: [
+			{
+				name: 'newKeyHash',
+				type: 'bytes32',
+				indexed: false,
+				internalType: 'bytes32',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'VrfRequestConfirmationsUpdated',
+		inputs: [
+			{
+				name: 'newConfirmations',
+				type: 'uint16',
+				indexed: false,
+				internalType: 'uint16',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'VrfSubscriptionIdUpdated',
+		inputs: [
+			{
+				name: 'newSubscriptionId',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+		],
+		anonymous: false,
+	},
+	{
 		type: 'error',
-		name: 'AlreadyRefunded',
+		name: 'AccessControlBadConfirmation',
 		inputs: [],
 	},
 	{
 		type: 'error',
-		name: 'EmptyPrizeDistribution',
+		name: 'AccessControlUnauthorizedAccount',
+		inputs: [
+			{
+				name: 'account',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'neededRole',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+		],
+	},
+	{
+		type: 'error',
+		name: 'AlreadyRefunded',
 		inputs: [],
 	},
 	{
@@ -845,11 +1825,6 @@ export const ripsAbi = [
 	},
 	{
 		type: 'error',
-		name: 'FeeTransferFailed',
-		inputs: [],
-	},
-	{
-		type: 'error',
 		name: 'IncorrectPayment',
 		inputs: [],
 	},
@@ -860,12 +1835,22 @@ export const ripsAbi = [
 	},
 	{
 		type: 'error',
+		name: 'InvalidRequestId',
+		inputs: [],
+	},
+	{
+		type: 'error',
 		name: 'InvalidStartIndex',
 		inputs: [],
 	},
 	{
 		type: 'error',
-		name: 'NativePaymentRequired',
+		name: 'InvalidTierCount',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'InvalidVrfRequestStatus',
 		inputs: [],
 	},
 	{
@@ -875,40 +1860,13 @@ export const ripsAbi = [
 	},
 	{
 		type: 'error',
-		name: 'OnlyCoordinatorCanFulfill',
-		inputs: [
-			{
-				name: 'have',
-				type: 'address',
-				internalType: 'address',
-			},
-			{
-				name: 'want',
-				type: 'address',
-				internalType: 'address',
-			},
-		],
+		name: 'NotRecipientOrOwner',
+		inputs: [],
 	},
 	{
 		type: 'error',
-		name: 'OnlyOwnerOrCoordinator',
-		inputs: [
-			{
-				name: 'have',
-				type: 'address',
-				internalType: 'address',
-			},
-			{
-				name: 'owner',
-				type: 'address',
-				internalType: 'address',
-			},
-			{
-				name: 'coordinator',
-				type: 'address',
-				internalType: 'address',
-			},
-		],
+		name: 'NothingToWithdraw',
+		inputs: [],
 	},
 	{
 		type: 'error',
@@ -922,22 +1880,32 @@ export const ripsAbi = [
 	},
 	{
 		type: 'error',
-		name: 'PrizeTransferFailed',
-		inputs: [],
-	},
-	{
-		type: 'error',
 		name: 'ReentrancyGuardReentrantCall',
 		inputs: [],
 	},
 	{
 		type: 'error',
-		name: 'RefundFailed',
+		name: 'ReferralTierCountExceeded',
 		inputs: [],
 	},
 	{
 		type: 'error',
-		name: 'ReturnExcessFailed',
+		name: 'ReferralTiersEmpty',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'ReferralTiersNotSorted',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'ReferrerFrozen',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'RoundExpired',
 		inputs: [],
 	},
 	{
@@ -952,7 +1920,7 @@ export const ripsAbi = [
 	},
 	{
 		type: 'error',
-		name: 'RoundNotFinalized',
+		name: 'RoundNotFulfilled',
 		inputs: [],
 	},
 	{
@@ -983,7 +1951,27 @@ export const ripsAbi = [
 	},
 	{
 		type: 'error',
+		name: 'TiersNotSortedByCount',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TransferFailed',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'VrfAlreadyRequested',
+		inputs: [],
+	},
+	{
+		type: 'error',
 		name: 'ZeroAddress',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'ZeroSubscriptionId',
 		inputs: [],
 	},
 	{

@@ -5,86 +5,225 @@ import type { EventParams as EParams, FunctionArguments, FunctionReturn } from '
 export const events = {
     CallbackGasLimitUpdated: event("0x25358b14cd4557629ee75bbccedef47b9c0fe38c159233fb711b4c547692f889", "CallbackGasLimitUpdated(uint32)", {"newLimit": p.uint32}),
     CoordinatorSet: event("0xd1a6a14209a385a964d036e404cb5cfb71f4000cdb03c9366292430787261be6", "CoordinatorSet(address)", {"vrfCoordinator": p.address}),
+    DefaultReferralFeeUpdated: event("0x9836739cc8e3f7428a3a9c5f389af27811d11bd3fb136009ff949514f78efd26", "DefaultReferralFeeUpdated(uint16)", {"newDefaultReferralFee": p.uint16}),
     FeeRecipientUpdated: event("0x7a7b5a0a132f9e0581eb8527f66eae9ee89c2a3e79d4ac7e41a1f1f4d48a7fc2", "FeeRecipientUpdated(address)", {"newRecipient": p.address}),
-    OwnershipTransferRequested: event("0xed8889f560326eb138920d842192f0eb3dd22b4f139c87a2c57538e05bae1278", "OwnershipTransferRequested(address,address)", {"from": indexed(p.address), "to": indexed(p.address)}),
-    OwnershipTransferred: event("0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0", "OwnershipTransferred(address,address)", {"from": indexed(p.address), "to": indexed(p.address)}),
     Paused: event("0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258", "Paused(address)", {"account": p.address}),
-    PrizesClaimed: event("0x690f8107ef1e5605994d2052a8bbba34645b2e2e21dfc9d34b7bad6a19ea1d53", "PrizesClaimed(uint256,address,address,uint256,uint256)", {"roundId": indexed(p.uint256), "user": indexed(p.address), "referrer": p.address, "ticketCount": p.uint256, "prizeAmount": p.uint256}),
+    PrizesClaimed: event("0x7147880f565bbe2512461c98f8d927d5d64fbcdf20fb1ea44f45c186980634e3", "PrizesClaimed(uint256,address,address,uint64,uint256)", {"roundId": indexed(p.uint256), "user": indexed(p.address), "referrer": p.address, "ticketCount": p.uint64, "prizeAmount": p.uint256}),
+    ProtocolFeeAccrued: event("0xa7d3ed4c08f0a22ed87b5588418154edb430223dc6ecf5acdf1654acac9fbba3", "ProtocolFeeAccrued(uint256,uint256)", {"roundId": indexed(p.uint256), "amount": p.uint256}),
+    ProtocolFeeWithdrawn: event("0x5878feeed994dd9f6c62cda75c4fb2fa60eb14dbe85b3f7e7ac2280b13dc365a", "ProtocolFeeWithdrawn(address,address,uint256)", {"recipient": indexed(p.address), "currency": indexed(p.address), "amount": p.uint256}),
+    RandomnessFulfilled: event("0xdc21bacb3b6e5d0ab7b2226e949e874de99019db7967e59ee54cc1e830016cab", "RandomnessFulfilled(uint256,uint256,uint256)", {"roundId": indexed(p.uint256), "randomA": p.uint256, "randomB": p.uint256}),
     RandomnessRequested: event("0x3d94fecedaa4f90b8bd459797adb95f5bb11426025c5541390d9ccc1ad1b60a1", "RandomnessRequested(uint256,uint256)", {"roundId": indexed(p.uint256), "vrfRequestId": p.uint256}),
-    RefundIssued: event("0x7a482fdeb6bc9a1376f597068a214a7a39472bb2eff1b8cad21ba04f49ddca1b", "RefundIssued(uint256,address,uint256)", {"roundId": indexed(p.uint256), "user": indexed(p.address), "ticketCount": p.uint256}),
-    RoundCreated: event("0xe934619c48e1b0b21b662adf6b7c08ad37e6f0d120f40a505503b4fd3bcfec58", "RoundCreated(uint256,uint256)", {"roundId": indexed(p.uint256), "stakeId": indexed(p.uint256)}),
-    RoundFinalized: event("0x50175b23949579f5a257c33ccacf5689f481c882821df6a2a9294c7b5c67fc55", "RoundFinalized(uint256,uint256,uint256)", {"roundId": indexed(p.uint256), "randomA": p.uint256, "randomB": p.uint256}),
-    StakeCreated: event("0xcb3e2345f6a570dd7e2ea4e558b0f4891ac509659eec8db8f805b23c2376ebbe", "StakeCreated(uint256)", {"stakeId": indexed(p.uint256)}),
-    StakeDeleted: event("0xce97243d24406722abc44bd316a8f3a630a3fa4f8178be225d2c224154d022ec", "StakeDeleted(uint256)", {"stakeId": indexed(p.uint256)}),
-    StakeUpdated: event("0x6a36d9ae14e63a7e1b6dd689b4ffd4ac78affeeb8c92036819ae062d6f8d940f", "StakeUpdated(uint256)", {"stakeId": indexed(p.uint256)}),
-    TicketsPurchased: event("0x830c4a183800e86da29c219cdb1ad8e51a4924fd549d8d2ee32d641c3b4e25a5", "TicketsPurchased(uint256,address,uint256,uint256)", {"roundId": indexed(p.uint256), "user": indexed(p.address), "ticketCount": p.uint256, "startTicketIndex": p.uint256}),
+    ReferralFeeAccrued: event("0xf51b8c95ee5eeea91a2309af8a0da1bcadcee2bcf67057f3e5b51358ff9ab969", "ReferralFeeAccrued(uint256,address,uint256)", {"roundId": indexed(p.uint256), "referrer": indexed(p.address), "amount": p.uint256}),
+    ReferralTiersUpdated: event("0x6b62d291a70ab2427227f2cae67265ba70ed523c6eb0bcc0f472c52cae565402", "ReferralTiersUpdated((uint128,uint16)[])", {"tiers": p.array(p.struct({"minVolume": p.uint128, "feePercent": p.uint16}))}),
+    ReferrerCustomFeeSet: event("0x0296a6ddfb989e97b8f275beac9149b76c0375f8f14596b8e1a67aae129411c1", "ReferrerCustomFeeSet(address,uint16)", {"referrer": indexed(p.address), "customFeePercent": p.uint16}),
+    ReferrerFeeSeized: event("0xc67df585acf738df3324c58148cccf0e0845dde9c7770a2be7bb3f337a459e19", "ReferrerFeeSeized(address,address,uint256)", {"referrer": indexed(p.address), "currency": indexed(p.address), "amount": p.uint256}),
+    ReferrerFeeWithdrawn: event("0x1f1a0569e61e4a8573e34abf057b1d530d895d6e95ed5d28cddb4eff6a32d1d8", "ReferrerFeeWithdrawn(address,address,uint256)", {"referrer": indexed(p.address), "currency": indexed(p.address), "amount": p.uint256}),
+    ReferrerFreezeUpdated: event("0xf130e492f9609fb734eeae4b625128bcd3efa572f68bd370f208b38dd581130d", "ReferrerFreezeUpdated(address,bool)", {"referrer": indexed(p.address), "frozen": p.bool}),
+    RefundIssued: event("0x041abe2f329a2403772cb6d3650f8fac25d2542bfff84be0089c73dff7289424", "RefundIssued(uint256,address,uint64)", {"roundId": indexed(p.uint256), "user": indexed(p.address), "ticketCount": p.uint64}),
+    RoleAdminChanged: event("0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff", "RoleAdminChanged(bytes32,bytes32,bytes32)", {"role": indexed(p.bytes32), "previousAdminRole": indexed(p.bytes32), "newAdminRole": indexed(p.bytes32)}),
+    RoleGranted: event("0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d", "RoleGranted(bytes32,address,address)", {"role": indexed(p.bytes32), "account": indexed(p.address), "sender": indexed(p.address)}),
+    RoleRevoked: event("0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b", "RoleRevoked(bytes32,address,address)", {"role": indexed(p.bytes32), "account": indexed(p.address), "sender": indexed(p.address)}),
+    RoundCreated: event("0x1b5721fdc0d91f91701eb33af1162938d948bfac559215c075140aefb67a8314", "RoundCreated(uint256,uint64,uint64)", {"roundId": indexed(p.uint256), "stakeId": indexed(p.uint64), "configId": p.uint64}),
+    StakeCreated: event("0xe7b7098505b7d799aba79d4623805fcee199374c466a9b834900db69b326c9e9", "StakeCreated(uint64,uint64)", {"stakeId": indexed(p.uint64), "configId": p.uint64}),
+    StakeDeleted: event("0xfb6215d515458f497c7f20ba2b25acb06a5b11b5420f30e2f4e9200340991444", "StakeDeleted(uint64)", {"stakeId": indexed(p.uint64)}),
+    StakeUpdated: event("0xa0206dd6f1a8b0e3b6a8ae2f9f03f6ebf6edb14617a7b14724e838532bd3309f", "StakeUpdated(uint64,uint64)", {"stakeId": indexed(p.uint64), "configId": p.uint64}),
+    TicketsPurchased: event("0x3b4632349295c42d5e81b4ff0ada5356532e1549e109a08d7948aface5cf6400", "TicketsPurchased(uint256,address,uint64,uint256)", {"roundId": indexed(p.uint256), "user": indexed(p.address), "ticketCount": p.uint64, "startTicketIndex": p.uint256}),
     Unpaused: event("0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa", "Unpaused(address)", {"account": p.address}),
+    VrfKeyHashUpdated: event("0x5a0c17938b4505d5f8f0cae0ac3e83cea1440c35e8dd54fe3993ee3772f767f2", "VrfKeyHashUpdated(bytes32)", {"newKeyHash": p.bytes32}),
+    VrfRequestConfirmationsUpdated: event("0xf37f403a112b0c927ff6e322d7ca9c0d124cca8fbf7584398b7a1f32f2c24f9a", "VrfRequestConfirmationsUpdated(uint16)", {"newConfirmations": p.uint16}),
+    VrfSubscriptionIdUpdated: event("0x8f6e94925304fda0fe752ec2cb17f1581598998f684a5b0e8a654d62ecdb9281", "VrfSubscriptionIdUpdated(uint256)", {"newSubscriptionId": p.uint256}),
 }
 
 export const functions = {
-    MAX_TICKETS_PER_RANGE: viewFun("0x13c4bce1", "MAX_TICKETS_PER_RANGE()", {}, p.uint256),
+    DEFAULT_ADMIN_ROLE: viewFun("0xa217fddf", "DEFAULT_ADMIN_ROLE()", {}, p.bytes32),
+    FEE_BASE: viewFun("0xecefc705", "FEE_BASE()", {}, p.uint256),
+    MAX_REFERRAL_TIER_COUNT: viewFun("0x74826c8b", "MAX_REFERRAL_TIER_COUNT()", {}, p.uint256),
+    MAX_TICKETS_PER_RANGE: viewFun("0x13c4bce1", "MAX_TICKETS_PER_RANGE()", {}, p.uint64),
+    MAX_TIER_COUNT: viewFun("0xfa998af2", "MAX_TIER_COUNT()", {}, p.uint256),
+    OPERATOR_ROLE: viewFun("0xf5b541a6", "OPERATOR_ROLE()", {}, p.bytes32),
+    REFERRAL_PERIOD: viewFun("0xa8207578", "REFERRAL_PERIOD()", {}, p.uint40),
+    VRF_COORDINATOR_ROLE: viewFun("0x233e341d", "VRF_COORDINATOR_ROLE()", {}, p.bytes32),
     VRF_NUM_WORDS: viewFun("0x5c900a1a", "VRF_NUM_WORDS()", {}, p.uint32),
-    VRF_REQUEST_CONFIRMATIONS: viewFun("0x1e27580e", "VRF_REQUEST_CONFIRMATIONS()", {}, p.uint16),
-    acceptOwnership: fun("0x79ba5097", "acceptOwnership()", {}, ),
-    buyTickets: fun("0xa792813c", "buyTickets(uint256,uint256,address)", {"stakeId": p.uint256, "ticketCount": p.uint256, "recipient": p.address}, ),
+    buyTickets: fun("0x4c57c153", "buyTickets(uint64,uint64,address)", {"stakeId": p.uint64, "ticketCount": p.uint64, "recipient": p.address}, ),
+    callbackGasLimit: viewFun("0x24f74697", "callbackGasLimit()", {}, p.uint32),
     claimPrizes: fun("0x8c8afe62", "claimPrizes(uint256,uint256,uint256,address,address)", {"roundId": p.uint256, "startIndex": p.uint256, "maxRanges": p.uint256, "recipient": p.address, "referrer": p.address}, ),
-    createStake: fun("0x55039261", "createStake(((uint64,uint128,uint128)[],address,uint256,uint256,uint256,uint256))", {"config": p.struct({"prizeDistribution": p.array(p.struct({"prizeCount": p.uint64, "minPrize": p.uint128, "maxPrize": p.uint128})), "currency": p.address, "ticketCap": p.uint256, "duration": p.uint256, "ticketCost": p.uint256, "feePercent": p.uint256})}, p.uint256),
-    deleteStake: fun("0xed5e8d7e", "deleteStake(uint256)", {"stakeId": p.uint256}, ),
+    configIdToConfig: viewFun("0xdc661ce2", "configIdToConfig(uint64)", {"configId": p.uint64}, {"currency": p.address, "ticketCap": p.uint64, "duration": p.uint32, "ticketCost": p.uint256, "feePercent": p.uint16}),
+    configIdToTierBoundaries: viewFun("0x2528df22", "configIdToTierBoundaries(uint64,uint256)", {"configId": p.uint64, "_1": p.uint256}, p.uint64),
+    createStake: fun("0x0b823796", "createStake(((uint64,uint128,uint128)[],address,uint64,uint32,uint256,uint16))", {"config": p.struct({"tiers": p.array(p.struct({"prizeCount": p.uint64, "minPrize": p.uint128, "maxPrize": p.uint128})), "currency": p.address, "ticketCap": p.uint64, "duration": p.uint32, "ticketCost": p.uint256, "feePercent": p.uint16})}, p.uint64),
+    defaultReferralFee: viewFun("0x80eaf094", "defaultReferralFee()", {}, p.uint16),
+    deleteStake: fun("0x975433a3", "deleteStake(uint64)", {"stakeId": p.uint64}, ),
     feeRecipient: viewFun("0x46904840", "feeRecipient()", {}, p.address),
-    getUserTickets: viewFun("0xe7a7f65c", "getUserTickets(uint256,address)", {"roundId": p.uint256, "user": p.address}, p.array(p.struct({"start": p.uint96, "count": p.uint96, "claimed": p.bool}))),
-    owner: viewFun("0x8da5cb5b", "owner()", {}, p.address),
+    getRoleAdmin: viewFun("0x248a9ca3", "getRoleAdmin(bytes32)", {"role": p.bytes32}, p.bytes32),
+    getUserTickets: viewFun("0xe7a7f65c", "getUserTickets(uint256,address)", {"roundId": p.uint256, "user": p.address}, p.array(p.struct({"start": p.uint64, "count": p.uint64, "claimed": p.bool}))),
+    grantRole: fun("0x2f2ff15d", "grantRole(bytes32,address)", {"role": p.bytes32, "account": p.address}, ),
+    hasRefunded: viewFun("0xc9de59ef", "hasRefunded(uint256,address)", {"roundId": p.uint256, "user": p.address}, p.bool),
+    hasRole: viewFun("0x91d14854", "hasRole(bytes32,address)", {"role": p.bytes32, "account": p.address}, p.bool),
+    isReferrerFrozen: viewFun("0xc2581e67", "isReferrerFrozen(address)", {"referrer": p.address}, p.bool),
+    isStakeDeleted: viewFun("0x6b143438", "isStakeDeleted(uint64)", {"stakeId": p.uint64}, p.bool),
     pause: fun("0x8456cb59", "pause()", {}, ),
     paused: viewFun("0x5c975abb", "paused()", {}, p.bool),
+    protocolFeeAccrued: viewFun("0xd0d55129", "protocolFeeAccrued(address)", {"currency": p.address}, p.uint256),
     rawFulfillRandomWords: fun("0x1fe543e3", "rawFulfillRandomWords(uint256,uint256[])", {"requestId": p.uint256, "randomWords": p.array(p.uint256)}, ),
+    referralTiers: viewFun("0x93e2d3b4", "referralTiers(uint256)", {"_0": p.uint256}, {"minVolume": p.uint128, "feePercent": p.uint16}),
+    referrerFeeAccrued: viewFun("0x334091ab", "referrerFeeAccrued(address,address)", {"referrer": p.address, "currency": p.address}, p.uint256),
+    referrerToReferrerStats: viewFun("0xe4c0acd6", "referrerToReferrerStats(address)", {"referrer": p.address}, {"activeFeePercent": p.uint16, "customFeePercent": p.uint16, "monthStartTimestamp": p.uint40, "currMonthVolume": p.uint256}),
     refund: fun("0x7ad226dc", "refund(uint256,address)", {"roundId": p.uint256, "recipient": p.address}, ),
+    renounceRole: fun("0x36568abe", "renounceRole(bytes32,address)", {"role": p.bytes32, "callerConfirmation": p.address}, ),
     requestRandomness: fun("0x7363ae1f", "requestRandomness(uint256)", {"roundId": p.uint256}, p.uint256),
-    s_vrfCoordinator: viewFun("0x9eccacf6", "s_vrfCoordinator()", {}, p.address),
-    setCoordinator: fun("0x8ea98117", "setCoordinator(address)", {"_vrfCoordinator": p.address}, ),
+    revokeRole: fun("0xd547741f", "revokeRole(bytes32,address)", {"role": p.bytes32, "account": p.address}, ),
+    roundIdToRound: viewFun("0x3dad4311", "roundIdToRound(uint256)", {"roundId": p.uint256}, {"stakeId": p.uint64, "configId": p.uint64, "startTime": p.uint40, "ticketsSold": p.uint64, "vrfRequestStatus": p.uint8, "randomA": p.uint64, "randomB": p.uint64}),
+    seizeReferrerFee: fun("0xe07b2a64", "seizeReferrerFee(address,address)", {"referrer": p.address, "currency": p.address}, ),
+    setCoordinator: fun("0x8ea98117", "setCoordinator(address)", {"newVrfCoordinator": p.address}, ),
+    setDefaultReferralFee: fun("0xe4b35fcf", "setDefaultReferralFee(uint16)", {"newDefaultReferralFee": p.uint16}, ),
     setFeeRecipient: fun("0xe74b981b", "setFeeRecipient(address)", {"newRecipient": p.address}, ),
-    transferOwnership: fun("0xf2fde38b", "transferOwnership(address)", {"to": p.address}, ),
+    setReferralTiers: fun("0xb8ea9c67", "setReferralTiers((uint128,uint16)[])", {"tiers": p.array(p.struct({"minVolume": p.uint128, "feePercent": p.uint16}))}, ),
+    setReferrerCustomFee: fun("0x0cd15fc0", "setReferrerCustomFee(address,uint16)", {"referrer": p.address, "customFeePercent": p.uint16}, ),
+    setReferrerFrozen: fun("0x53372947", "setReferrerFrozen(address,bool)", {"referrer": p.address, "frozen": p.bool}, ),
+    stakeIdToCurrentConfigId: viewFun("0x237373ce", "stakeIdToCurrentConfigId(uint64)", {"stakeId": p.uint64}, p.uint64),
+    stakeIdToCurrentRoundId: viewFun("0xe0738d8c", "stakeIdToCurrentRoundId(uint64)", {"stakeId": p.uint64}, p.uint256),
+    supportsInterface: viewFun("0x01ffc9a7", "supportsInterface(bytes4)", {"interfaceId": p.bytes4}, p.bool),
     unpause: fun("0x3f4ba83a", "unpause()", {}, ),
     updateCallbackGasLimit: fun("0xb0e8d086", "updateCallbackGasLimit(uint32)", {"newLimit": p.uint32}, ),
-    updateStake: fun("0x6c4ae35f", "updateStake(uint256,((uint64,uint128,uint128)[],address,uint256,uint256,uint256,uint256))", {"stakeId": p.uint256, "config": p.struct({"prizeDistribution": p.array(p.struct({"prizeCount": p.uint64, "minPrize": p.uint128, "maxPrize": p.uint128})), "currency": p.address, "ticketCap": p.uint256, "duration": p.uint256, "ticketCost": p.uint256, "feePercent": p.uint256})}, ),
+    updateStake: fun("0x53067ea7", "updateStake(uint64,((uint64,uint128,uint128)[],address,uint64,uint32,uint256,uint16))", {"stakeId": p.uint64, "config": p.struct({"tiers": p.array(p.struct({"prizeCount": p.uint64, "minPrize": p.uint128, "maxPrize": p.uint128})), "currency": p.address, "ticketCap": p.uint64, "duration": p.uint32, "ticketCost": p.uint256, "feePercent": p.uint16})}, ),
+    updateVrfKeyHash: fun("0x98264fa6", "updateVrfKeyHash(bytes32)", {"newKeyHash": p.bytes32}, ),
+    updateVrfRequestConfirmations: fun("0xe496d045", "updateVrfRequestConfirmations(uint16)", {"newConfirmations": p.uint16}, ),
+    updateVrfSubscriptionId: fun("0x4ac925cb", "updateVrfSubscriptionId(uint256)", {"newSubscriptionId": p.uint256}, ),
+    vrfCoordinator: viewFun("0xa3e56fa8", "vrfCoordinator()", {}, p.address),
     vrfKeyHash: viewFun("0x041d443e", "vrfKeyHash()", {}, p.bytes32),
+    vrfRequestConfirmations: viewFun("0x598bc486", "vrfRequestConfirmations()", {}, p.uint16),
     vrfSubscriptionId: viewFun("0xed647d21", "vrfSubscriptionId()", {}, p.uint256),
+    withdrawProtocolFee: fun("0x668fb6dc", "withdrawProtocolFee(address)", {"currency": p.address}, ),
+    withdrawReferrerFee: fun("0x8c11d63e", "withdrawReferrerFee(address,address)", {"referrer": p.address, "currency": p.address}, ),
 }
 
 export class Contract extends ContractBase {
 
+    DEFAULT_ADMIN_ROLE() {
+        return this.eth_call(functions.DEFAULT_ADMIN_ROLE, {})
+    }
+
+    FEE_BASE() {
+        return this.eth_call(functions.FEE_BASE, {})
+    }
+
+    MAX_REFERRAL_TIER_COUNT() {
+        return this.eth_call(functions.MAX_REFERRAL_TIER_COUNT, {})
+    }
+
     MAX_TICKETS_PER_RANGE() {
         return this.eth_call(functions.MAX_TICKETS_PER_RANGE, {})
+    }
+
+    MAX_TIER_COUNT() {
+        return this.eth_call(functions.MAX_TIER_COUNT, {})
+    }
+
+    OPERATOR_ROLE() {
+        return this.eth_call(functions.OPERATOR_ROLE, {})
+    }
+
+    REFERRAL_PERIOD() {
+        return this.eth_call(functions.REFERRAL_PERIOD, {})
+    }
+
+    VRF_COORDINATOR_ROLE() {
+        return this.eth_call(functions.VRF_COORDINATOR_ROLE, {})
     }
 
     VRF_NUM_WORDS() {
         return this.eth_call(functions.VRF_NUM_WORDS, {})
     }
 
-    VRF_REQUEST_CONFIRMATIONS() {
-        return this.eth_call(functions.VRF_REQUEST_CONFIRMATIONS, {})
+    callbackGasLimit() {
+        return this.eth_call(functions.callbackGasLimit, {})
+    }
+
+    configIdToConfig(configId: ConfigIdToConfigParams["configId"]) {
+        return this.eth_call(functions.configIdToConfig, {configId})
+    }
+
+    configIdToTierBoundaries(configId: ConfigIdToTierBoundariesParams["configId"], _1: ConfigIdToTierBoundariesParams["_1"]) {
+        return this.eth_call(functions.configIdToTierBoundaries, {configId, _1})
+    }
+
+    defaultReferralFee() {
+        return this.eth_call(functions.defaultReferralFee, {})
     }
 
     feeRecipient() {
         return this.eth_call(functions.feeRecipient, {})
     }
 
+    getRoleAdmin(role: GetRoleAdminParams["role"]) {
+        return this.eth_call(functions.getRoleAdmin, {role})
+    }
+
     getUserTickets(roundId: GetUserTicketsParams["roundId"], user: GetUserTicketsParams["user"]) {
         return this.eth_call(functions.getUserTickets, {roundId, user})
     }
 
-    owner() {
-        return this.eth_call(functions.owner, {})
+    hasRefunded(roundId: HasRefundedParams["roundId"], user: HasRefundedParams["user"]) {
+        return this.eth_call(functions.hasRefunded, {roundId, user})
+    }
+
+    hasRole(role: HasRoleParams["role"], account: HasRoleParams["account"]) {
+        return this.eth_call(functions.hasRole, {role, account})
+    }
+
+    isReferrerFrozen(referrer: IsReferrerFrozenParams["referrer"]) {
+        return this.eth_call(functions.isReferrerFrozen, {referrer})
+    }
+
+    isStakeDeleted(stakeId: IsStakeDeletedParams["stakeId"]) {
+        return this.eth_call(functions.isStakeDeleted, {stakeId})
     }
 
     paused() {
         return this.eth_call(functions.paused, {})
     }
 
-    s_vrfCoordinator() {
-        return this.eth_call(functions.s_vrfCoordinator, {})
+    protocolFeeAccrued(currency: ProtocolFeeAccruedParams["currency"]) {
+        return this.eth_call(functions.protocolFeeAccrued, {currency})
+    }
+
+    referralTiers(_0: ReferralTiersParams["_0"]) {
+        return this.eth_call(functions.referralTiers, {_0})
+    }
+
+    referrerFeeAccrued(referrer: ReferrerFeeAccruedParams["referrer"], currency: ReferrerFeeAccruedParams["currency"]) {
+        return this.eth_call(functions.referrerFeeAccrued, {referrer, currency})
+    }
+
+    referrerToReferrerStats(referrer: ReferrerToReferrerStatsParams["referrer"]) {
+        return this.eth_call(functions.referrerToReferrerStats, {referrer})
+    }
+
+    roundIdToRound(roundId: RoundIdToRoundParams["roundId"]) {
+        return this.eth_call(functions.roundIdToRound, {roundId})
+    }
+
+    stakeIdToCurrentConfigId(stakeId: StakeIdToCurrentConfigIdParams["stakeId"]) {
+        return this.eth_call(functions.stakeIdToCurrentConfigId, {stakeId})
+    }
+
+    stakeIdToCurrentRoundId(stakeId: StakeIdToCurrentRoundIdParams["stakeId"]) {
+        return this.eth_call(functions.stakeIdToCurrentRoundId, {stakeId})
+    }
+
+    supportsInterface(interfaceId: SupportsInterfaceParams["interfaceId"]) {
+        return this.eth_call(functions.supportsInterface, {interfaceId})
+    }
+
+    vrfCoordinator() {
+        return this.eth_call(functions.vrfCoordinator, {})
     }
 
     vrfKeyHash() {
         return this.eth_call(functions.vrfKeyHash, {})
+    }
+
+    vrfRequestConfirmations() {
+        return this.eth_call(functions.vrfRequestConfirmations, {})
     }
 
     vrfSubscriptionId() {
@@ -95,42 +234,82 @@ export class Contract extends ContractBase {
 /// Event types
 export type CallbackGasLimitUpdatedEventArgs = EParams<typeof events.CallbackGasLimitUpdated>
 export type CoordinatorSetEventArgs = EParams<typeof events.CoordinatorSet>
+export type DefaultReferralFeeUpdatedEventArgs = EParams<typeof events.DefaultReferralFeeUpdated>
 export type FeeRecipientUpdatedEventArgs = EParams<typeof events.FeeRecipientUpdated>
-export type OwnershipTransferRequestedEventArgs = EParams<typeof events.OwnershipTransferRequested>
-export type OwnershipTransferredEventArgs = EParams<typeof events.OwnershipTransferred>
 export type PausedEventArgs = EParams<typeof events.Paused>
 export type PrizesClaimedEventArgs = EParams<typeof events.PrizesClaimed>
+export type ProtocolFeeAccruedEventArgs = EParams<typeof events.ProtocolFeeAccrued>
+export type ProtocolFeeWithdrawnEventArgs = EParams<typeof events.ProtocolFeeWithdrawn>
+export type RandomnessFulfilledEventArgs = EParams<typeof events.RandomnessFulfilled>
 export type RandomnessRequestedEventArgs = EParams<typeof events.RandomnessRequested>
+export type ReferralFeeAccruedEventArgs = EParams<typeof events.ReferralFeeAccrued>
+export type ReferralTiersUpdatedEventArgs = EParams<typeof events.ReferralTiersUpdated>
+export type ReferrerCustomFeeSetEventArgs = EParams<typeof events.ReferrerCustomFeeSet>
+export type ReferrerFeeSeizedEventArgs = EParams<typeof events.ReferrerFeeSeized>
+export type ReferrerFeeWithdrawnEventArgs = EParams<typeof events.ReferrerFeeWithdrawn>
+export type ReferrerFreezeUpdatedEventArgs = EParams<typeof events.ReferrerFreezeUpdated>
 export type RefundIssuedEventArgs = EParams<typeof events.RefundIssued>
+export type RoleAdminChangedEventArgs = EParams<typeof events.RoleAdminChanged>
+export type RoleGrantedEventArgs = EParams<typeof events.RoleGranted>
+export type RoleRevokedEventArgs = EParams<typeof events.RoleRevoked>
 export type RoundCreatedEventArgs = EParams<typeof events.RoundCreated>
-export type RoundFinalizedEventArgs = EParams<typeof events.RoundFinalized>
 export type StakeCreatedEventArgs = EParams<typeof events.StakeCreated>
 export type StakeDeletedEventArgs = EParams<typeof events.StakeDeleted>
 export type StakeUpdatedEventArgs = EParams<typeof events.StakeUpdated>
 export type TicketsPurchasedEventArgs = EParams<typeof events.TicketsPurchased>
 export type UnpausedEventArgs = EParams<typeof events.Unpaused>
+export type VrfKeyHashUpdatedEventArgs = EParams<typeof events.VrfKeyHashUpdated>
+export type VrfRequestConfirmationsUpdatedEventArgs = EParams<typeof events.VrfRequestConfirmationsUpdated>
+export type VrfSubscriptionIdUpdatedEventArgs = EParams<typeof events.VrfSubscriptionIdUpdated>
 
 /// Function types
+export type DEFAULT_ADMIN_ROLEParams = FunctionArguments<typeof functions.DEFAULT_ADMIN_ROLE>
+export type DEFAULT_ADMIN_ROLEReturn = FunctionReturn<typeof functions.DEFAULT_ADMIN_ROLE>
+
+export type FEE_BASEParams = FunctionArguments<typeof functions.FEE_BASE>
+export type FEE_BASEReturn = FunctionReturn<typeof functions.FEE_BASE>
+
+export type MAX_REFERRAL_TIER_COUNTParams = FunctionArguments<typeof functions.MAX_REFERRAL_TIER_COUNT>
+export type MAX_REFERRAL_TIER_COUNTReturn = FunctionReturn<typeof functions.MAX_REFERRAL_TIER_COUNT>
+
 export type MAX_TICKETS_PER_RANGEParams = FunctionArguments<typeof functions.MAX_TICKETS_PER_RANGE>
 export type MAX_TICKETS_PER_RANGEReturn = FunctionReturn<typeof functions.MAX_TICKETS_PER_RANGE>
+
+export type MAX_TIER_COUNTParams = FunctionArguments<typeof functions.MAX_TIER_COUNT>
+export type MAX_TIER_COUNTReturn = FunctionReturn<typeof functions.MAX_TIER_COUNT>
+
+export type OPERATOR_ROLEParams = FunctionArguments<typeof functions.OPERATOR_ROLE>
+export type OPERATOR_ROLEReturn = FunctionReturn<typeof functions.OPERATOR_ROLE>
+
+export type REFERRAL_PERIODParams = FunctionArguments<typeof functions.REFERRAL_PERIOD>
+export type REFERRAL_PERIODReturn = FunctionReturn<typeof functions.REFERRAL_PERIOD>
+
+export type VRF_COORDINATOR_ROLEParams = FunctionArguments<typeof functions.VRF_COORDINATOR_ROLE>
+export type VRF_COORDINATOR_ROLEReturn = FunctionReturn<typeof functions.VRF_COORDINATOR_ROLE>
 
 export type VRF_NUM_WORDSParams = FunctionArguments<typeof functions.VRF_NUM_WORDS>
 export type VRF_NUM_WORDSReturn = FunctionReturn<typeof functions.VRF_NUM_WORDS>
 
-export type VRF_REQUEST_CONFIRMATIONSParams = FunctionArguments<typeof functions.VRF_REQUEST_CONFIRMATIONS>
-export type VRF_REQUEST_CONFIRMATIONSReturn = FunctionReturn<typeof functions.VRF_REQUEST_CONFIRMATIONS>
-
-export type AcceptOwnershipParams = FunctionArguments<typeof functions.acceptOwnership>
-export type AcceptOwnershipReturn = FunctionReturn<typeof functions.acceptOwnership>
-
 export type BuyTicketsParams = FunctionArguments<typeof functions.buyTickets>
 export type BuyTicketsReturn = FunctionReturn<typeof functions.buyTickets>
+
+export type CallbackGasLimitParams = FunctionArguments<typeof functions.callbackGasLimit>
+export type CallbackGasLimitReturn = FunctionReturn<typeof functions.callbackGasLimit>
 
 export type ClaimPrizesParams = FunctionArguments<typeof functions.claimPrizes>
 export type ClaimPrizesReturn = FunctionReturn<typeof functions.claimPrizes>
 
+export type ConfigIdToConfigParams = FunctionArguments<typeof functions.configIdToConfig>
+export type ConfigIdToConfigReturn = FunctionReturn<typeof functions.configIdToConfig>
+
+export type ConfigIdToTierBoundariesParams = FunctionArguments<typeof functions.configIdToTierBoundaries>
+export type ConfigIdToTierBoundariesReturn = FunctionReturn<typeof functions.configIdToTierBoundaries>
+
 export type CreateStakeParams = FunctionArguments<typeof functions.createStake>
 export type CreateStakeReturn = FunctionReturn<typeof functions.createStake>
+
+export type DefaultReferralFeeParams = FunctionArguments<typeof functions.defaultReferralFee>
+export type DefaultReferralFeeReturn = FunctionReturn<typeof functions.defaultReferralFee>
 
 export type DeleteStakeParams = FunctionArguments<typeof functions.deleteStake>
 export type DeleteStakeReturn = FunctionReturn<typeof functions.deleteStake>
@@ -138,11 +317,26 @@ export type DeleteStakeReturn = FunctionReturn<typeof functions.deleteStake>
 export type FeeRecipientParams = FunctionArguments<typeof functions.feeRecipient>
 export type FeeRecipientReturn = FunctionReturn<typeof functions.feeRecipient>
 
+export type GetRoleAdminParams = FunctionArguments<typeof functions.getRoleAdmin>
+export type GetRoleAdminReturn = FunctionReturn<typeof functions.getRoleAdmin>
+
 export type GetUserTicketsParams = FunctionArguments<typeof functions.getUserTickets>
 export type GetUserTicketsReturn = FunctionReturn<typeof functions.getUserTickets>
 
-export type OwnerParams = FunctionArguments<typeof functions.owner>
-export type OwnerReturn = FunctionReturn<typeof functions.owner>
+export type GrantRoleParams = FunctionArguments<typeof functions.grantRole>
+export type GrantRoleReturn = FunctionReturn<typeof functions.grantRole>
+
+export type HasRefundedParams = FunctionArguments<typeof functions.hasRefunded>
+export type HasRefundedReturn = FunctionReturn<typeof functions.hasRefunded>
+
+export type HasRoleParams = FunctionArguments<typeof functions.hasRole>
+export type HasRoleReturn = FunctionReturn<typeof functions.hasRole>
+
+export type IsReferrerFrozenParams = FunctionArguments<typeof functions.isReferrerFrozen>
+export type IsReferrerFrozenReturn = FunctionReturn<typeof functions.isReferrerFrozen>
+
+export type IsStakeDeletedParams = FunctionArguments<typeof functions.isStakeDeleted>
+export type IsStakeDeletedReturn = FunctionReturn<typeof functions.isStakeDeleted>
 
 export type PauseParams = FunctionArguments<typeof functions.pause>
 export type PauseReturn = FunctionReturn<typeof functions.pause>
@@ -150,26 +344,65 @@ export type PauseReturn = FunctionReturn<typeof functions.pause>
 export type PausedParams = FunctionArguments<typeof functions.paused>
 export type PausedReturn = FunctionReturn<typeof functions.paused>
 
+export type ProtocolFeeAccruedParams = FunctionArguments<typeof functions.protocolFeeAccrued>
+export type ProtocolFeeAccruedReturn = FunctionReturn<typeof functions.protocolFeeAccrued>
+
 export type RawFulfillRandomWordsParams = FunctionArguments<typeof functions.rawFulfillRandomWords>
 export type RawFulfillRandomWordsReturn = FunctionReturn<typeof functions.rawFulfillRandomWords>
+
+export type ReferralTiersParams = FunctionArguments<typeof functions.referralTiers>
+export type ReferralTiersReturn = FunctionReturn<typeof functions.referralTiers>
+
+export type ReferrerFeeAccruedParams = FunctionArguments<typeof functions.referrerFeeAccrued>
+export type ReferrerFeeAccruedReturn = FunctionReturn<typeof functions.referrerFeeAccrued>
+
+export type ReferrerToReferrerStatsParams = FunctionArguments<typeof functions.referrerToReferrerStats>
+export type ReferrerToReferrerStatsReturn = FunctionReturn<typeof functions.referrerToReferrerStats>
 
 export type RefundParams = FunctionArguments<typeof functions.refund>
 export type RefundReturn = FunctionReturn<typeof functions.refund>
 
+export type RenounceRoleParams = FunctionArguments<typeof functions.renounceRole>
+export type RenounceRoleReturn = FunctionReturn<typeof functions.renounceRole>
+
 export type RequestRandomnessParams = FunctionArguments<typeof functions.requestRandomness>
 export type RequestRandomnessReturn = FunctionReturn<typeof functions.requestRandomness>
 
-export type S_vrfCoordinatorParams = FunctionArguments<typeof functions.s_vrfCoordinator>
-export type S_vrfCoordinatorReturn = FunctionReturn<typeof functions.s_vrfCoordinator>
+export type RevokeRoleParams = FunctionArguments<typeof functions.revokeRole>
+export type RevokeRoleReturn = FunctionReturn<typeof functions.revokeRole>
+
+export type RoundIdToRoundParams = FunctionArguments<typeof functions.roundIdToRound>
+export type RoundIdToRoundReturn = FunctionReturn<typeof functions.roundIdToRound>
+
+export type SeizeReferrerFeeParams = FunctionArguments<typeof functions.seizeReferrerFee>
+export type SeizeReferrerFeeReturn = FunctionReturn<typeof functions.seizeReferrerFee>
 
 export type SetCoordinatorParams = FunctionArguments<typeof functions.setCoordinator>
 export type SetCoordinatorReturn = FunctionReturn<typeof functions.setCoordinator>
 
+export type SetDefaultReferralFeeParams = FunctionArguments<typeof functions.setDefaultReferralFee>
+export type SetDefaultReferralFeeReturn = FunctionReturn<typeof functions.setDefaultReferralFee>
+
 export type SetFeeRecipientParams = FunctionArguments<typeof functions.setFeeRecipient>
 export type SetFeeRecipientReturn = FunctionReturn<typeof functions.setFeeRecipient>
 
-export type TransferOwnershipParams = FunctionArguments<typeof functions.transferOwnership>
-export type TransferOwnershipReturn = FunctionReturn<typeof functions.transferOwnership>
+export type SetReferralTiersParams = FunctionArguments<typeof functions.setReferralTiers>
+export type SetReferralTiersReturn = FunctionReturn<typeof functions.setReferralTiers>
+
+export type SetReferrerCustomFeeParams = FunctionArguments<typeof functions.setReferrerCustomFee>
+export type SetReferrerCustomFeeReturn = FunctionReturn<typeof functions.setReferrerCustomFee>
+
+export type SetReferrerFrozenParams = FunctionArguments<typeof functions.setReferrerFrozen>
+export type SetReferrerFrozenReturn = FunctionReturn<typeof functions.setReferrerFrozen>
+
+export type StakeIdToCurrentConfigIdParams = FunctionArguments<typeof functions.stakeIdToCurrentConfigId>
+export type StakeIdToCurrentConfigIdReturn = FunctionReturn<typeof functions.stakeIdToCurrentConfigId>
+
+export type StakeIdToCurrentRoundIdParams = FunctionArguments<typeof functions.stakeIdToCurrentRoundId>
+export type StakeIdToCurrentRoundIdReturn = FunctionReturn<typeof functions.stakeIdToCurrentRoundId>
+
+export type SupportsInterfaceParams = FunctionArguments<typeof functions.supportsInterface>
+export type SupportsInterfaceReturn = FunctionReturn<typeof functions.supportsInterface>
 
 export type UnpauseParams = FunctionArguments<typeof functions.unpause>
 export type UnpauseReturn = FunctionReturn<typeof functions.unpause>
@@ -180,9 +413,30 @@ export type UpdateCallbackGasLimitReturn = FunctionReturn<typeof functions.updat
 export type UpdateStakeParams = FunctionArguments<typeof functions.updateStake>
 export type UpdateStakeReturn = FunctionReturn<typeof functions.updateStake>
 
+export type UpdateVrfKeyHashParams = FunctionArguments<typeof functions.updateVrfKeyHash>
+export type UpdateVrfKeyHashReturn = FunctionReturn<typeof functions.updateVrfKeyHash>
+
+export type UpdateVrfRequestConfirmationsParams = FunctionArguments<typeof functions.updateVrfRequestConfirmations>
+export type UpdateVrfRequestConfirmationsReturn = FunctionReturn<typeof functions.updateVrfRequestConfirmations>
+
+export type UpdateVrfSubscriptionIdParams = FunctionArguments<typeof functions.updateVrfSubscriptionId>
+export type UpdateVrfSubscriptionIdReturn = FunctionReturn<typeof functions.updateVrfSubscriptionId>
+
+export type VrfCoordinatorParams = FunctionArguments<typeof functions.vrfCoordinator>
+export type VrfCoordinatorReturn = FunctionReturn<typeof functions.vrfCoordinator>
+
 export type VrfKeyHashParams = FunctionArguments<typeof functions.vrfKeyHash>
 export type VrfKeyHashReturn = FunctionReturn<typeof functions.vrfKeyHash>
 
+export type VrfRequestConfirmationsParams = FunctionArguments<typeof functions.vrfRequestConfirmations>
+export type VrfRequestConfirmationsReturn = FunctionReturn<typeof functions.vrfRequestConfirmations>
+
 export type VrfSubscriptionIdParams = FunctionArguments<typeof functions.vrfSubscriptionId>
 export type VrfSubscriptionIdReturn = FunctionReturn<typeof functions.vrfSubscriptionId>
+
+export type WithdrawProtocolFeeParams = FunctionArguments<typeof functions.withdrawProtocolFee>
+export type WithdrawProtocolFeeReturn = FunctionReturn<typeof functions.withdrawProtocolFee>
+
+export type WithdrawReferrerFeeParams = FunctionArguments<typeof functions.withdrawReferrerFee>
+export type WithdrawReferrerFeeReturn = FunctionReturn<typeof functions.withdrawReferrerFee>
 
