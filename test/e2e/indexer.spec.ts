@@ -33,19 +33,13 @@ const DURATION = 300n // 5 minutes
 const STAKE_1_ID = '1'
 const STAKE_2_ID = '2'
 
-const STAKE_1_CONFIG_ID = '1'
-const STAKE_2_CONFIG_ID = '2'
+const CONFIG_1_ID = '1'
+const CONFIG_2_ID = '2'
 
-const UNSETTLED_STAKE_1_ROUND_ID = '1'
-const UNSETTLED_STAKE_2_ROUND_ID = '2'
+const STAKE_1_ROUND_1_ID = '1'
+const STAKE_1_ROUND_2_ID = '2'
 
-// Round 1 (stake 1) is expired at test time; buyTickets creates round 3
-// fillRound fills round 3 (Sealed) and creates round 4
-// refund round is round 4 (2 tickets bought, then expired)
-const STAKE_1_BUY_ROUND_ID = '3'
-const STAKE_1_FILL_ROUND_ID = '3'
-const STAKE_1_NEXT_ROUND_ID = '4'
-const STAKE_1_REFUND_ROUND_ID = '4'
+const TOTAL_STAKES = 2
 
 const STAKE_1_TICKET_CAP = 8n
 const STAKE_1_TICKET_COST = parseEther('0.005')
@@ -62,8 +56,8 @@ const STAKE_1_PRIZE_TIERS = [
 	},
 	{
 		prizeCount: 1n,
-		minPrize: parseEther('0.02'),
-		maxPrize: parseEther('0.02'),
+		minPrize: parseEther('0.018'),
+		maxPrize: parseEther('0.018'),
 	},
 ]
 
@@ -82,8 +76,8 @@ const STAKE_2_PRIZE_TIERS = [
 	},
 	{
 		prizeCount: 1n,
-		minPrize: parseEther('0.04'),
-		maxPrize: parseEther('0.04'),
+		minPrize: parseEther('0.036'),
+		maxPrize: parseEther('0.036'),
 	},
 ]
 
@@ -142,8 +136,6 @@ describe('indexer e2e', () => {
 	})
 
 	describe('createStake', () => {
-		const TOTAL_STAKES = 2
-
 		it('indexes all stakes', async () => {
 			const stakes = await waitForRecord(async () => {
 				const rows: unknown[] = await dataSource.query(
@@ -158,28 +150,26 @@ describe('indexer e2e', () => {
 			])
 		})
 
-		it('indexes all stake configs', async () => {
+		it('indexes all configs', async () => {
 			const configs = await waitForRecord(async () => {
 				const rows: unknown[] = await dataSource.query(
-					'SELECT * FROM stake_config ORDER BY id',
+					'SELECT * FROM config ORDER BY id',
 				)
 				return rows.length === TOTAL_STAKES ? rows : null
 			})
 
 			expect(configs).toMatchObject([
 				{
-					id: STAKE_1_CONFIG_ID,
+					id: CONFIG_1_ID,
 					stake_id: STAKE_1_ID,
-					status: 'Active',
 					ticket_cap: STAKE_1_TICKET_CAP.toString(),
 					duration_seconds: DURATION.toString(),
 					ticket_cost: STAKE_1_TICKET_COST.toString(),
 					currency: NATIVE_CURRENCY,
 				},
 				{
-					id: STAKE_2_CONFIG_ID,
+					id: CONFIG_2_ID,
 					stake_id: STAKE_2_ID,
-					status: 'Active',
 					ticket_cap: STAKE_2_TICKET_CAP.toString(),
 					duration_seconds: DURATION.toString(),
 					ticket_cost: STAKE_2_TICKET_COST.toString(),
@@ -194,52 +184,28 @@ describe('indexer e2e', () => {
 
 			const tiers = await waitForRecord(async () => {
 				const rows: unknown[] = await dataSource.query(
-					'SELECT * FROM prize_tier ORDER BY stake_config_id, tier_index',
+					'SELECT * FROM prize_tier ORDER BY config_id, tier_index',
 				)
 				return rows.length === TOTAL_TIERS ? rows : null
 			})
 
 			expect(tiers).toMatchObject([
 				...STAKE_1_PRIZE_TIERS.map((tier, i) => ({
-					id: `${STAKE_1_CONFIG_ID}-${i}`,
-					stake_config_id: STAKE_1_CONFIG_ID,
+					id: `${CONFIG_1_ID}-${i}`,
+					config_id: CONFIG_1_ID,
 					tier_index: i,
 					prize_count: tier.prizeCount.toString(),
 					min_prize: tier.minPrize.toString(),
 					max_prize: tier.maxPrize.toString(),
 				})),
 				...STAKE_2_PRIZE_TIERS.map((tier, i) => ({
-					id: `${STAKE_2_CONFIG_ID}-${i}`,
-					stake_config_id: STAKE_2_CONFIG_ID,
+					id: `${CONFIG_2_ID}-${i}`,
+					config_id: CONFIG_2_ID,
 					tier_index: i,
 					prize_count: tier.prizeCount.toString(),
 					min_prize: tier.minPrize.toString(),
 					max_prize: tier.maxPrize.toString(),
 				})),
-			])
-		})
-
-		it('creates initial rounds for each stake as Unsettled', async () => {
-			const rounds = await waitForRecord(async () => {
-				const rows: unknown[] = await dataSource.query(
-					`SELECT * FROM round WHERE id IN ('${UNSETTLED_STAKE_1_ROUND_ID}', '${UNSETTLED_STAKE_2_ROUND_ID}') ORDER BY id`,
-				)
-				return rows.length === TOTAL_STAKES ? rows : null
-			})
-
-			expect(rounds).toMatchObject([
-				{
-					id: UNSETTLED_STAKE_1_ROUND_ID,
-					stake_config_id: STAKE_1_CONFIG_ID,
-					tickets_sold: 0,
-					status: 'Unsettled',
-				},
-				{
-					id: UNSETTLED_STAKE_2_ROUND_ID,
-					stake_config_id: STAKE_2_CONFIG_ID,
-					tickets_sold: 0,
-					status: 'Unsettled',
-				},
 			])
 		})
 	})
@@ -253,14 +219,32 @@ describe('indexer e2e', () => {
 			txHash = await buyTickets(TICKET_COUNT)
 		})
 
+		it('creates initial rounds for each stake', async () => {
+			const rounds = await waitForRecord(async () => {
+				const rows: unknown[] =
+					await dataSource.query(`SELECT * FROM round`)
+
+				return rows.length > 0 ? rows : null
+			})
+
+			expect(rounds).toMatchObject([
+				{
+					id: STAKE_1_ROUND_1_ID,
+					config_id: CONFIG_1_ID,
+					tickets_sold: TICKET_COUNT.toString(),
+					vrf_request_status: 'NotRequested',
+				},
+			])
+		})
+
 		it('indexes the TicketPurchase with correct fields', async () => {
 			const purchase = await waitForRow(
 				dataSource,
-				`SELECT * FROM ticket_purchase WHERE round_id = '${STAKE_1_BUY_ROUND_ID}'`,
+				`SELECT * FROM ticket_purchase WHERE round_id = '${STAKE_1_ROUND_1_ID}'`,
 			)
 
 			expect(purchase).toMatchObject({
-				round_id: STAKE_1_BUY_ROUND_ID,
+				round_id: STAKE_1_ROUND_1_ID,
 				user: deployer.address.toLowerCase(),
 				ticket_count: TICKET_COUNT.toString(),
 				start_ticket_index: '0',
@@ -271,12 +255,12 @@ describe('indexer e2e', () => {
 		it('updates the round tickets_sold count', async () => {
 			const round = await waitForRow(
 				dataSource,
-				`SELECT * FROM round WHERE id = '${STAKE_1_BUY_ROUND_ID}' AND tickets_sold = ${TICKET_COUNT}`,
+				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND tickets_sold = ${TICKET_COUNT}`,
 			)
 
 			expect(round).toMatchObject({
-				id: STAKE_1_BUY_ROUND_ID,
-				tickets_sold: Number(TICKET_COUNT),
+				id: STAKE_1_ROUND_1_ID,
+				tickets_sold: TICKET_COUNT.toString(),
 			})
 		})
 	})
@@ -288,30 +272,15 @@ describe('indexer e2e', () => {
 			await buyTickets(REMAINING_TICKETS)
 		})
 
-		it('marks round 3 as Sealed', async () => {
+		it('fills round 1 to ticket cap', async () => {
 			const round = await waitForRow(
 				dataSource,
-				`SELECT * FROM round WHERE id = '${STAKE_1_FILL_ROUND_ID}' AND status = 'Sealed'`,
+				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND tickets_sold = '${STAKE_1_TICKET_CAP}'`,
 			)
 
 			expect(round).toMatchObject({
-				id: STAKE_1_FILL_ROUND_ID,
-				tickets_sold: Number(STAKE_1_TICKET_CAP),
-				status: 'Sealed',
-			})
-		})
-
-		it('creates round 4 for stake 1 as Unsettled', async () => {
-			const round = await waitForRow(
-				dataSource,
-				`SELECT * FROM round WHERE id = '${STAKE_1_NEXT_ROUND_ID}'`,
-			)
-
-			expect(round).toMatchObject({
-				id: STAKE_1_NEXT_ROUND_ID,
-				stake_config_id: STAKE_1_CONFIG_ID,
-				tickets_sold: 0,
-				status: 'Unsettled',
+				id: STAKE_1_ROUND_1_ID,
+				tickets_sold: STAKE_1_TICKET_CAP.toString(),
 			})
 		})
 	})
@@ -321,21 +290,21 @@ describe('indexer e2e', () => {
 			const txHash = await walletClient.writeContract({
 				...ripsAbiAndAddress,
 				functionName: 'requestRandomness',
-				args: [BigInt(STAKE_1_FILL_ROUND_ID)],
+				args: [BigInt(STAKE_1_ROUND_1_ID)],
 				gas: DEFAULT_GAS,
 			})
 			await waitForReceipt(publicClient, txHash)
 		})
 
-		it('marks round 3 as VRFRequested with a vrf_request_id', async () => {
+		it('marks round 1 as VRF Requested with a vrf_request_id', async () => {
 			const round = (await waitForRow(
 				dataSource,
-				`SELECT * FROM round WHERE id = '${STAKE_1_FILL_ROUND_ID}' AND status = 'VRFRequested'`,
+				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND vrf_request_status = 'Requested'`,
 			)) as Record<string, unknown>
 
 			expect(round).toMatchObject({
-				id: STAKE_1_FILL_ROUND_ID,
-				status: 'VRFRequested',
+				id: STAKE_1_ROUND_1_ID,
+				vrf_request_status: 'Requested',
 			})
 			expect(round.vrf_request_id).not.toBeNull()
 		})
@@ -344,7 +313,7 @@ describe('indexer e2e', () => {
 	describe('fulfillRandomWords', () => {
 		beforeAll(async () => {
 			const [round] = await dataSource.query(
-				`SELECT vrf_request_id FROM round WHERE id = '${STAKE_1_FILL_ROUND_ID}'`,
+				`SELECT vrf_request_id FROM round WHERE id = '${STAKE_1_ROUND_1_ID}'`,
 			)
 			const vrfRequestId: string = (round as Record<string, unknown>)
 				.vrf_request_id as string
@@ -359,15 +328,15 @@ describe('indexer e2e', () => {
 			await waitForReceipt(publicClient, txHash)
 		})
 
-		it('marks round 3 as Claiming with random values', async () => {
+		it('marks round 3 as VRF Fulfilled with random values', async () => {
 			const round = (await waitForRow(
 				dataSource,
-				`SELECT * FROM round WHERE id = '${STAKE_1_FILL_ROUND_ID}' AND status = 'Claiming'`,
+				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND vrf_request_status = 'Fulfilled'`,
 			)) as Record<string, unknown>
 
 			expect(round).toMatchObject({
-				id: STAKE_1_FILL_ROUND_ID,
-				status: 'Claiming',
+				id: STAKE_1_ROUND_1_ID,
+				vrf_request_status: 'Fulfilled',
 			})
 			expect(round.random_a).not.toBeNull()
 			expect(round.random_b).not.toBeNull()
@@ -382,7 +351,7 @@ describe('indexer e2e', () => {
 				...ripsAbiAndAddress,
 				functionName: 'claimPrizes',
 				args: [
-					BigInt(STAKE_1_FILL_ROUND_ID),
+					BigInt(STAKE_1_ROUND_1_ID),
 					0n,
 					10n,
 					deployer.address,
@@ -396,11 +365,11 @@ describe('indexer e2e', () => {
 		it('indexes the PrizeClaim with correct fields', async () => {
 			const claim = (await waitForRow(
 				dataSource,
-				`SELECT * FROM prize_claim WHERE round_id = '${STAKE_1_FILL_ROUND_ID}'`,
+				`SELECT * FROM prize_claim WHERE round_id = '${STAKE_1_ROUND_1_ID}'`,
 			)) as Record<string, unknown>
 
 			expect(claim).toMatchObject({
-				round_id: STAKE_1_FILL_ROUND_ID,
+				round_id: STAKE_1_ROUND_1_ID,
 				user: deployer.address.toLowerCase(),
 				tx_hash: txHash,
 			})
@@ -408,17 +377,16 @@ describe('indexer e2e', () => {
 			expect(BigInt(claim.amount as string)).toBeGreaterThan(0n)
 		})
 
-		it('marks round 3 as Claimed when all tickets are claimed', async () => {
-			const round = await waitForRow(
+		it('updates round tickets_claimed count', async () => {
+			const round = (await waitForRow(
 				dataSource,
-				`SELECT * FROM round WHERE id = '${STAKE_1_FILL_ROUND_ID}' AND status = 'Claimed'`,
-			)
+				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND tickets_claimed > 0`,
+			)) as Record<string, unknown>
 
 			expect(round).toMatchObject({
-				id: STAKE_1_FILL_ROUND_ID,
-				status: 'Claimed',
-				tickets_claimed: Number(STAKE_1_TICKET_CAP),
+				id: STAKE_1_ROUND_1_ID,
 			})
+			expect(Number(round.tickets_claimed)).toBeGreaterThan(0)
 		})
 	})
 
@@ -435,7 +403,7 @@ describe('indexer e2e', () => {
 			txHash = await walletClient.writeContract({
 				...ripsAbiAndAddress,
 				functionName: 'refund',
-				args: [BigInt(STAKE_1_REFUND_ROUND_ID), deployer.address],
+				args: [BigInt(STAKE_1_ROUND_2_ID), deployer.address],
 				gas: DEFAULT_GAS,
 			})
 			await waitForReceipt(publicClient, txHash)
@@ -444,11 +412,11 @@ describe('indexer e2e', () => {
 		it('indexes the Refund with correct fields', async () => {
 			const refund = await waitForRow(
 				dataSource,
-				`SELECT * FROM refund WHERE round_id = '${STAKE_1_REFUND_ROUND_ID}'`,
+				`SELECT * FROM refund WHERE round_id = '${STAKE_1_ROUND_2_ID}'`,
 			)
 
 			expect(refund).toMatchObject({
-				round_id: STAKE_1_REFUND_ROUND_ID,
+				round_id: STAKE_1_ROUND_2_ID,
 				user: deployer.address.toLowerCase(),
 				ticket_count: TICKET_COUNT.toString(),
 				amount: (TICKET_COUNT * STAKE_1_TICKET_COST).toString(),
@@ -456,16 +424,15 @@ describe('indexer e2e', () => {
 			})
 		})
 
-		it('marks round 4 as Refunded when all tickets are refunded', async () => {
+		it('updates round tickets_refunded count', async () => {
 			const round = await waitForRow(
 				dataSource,
-				`SELECT * FROM round WHERE id = '${STAKE_1_REFUND_ROUND_ID}' AND status = 'Refunded'`,
+				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_2_ID}' AND tickets_refunded = ${TICKET_COUNT}`,
 			)
 
 			expect(round).toMatchObject({
-				id: STAKE_1_REFUND_ROUND_ID,
-				status: 'Refunded',
-				tickets_refunded: Number(TICKET_COUNT),
+				id: STAKE_1_ROUND_2_ID,
+				tickets_refunded: TICKET_COUNT.toString(),
 			})
 		})
 	})

@@ -12,7 +12,7 @@ export async function handleTicketsPurchased(args: HandlerArgs): Promise<void> {
 
 	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
 
-	round.ticketsSold += Number(ticketCount)
+	round.ticketsSold += ticketCount
 	entities.rounds.set(roundIdStr, round)
 
 	entities.ticketPurchases.push(

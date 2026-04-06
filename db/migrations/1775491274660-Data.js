@@ -1,5 +1,5 @@
-module.exports = class Data1775487582164 {
-    name = 'Data1775487582164'
+module.exports = class Data1775491274660 {
+    name = 'Data1775491274660'
 
     async up(db) {
         await db.query(`CREATE TABLE "prize_tier" ("id" character varying NOT NULL, "tier_index" integer NOT NULL, "prize_count" numeric NOT NULL, "min_prize" numeric NOT NULL, "max_prize" numeric NOT NULL, "config_id" character varying, CONSTRAINT "PK_edefaa73bb27e6bf21aa376c178" PRIMARY KEY ("id"))`)
@@ -10,7 +10,7 @@ module.exports = class Data1775487582164 {
         await db.query(`CREATE INDEX "IDX_5716fcc128026f9424ec88d50f" ON "prize_claim" ("round_id") `)
         await db.query(`CREATE TABLE "refund" ("id" character varying NOT NULL, "user" text NOT NULL, "ticket_count" numeric NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "round_id" character varying, CONSTRAINT "PK_f1cefa2e60d99b206c46c1116e5" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_7c5bfc74f3be5483d696a22aee" ON "refund" ("round_id") `)
-        await db.query(`CREATE TABLE "round" ("id" character varying NOT NULL, "start_time" TIMESTAMP WITH TIME ZONE NOT NULL, "tickets_sold" integer NOT NULL, "tickets_claimed" integer NOT NULL, "tickets_refunded" integer NOT NULL, "vrf_request_status" character varying(12) NOT NULL, "random_a" numeric, "random_b" numeric, "vrf_request_id" numeric, "config_id" character varying, CONSTRAINT "PK_34bd959f3f4a90eb86e4ae24d2d" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "round" ("id" character varying NOT NULL, "start_time" TIMESTAMP WITH TIME ZONE NOT NULL, "tickets_sold" numeric NOT NULL, "tickets_claimed" numeric NOT NULL, "tickets_refunded" numeric NOT NULL, "vrf_request_status" character varying(12) NOT NULL, "random_a" numeric, "random_b" numeric, "vrf_request_id" numeric, "config_id" character varying, CONSTRAINT "PK_34bd959f3f4a90eb86e4ae24d2d" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_a02e943e2b4ededce255597a6f" ON "round" ("config_id") `)
         await db.query(`CREATE TABLE "config" ("id" character varying NOT NULL, "ticket_cap" numeric NOT NULL, "currency" text NOT NULL, "duration_seconds" numeric NOT NULL, "ticket_cost" numeric NOT NULL, "fee_percent" numeric NOT NULL, "stake_id" character varying, CONSTRAINT "PK_d0ee79a681413d50b0a4f98cf7b" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_054f4e80d93bcff93a9f4520ff" ON "config" ("stake_id") `)

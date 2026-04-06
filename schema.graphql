@@ -35,9 +35,9 @@ type Round @entity {
 	id: ID!
 	config: Config!
 	startTime: DateTime!
-	ticketsSold: Int!
-	ticketsClaimed: Int!
-	ticketsRefunded: Int!
+	ticketsSold: BigInt!
+	ticketsClaimed: BigInt!
+	ticketsRefunded: BigInt!
 	vrfRequestStatus: VrfRequestStatus!
 	randomA: BigInt
 	randomB: BigInt

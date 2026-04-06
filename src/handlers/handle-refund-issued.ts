@@ -11,7 +11,7 @@ export async function handleRefundIssued(args: HandlerArgs): Promise<void> {
 
 	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
 
-	round.ticketsRefunded += Number(ticketCount)
+	round.ticketsRefunded += ticketCount
 	entities.rounds.set(roundIdStr, round)
 
 	entities.refunds.push(

@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm'
 
-const DEFAULT_TIMEOUT_MS = 60_000
+const DEFAULT_TIMEOUT_MS = 10000
 
 export async function waitForRecord<T>(
 	query: () => Promise<T | null | undefined>,

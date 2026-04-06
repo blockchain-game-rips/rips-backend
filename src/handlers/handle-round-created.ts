@@ -30,9 +30,9 @@ export async function handleRoundCreated(args: HandlerArgs): Promise<void> {
 			id: roundIdStr,
 			config,
 			startTime: new Date(block.timestamp),
-			ticketsSold: 0,
-			ticketsClaimed: 0,
-			ticketsRefunded: 0,
+			ticketsSold: 0n,
+			ticketsClaimed: 0n,
+			ticketsRefunded: 0n,
 			vrfRequestStatus: VrfRequestStatus.NotRequested,
 		}),
 	)
