@@ -1,6 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, DateTimeColumn as DateTimeColumn_, IntColumn as IntColumn_, BigIntColumn as BigIntColumn_, OneToMany as OneToMany_} from "@subsquid/typeorm-store"
-import {StakeConfig} from "./stakeConfig.model"
-import {RoundStatus} from "./_roundStatus"
+import {Config} from "./config.model"
+import {VrfRequestStatus} from "./_vrfRequestStatus"
 import {TicketPurchase} from "./ticketPurchase.model"
 import {PrizeClaim} from "./prizeClaim.model"
 import {Refund} from "./refund.model"
@@ -15,8 +15,8 @@ export class Round {
     id!: string
 
     @Index_()
-    @ManyToOne_(() => StakeConfig, {nullable: true})
-    stakeConfig!: StakeConfig
+    @ManyToOne_(() => Config, {nullable: true})
+    config!: Config
 
     @DateTimeColumn_({nullable: false})
     startTime!: Date
@@ -31,7 +31,7 @@ export class Round {
     ticketsRefunded!: number
 
     @Column_("varchar", {length: 12, nullable: false})
-    status!: RoundStatus
+    vrfRequestStatus!: VrfRequestStatus
 
     @BigIntColumn_({nullable: true})
     randomA!: bigint | undefined | null

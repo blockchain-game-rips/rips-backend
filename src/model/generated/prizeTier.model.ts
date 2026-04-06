@@ -1,5 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, IntColumn as IntColumn_, BigIntColumn as BigIntColumn_} from "@subsquid/typeorm-store"
-import {StakeConfig} from "./stakeConfig.model"
+import {Config} from "./config.model"
 
 @Entity_()
 export class PrizeTier {
@@ -11,8 +11,8 @@ export class PrizeTier {
     id!: string
 
     @Index_()
-    @ManyToOne_(() => StakeConfig, {nullable: true})
-    stakeConfig!: StakeConfig
+    @ManyToOne_(() => Config, {nullable: true})
+    config!: Config
 
     @IntColumn_({nullable: false})
     tierIndex!: number

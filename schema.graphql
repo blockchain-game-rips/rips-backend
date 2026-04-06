@@ -1,108 +1,212 @@
 type Stake @entity {
-    id: ID!
-    deleted: Boolean!
-    configs: [StakeConfig!]! @derivedFrom(field: "stake")
+	id: ID!
+	deleted: Boolean!
+	configs: [Config!]! @derivedFrom(field: "stake")
 }
 
-enum StakeConfigStatus {
-    Active
-    Pending
-    Superseded
-}
-
-type StakeConfig @entity {
-    id: ID!
-    stake: Stake!
-    status: StakeConfigStatus!
-    ticketCap: BigInt!
-    currency: String!
-    durationSeconds: BigInt!
-    ticketCost: BigInt!
-    feePercent: BigInt!
-    prizeDistribution: [PrizeTier!]! @derivedFrom(field: "stakeConfig")
-    rounds: [Round!]! @derivedFrom(field: "stakeConfig")
+type Config @entity {
+	id: ID!
+	stake: Stake!
+	ticketCap: BigInt!
+	currency: String!
+	durationSeconds: BigInt!
+	ticketCost: BigInt!
+	feePercent: BigInt!
+	prizeDistribution: [PrizeTier!]! @derivedFrom(field: "config")
+	rounds: [Round!]! @derivedFrom(field: "config")
 }
 
 type PrizeTier @entity {
-    id: ID!
-    stakeConfig: StakeConfig!
-    tierIndex: Int!
-    prizeCount: BigInt!
-    minPrize: BigInt!
-    maxPrize: BigInt!
+	id: ID!
+	config: Config!
+	tierIndex: Int!
+	prizeCount: BigInt!
+	minPrize: BigInt!
+	maxPrize: BigInt!
 }
 
-enum RoundStatus {
-    Unsettled
-    Sealed
-    VRFRequested
-    Claiming
-    Claimed
-    Refunded
+enum VrfRequestStatus {
+	NotRequested
+	Requested
+	Fulfilled
 }
 
 type Round @entity {
-    id: ID!
-    stakeConfig: StakeConfig!
-    startTime: DateTime!
-    ticketsSold: Int!
-    ticketsClaimed: Int!
-    ticketsRefunded: Int!
-    status: RoundStatus!
-    randomA: BigInt
-    randomB: BigInt
-    vrfRequestId: BigInt
-    ticketPurchases: [TicketPurchase!]! @derivedFrom(field: "round")
-    prizesClaimed: [PrizeClaim!]! @derivedFrom(field: "round")
-    refunds: [Refund!]! @derivedFrom(field: "round")
+	id: ID!
+	config: Config!
+	startTime: DateTime!
+	ticketsSold: Int!
+	ticketsClaimed: Int!
+	ticketsRefunded: Int!
+	vrfRequestStatus: VrfRequestStatus!
+	randomA: BigInt
+	randomB: BigInt
+	vrfRequestId: BigInt
+	ticketPurchases: [TicketPurchase!]! @derivedFrom(field: "round")
+	prizesClaimed: [PrizeClaim!]! @derivedFrom(field: "round")
+	refunds: [Refund!]! @derivedFrom(field: "round")
 }
 
 type TicketPurchase @entity {
-    id: ID!
-    round: Round!
-    user: String!
-    ticketCount: BigInt!
-    startTicketIndex: BigInt!
-    blockNumber: BigInt!
-    time: DateTime!
-    txHash: String!
+	id: ID!
+	round: Round!
+	user: String!
+	ticketCount: BigInt!
+	startTicketIndex: BigInt!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
 }
 
 type PrizeClaim @entity {
-    id: ID!
-    round: Round!
-    user: String!
-    referrer: String!
-    ticketCount: BigInt! 
-    amount: BigInt!
-    blockNumber: BigInt!
-    time: DateTime!
-    txHash: String!
+	id: ID!
+	round: Round!
+	user: String!
+	referrer: String!
+	ticketCount: BigInt!
+	amount: BigInt!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
 }
 
 type Refund @entity {
-    id: ID!
-    round: Round!
-    user: String!
-    ticketCount: BigInt! 
-    amount: BigInt!
-    blockNumber: BigInt!
-    time: DateTime!
-    txHash: String!
+	id: ID!
+	round: Round!
+	user: String!
+	ticketCount: BigInt!
+	amount: BigInt!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
 }
 
 type FeeRecipientUpdated @entity {
-    id: ID!
-    feeRecipient: String!
-    blockNumber: BigInt!
-    time: DateTime!
-    txHash: String!
+	id: ID!
+	feeRecipient: String!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
 }
 
 type CallbackGasLimitUpdated @entity {
-    id: ID!
-    callbackGasLimit: Int!
-    blockNumber: BigInt!
-    time: DateTime!
-    txHash: String!
+	id: ID!
+	callbackGasLimit: Int!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type VrfRequestConfirmationsUpdated @entity {
+	id: ID!
+	confirmations: Int!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type VrfSubscriptionIdUpdated @entity {
+	id: ID!
+	subscriptionId: BigInt!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type VrfKeyHashUpdated @entity {
+	id: ID!
+	keyHash: String!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type ProtocolFeeWithdrawn @entity {
+	id: ID!
+	recipient: String!
+	currency: String!
+	amount: BigInt!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type ReferrerFeeWithdrawn @entity {
+	id: ID!
+	referrer: String!
+	currency: String!
+	amount: BigInt!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type ReferrerFeeSeized @entity {
+	id: ID!
+	referrer: String!
+	currency: String!
+	amount: BigInt!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type ReferrerFreezeUpdated @entity {
+	id: ID!
+	referrer: String!
+	frozen: Boolean!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type ReferralTier @entity {
+	id: ID!
+	update: ReferralTiersUpdated!
+	minVolume: BigInt!
+	feePercent: Int!
+}
+
+type ReferralTiersUpdated @entity {
+	id: ID!
+	tiers: [ReferralTier!]! @derivedFrom(field: "update")
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type DefaultReferralFeeUpdated @entity {
+	id: ID!
+	defaultReferralFee: Int!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type ReferrerCustomFeeSet @entity {
+	id: ID!
+	referrer: String!
+	customFeePercent: Int!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type ReferralFeeAccrued @entity {
+	id: ID!
+	roundId: BigInt!
+	referrer: String!
+	amount: BigInt!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type ProtocolFeeAccrued @entity {
+	id: ID!
+	roundId: BigInt!
+	amount: BigInt!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
 }

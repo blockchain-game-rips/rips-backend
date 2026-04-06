@@ -1,5 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BooleanColumn as BooleanColumn_, OneToMany as OneToMany_} from "@subsquid/typeorm-store"
-import {StakeConfig} from "./stakeConfig.model"
+import {Config} from "./config.model"
 
 @Entity_()
 export class Stake {
@@ -13,6 +13,6 @@ export class Stake {
     @BooleanColumn_({nullable: false})
     deleted!: boolean
 
-    @OneToMany_(() => StakeConfig, e => e.stake)
-    configs!: StakeConfig[]
+    @OneToMany_(() => Config, e => e.stake)
+    configs!: Config[]
 }

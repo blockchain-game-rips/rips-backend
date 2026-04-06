@@ -1,12 +1,11 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, BigIntColumn as BigIntColumn_, StringColumn as StringColumn_, OneToMany as OneToMany_} from "@subsquid/typeorm-store"
 import {Stake} from "./stake.model"
-import {StakeConfigStatus} from "./_stakeConfigStatus"
 import {PrizeTier} from "./prizeTier.model"
 import {Round} from "./round.model"
 
 @Entity_()
-export class StakeConfig {
-    constructor(props?: Partial<StakeConfig>) {
+export class Config {
+    constructor(props?: Partial<Config>) {
         Object.assign(this, props)
     }
 
@@ -16,9 +15,6 @@ export class StakeConfig {
     @Index_()
     @ManyToOne_(() => Stake, {nullable: true})
     stake!: Stake
-
-    @Column_("varchar", {length: 10, nullable: false})
-    status!: StakeConfigStatus
 
     @BigIntColumn_({nullable: false})
     ticketCap!: bigint
@@ -35,9 +31,9 @@ export class StakeConfig {
     @BigIntColumn_({nullable: false})
     feePercent!: bigint
 
-    @OneToMany_(() => PrizeTier, e => e.stakeConfig)
+    @OneToMany_(() => PrizeTier, e => e.config)
     prizeDistribution!: PrizeTier[]
 
-    @OneToMany_(() => Round, e => e.stakeConfig)
+    @OneToMany_(() => Round, e => e.config)
     rounds!: Round[]
 }
