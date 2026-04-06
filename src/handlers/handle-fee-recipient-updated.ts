@@ -1,13 +1,13 @@
 import * as rips from '../abi/rips'
 import { FeeRecipientUpdated } from '../model'
-import { EventContext } from '../types'
+import { HandlerArgs } from '../types'
 
-export function handleFeeRecipientUpdated(eventCtx: EventContext): void {
-	const { block, log, feeRecipientUpdates } = eventCtx
+export function handleFeeRecipientUpdated(args: HandlerArgs): void {
+	const { entities, block, log } = args
 
 	const { newRecipient } = rips.events.FeeRecipientUpdated.decode(log)
 
-	feeRecipientUpdates.push(
+	entities.feeRecipientUpdates.push(
 		new FeeRecipientUpdated({
 			id: log.id,
 			feeRecipient: newRecipient.toLowerCase(),

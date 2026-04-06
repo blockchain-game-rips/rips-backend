@@ -1,22 +1,32 @@
 import {
 	CallbackGasLimitUpdated,
+	Config,
+	DefaultReferralFeeUpdated,
 	FeeRecipientUpdated,
 	PrizeClaim,
 	PrizeTier,
+	ProtocolFeeAccrued,
+	ProtocolFeeWithdrawn,
+	ReferralFeeAccrued,
+	ReferralTier,
+	ReferralTiersUpdated,
+	ReferrerCustomFeeSet,
+	ReferrerFeeSeized,
+	ReferrerFeeWithdrawn,
+	ReferrerFreezeUpdated,
 	Refund,
 	Round,
 	Stake,
-	StakeConfig,
 	TicketPurchase,
+	VrfKeyHashUpdated,
+	VrfRequestConfirmationsUpdated,
+	VrfSubscriptionIdUpdated,
 } from './model'
 import { Block, Context, Log } from './processor'
 
-export interface EventContext {
-	ctx: Context
-	block: Block
-	log: Log
+export interface Entities {
 	stakes: Map<string, Stake>
-	stakeConfigs: Map<string, StakeConfig>
+	configs: Map<string, Config>
 	prizeTiers: PrizeTier[]
 	rounds: Map<string, Round>
 	ticketPurchases: TicketPurchase[]
@@ -24,5 +34,24 @@ export interface EventContext {
 	refunds: Refund[]
 	feeRecipientUpdates: FeeRecipientUpdated[]
 	callbackGasLimitUpdates: CallbackGasLimitUpdated[]
-	stakeConfigIdCounter: { value: number }
+	vrfRequestConfirmationsUpdates: VrfRequestConfirmationsUpdated[]
+	vrfSubscriptionIdUpdates: VrfSubscriptionIdUpdated[]
+	vrfKeyHashUpdates: VrfKeyHashUpdated[]
+	protocolFeeWithdrawals: ProtocolFeeWithdrawn[]
+	referrerFeeWithdrawals: ReferrerFeeWithdrawn[]
+	referrerFeeSeizures: ReferrerFeeSeized[]
+	referrerFreezeUpdates: ReferrerFreezeUpdated[]
+	referralTiersUpdates: ReferralTiersUpdated[]
+	referralTiers: ReferralTier[]
+	defaultReferralFeeUpdates: DefaultReferralFeeUpdated[]
+	referrerCustomFeeUpdates: ReferrerCustomFeeSet[]
+	referralFeeAccruals: ReferralFeeAccrued[]
+	protocolFeeAccruals: ProtocolFeeAccrued[]
+}
+
+export interface HandlerArgs {
+	ctx: Context
+	entities: Entities
+	block: Block
+	log: Log
 }

@@ -1,13 +1,13 @@
 import * as rips from '../abi/rips'
 import { CallbackGasLimitUpdated } from '../model'
-import { EventContext } from '../types'
+import { HandlerArgs } from '../types'
 
-export function handleCallbackGasLimitUpdated(eventCtx: EventContext): void {
-	const { block, log, callbackGasLimitUpdates } = eventCtx
+export function handleCallbackGasLimitUpdated(args: HandlerArgs): void {
+	const { entities, block, log } = args
 
 	const { newLimit } = rips.events.CallbackGasLimitUpdated.decode(log)
 
-	callbackGasLimitUpdates.push(
+	entities.callbackGasLimitUpdates.push(
 		new CallbackGasLimitUpdated({
 			id: log.id,
 			callbackGasLimit: newLimit,

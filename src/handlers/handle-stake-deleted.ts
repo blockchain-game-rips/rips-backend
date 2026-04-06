@@ -1,17 +1,15 @@
-import { resolveStakeOrThrow } from '../helpers'
 import * as rips from '../abi/rips'
-import { EventContext } from '../types'
+import { resolveStakeOrThrow } from '../helpers'
+import { HandlerArgs } from '../types'
 
-export async function handleStakeDeleted(
-	eventCtx: EventContext,
-): Promise<void> {
-	const { ctx, log, stakes } = eventCtx
+export async function handleStakeDeleted(args: HandlerArgs): Promise<void> {
+	const { ctx, entities, log } = args
 
 	const { stakeId } = rips.events.StakeDeleted.decode(log)
 	const stakeIdStr = stakeId.toString()
 
-	const stake = await resolveStakeOrThrow(ctx, stakes, stakeIdStr)
+	const stake = await resolveStakeOrThrow(ctx, entities.stakes, stakeIdStr)
 
 	stake.deleted = true
-	stakes.set(stakeIdStr, stake)
+	entities.stakes.set(stakeIdStr, stake)
 }

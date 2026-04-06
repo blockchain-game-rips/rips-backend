@@ -1,33 +1,26 @@
 import * as rips from '../abi/rips'
 import { resolveRoundOrThrow } from '../helpers'
-import { PrizeClaim, RoundStatus } from '../model'
-import { EventContext } from '../types'
+import { PrizeClaim } from '../model'
+import { HandlerArgs } from '../types'
 
-export async function handlePrizesClaimed(
-	eventCtx: EventContext,
-): Promise<void> {
-	const { ctx, block, log, rounds, prizeClaims } = eventCtx
+export async function handlePrizesClaimed(args: HandlerArgs): Promise<void> {
+	const { ctx, entities, block, log } = args
 
-	const { roundId, user, ticketCount, prizeAmount } =
+	const { roundId, user, referrer, ticketCount, prizeAmount } =
 		rips.events.PrizesClaimed.decode(log)
 	const roundIdStr = roundId.toString()
 
-	const round = await resolveRoundOrThrow(ctx, rounds, roundIdStr)
+	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
 
 	round.ticketsClaimed += Number(ticketCount)
+	entities.rounds.set(roundIdStr, round)
 
-	if (round.ticketsClaimed === round.ticketsSold) {
-		round.status = RoundStatus.Claimed
-	}
-
-	rounds.set(roundIdStr, round)
-
-	prizeClaims.push(
+	entities.prizeClaims.push(
 		new PrizeClaim({
 			id: log.id,
 			round,
 			user: user.toLowerCase(),
-			referrer: user.toLowerCase(),
+			referrer: referrer.toLowerCase(),
 			ticketCount,
 			amount: prizeAmount,
 			blockNumber: BigInt(block.height),

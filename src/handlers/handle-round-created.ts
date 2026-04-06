@@ -1,55 +1,39 @@
 import * as rips from '../abi/rips'
-import { resolveStakeConfig } from '../helpers'
-import { Round, RoundStatus, StakeConfigStatus } from '../model'
-import { EventContext } from '../types'
+import { Config, Round, VrfRequestStatus } from '../model'
+import { HandlerArgs } from '../types'
 
-export async function handleRoundCreated(
-	eventCtx: EventContext,
-): Promise<void> {
-	const { ctx, block, log, stakeConfigs, rounds } = eventCtx
+export async function handleRoundCreated(args: HandlerArgs): Promise<void> {
+	const { ctx, entities, block, log } = args
 
-	const { roundId, stakeId } = rips.events.RoundCreated.decode(log)
-	const stakeIdStr = stakeId.toString()
+	const { roundId, configId } = rips.events.RoundCreated.decode(log)
+	const roundIdStr = roundId.toString()
+	const configIdStr = configId.toString()
 
-	const pendingConfig = await resolveStakeConfig(
-		ctx,
-		stakeConfigs,
-		stakeIdStr,
-		StakeConfigStatus.Pending,
-	)
+	let config = entities.configs.get(configIdStr)
 
-	const activeConfig = await resolveStakeConfig(
-		ctx,
-		stakeConfigs,
-		stakeIdStr,
-		StakeConfigStatus.Active,
-	)
-
-	if (pendingConfig !== undefined && activeConfig !== undefined) {
-		activeConfig.status = StakeConfigStatus.Superseded
-		pendingConfig.status = StakeConfigStatus.Active
-		stakeConfigs.set(activeConfig.id, activeConfig)
-		stakeConfigs.set(pendingConfig.id, pendingConfig)
+	if (config === undefined) {
+		config = await ctx.store.findOne(Config, {
+			where: { id: configIdStr },
+			relations: { stake: true },
+		})
 	}
 
-	const roundConfig = pendingConfig ?? activeConfig
-
-	if (roundConfig === undefined) {
+	if (config === undefined) {
 		throw new Error(
-			`No active or pending StakeConfig found for stake ${stakeIdStr} on round ${roundId}`,
+			`Config ${configIdStr} not found for round ${roundIdStr}`,
 		)
 	}
 
-	rounds.set(
-		roundId.toString(),
+	entities.rounds.set(
+		roundIdStr,
 		new Round({
-			id: roundId.toString(),
-			stakeConfig: roundConfig,
+			id: roundIdStr,
+			config,
 			startTime: new Date(block.timestamp),
 			ticketsSold: 0,
 			ticketsClaimed: 0,
 			ticketsRefunded: 0,
-			status: RoundStatus.Unsettled,
+			vrfRequestStatus: VrfRequestStatus.NotRequested,
 		}),
 	)
 }

@@ -1,28 +1,21 @@
 import * as rips from '../abi/rips'
 import { resolveRoundOrThrow } from '../helpers'
-import { RoundStatus, TicketPurchase } from '../model'
-import { EventContext } from '../types'
+import { TicketPurchase } from '../model'
+import { HandlerArgs } from '../types'
 
-export async function handleTicketsPurchased(
-	eventCtx: EventContext,
-): Promise<void> {
-	const { ctx, block, log, rounds, ticketPurchases } = eventCtx
+export async function handleTicketsPurchased(args: HandlerArgs): Promise<void> {
+	const { ctx, entities, block, log } = args
 
 	const { roundId, user, ticketCount, startTicketIndex } =
 		rips.events.TicketsPurchased.decode(log)
 	const roundIdStr = roundId.toString()
 
-	const round = await resolveRoundOrThrow(ctx, rounds, roundIdStr)
+	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
 
 	round.ticketsSold += Number(ticketCount)
+	entities.rounds.set(roundIdStr, round)
 
-	if (BigInt(round.ticketsSold) === round.stakeConfig.ticketCap) {
-		round.status = RoundStatus.Sealed
-	}
-
-	rounds.set(roundIdStr, round)
-
-	ticketPurchases.push(
+	entities.ticketPurchases.push(
 		new TicketPurchase({
 			id: log.id,
 			round,

@@ -1,53 +1,33 @@
 import { assertNotNull } from '@subsquid/util-internal'
 import * as rips from '../abi/rips'
-import {
-	buildPrizeTiers,
-	resolveStakeConfig,
-	resolveStakeOrThrow,
-} from '../helpers'
-import { StakeConfig, StakeConfigStatus } from '../model'
+import { buildPrizeTiers, resolveStakeOrThrow } from '../helpers'
+import { Config } from '../model'
 import { Log } from '../processor'
-import { EventContext } from '../types'
+import { HandlerArgs } from '../types'
 
-export async function handleStakeUpdated(
-	eventCtx: EventContext,
-): Promise<void> {
-	const { ctx, log, stakeConfigs, prizeTiers, stakeConfigIdCounter } =
-		eventCtx
+export async function handleStakeUpdated(args: HandlerArgs): Promise<void> {
+	const { ctx, entities, log } = args
 
-	const { stakeId } = rips.events.StakeUpdated.decode(log)
+	const { stakeId, configId } = rips.events.StakeUpdated.decode(log)
 	const stakeIdStr = stakeId.toString()
+	const configIdStr = configId.toString()
 
-	const config = decodeInputOrThrow(log)
+	const txConfig = decodeInputOrThrow(log)
 
-	const stake = await resolveStakeOrThrow(ctx, eventCtx.stakes, stakeIdStr)
+	const stake = await resolveStakeOrThrow(ctx, entities.stakes, stakeIdStr)
 
-	const existingPending = await resolveStakeConfig(
-		ctx,
-		stakeConfigs,
-		stakeIdStr,
-		StakeConfigStatus.Pending,
-	)
-
-	if (existingPending !== undefined) {
-		existingPending.status = StakeConfigStatus.Superseded
-		stakeConfigs.set(existingPending.id, existingPending)
-	}
-
-	const newConfig = new StakeConfig({
-		id: stakeConfigIdCounter.value.toString(),
+	const config = new Config({
+		id: configIdStr,
 		stake,
-		status: StakeConfigStatus.Pending,
-		feePercent: config.feePercent,
-		ticketCap: config.ticketCap,
-		durationSeconds: config.duration,
-		ticketCost: config.ticketCost,
-		currency: config.currency,
+		ticketCap: txConfig.ticketCap,
+		currency: txConfig.currency.toLowerCase(),
+		durationSeconds: BigInt(txConfig.duration),
+		ticketCost: txConfig.ticketCost,
+		feePercent: BigInt(txConfig.feePercent),
 	})
 
-	stakeConfigIdCounter.value++
-	stakeConfigs.set(newConfig.id, newConfig)
-	prizeTiers.push(...buildPrizeTiers(newConfig, config.prizeDistribution))
+	entities.configs.set(configIdStr, config)
+	entities.prizeTiers.push(...buildPrizeTiers(config, txConfig.tiers))
 }
 
 function decodeInputOrThrow(log: Log) {
@@ -57,7 +37,7 @@ function decodeInputOrThrow(log: Log) {
 		).config
 	} catch {
 		throw new Error(
-			`Could not decode createStake with input ${log.transaction?.input}`,
+			`Could not decode updateStake with input ${log.transaction?.input}`,
 		)
 	}
 }
