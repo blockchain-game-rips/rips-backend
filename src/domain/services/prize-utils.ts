@@ -1,4 +1,4 @@
-import { PrizeTier } from '../entities/stake'
+import { PrizeTier } from '../entities/config'
 
 export function resolveTicketPrize(
 	ticketNumber: number,

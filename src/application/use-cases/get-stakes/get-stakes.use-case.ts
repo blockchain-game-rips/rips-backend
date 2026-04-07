@@ -1,5 +1,5 @@
-import { Stake } from 'src/domain/entities/stake'
+import { Config } from 'src/domain/entities/stake'
 
 export abstract class GetStakesUseCase {
-	abstract execute(): Promise<Stake[]>
+	abstract execute(): Promise<Config[]>
 }

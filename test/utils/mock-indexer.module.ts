@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
-import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
+import { StakeRepository } from 'src/application/interfaces/repositories/config.repository'
 
 class MockRoundRepository extends RoundRepository {
 	async getRounds() {

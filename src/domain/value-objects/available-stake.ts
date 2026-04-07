@@ -1,7 +1,7 @@
 import { Config } from '../entities/config'
-import { Round } from '../entities/round'
+import { OngoingRound } from '../entities/round'
 import { Stake } from '../entities/stake'
 
 export type AvailableStake =
-	| { stake: Stake & { currentConfig: Config }; activeRound: null }
-	| { stake: Stake; activeRound: Round }
+	| { stake: Stake & { currentConfig: Config }; fillingRound: null }
+	| { stake: Stake; fillingRound: OngoingRound }

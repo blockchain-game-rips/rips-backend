@@ -1,5 +1,5 @@
-import { Stake } from 'src/domain/entities/stake'
+import { StakeWithRounds } from 'src/domain/value-objects/stake-with-rounds'
 
 export abstract class StakeRepository {
-	abstract getStakes(): Promise<Stake[]>
+	abstract getStakesWithRounds(): Promise<StakeWithRounds[]>
 }

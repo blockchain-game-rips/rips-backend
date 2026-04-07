@@ -1,4 +1,4 @@
-import { PrizeTier } from 'src/domain/entities/stake'
+import { PrizeTier } from 'src/domain/entities/config'
 import { resolveTicketPrize } from 'src/domain/services/prize-utils'
 
 // config: [[1,2],[6,8],[20,30,40,50]] ether — mirrors RipsMath_CalculatePrizeAmount

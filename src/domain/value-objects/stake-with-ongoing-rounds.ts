@@ -1,7 +1,7 @@
 import { OngoingRound } from '../entities/round'
 import { Stake } from '../entities/stake'
 
-export type StakeWithRounds = {
+export type StakeWithOngoingRounds = {
 	stake: Stake
 	ongoingRounds: OngoingRound[]
 }

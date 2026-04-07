@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { WalletService } from 'src/application/interfaces/wallet.service'
 import { EIP155 } from 'src/constants'
 import { Currency } from 'src/domain/entities/currency'
-import { Stake } from 'src/domain/entities/stake'
+import { Config } from 'src/domain/entities/stake'
 import { ChainAddress } from 'src/domain/value-objects/chain-address'
 import { Purchase } from 'src/domain/value-objects/purchase'
 import { Transaction } from 'src/domain/value-objects/transaction'
@@ -53,7 +53,7 @@ export class WalletServiceImpl extends WalletService {
 
 	buyTickets(
 		wallet: Wallet,
-		args: { stake: Stake; amount: number },
+		args: { stake: Config; amount: number },
 	): Promise<Purchase> {
 		return this.ripsWriteService.buyTickets(wallet, args)
 	}

@@ -1,4 +1,4 @@
-import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
+import { StakeRepository } from 'src/application/interfaces/repositories/config.repository'
 import request from 'supertest'
 import { parseEther } from 'viem'
 import { setNativeBalance } from '../utils/anvil'

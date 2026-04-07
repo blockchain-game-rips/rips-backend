@@ -3,7 +3,7 @@ import { RipsService } from 'src/application/interfaces/rips.service'
 import { MAIN_CURRENCY } from 'src/application/interfaces/tokens'
 import { EIP155 } from 'src/constants'
 import { Currency } from 'src/domain/entities/currency'
-import { Stake } from 'src/domain/entities/stake'
+import { Config } from 'src/domain/entities/stake'
 import { TransactionFailedError } from 'src/domain/errors/transaction-failed.error'
 import { Purchase } from 'src/domain/value-objects/purchase'
 import { Transaction } from 'src/domain/value-objects/transaction'
@@ -126,7 +126,7 @@ export class RipsServiceIpml implements RipsService {
 
 	async buyTickets(
 		wallet: Wallet,
-		args: { stake: Stake; amount: number },
+		args: { stake: Config; amount: number },
 	): Promise<Purchase> {
 		if (!(this.mainCurrency instanceof EvmCurrency)) {
 			throw new Error(`Unsupported currency: ${this.mainCurrency.id}`)

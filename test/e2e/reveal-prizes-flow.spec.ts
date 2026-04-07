@@ -1,8 +1,8 @@
 import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
-import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
+import { StakeRepository } from 'src/application/interfaces/repositories/config.repository'
 import { KeeperUseCase } from 'src/application/use-cases/keeper/keeper.use-case'
 import { Round, RoundStatus } from 'src/domain/entities/round'
-import { Stake } from 'src/domain/entities/stake'
+import { Config } from 'src/domain/entities/config'
 import request from 'supertest'
 import {
 	createWalletClient,
@@ -28,7 +28,7 @@ const KEEPER_PRIVATE_KEY =
 const TELEGRAM_ID_USER_1 = '111222333'
 const TELEGRAM_ID_USER_2 = '444555666'
 
-const STAKE: Stake = {
+const STAKE: Config = {
 	id: STAKE_ID,
 	ticketCup: TICKET_CAP,
 	ticketPrice: {

@@ -1,4 +1,4 @@
-import { Stake } from 'src/domain/entities/stake'
+import { Config } from 'src/domain/entities/stake'
 import { ChainAddress } from 'src/domain/value-objects/chain-address'
 
 type PrizeTierDto = {
@@ -23,7 +23,7 @@ export type StakeResponseDto = {
 	prizeDistribution: PrizeTierDto[]
 }
 
-export function toStakeResponseDto(stake: Stake): StakeResponseDto {
+export function toStakeResponseDto(stake: Config): StakeResponseDto {
 	return {
 		id: stake.id,
 		ticketCup: stake.ticketCup,
