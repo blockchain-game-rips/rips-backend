@@ -10,7 +10,8 @@ export class GetOngoingRoundsService extends GetOngoingRoundsUseCase {
 	}
 
 	async execute(): Promise<OngoingRound[]> {
-		const stakesWithRounds = await this.stakeRepository.getStakesWithOngoingRounds()
+		const stakesWithRounds =
+			await this.stakeRepository.getStakesWithOngoingRounds()
 
 		return stakesWithRounds.flatMap(({ ongoingRounds }) => ongoingRounds)
 	}

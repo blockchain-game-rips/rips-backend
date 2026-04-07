@@ -50,7 +50,9 @@ function toConfigDto(config: Config): ConfigDto {
 	}
 }
 
-export function toStakeResponseDto(availableStake: AvailableStake): StakeResponseDto {
+export function toStakeResponseDto(
+	availableStake: AvailableStake,
+): StakeResponseDto {
 	const config =
 		availableStake.fillingRound !== null
 			? availableStake.fillingRound.config

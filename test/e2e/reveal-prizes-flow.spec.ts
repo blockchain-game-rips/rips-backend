@@ -1,8 +1,8 @@
-import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
 import { StakeRepository } from 'src/application/interfaces/repositories/config.repository'
+import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
 import { KeeperUseCase } from 'src/application/use-cases/keeper/keeper.use-case'
-import { Round, RoundStatus } from 'src/domain/entities/round'
 import { Config } from 'src/domain/entities/config'
+import { Round, RoundStatus } from 'src/domain/entities/round'
 import request from 'supertest'
 import {
 	createWalletClient,

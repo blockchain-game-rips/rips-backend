@@ -11,13 +11,15 @@ export class GetAvailableStakesService extends GetAvailableStakesUseCase {
 	}
 
 	async execute(): Promise<AvailableStake[]> {
-		const stakesWithRounds = await this.stakeRepository.getStakesWithOngoingRounds()
+		const stakesWithRounds =
+			await this.stakeRepository.getStakesWithOngoingRounds()
 
 		const result: AvailableStake[] = []
 
 		for (const { stake, ongoingRounds } of stakesWithRounds) {
 			const fillingRound =
-				ongoingRounds.find((r) => r.status === RoundStatus.FILLING) ?? null
+				ongoingRounds.find((r) => r.status === RoundStatus.FILLING) ??
+				null
 
 			if (fillingRound !== null) {
 				result.push({ stake, fillingRound })
@@ -25,7 +27,10 @@ export class GetAvailableStakesService extends GetAvailableStakesUseCase {
 			}
 
 			if (stake.currentConfig !== null) {
-				result.push({ stake: { ...stake, currentConfig: stake.currentConfig }, fillingRound: null })
+				result.push({
+					stake: { ...stake, currentConfig: stake.currentConfig },
+					fillingRound: null,
+				})
 			}
 		}
 

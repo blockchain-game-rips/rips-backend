@@ -6,7 +6,10 @@ import { IndexerModule } from 'src/infrastructure/indexer/indexer.module'
 @Module({
 	imports: [IndexerModule],
 	providers: [
-		{ provide: GetAvailableStakesUseCase, useClass: GetAvailableStakesService },
+		{
+			provide: GetAvailableStakesUseCase,
+			useClass: GetAvailableStakesService,
+		},
 	],
 	exports: [GetAvailableStakesUseCase],
 })
