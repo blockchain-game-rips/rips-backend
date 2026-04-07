@@ -1,6 +1,6 @@
 import * as rips from '../abi/rips'
 import { resolveRoundOrThrow } from '../helpers'
-import { TicketPurchase } from '../model'
+import { RoundStatus, TicketPurchase } from '../model'
 import { HandlerArgs } from '../types'
 
 export async function handleTicketsPurchased(args: HandlerArgs): Promise<void> {
@@ -13,6 +13,11 @@ export async function handleTicketsPurchased(args: HandlerArgs): Promise<void> {
 	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
 
 	round.ticketsSold += ticketCount
+
+	if (round.ticketsSold === round.config.ticketCap) {
+		round.status = RoundStatus.SEALED
+	}
+
 	entities.rounds.set(roundIdStr, round)
 
 	entities.ticketPurchases.push(

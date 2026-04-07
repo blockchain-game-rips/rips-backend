@@ -1,3 +1,51 @@
+# Round status state machine
+#
+# Happy path (ticket cap reached):
+#   FILLING --(TicketsPurchased: ticketsSold === ticketCap)--> SEALED
+#   SEALED  --(RandomnessRequested)--> VRFREQUESTED
+#   VRFREQUESTED --(RandomnessFulfilled)--> CLAIMING
+#   CLAIMING --(PrizesClaimed: ticketsClaimed === ticketsSold)--> CLAIMED
+#
+# Refund path (round expired before cap):
+#   FILLING --(no event: startTime + duration < now)--> REFUNDING
+#   REFUNDING --(RefundIssued: ticketsRefunded === ticketsSold)--> REFUNDED
+#
+# Transition conditions per status:
+#   FILLING     vrfRequestStatus = NotRequested
+#               ticketsSold < ticketCap
+#               startTime + durationSeconds >= now
+#
+#   SEALED      vrfRequestStatus = NotRequested
+#               ticketsSold = ticketCap
+#
+#   VRFREQUESTED  vrfRequestStatus = Requested
+#
+#   CLAIMING    vrfRequestStatus = Fulfilled
+#               ticketsClaimed < ticketsSold
+#
+#   CLAIMED     vrfRequestStatus = Fulfilled
+#               ticketsClaimed = ticketsSold
+#
+#   REFUNDING   vrfRequestStatus = NotRequested
+#               ticketsSold < ticketCap
+#               startTime + durationSeconds < now
+#               ticketsRefunded < ticketsSold
+#
+#   REFUNDED    vrfRequestStatus = NotRequested
+#               ticketsSold < ticketCap
+#               startTime + durationSeconds < now
+#               ticketsRefunded = ticketsSold
+
+enum RoundStatus {
+	FILLING
+	SEALED
+	VRFREQUESTED
+	CLAIMING
+	CLAIMED
+	REFUNDING
+	REFUNDED
+}
+
 type Stake @entity {
 	id: ID!
 	deleted: Boolean!
@@ -38,6 +86,7 @@ type Round @entity {
 	ticketsSold: BigInt!
 	ticketsClaimed: BigInt!
 	ticketsRefunded: BigInt!
+	status: RoundStatus!
 	vrfRequestStatus: VrfRequestStatus!
 	randomA: BigInt
 	randomB: BigInt

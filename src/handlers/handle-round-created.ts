@@ -1,5 +1,5 @@
 import * as rips from '../abi/rips'
-import { Config, Round, VrfRequestStatus } from '../model'
+import { Config, Round, RoundStatus, VrfRequestStatus } from '../model'
 import { HandlerArgs } from '../types'
 
 export async function handleRoundCreated(args: HandlerArgs): Promise<void> {
@@ -28,6 +28,7 @@ export async function handleRoundCreated(args: HandlerArgs): Promise<void> {
 		roundIdStr,
 		new Round({
 			id: roundIdStr,
+			status: RoundStatus.FILLING,
 			config,
 			startTime: new Date(block.timestamp),
 			ticketsSold: 0n,

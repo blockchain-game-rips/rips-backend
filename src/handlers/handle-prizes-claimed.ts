@@ -1,6 +1,6 @@
 import * as rips from '../abi/rips'
 import { resolveRoundOrThrow } from '../helpers'
-import { PrizeClaim } from '../model'
+import { PrizeClaim, RoundStatus } from '../model'
 import { HandlerArgs } from '../types'
 
 export async function handlePrizesClaimed(args: HandlerArgs): Promise<void> {
@@ -13,6 +13,11 @@ export async function handlePrizesClaimed(args: HandlerArgs): Promise<void> {
 	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
 
 	round.ticketsClaimed += ticketCount
+
+	if (round.ticketsClaimed === round.config.ticketCap) {
+		round.status = RoundStatus.CLAIMED
+	}
+
 	entities.rounds.set(roundIdStr, round)
 
 	entities.prizeClaims.push(

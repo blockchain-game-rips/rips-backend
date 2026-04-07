@@ -1,6 +1,6 @@
 import * as rips from '../abi/rips'
 import { resolveRoundOrThrow } from '../helpers'
-import { Refund } from '../model'
+import { Refund, RoundStatus } from '../model'
 import { HandlerArgs } from '../types'
 
 export async function handleRefundIssued(args: HandlerArgs): Promise<void> {
@@ -12,6 +12,11 @@ export async function handleRefundIssued(args: HandlerArgs): Promise<void> {
 	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
 
 	round.ticketsRefunded += ticketCount
+
+	if (round.ticketsRefunded === round.config.ticketCap) {
+		round.status = RoundStatus.REFUNDED
+	}
+
 	entities.rounds.set(roundIdStr, round)
 
 	entities.refunds.push(

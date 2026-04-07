@@ -1,6 +1,6 @@
 import * as rips from '../abi/rips'
 import { resolveRoundOrThrow } from '../helpers'
-import { VrfRequestStatus } from '../model'
+import { RoundStatus, VrfRequestStatus } from '../model'
 import { HandlerArgs } from '../types'
 
 export async function handleRandomnessFulfilled(
@@ -17,6 +17,7 @@ export async function handleRandomnessFulfilled(
 	round.vrfRequestStatus = VrfRequestStatus.Fulfilled
 	round.randomA = randomA
 	round.randomB = randomB
+	round.status = RoundStatus.CLAIMING
 
 	entities.rounds.set(roundIdStr, round)
 }
