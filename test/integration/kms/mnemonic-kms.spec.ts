@@ -36,7 +36,8 @@ describe('MnemonicKmsService integration', () => {
 	})
 
 	it('signs a transaction and sends it on-chain', async () => {
-		const { kmsKeyId, evmAddress } = await kmsService.createEvmKey()
+		const { kmsKeyId, evmAddress: evmAddressStr } = await kmsService.createEvmKey()
+		const evmAddress = evmAddressStr as `0x${string}`
 
 		const rpcUrl = `http://127.0.0.1:${anvilInstance.port}`
 
@@ -79,7 +80,7 @@ describe('MnemonicKmsService integration', () => {
 			hash,
 			evmAddress,
 		)
-		const signature = parseSignature(signatureHex)
+		const signature = parseSignature(signatureHex as `0x${string}`)
 		const serializedSigned = serializeTransaction(tx, signature)
 
 		const txHash = await walletClient.sendRawTransaction({

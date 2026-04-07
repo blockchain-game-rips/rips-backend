@@ -15,7 +15,7 @@ import { UseCaseExceptionFilter } from 'src/presentation/filters/use-case-except
 import { createPublicClient, http } from 'viem'
 import { base } from 'viem/chains'
 import { Anvil, useAnvil } from './anvil'
-import deployments from './deployments.json'
+import deployments from './state/deployments.json'
 import { MockIndexerModule } from './mock-indexer.module'
 import { usePostgres } from './postgres'
 

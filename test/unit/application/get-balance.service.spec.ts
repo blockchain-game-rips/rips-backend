@@ -46,7 +46,7 @@ function makeMockGetUserUseCase(): jest.Mocked<GetUserUseCase> {
 }
 
 function makeMockWalletService(): jest.Mocked<WalletService> {
-	return { balanceOf: jest.fn(), transfer: jest.fn(), buyTickets: jest.fn() }
+	return { balanceOf: jest.fn(), transfer: jest.fn() }
 }
 
 describe('GetBalanceService', () => {

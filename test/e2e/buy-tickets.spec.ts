@@ -1,4 +1,4 @@
-import { StakeRepository } from 'src/application/interfaces/repositories/config.repository'
+import { GetAvailableStakesUseCase } from 'src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import request from 'supertest'
 import { parseEther } from 'viem'
 import { setNativeBalance } from '../utils/anvil'
@@ -10,24 +10,35 @@ const TICKET_AMOUNT = 2
 
 const USER_TG_ID = '999888777'
 
-const mockStakeRepository: StakeRepository = {
-	getStakes: async () => [
+const mockGetAvailableStakesUseCase: Pick<GetAvailableStakesUseCase, 'execute'> = {
+	execute: async () => [
 		{
-			id: STAKE_ID,
-			ticketCup: 8,
-			ticketPrice: {
+			stake: { id: STAKE_ID, currentConfig: null },
+			fillingRound: {
+				id: 1,
+				stake: { id: STAKE_ID, currentConfig: null },
+				config: {
+					id: 1,
+					ticketCup: 8,
+					feePercent: 0,
+					ticketPrice: { currency: {} as never, amount: TICKET_COST },
+					durationSeconds: 86400,
+					prizeDistribution: [],
+				},
 				currency: {} as never,
-				amount: TICKET_COST,
+				actions: { purchases: [], claims: [], refunds: [] },
+				status: 'FILLING' as never,
+				startTime: new Date(),
 			},
-			durationSeconds: 86400,
-			prizeDistribution: [],
 		},
 	],
 }
 
 describe('Buy tickets E2E', () => {
 	const ctx = useRipsApp((builder) =>
-		builder.overrideProvider(StakeRepository).useValue(mockStakeRepository),
+		builder
+			.overrideProvider(GetAvailableStakesUseCase)
+			.useValue(mockGetAvailableStakesUseCase),
 	)
 
 	it('creates a user', async () => {
