@@ -254,7 +254,7 @@ export async function increaseTime(client: Client, seconds: number) {
 	})
 	await client.request({
 		// @ts-expect-error viem doesn't know about this method
-		method: 'evm_mine',
+		method: 'anvil_mine',
 		params: [],
 	})
 }

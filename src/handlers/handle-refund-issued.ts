@@ -13,7 +13,7 @@ export async function handleRefundIssued(args: HandlerArgs): Promise<void> {
 
 	round.ticketsRefunded += ticketCount
 
-	if (round.ticketsRefunded === round.config.ticketCap) {
+	if (round.ticketsRefunded === round.ticketsSold) {
 		round.status = RoundStatus.REFUNDED
 	}
 

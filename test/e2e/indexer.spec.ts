@@ -231,6 +231,7 @@ describe('indexer e2e', () => {
 				{
 					id: STAKE_1_ROUND_1_ID,
 					config_id: CONFIG_1_ID,
+					status: 'FILLING',
 					tickets_sold: TICKET_COUNT.toString(),
 					vrf_request_status: 'NOT_REQUESTED',
 				},
@@ -281,6 +282,7 @@ describe('indexer e2e', () => {
 			expect(round).toMatchObject({
 				id: STAKE_1_ROUND_1_ID,
 				tickets_sold: STAKE_1_TICKET_CAP.toString(),
+				status: 'SEALED',
 			})
 		})
 	})
@@ -299,12 +301,13 @@ describe('indexer e2e', () => {
 		it('marks round 1 as VRF REQUESTED with a vrf_request_id', async () => {
 			const round = (await waitForRow(
 				dataSource,
-				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND vrf_request_status = 'Requested'`,
+				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND vrf_request_status = 'REQUESTED'`,
 			)) as Record<string, unknown>
 
 			expect(round).toMatchObject({
 				id: STAKE_1_ROUND_1_ID,
-				vrf_request_status: 'Requested',
+				vrf_request_status: 'REQUESTED',
+				status: 'VRF_REQUESTED',
 			})
 			expect(round.vrf_request_id).not.toBeNull()
 		})
@@ -331,12 +334,13 @@ describe('indexer e2e', () => {
 		it('marks round 3 as VRF FULFILLED with random values', async () => {
 			const round = (await waitForRow(
 				dataSource,
-				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND vrf_request_status = 'Fulfilled'`,
+				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND vrf_request_status = 'FULFILLED'`,
 			)) as Record<string, unknown>
 
 			expect(round).toMatchObject({
 				id: STAKE_1_ROUND_1_ID,
-				vrf_request_status: 'Fulfilled',
+				vrf_request_status: 'FULFILLED',
+				status: 'CLAIMING',
 			})
 			expect(round.random_a).not.toBeNull()
 			expect(round.random_b).not.toBeNull()
@@ -385,8 +389,31 @@ describe('indexer e2e', () => {
 
 			expect(round).toMatchObject({
 				id: STAKE_1_ROUND_1_ID,
+				status: 'CLAIMED',
 			})
 			expect(Number(round.tickets_claimed)).toBeGreaterThan(0)
+		})
+	})
+
+	describe('refunding', () => {
+		const TICKET_COUNT = 2n
+
+		beforeAll(async () => {
+			await buyTickets(TICKET_COUNT)
+
+			await increaseTime(publicClient, Number(DURATION) + 1)
+		})
+
+		it('updates round status to REFUNDING', async () => {
+			const round = await waitForRow(
+				dataSource,
+				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_2_ID}'`,
+			)
+
+			expect(round).toMatchObject({
+				id: STAKE_1_ROUND_2_ID,
+				status: 'REFUNDING',
+			})
 		})
 	})
 
@@ -396,10 +423,6 @@ describe('indexer e2e', () => {
 		let txHash: `0x${string}`
 
 		beforeAll(async () => {
-			await buyTickets(TICKET_COUNT)
-
-			await increaseTime(publicClient, Number(DURATION) + 1)
-
 			txHash = await walletClient.writeContract({
 				...ripsAbiAndAddress,
 				functionName: 'refund',
@@ -433,6 +456,7 @@ describe('indexer e2e', () => {
 			expect(round).toMatchObject({
 				id: STAKE_1_ROUND_2_ID,
 				tickets_refunded: TICKET_COUNT.toString(),
+				status: 'REFUNDED',
 			})
 		})
 	})

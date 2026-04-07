@@ -24,7 +24,8 @@ import { handleTicketsPurchased } from './handlers/handle-tickets-purchased'
 import { handleVrfKeyHashUpdated } from './handlers/handle-vrf-key-hash-updated'
 import { handleVrfRequestConfirmationsUpdated } from './handlers/handle-vrf-request-confirmations-updated'
 import { handleVrfSubscriptionIdUpdated } from './handlers/handle-vrf-subscription-id-updated'
-import { processor } from './processor'
+import { Round, RoundStatus } from './model'
+import { Block, Context, processor } from './processor'
 import { Entities, HandlerArgs } from './types'
 
 type Handler = (args: HandlerArgs) => void | Promise<void>
@@ -56,6 +57,35 @@ const handlers: Record<string, Handler> = {
 	[rips.events.ReferrerCustomFeeSet.topic]: handleReferrerCustomFeeSet,
 	[rips.events.ReferralFeeAccrued.topic]: handleReferralFeeAccrued,
 	[rips.events.ProtocolFeeAccrued.topic]: handleProtocolFeeAccrued,
+}
+
+const MILLISECONDS_PER_SECOND = 1000n
+
+async function handleFillingToRefunding(
+	ctx: Context,
+	entities: Entities,
+	lastBlock: Block,
+): Promise<void> {
+	const lastBlockTimestamp = BigInt(lastBlock.timestamp)
+
+	const fillingRounds = await ctx.store.find(Round, {
+		where: { status: RoundStatus.FILLING },
+		relations: { config: true },
+	})
+
+	for (const round of fillingRounds) {
+		const inMemoryRound = entities.rounds.get(round.id)
+		const target = inMemoryRound ?? round
+
+		const deadlineMs =
+			BigInt(target.startTime.getTime()) +
+			target.config.durationSeconds * MILLISECONDS_PER_SECOND
+
+		if (lastBlockTimestamp >= deadlineMs) {
+			target.status = RoundStatus.REFUNDING
+			entities.rounds.set(target.id, target)
+		}
+	}
 }
 
 processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
@@ -96,6 +126,9 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 			})
 		}
 	}
+
+	const lastBlock = ctx.blocks[ctx.blocks.length - 1].header
+	await handleFillingToRefunding(ctx, entities, lastBlock)
 
 	for (const key of Object.keys(entities) as (keyof Entities)[]) {
 		const value = entities[key]
