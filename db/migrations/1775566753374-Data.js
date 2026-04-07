@@ -1,5 +1,5 @@
-module.exports = class Data1775555129109 {
-    name = 'Data1775555129109'
+module.exports = class Data1775566753374 {
+    name = 'Data1775566753374'
 
     async up(db) {
         await db.query(`CREATE TABLE "prize_tier" ("id" character varying NOT NULL, "tier_index" integer NOT NULL, "prize_count" numeric NOT NULL, "min_prize" numeric NOT NULL, "max_prize" numeric NOT NULL, "config_id" character varying, CONSTRAINT "PK_edefaa73bb27e6bf21aa376c178" PRIMARY KEY ("id"))`)
@@ -10,8 +10,9 @@ module.exports = class Data1775555129109 {
         await db.query(`CREATE INDEX "IDX_5716fcc128026f9424ec88d50f" ON "prize_claim" ("round_id") `)
         await db.query(`CREATE TABLE "refund" ("id" character varying NOT NULL, "user" text NOT NULL, "ticket_count" numeric NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "round_id" character varying, CONSTRAINT "PK_f1cefa2e60d99b206c46c1116e5" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_7c5bfc74f3be5483d696a22aee" ON "refund" ("round_id") `)
-        await db.query(`CREATE TABLE "round" ("id" character varying NOT NULL, "start_time" TIMESTAMP WITH TIME ZONE NOT NULL, "tickets_sold" numeric NOT NULL, "tickets_claimed" numeric NOT NULL, "tickets_refunded" numeric NOT NULL, "status" character varying(13) NOT NULL, "vrf_request_status" character varying(13) NOT NULL, "random_a" numeric, "random_b" numeric, "vrf_request_id" numeric, "config_id" character varying, CONSTRAINT "PK_34bd959f3f4a90eb86e4ae24d2d" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "round" ("id" character varying NOT NULL, "start_time" TIMESTAMP WITH TIME ZONE NOT NULL, "tickets_sold" numeric NOT NULL, "tickets_claimed" numeric NOT NULL, "tickets_refunded" numeric NOT NULL, "status" character varying(13) NOT NULL, "vrf_request_status" character varying(13) NOT NULL, "random_a" numeric, "random_b" numeric, "vrf_request_id" numeric, "config_id" character varying, "stake_id" character varying, CONSTRAINT "PK_34bd959f3f4a90eb86e4ae24d2d" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_a02e943e2b4ededce255597a6f" ON "round" ("config_id") `)
+        await db.query(`CREATE INDEX "IDX_161464c4fefeec1f2ece18e712" ON "round" ("stake_id") `)
         await db.query(`CREATE TABLE "config" ("id" character varying NOT NULL, "ticket_cap" numeric NOT NULL, "currency" text NOT NULL, "duration_seconds" numeric NOT NULL, "ticket_cost" numeric NOT NULL, "fee_percent" numeric NOT NULL, "stake_id" character varying, CONSTRAINT "PK_d0ee79a681413d50b0a4f98cf7b" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_054f4e80d93bcff93a9f4520ff" ON "config" ("stake_id") `)
         await db.query(`CREATE TABLE "stake" ("id" character varying NOT NULL, "deleted" boolean NOT NULL, CONSTRAINT "PK_8cfd82a65916af9d517d25a894e" PRIMARY KEY ("id"))`)
@@ -36,6 +37,7 @@ module.exports = class Data1775555129109 {
         await db.query(`ALTER TABLE "prize_claim" ADD CONSTRAINT "FK_5716fcc128026f9424ec88d50fd" FOREIGN KEY ("round_id") REFERENCES "round"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "refund" ADD CONSTRAINT "FK_7c5bfc74f3be5483d696a22aee3" FOREIGN KEY ("round_id") REFERENCES "round"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "round" ADD CONSTRAINT "FK_a02e943e2b4ededce255597a6f7" FOREIGN KEY ("config_id") REFERENCES "config"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+        await db.query(`ALTER TABLE "round" ADD CONSTRAINT "FK_161464c4fefeec1f2ece18e7124" FOREIGN KEY ("stake_id") REFERENCES "stake"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "config" ADD CONSTRAINT "FK_054f4e80d93bcff93a9f4520ffa" FOREIGN KEY ("stake_id") REFERENCES "stake"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "referral_tier" ADD CONSTRAINT "FK_6b61e94b7ef089009a27b561e68" FOREIGN KEY ("update_id") REFERENCES "referral_tiers_updated"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     }
@@ -51,6 +53,7 @@ module.exports = class Data1775555129109 {
         await db.query(`DROP INDEX "public"."IDX_7c5bfc74f3be5483d696a22aee"`)
         await db.query(`DROP TABLE "round"`)
         await db.query(`DROP INDEX "public"."IDX_a02e943e2b4ededce255597a6f"`)
+        await db.query(`DROP INDEX "public"."IDX_161464c4fefeec1f2ece18e712"`)
         await db.query(`DROP TABLE "config"`)
         await db.query(`DROP INDEX "public"."IDX_054f4e80d93bcff93a9f4520ff"`)
         await db.query(`DROP TABLE "stake"`)
@@ -75,6 +78,7 @@ module.exports = class Data1775555129109 {
         await db.query(`ALTER TABLE "prize_claim" DROP CONSTRAINT "FK_5716fcc128026f9424ec88d50fd"`)
         await db.query(`ALTER TABLE "refund" DROP CONSTRAINT "FK_7c5bfc74f3be5483d696a22aee3"`)
         await db.query(`ALTER TABLE "round" DROP CONSTRAINT "FK_a02e943e2b4ededce255597a6f7"`)
+        await db.query(`ALTER TABLE "round" DROP CONSTRAINT "FK_161464c4fefeec1f2ece18e7124"`)
         await db.query(`ALTER TABLE "config" DROP CONSTRAINT "FK_054f4e80d93bcff93a9f4520ffa"`)
         await db.query(`ALTER TABLE "referral_tier" DROP CONSTRAINT "FK_6b61e94b7ef089009a27b561e68"`)
     }

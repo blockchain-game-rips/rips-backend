@@ -50,6 +50,7 @@ type Stake @entity {
 	id: ID!
 	deleted: Boolean!
 	configs: [Config!]! @derivedFrom(field: "stake")
+	rounds: [Round!]! @derivedFrom(field: "stake")
 }
 
 type Config @entity {
@@ -82,6 +83,7 @@ enum VrfRequestStatus {
 type Round @entity {
 	id: ID!
 	config: Config!
+	stake: Stake!
 	startTime: DateTime!
 	ticketsSold: BigInt!
 	ticketsClaimed: BigInt!

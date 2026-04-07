@@ -30,6 +30,7 @@ export async function handleRoundCreated(args: HandlerArgs): Promise<void> {
 			id: roundIdStr,
 			status: RoundStatus.FILLING,
 			config,
+			stake: config.stake,
 			startTime: new Date(block.timestamp),
 			ticketsSold: 0n,
 			ticketsClaimed: 0n,

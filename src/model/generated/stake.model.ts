@@ -1,5 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BooleanColumn as BooleanColumn_, OneToMany as OneToMany_} from "@subsquid/typeorm-store"
 import {Config} from "./config.model"
+import {Round} from "./round.model"
 
 @Entity_()
 export class Stake {
@@ -15,4 +16,7 @@ export class Stake {
 
     @OneToMany_(() => Config, e => e.stake)
     configs!: Config[]
+
+    @OneToMany_(() => Round, e => e.stake)
+    rounds!: Round[]
 }
