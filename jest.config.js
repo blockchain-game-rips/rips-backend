@@ -2,6 +2,7 @@
 
 const sharedConfig = {
 	testEnvironment: 'node',
+	modulePathIgnorePatterns: ['<rootDir>/dist/'],
 	transform: {
 		'^.+.tsx?$': ['ts-jest', {}],
 	},
