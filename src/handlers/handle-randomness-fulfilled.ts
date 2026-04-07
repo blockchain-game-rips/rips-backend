@@ -14,7 +14,7 @@ export async function handleRandomnessFulfilled(
 
 	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
 
-	round.vrfRequestStatus = VrfRequestStatus.Fulfilled
+	round.vrfRequestStatus = VrfRequestStatus.FULFILLED
 	round.randomA = randomA
 	round.randomB = randomB
 	round.status = RoundStatus.CLAIMING

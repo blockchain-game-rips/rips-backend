@@ -1,5 +1,5 @@
 export enum VrfRequestStatus {
-    NotRequested = "NotRequested",
-    Requested = "Requested",
-    Fulfilled = "Fulfilled",
+    NOT_REQUESTED = "NOT_REQUESTED",
+    REQUESTED = "REQUESTED",
+    FULFILLED = "FULFILLED",
 }

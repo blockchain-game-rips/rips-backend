@@ -31,10 +31,10 @@ export class Round {
     @BigIntColumn_({nullable: false})
     ticketsRefunded!: bigint
 
-    @Column_("varchar", {length: 12, nullable: false})
+    @Column_("varchar", {length: 13, nullable: false})
     status!: RoundStatus
 
-    @Column_("varchar", {length: 12, nullable: false})
+    @Column_("varchar", {length: 13, nullable: false})
     vrfRequestStatus!: VrfRequestStatus
 
     @BigIntColumn_({nullable: true})

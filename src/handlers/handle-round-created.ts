@@ -34,7 +34,7 @@ export async function handleRoundCreated(args: HandlerArgs): Promise<void> {
 			ticketsSold: 0n,
 			ticketsClaimed: 0n,
 			ticketsRefunded: 0n,
-			vrfRequestStatus: VrfRequestStatus.NotRequested,
+			vrfRequestStatus: VrfRequestStatus.NOT_REQUESTED,
 		}),
 	)
 }

@@ -2,8 +2,8 @@
 #
 # Happy path (ticket cap reached):
 #   FILLING --(TicketsPurchased: ticketsSold === ticketCap)--> SEALED
-#   SEALED  --(RandomnessRequested)--> VRFREQUESTED
-#   VRFREQUESTED --(RandomnessFulfilled)--> CLAIMING
+#   SEALED  --(RandomnessRequested)--> VRF_REQUESTED
+#   VRF_REQUESTED --(RandomnessFulfilled)--> CLAIMING
 #   CLAIMING --(PrizesClaimed: ticketsClaimed === ticketsSold)--> CLAIMED
 #
 # Refund path (round expired before cap):
@@ -11,27 +11,27 @@
 #   REFUNDING --(RefundIssued: ticketsRefunded === ticketsSold)--> REFUNDED
 #
 # Transition conditions per status:
-#   FILLING     vrfRequestStatus = NotRequested
+#   FILLING     vrfRequestStatus = NOT_REQUESTED
 #               ticketsSold < ticketCap
 #               startTime + durationSeconds >= now
 #
-#   SEALED      vrfRequestStatus = NotRequested
+#   SEALED      vrfRequestStatus = NOT_REQUESTED
 #               ticketsSold = ticketCap
 #
-#   VRFREQUESTED  vrfRequestStatus = Requested
+#   VRF_REQUESTED  vrfRequestStatus = REQUESTED
 #
-#   CLAIMING    vrfRequestStatus = Fulfilled
+#   CLAIMING    vrfRequestStatus = FULFILLED
 #               ticketsClaimed < ticketsSold
 #
-#   CLAIMED     vrfRequestStatus = Fulfilled
+#   CLAIMED     vrfRequestStatus = FULFILLED
 #               ticketsClaimed = ticketsSold
 #
-#   REFUNDING   vrfRequestStatus = NotRequested
+#   REFUNDING   vrfRequestStatus = NOT_REQUESTED
 #               ticketsSold < ticketCap
 #               startTime + durationSeconds < now
 #               ticketsRefunded < ticketsSold
 #
-#   REFUNDED    vrfRequestStatus = NotRequested
+#   REFUNDED    vrfRequestStatus = NOT_REQUESTED
 #               ticketsSold < ticketCap
 #               startTime + durationSeconds < now
 #               ticketsRefunded = ticketsSold
@@ -39,7 +39,7 @@
 enum RoundStatus {
 	FILLING
 	SEALED
-	VRFREQUESTED
+	VRF_REQUESTED
 	CLAIMING
 	CLAIMED
 	REFUNDING
@@ -74,9 +74,9 @@ type PrizeTier @entity {
 }
 
 enum VrfRequestStatus {
-	NotRequested
-	Requested
-	Fulfilled
+	NOT_REQUESTED
+	REQUESTED
+	FULFILLED
 }
 
 type Round @entity {

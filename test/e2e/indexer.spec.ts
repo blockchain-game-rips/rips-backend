@@ -232,7 +232,7 @@ describe('indexer e2e', () => {
 					id: STAKE_1_ROUND_1_ID,
 					config_id: CONFIG_1_ID,
 					tickets_sold: TICKET_COUNT.toString(),
-					vrf_request_status: 'NotRequested',
+					vrf_request_status: 'NOT_REQUESTED',
 				},
 			])
 		})
@@ -296,7 +296,7 @@ describe('indexer e2e', () => {
 			await waitForReceipt(publicClient, txHash)
 		})
 
-		it('marks round 1 as VRF Requested with a vrf_request_id', async () => {
+		it('marks round 1 as VRF REQUESTED with a vrf_request_id', async () => {
 			const round = (await waitForRow(
 				dataSource,
 				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND vrf_request_status = 'Requested'`,
@@ -328,7 +328,7 @@ describe('indexer e2e', () => {
 			await waitForReceipt(publicClient, txHash)
 		})
 
-		it('marks round 3 as VRF Fulfilled with random values', async () => {
+		it('marks round 3 as VRF FULFILLED with random values', async () => {
 			const round = (await waitForRow(
 				dataSource,
 				`SELECT * FROM round WHERE id = '${STAKE_1_ROUND_1_ID}' AND vrf_request_status = 'Fulfilled'`,

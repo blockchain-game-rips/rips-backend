@@ -14,9 +14,9 @@ export async function handleRandomnessRequested(
 
 	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
 
-	round.vrfRequestStatus = VrfRequestStatus.Requested
+	round.vrfRequestStatus = VrfRequestStatus.REQUESTED
 	round.vrfRequestId = vrfRequestId
-	round.status = RoundStatus.VRFREQUESTED
+	round.status = RoundStatus.VRF_REQUESTED
 
 	entities.rounds.set(roundIdStr, round)
 }
