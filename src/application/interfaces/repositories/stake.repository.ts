@@ -1,5 +1,5 @@
-import { StakeWithRounds } from 'src/domain/value-objects/stake-with-rounds'
+import { StakeWithOngoingRounds } from 'src/domain/value-objects/stake-with-ongoing-rounds'
 
 export abstract class StakeRepository {
-	abstract getStakesWithRounds(): Promise<StakeWithRounds[]>
+	abstract getStakesWithOngoingRounds(): Promise<StakeWithOngoingRounds[]>
 }

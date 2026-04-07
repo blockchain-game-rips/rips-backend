@@ -49,7 +49,7 @@ export class HandleClaimService extends HandleClaimUseCase {
 		if (!user) return
 
 		const { a, b } = round.randoms
-		const { ticketCup, prizeDistribution } = round.stake
+		const { ticketCup, prizeDistribution } = round.config
 
 		const prizes = Array.from(
 			{ length: Number(purchase.ticketAmount) },

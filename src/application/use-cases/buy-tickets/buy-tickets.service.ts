@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { RipsService } from 'src/application/interfaces/rips.service'
 import { TicketNotFoundError } from 'src/domain/errors/stake-not-found.error'
 import { Purchase } from 'src/domain/value-objects/purchase'
-import { GetStakesUseCase } from '../get-stakes/get-stakes.use-case'
+import { GetAvailableStakesUseCase } from '../get-available-stakes/get-available-stakes.use-case'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import { BuyTicketsInput, BuyTicketsUseCase } from './buy-tickets.use-case'
 
@@ -10,7 +10,7 @@ import { BuyTicketsInput, BuyTicketsUseCase } from './buy-tickets.use-case'
 export class BuyTicketsService extends BuyTicketsUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
-		private readonly getStakesUseCase: GetStakesUseCase,
+		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
 		private readonly ripsService: RipsService,
 	) {
 		super()
@@ -19,17 +19,29 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 	async execute(input: BuyTicketsInput): Promise<Purchase> {
 		const { telegramId, stakeId, amount } = input
 
-		const [user, stakes] = await Promise.all([
+		const [user, availableStakes] = await Promise.all([
 			this.getUserUseCase.execute({ telegramId }),
-			this.getStakesUseCase.execute(),
+			this.getAvailableStakesUseCase.execute(),
 		])
 
-		const stake = stakes.find((s) => s.id === stakeId)
+		const availableStake = availableStakes.find(
+			(s) => s.stake.id === stakeId,
+		)
 
-		if (!stake) {
+		if (!availableStake) {
+			//TODO: imrove error naming
 			throw new TicketNotFoundError(`Stake with id ${stakeId} not found`)
 		}
 
-		return this.ripsService.buyTickets(user.wallet, { stake, amount })
+		const config =
+			availableStake.fillingRound !== null
+				? availableStake.fillingRound.config
+				: availableStake.stake.currentConfig
+
+		return this.ripsService.buyTickets(user.wallet, {
+			stakeId: availableStake.stake.id,
+			config,
+			amount,
+		})
 	}
 }
