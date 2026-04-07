@@ -1,11 +1,12 @@
 import { AddressesActions } from '../value-objects/actions'
+import { Config } from './config'
 import { Currency } from './currency'
 import { Stake } from './stake'
 
 export enum RoundStatus {
 	FILLING = 'FILLING',
 	SEALED = 'SEALED',
-	VRFREQUESTED = 'VRFREQUESTED',
+	VRF_REQUESTED = 'VRF_REQUESTED',
 	CLAIMING = 'CLAIMING',
 	CLAIMED = 'CLAIMED',
 	REFUNDING = 'REFUNDING',
@@ -15,6 +16,7 @@ export enum RoundStatus {
 export type Round = {
 	id: number
 	stake: Stake
+	config: Config
 	currency: Currency
 	actions: AddressesActions
 	status: RoundStatus
@@ -25,7 +27,7 @@ export type Round = {
 export type OngoingStatus =
 	| RoundStatus.FILLING
 	| RoundStatus.SEALED
-	| RoundStatus.VRFREQUESTED
+	| RoundStatus.VRF_REQUESTED
 	| RoundStatus.CLAIMING
 	| RoundStatus.REFUNDING
 

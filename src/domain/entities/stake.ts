@@ -1,15 +1,7 @@
-import { CurrencyAmount } from '../value-objects/currency-amount'
-
-export type PrizeTier = {
-	prizeCount: bigint
-	minPrize: bigint
-	maxPrize: bigint
-}
+import { Config } from './config'
 
 export type Stake = {
 	id: number
-	ticketCup: number
-	ticketPrice: CurrencyAmount
-	durationSeconds: number
-	prizeDistribution: PrizeTier[]
+	/** A new round is created based on this config. If null, no round can be created — the stake has been deleted. */
+	currentConfig: Config | null
 }
