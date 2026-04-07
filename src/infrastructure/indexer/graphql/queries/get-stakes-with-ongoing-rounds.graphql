@@ -1,4 +1,4 @@
-query GetAvailableStakes {
+query GetStakesWithOngoingRounds {
     stakes {
         id
         deleted
@@ -6,6 +6,7 @@ query GetAvailableStakes {
             id
             ticketCap
             ticketCost
+            feePercent
             durationSeconds
             prizeDistribution(orderBy: tierIndex_ASC) {
                 prizeCount
@@ -15,12 +16,16 @@ query GetAvailableStakes {
         }
         rounds(where: { status_not_in: [CLAIMED, REFUNDED] }) {
             id
+            stakeId
             startTime
             status
+            randomA
+            randomB
             config {
                 id
                 ticketCap
                 ticketCost
+                feePercent
                 durationSeconds
                 prizeDistribution(orderBy: tierIndex_ASC) {
                     prizeCount

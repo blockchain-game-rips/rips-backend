@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { BuyTicketsUseCase } from 'src/application/use-cases/buy-tickets/buy-tickets.use-case'
 import { GetCompletedRoundsUseCase } from 'src/application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
 import { GetOngoingRoundsUseCase } from 'src/application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
-import { GetStakesUseCase } from 'src/application/use-cases/get-stakes/get-stakes.use-case'
+import { GetAvailableStakesUseCase } from 'src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { TelegramId } from 'src/domain/value-objects/telegram-id'
 import { ZodValidationPipe } from 'src/presentation/pipes/zod-validation.pipe'
 import {
@@ -28,7 +28,7 @@ const TELEGRAM_ID_PARAM = 'telegramId'
 @Controller()
 export class RipsController {
 	constructor(
-		private readonly getStakesUseCase: GetStakesUseCase,
+		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
 		private readonly buyTicketsUseCase: BuyTicketsUseCase,
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly getCompletedRoundsUseCase: GetCompletedRoundsUseCase,
@@ -36,7 +36,7 @@ export class RipsController {
 
 	@Get('stakes')
 	async getStakes(): Promise<StakeResponseDto[]> {
-		const stakes = await this.getStakesUseCase.execute()
+		const stakes = await this.getAvailableStakesUseCase.execute()
 
 		return stakes.map(toStakeResponseDto)
 	}

@@ -1,32 +1,85 @@
+import { Config } from 'src/domain/entities/config'
 import { Currency } from 'src/domain/entities/currency'
+import { Round, RoundStatus } from 'src/domain/entities/round'
+import { AddressesActions } from 'src/domain/value-objects/actions'
+import {
+	GetCompletedRoundsQuery,
+	RoundStatus as RoundStatusRaw,
+} from 'src/generated/graphql/generated'
+import { getAddress } from 'viem'
 
-export function fromStakeRaw(
-	stakeRaw: {
-		__typename?: 'StakeConfig'
-		id: string
-		ticketCap: string
-		ticketCost: string
-		durationSeconds: string
-		prizeDistribution: {
-			prizeCount: string
-			minPrize: string
-			maxPrize: string
-		}[]
-	},
-	mainCurrency: Currency,
-) {
+export type RoundRaw = GetCompletedRoundsQuery['rounds'][number]
+
+export function fromConfigRaw(
+	configRaw: RoundRaw['config'],
+	currency: Currency,
+): Config {
 	return {
-		id: Number(stakeRaw.id),
-		ticketCup: Number(stakeRaw.ticketCap),
+		id: Number(configRaw.id),
+		ticketCup: Number(configRaw.ticketCap),
+		feePercent: Number(configRaw.feePercent),
 		ticketPrice: {
-			currency: mainCurrency,
-			amount: BigInt(stakeRaw.ticketCost),
+			currency,
+			amount: BigInt(configRaw.ticketCost),
 		},
-		durationSeconds: Number(stakeRaw.durationSeconds),
-		prizeDistribution: stakeRaw.prizeDistribution.map((tier) => ({
+		durationSeconds: Number(configRaw.durationSeconds),
+		prizeDistribution: configRaw.prizeDistribution.map((tier) => ({
 			prizeCount: BigInt(tier.prizeCount),
 			minPrize: BigInt(tier.minPrize),
 			maxPrize: BigInt(tier.maxPrize),
 		})),
+	}
+}
+
+export function resolveRoundStatus(status: RoundStatusRaw): RoundStatus {
+	switch (status) {
+		case RoundStatusRaw.Filling:
+			return RoundStatus.FILLING
+		case RoundStatusRaw.Sealed:
+			return RoundStatus.SEALED
+		case RoundStatusRaw.VrfRequested:
+			return RoundStatus.VRF_REQUESTED
+		case RoundStatusRaw.Claiming:
+			return RoundStatus.CLAIMING
+		case RoundStatusRaw.Claimed:
+			return RoundStatus.CLAIMED
+		case RoundStatusRaw.Refunding:
+			return RoundStatus.REFUNDING
+		case RoundStatusRaw.Refunded:
+			return RoundStatus.REFUNDED
+	}
+}
+
+function resolveActions(roundRaw: RoundRaw): AddressesActions {
+	return {
+		purchases: roundRaw.ticketPurchases.map((p) => ({
+			userAddress: getAddress(p.user),
+			ticketAmount: BigInt(p.ticketCount),
+			startTicketIndex: BigInt(p.startTicketIndex),
+		})),
+		claims: roundRaw.prizesClaimed.map((c) => ({
+			userAddress: getAddress(c.user),
+			amount: BigInt(c.amount),
+		})),
+		refunds: roundRaw.refunds.map((r) => ({
+			userAddress: getAddress(r.user),
+			amount: BigInt(r.amount),
+		})),
+	}
+}
+
+export function fromRoundRaw(roundRaw: RoundRaw, currency: Currency): Round {
+	return {
+		id: Number(roundRaw.id),
+		stake: { id: Number(roundRaw.stakeId), currentConfig: null },
+		config: fromConfigRaw(roundRaw.config, currency),
+		currency,
+		actions: resolveActions(roundRaw),
+		status: resolveRoundStatus(roundRaw.status),
+		startTime: new Date(roundRaw.startTime),
+		randoms:
+			roundRaw.randomA != null && roundRaw.randomB != null
+				? { a: BigInt(roundRaw.randomA), b: BigInt(roundRaw.randomB) }
+				: undefined,
 	}
 }

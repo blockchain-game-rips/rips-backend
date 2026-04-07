@@ -1,4 +1,5 @@
-import { Config } from 'src/domain/entities/stake'
+import { Config } from 'src/domain/entities/config'
+import { AvailableStake } from 'src/domain/value-objects/available-stake'
 import { ChainAddress } from 'src/domain/value-objects/chain-address'
 
 type PrizeTierDto = {
@@ -7,9 +8,8 @@ type PrizeTierDto = {
 	maxPrize: string
 }
 
-export type StakeResponseDto = {
-	id: number
-	ticketCup: number
+type ConfigDto = {
+	ticketCap: number
 	ticketPrice: {
 		amount: string
 		currency: {
@@ -23,24 +23,42 @@ export type StakeResponseDto = {
 	prizeDistribution: PrizeTierDto[]
 }
 
-export function toStakeResponseDto(stake: Config): StakeResponseDto {
+export type StakeResponseDto = {
+	stakeId: number
+	config: ConfigDto
+	fillingRoundId: number | null
+}
+
+function toConfigDto(config: Config): ConfigDto {
 	return {
-		id: stake.id,
-		ticketCup: stake.ticketCup,
+		ticketCap: config.ticketCup,
 		ticketPrice: {
-			amount: stake.ticketPrice.amount.toString(),
+			amount: config.ticketPrice.amount.toString(),
 			currency: {
-				symbol: stake.ticketPrice.currency.symbol,
-				decimals: stake.ticketPrice.currency.decimals,
-				chainAddress: stake.ticketPrice.currency.chainAddress,
-				name: stake.ticketPrice.currency.name,
+				symbol: config.ticketPrice.currency.symbol,
+				decimals: config.ticketPrice.currency.decimals,
+				chainAddress: config.ticketPrice.currency.chainAddress,
+				name: config.ticketPrice.currency.name,
 			},
 		},
-		durationSeconds: stake.durationSeconds,
-		prizeDistribution: stake.prizeDistribution.map((tier) => ({
+		durationSeconds: config.durationSeconds,
+		prizeDistribution: config.prizeDistribution.map((tier) => ({
 			prizeCount: tier.prizeCount.toString(),
 			minPrize: tier.minPrize.toString(),
 			maxPrize: tier.maxPrize.toString(),
 		})),
+	}
+}
+
+export function toStakeResponseDto(availableStake: AvailableStake): StakeResponseDto {
+	const config =
+		availableStake.fillingRound !== null
+			? availableStake.fillingRound.config
+			: availableStake.stake.currentConfig
+
+	return {
+		stakeId: availableStake.stake.id,
+		config: toConfigDto(config),
+		fillingRoundId: availableStake.fillingRound?.id ?? null,
 	}
 }

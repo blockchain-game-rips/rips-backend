@@ -42,7 +42,7 @@ export class SignService {
 			address,
 		)
 
-		const signature = parseSignature(signatureHex)
+		const signature = parseSignature(signatureHex as `0x${string}`)
 
 		return serializeTransaction(tx, signature)
 	}

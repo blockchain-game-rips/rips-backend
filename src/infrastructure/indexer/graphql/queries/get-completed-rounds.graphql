@@ -1,11 +1,23 @@
-query GetRounds {
-    rounds {
+query GetCompletedRounds($limit: Int!, $cursor: String) {
+    rounds(
+        where: {
+            status_in: [CLAIMED, REFUNDED]
+            id_gt: $cursor
+        }
+        orderBy: id_ASC
+        limit: $limit
+    ) {
         id
-        stakeConfigId
-        stakeConfig {
+        stakeId
+        startTime
+        status
+        randomA
+        randomB
+        config {
             id
             ticketCap
             ticketCost
+            feePercent
             durationSeconds
             prizeDistribution(orderBy: tierIndex_ASC) {
                 prizeCount
@@ -13,32 +25,18 @@ query GetRounds {
                 maxPrize
             }
         }
-        startTime
-        ticketsSold
-        status
-        randomA
-        randomB
         ticketPurchases {
-            id
-            buyer
-            count
-            txHash
+            user
+            ticketCount
             startTicketIndex
-            time
         }
         prizesClaimed {
-            id
-            claimer
-            amount
-            txHash
-            time
-        }
-        refunds {
-            id
             user
             amount
-            txHash
-            time
+        }
+        refunds {
+            user
+            amount
         }
     }
 }

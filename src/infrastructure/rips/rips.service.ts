@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common'
 import { RipsService } from 'src/application/interfaces/rips.service'
 import { MAIN_CURRENCY } from 'src/application/interfaces/tokens'
 import { EIP155 } from 'src/constants'
+import { Config } from 'src/domain/entities/config'
 import { Currency } from 'src/domain/entities/currency'
-import { Config } from 'src/domain/entities/stake'
 import { TransactionFailedError } from 'src/domain/errors/transaction-failed.error'
 import { Purchase } from 'src/domain/value-objects/purchase'
 import { Transaction } from 'src/domain/value-objects/transaction'
@@ -25,6 +25,7 @@ import { KEEPER_PK, RIPS_SC_ADDRESS } from './rips.constants'
 
 const CLAIM_START_INDEX = 0n
 const CLAIM_MAX_RANGES = 100n
+const ZERO_ADDRESS: Address = '0x0000000000000000000000000000000000000000'
 
 @Injectable()
 export class RipsServiceIpml implements RipsService {
@@ -39,36 +40,46 @@ export class RipsServiceIpml implements RipsService {
 		@Inject(MAIN_CURRENCY) private readonly mainCurrency: Currency,
 	) {}
 
-	async claim(roundId: number, userToClaim: Address): Promise<Transaction> {
+	async claim(
+		_wallet: Wallet,
+		args: { roundId: number; userAddress: string },
+	): Promise<Transaction> {
 		const data = encodeFunctionData({
 			abi: ripsAbi,
 			functionName: 'claimPrizes',
 			args: [
-				BigInt(roundId),
+				BigInt(args.roundId),
 				CLAIM_START_INDEX,
 				CLAIM_MAX_RANGES,
-				userToClaim,
+				args.userAddress as Address,
+				ZERO_ADDRESS,
 			],
 		})
 
 		return await this.sendKeeperTransaction(data)
 	}
 
-	async refund(roundId: number, userToRefund: Address): Promise<Transaction> {
+	async refund(
+		_wallet: Wallet,
+		args: { roundId: number; userAddress: string },
+	): Promise<Transaction> {
 		const data = encodeFunctionData({
 			abi: ripsAbi,
 			functionName: 'refund',
-			args: [BigInt(roundId), userToRefund],
+			args: [BigInt(args.roundId), args.userAddress as Address],
 		})
 
 		return await this.sendKeeperTransaction(data)
 	}
 
-	async requestVrf(roundId: number): Promise<Transaction> {
+	async requestVrf(
+		_wallet: Wallet,
+		args: { roundId: number },
+	): Promise<Transaction> {
 		const data = encodeFunctionData({
 			abi: ripsAbi,
 			functionName: 'requestRandomness',
-			args: [BigInt(roundId)],
+			args: [BigInt(args.roundId)],
 		})
 
 		return await this.sendKeeperTransaction(data)
@@ -126,26 +137,26 @@ export class RipsServiceIpml implements RipsService {
 
 	async buyTickets(
 		wallet: Wallet,
-		args: { stake: Config; amount: number },
+		args: { stakeId: number; config: Config; amount: number },
 	): Promise<Purchase> {
 		if (!(this.mainCurrency instanceof EvmCurrency)) {
 			throw new Error(`Unsupported currency: ${this.mainCurrency.id}`)
 		}
 
-		const { stake, amount } = args
+		const { stakeId, config, amount } = args
 
 		const chainId = Number(this.mainCurrency.chainAddress.chain.reference)
 		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
 		const client = this.evmClientService.getClient(chainId)
 
-		const totalValue = stake.ticketPrice.amount * BigInt(amount)
+		const totalValue = config.ticketPrice.amount * BigInt(amount)
 
 		const request: TransactionRequestEIP1559 = {
 			to: this.contractAddress,
 			data: encodeFunctionData({
 				abi: ripsAbi,
 				functionName: 'buyTickets',
-				args: [BigInt(stake.id), BigInt(amount), userAddress],
+				args: [BigInt(stakeId), BigInt(amount), userAddress],
 			}),
 			value: totalValue,
 		}
@@ -203,7 +214,7 @@ export class RipsServiceIpml implements RipsService {
 			},
 			ticketAmount: {
 				roundId: Number(ticketsPurchasedLog.args.roundId),
-				amount: Number(ticketsPurchasedLog.args.count),
+				amount: Number(ticketsPurchasedLog.args.ticketCount),
 			},
 		}
 	}

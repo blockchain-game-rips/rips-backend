@@ -3,7 +3,6 @@ import {
 	OngoingRound,
 	RoundStatus,
 } from 'src/domain/entities/round'
-import { StakeResponseDto, toStakeResponseDto } from './stake-response.dto'
 
 type PurchaseActionDto = {
 	userAddress: string
@@ -29,7 +28,7 @@ type AddressesActionsDto = {
 
 export type OngoingRoundResponseDto = {
 	id: number
-	stake: StakeResponseDto
+	stakeId: number
 	actions: AddressesActionsDto
 	status: RoundStatus
 	startTime: string
@@ -37,7 +36,7 @@ export type OngoingRoundResponseDto = {
 
 export type CompletedRoundResponseDto = {
 	id: number
-	stake: StakeResponseDto
+	stakeId: number
 	actions: AddressesActionsDto
 	status: RoundStatus
 	startTime: string
@@ -71,7 +70,7 @@ export function toOngoingRoundResponseDto(
 ): OngoingRoundResponseDto {
 	return {
 		id: round.id,
-		stake: toStakeResponseDto(round.stake),
+		stakeId: round.stake.id,
 		actions: toActionsDto(round.actions),
 		status: round.status,
 		startTime: round.startTime.toISOString(),
@@ -83,7 +82,7 @@ export function toCompletedRoundResponseDto(
 ): CompletedRoundResponseDto {
 	return {
 		id: round.id,
-		stake: toStakeResponseDto(round.stake),
+		stakeId: round.stake.id,
 		actions: toActionsDto(round.actions),
 		status: round.status,
 		startTime: round.startTime.toISOString(),
