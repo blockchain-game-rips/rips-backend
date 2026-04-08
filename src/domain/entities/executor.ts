@@ -1,6 +1,6 @@
-import { Wallet } from '../value-objects/wallet'
+import { ExecutorWallet } from '../value-objects/wallet'
 
 export type Executor = {
 	id: bigint
-	wallet: Wallet
+	wallet: ExecutorWallet
 }

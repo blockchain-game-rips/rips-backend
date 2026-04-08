@@ -66,6 +66,7 @@ function toDomainUser(record: UserRecord): User {
 			telegramId: toTelegramId(record.telegramId),
 		},
 		wallet: {
+			kind: 'user',
 			namespaceToAddress: {
 				[EIP155]: getAddress(record.evmWallet.address),
 			},

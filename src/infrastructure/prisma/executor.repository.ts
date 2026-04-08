@@ -32,6 +32,7 @@ function toExecutor(
 	return {
 		id: record.id,
 		wallet: {
+			kind: 'executor',
 			namespaceToAddress: {
 				[EIP155]: record.executorWallet.address,
 			},

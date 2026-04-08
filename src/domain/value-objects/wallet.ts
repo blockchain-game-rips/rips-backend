@@ -1,6 +1,16 @@
 import { ChainNamespace } from './chain-namespace'
 
-export type Wallet = {
+type WalletBase = {
 	/** Maps a chain namespace (e.g. 'eip155') to a single address shared across all chains in that namespace. */
 	namespaceToAddress: Record<ChainNamespace, string>
 }
+
+export type UserWallet = {
+	kind: 'user'
+} & WalletBase
+
+export type ExecutorWallet = {
+	kind: 'executor'
+} & WalletBase
+
+export type Wallet = UserWallet | ExecutorWallet
