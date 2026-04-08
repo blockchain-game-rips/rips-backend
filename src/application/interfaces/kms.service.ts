@@ -1,12 +1,14 @@
+import { KmsKeyId } from 'src/domain/value-objects/kms-key-id'
+
 export interface KmsKeyResult {
-	kmsKeyId: string
+	kmsKeyId: KmsKeyId
 	evmAddress: string
 }
 
 export abstract class KmsService {
 	abstract createEvmKey(): Promise<KmsKeyResult>
 	abstract signTransaction(
-		kmsKeyId: string,
+		kmsKeyId: KmsKeyId,
 		hash: string,
 		expectedAddress: string,
 	): Promise<string>

@@ -3,6 +3,7 @@ import {
 	EvmWalletRecord,
 	EvmWalletRepository,
 } from 'src/application/interfaces/repositories/evm-wallet.repository'
+import { toKmsKeyId } from 'src/domain/value-objects/kms-key-id'
 import { getAddress, type Address } from 'viem'
 import { PrismaService } from './prisma.service'
 
@@ -20,7 +21,7 @@ export class PrismaEvmWalletRepository extends EvmWalletRepository {
 		if (!record) return null
 
 		return {
-			kmsKeyId: record.kmsKeyId,
+			kmsKeyId: toKmsKeyId(record.kmsKeyId),
 			address: getAddress(record.address),
 		}
 	}

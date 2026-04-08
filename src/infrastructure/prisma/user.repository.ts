@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
 import { EIP155 } from 'src/constants'
 import { User } from 'src/domain/entities/user'
+import { KmsKeyId } from 'src/domain/value-objects/kms-key-id'
 import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
 import { Prisma } from 'src/generated/prisma'
 import { getAddress, type Address } from 'viem'
@@ -38,7 +39,7 @@ export class PrismaUserRepository extends UserRepository {
 	async create(
 		telegramId: TelegramId,
 		address: Address,
-		kmsKeyId: string,
+		kmsKeyId: KmsKeyId,
 	): Promise<User> {
 		const record = await this.prisma.user.create({
 			data: {

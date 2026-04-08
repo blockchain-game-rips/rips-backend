@@ -1,5 +1,7 @@
+import { KmsKeyId } from 'src/domain/value-objects/kms-key-id'
+
 export type EvmWalletRecord = {
-	kmsKeyId: string
+	kmsKeyId: KmsKeyId
 	address: string
 }
 

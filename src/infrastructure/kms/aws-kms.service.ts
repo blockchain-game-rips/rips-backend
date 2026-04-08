@@ -8,6 +8,7 @@ import {
 	KmsService,
 	type KmsKeyResult,
 } from 'src/application/interfaces/kms.service'
+import { KmsKeyId, toKmsKeyId } from 'src/domain/value-objects/kms-key-id'
 import { getEnvSafe } from 'src/utils/common'
 import { getAddress, keccak256, type Address, type Hex } from 'viem'
 
@@ -31,7 +32,7 @@ export class AwsKmsService extends KmsService {
 			}),
 		)
 
-		const kmsKeyId = createResult.KeyMetadata!.KeyId!
+		const kmsKeyId = toKmsKeyId(createResult.KeyMetadata!.KeyId!)
 
 		const publicKeyResult = await this.client.send(
 			new GetPublicKeyCommand({ KeyId: kmsKeyId }),
@@ -44,7 +45,7 @@ export class AwsKmsService extends KmsService {
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	async signTransaction(
-		_kmsKeyId: string,
+		_kmsKeyId: KmsKeyId,
 		_hash: Hex,
 		_expectedAddress: Address,
 	): Promise<Hex> {

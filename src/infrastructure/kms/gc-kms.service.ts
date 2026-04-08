@@ -5,6 +5,7 @@ import {
 	KmsService,
 	type KmsKeyResult,
 } from 'src/application/interfaces/kms.service'
+import { KmsKeyId, toKmsKeyId } from 'src/domain/value-objects/kms-key-id'
 import { getEnvSafe } from 'src/utils/common'
 import {
 	getAddress,
@@ -69,11 +70,11 @@ export class GcKmsService extends KmsService {
 
 		const evmAddress = deriveEvmAddressFromPem(publicKey.pem)
 
-		return { kmsKeyId: versionName, evmAddress }
+		return { kmsKeyId: toKmsKeyId(versionName), evmAddress }
 	}
 
 	async signTransaction(
-		kmsKeyId: string,
+		kmsKeyId: KmsKeyId,
 		hash: Hex,
 		expectedAddress: Address,
 	): Promise<Hex> {

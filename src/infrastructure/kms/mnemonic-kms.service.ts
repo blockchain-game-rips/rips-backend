@@ -5,6 +5,7 @@ import {
 	KmsService,
 	type KmsKeyResult,
 } from 'src/application/interfaces/kms.service'
+import { KmsKeyId, toKmsKeyId } from 'src/domain/value-objects/kms-key-id'
 import { getEnvSafe } from 'src/utils/common'
 import { type Address, type Hex } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
@@ -32,13 +33,13 @@ export class MnemonicKmsService extends KmsService {
 		this.saveKeyIndex(keyIndex)
 
 		return Promise.resolve({
-			kmsKeyId: String(keyIndex),
+			kmsKeyId: toKmsKeyId(String(keyIndex)),
 			evmAddress: account.address,
 		})
 	}
 
 	async signTransaction(
-		kmsKeyId: string,
+		kmsKeyId: KmsKeyId,
 		hash: Hex,
 		_expectedAddress: Address,
 	): Promise<Hex> {
