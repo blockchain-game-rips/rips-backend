@@ -86,21 +86,20 @@ export class RipsServiceIpml implements RipsService {
 		const evmCurrency = this.requireEvmCurrency()
 
 		const chainId = Number(evmCurrency.chainAddress.chain.reference)
-		const keeperAddress = getAddress(wallet.namespaceToAddress[EIP155])
 
 		const request: TransactionRequestEIP1559 = {
 			...requestFields,
 			to: this.contractAddress,
 		}
 
-		const res = await this.evmTransactionService.sendTransaction(
-			wallet,
-			keeperAddress,
-			request,
-			chainId,
-		)
+		const { transaction } =
+			await this.evmTransactionService.sendTransaction(
+				wallet,
+				request,
+				chainId,
+			)
 
-		return res.transaction
+		return transaction
 	}
 
 	async buyTickets(
@@ -129,7 +128,6 @@ export class RipsServiceIpml implements RipsService {
 		const { transaction, receipt } =
 			await this.evmTransactionService.sendTransaction(
 				wallet,
-				userAddress,
 				request,
 				chainId,
 			)

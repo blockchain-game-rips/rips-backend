@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common'
+import { EIP155 } from 'src/constants'
 import { TransactionFailedError } from 'src/domain/errors/transaction-failed.error'
 import { Transaction } from 'src/domain/value-objects/transaction'
 import { Wallet } from 'src/domain/value-objects/wallet'
 import {
-	Address,
+	getAddress,
 	TransactionReceipt,
 	type TransactionRequestEIP1559,
 } from 'viem'
@@ -29,12 +30,12 @@ export class EvmTransactionService {
 
 	async sendTransaction(
 		wallet: Wallet,
-		senderAddress: Address,
 		request: TransactionRequestEIP1559,
 		chainId: number,
 	): Promise<TransactionResult> {
 		const client = this.evmClientService.getClient(chainId)
 		const nativeCurrency = this.evmCurrencyService.getNative(chainId)
+		const senderAddress = getAddress(wallet.namespaceToAddress[EIP155])
 
 		const tx = await client
 			.prepareTransactionRequest({

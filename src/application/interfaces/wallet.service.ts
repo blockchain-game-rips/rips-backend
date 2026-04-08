@@ -10,7 +10,6 @@ export abstract class WalletService {
 		wallet: Wallet,
 		args: {
 			currency: Currency
-			from: ChainAddress
 			to: ChainAddress
 			amount: bigint
 		},

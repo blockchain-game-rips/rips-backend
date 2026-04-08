@@ -23,15 +23,13 @@ export class EvmCurrencyWriteService {
 		wallet: Wallet,
 		args: {
 			currency: EvmCurrency
-			from: ChainAddress
 			to: ChainAddress
 			amount: bigint
 		},
 	): Promise<Transaction> {
-		const { currency, from: sender, to: recipient, amount } = args
+		const { currency, to: recipient, amount } = args
 
-		const chainId = Number(sender.chain.reference)
-		const senderAddress = getAddress(sender.address)
+		const chainId = Number(currency.chainAddress.chain.reference)
 		const recipientAddress = getAddress(recipient.address)
 
 		const request = this.buildTransactionRequest(currency, {
@@ -42,7 +40,6 @@ export class EvmCurrencyWriteService {
 		const { transaction } =
 			await this.evmTransactionService.sendTransaction(
 				wallet,
-				senderAddress,
 				request,
 				chainId,
 			)
