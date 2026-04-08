@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { TransactionFailedError } from 'src/domain/errors/transaction-failed.error'
 import { ChainAddress } from 'src/domain/value-objects/chain-address'
 import { Transaction } from 'src/domain/value-objects/transaction'
 import { Wallet } from 'src/domain/value-objects/wallet'
@@ -10,16 +9,14 @@ import {
 	type Address,
 	type TransactionRequestEIP1559,
 } from 'viem'
-import { SignService } from '../sign/sign.service'
-import { EvmClientService } from './evm-client/evm-client.service'
+import { EvmTransactionService } from './evm-transaction.service'
 import { EvmCurrency } from './primitives/currencies/evm-currency'
 import { Token } from './primitives/currencies/token'
 
 @Injectable()
 export class EvmCurrencyWriteService {
 	constructor(
-		private readonly evmClientService: EvmClientService,
-		private readonly signService: SignService,
+		private readonly evmTransactionService: EvmTransactionService,
 	) {}
 
 	async transfer(
@@ -36,47 +33,21 @@ export class EvmCurrencyWriteService {
 		const chainId = Number(sender.chain.reference)
 		const senderAddress = getAddress(sender.address)
 		const recipientAddress = getAddress(recipient.address)
-		const client = this.evmClientService.getClient(chainId)
 
 		const request = this.buildTransactionRequest(currency, {
 			recipientAddress,
 			amount,
 		})
 
-		const tx = await client
-			.prepareTransactionRequest({
-				...request,
-				account: senderAddress,
+		const { transaction } =
+			await this.evmTransactionService.sendTransaction(
+				wallet,
+				senderAddress,
+				request,
 				chainId,
-			})
-			.catch((cause) => {
-				throw new TransactionFailedError(
-					'Transaction simulation failed',
-					cause,
-				)
-			})
+			)
 
-		const signedTx = await this.signService.signTx(wallet, tx)
-
-		const txHash = await client.sendRawTransaction({
-			serializedTransaction: signedTx,
-		})
-
-		const receipt = await client.waitForTransactionReceipt({ hash: txHash })
-
-		if (receipt.status === 'reverted') {
-			throw new TransactionFailedError(`Transaction reverted: ${txHash}`)
-		}
-
-		const gasCost = receipt.gasUsed * receipt.effectiveGasPrice
-
-		return {
-			id: txHash,
-			cost: {
-				currency,
-				amount: gasCost,
-			},
-		}
+		return transaction
 	}
 
 	private buildTransactionRequest(

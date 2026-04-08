@@ -1,9 +1,8 @@
-import { GetAvailableStakesUseCase } from 'src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
-import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
 import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
+import { GetAvailableStakesUseCase } from 'src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { KeeperUseCase } from 'src/application/use-cases/keeper/keeper.use-case'
 import { Config } from 'src/domain/entities/config'
-import { OngoingRound, Round, RoundStatus } from 'src/domain/entities/round'
+import { OngoingRound, RoundStatus } from 'src/domain/entities/round'
 import { Stake } from 'src/domain/entities/stake'
 import request from 'supertest'
 import {
@@ -15,8 +14,8 @@ import {
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { setNativeBalance } from '../utils/anvil'
-import deployments from '../utils/state/deployments.json'
 import { useRipsApp } from '../utils/rips-app'
+import deployments from '../utils/state/deployments.json'
 import { vrfCoordinatorAbi } from '../utils/vrf-coordinator-abi'
 
 const STAKE_ID = 1
@@ -71,7 +70,10 @@ describe('Reveal prizes flow E2E', () => {
 	let user2OnChainPrize: bigint
 
 	const stakeRepository = new (class extends StakeRepository {
-		private stakesWithRounds: { stake: Stake; ongoingRounds: OngoingRound[] }[] = []
+		private stakesWithRounds: {
+			stake: Stake
+			ongoingRounds: OngoingRound[]
+		}[] = []
 
 		setOngoingRounds(rounds: OngoingRound[]) {
 			this.stakesWithRounds = [{ stake: STAKE, ongoingRounds: rounds }]
@@ -82,7 +84,10 @@ describe('Reveal prizes flow E2E', () => {
 		}
 	})()
 
-	const mockGetAvailableStakesUseCase: Pick<GetAvailableStakesUseCase, 'execute'> = {
+	const mockGetAvailableStakesUseCase: Pick<
+		GetAvailableStakesUseCase,
+		'execute'
+	> = {
 		execute: async () => [
 			{
 				stake: STAKE,

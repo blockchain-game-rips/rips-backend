@@ -10,7 +10,10 @@ const TICKET_AMOUNT = 2
 
 const USER_TG_ID = '999888777'
 
-const mockGetAvailableStakesUseCase: Pick<GetAvailableStakesUseCase, 'execute'> = {
+const mockGetAvailableStakesUseCase: Pick<
+	GetAvailableStakesUseCase,
+	'execute'
+> = {
 	execute: async () => [
 		{
 			stake: { id: STAKE_ID, currentConfig: null },

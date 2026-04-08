@@ -12,142 +12,107 @@ import {
 	decodeEventLog,
 	encodeFunctionData,
 	getAddress,
-	Hex,
+	zeroAddress,
 	type Address,
 	type TransactionRequestEIP1559,
 } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { EvmClientService } from '../evm/evm-client/evm-client.service'
+import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
-import { SignService } from '../sign/sign.service'
 import { ripsAbi } from './rips-abi'
-import { KEEPER_PK, RIPS_SC_ADDRESS } from './rips.constants'
+import { RIPS_SC_ADDRESS } from './rips.constants'
 
 const CLAIM_START_INDEX = 0n
 const CLAIM_MAX_RANGES = 100n
-const ZERO_ADDRESS: Address = '0x0000000000000000000000000000000000000000'
 
 @Injectable()
 export class RipsServiceIpml implements RipsService {
 	constructor(
-		private readonly evmClientService: EvmClientService,
-		private readonly signService: SignService,
+		private readonly evmTransactionService: EvmTransactionService,
 
 		@Inject(RIPS_SC_ADDRESS) private readonly contractAddress: Address,
-
-		@Inject(KEEPER_PK) private readonly keeperPk: Hex,
 
 		@Inject(MAIN_CURRENCY) private readonly mainCurrency: Currency,
 	) {}
 
-	async claim(
-		_wallet: Wallet,
+	claim(
+		wallet: Wallet,
 		args: { roundId: number; userAddress: string },
 	): Promise<Transaction> {
-		const data = encodeFunctionData({
-			abi: ripsAbi,
-			functionName: 'claimPrizes',
-			args: [
-				BigInt(args.roundId),
-				CLAIM_START_INDEX,
-				CLAIM_MAX_RANGES,
-				args.userAddress as Address,
-				ZERO_ADDRESS,
-			],
+		return this.sendKeeperTransaction(wallet, {
+			data: encodeFunctionData({
+				abi: ripsAbi,
+				functionName: 'claimPrizes',
+				args: [
+					BigInt(args.roundId),
+					CLAIM_START_INDEX,
+					CLAIM_MAX_RANGES,
+					args.userAddress as Address,
+					zeroAddress,
+				],
+			}),
 		})
-
-		return await this.sendKeeperTransaction(data)
 	}
 
-	async refund(
-		_wallet: Wallet,
+	refund(
+		wallet: Wallet,
 		args: { roundId: number; userAddress: string },
 	): Promise<Transaction> {
-		const data = encodeFunctionData({
-			abi: ripsAbi,
-			functionName: 'refund',
-			args: [BigInt(args.roundId), args.userAddress as Address],
+		return this.sendKeeperTransaction(wallet, {
+			data: encodeFunctionData({
+				abi: ripsAbi,
+				functionName: 'refund',
+				args: [BigInt(args.roundId), args.userAddress as Address],
+			}),
 		})
-
-		return await this.sendKeeperTransaction(data)
 	}
 
-	async requestVrf(
-		_wallet: Wallet,
+	requestVrf(
+		wallet: Wallet,
 		args: { roundId: number },
 	): Promise<Transaction> {
-		const data = encodeFunctionData({
-			abi: ripsAbi,
-			functionName: 'requestRandomness',
-			args: [BigInt(args.roundId)],
+		return this.sendKeeperTransaction(wallet, {
+			data: encodeFunctionData({
+				abi: ripsAbi,
+				functionName: 'requestRandomness',
+				args: [BigInt(args.roundId)],
+			}),
 		})
-
-		return await this.sendKeeperTransaction(data)
 	}
 
-	private async sendKeeperTransaction(data: Hex): Promise<Transaction> {
-		if (!(this.mainCurrency instanceof EvmCurrency)) {
-			throw new Error(`Unsupported currency: ${this.mainCurrency.id}`)
-		}
+	private async sendKeeperTransaction(
+		wallet: Wallet,
+		requestFields: Pick<TransactionRequestEIP1559, 'data'>,
+	): Promise<Transaction> {
+		const evmCurrency = this.requireEvmCurrency()
 
-		const chainId = Number(this.mainCurrency.chainAddress.chain.reference)
-		const account = privateKeyToAccount(this.keeperPk)
-		const client = this.evmClientService.getClient(chainId)
+		const chainId = Number(evmCurrency.chainAddress.chain.reference)
+		const keeperAddress = getAddress(wallet.namespaceToAddress[EIP155])
 
 		const request: TransactionRequestEIP1559 = {
+			...requestFields,
 			to: this.contractAddress,
-			data,
 		}
 
-		const tx = await client
-			.prepareTransactionRequest({
-				...request,
-				account: account.address,
-				chainId,
-			})
-			.catch((cause) => {
-				throw new TransactionFailedError(
-					'Transaction simulation failed',
-					cause,
-				)
-			})
+		const res = await this.evmTransactionService.sendTransaction(
+			wallet,
+			keeperAddress,
+			request,
+			chainId,
+		)
 
-		const signedTx = await account.signTransaction(tx)
-
-		const txHash = await client.sendRawTransaction({
-			serializedTransaction: signedTx,
-		})
-
-		const receipt = await client.waitForTransactionReceipt({ hash: txHash })
-
-		if (receipt.status === 'reverted') {
-			throw new TransactionFailedError(`Transaction reverted: ${txHash}`)
-		}
-
-		const gasCost = receipt.gasUsed * receipt.effectiveGasPrice
-
-		return {
-			id: txHash,
-			cost: {
-				currency: this.mainCurrency,
-				amount: gasCost,
-			},
-		}
+		return res.transaction
 	}
 
 	async buyTickets(
 		wallet: Wallet,
 		args: { stakeId: number; config: Config; amount: number },
 	): Promise<Purchase> {
-		if (!(this.mainCurrency instanceof EvmCurrency)) {
-			throw new Error(`Unsupported currency: ${this.mainCurrency.id}`)
-		}
+		const evmCurrency = this.requireEvmCurrency()
 
 		const { stakeId, config, amount } = args
 
-		const chainId = Number(this.mainCurrency.chainAddress.chain.reference)
+		const chainId = Number(evmCurrency.chainAddress.chain.reference)
 		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
-		const client = this.evmClientService.getClient(chainId)
 
 		const totalValue = config.ticketPrice.amount * BigInt(amount)
 
@@ -161,27 +126,13 @@ export class RipsServiceIpml implements RipsService {
 			value: totalValue,
 		}
 
-		const tx = await client
-			.prepareTransactionRequest({
-				...request,
-				account: userAddress,
+		const { transaction, receipt } =
+			await this.evmTransactionService.sendTransaction(
+				wallet,
+				userAddress,
+				request,
 				chainId,
-			})
-			.catch((cause) => {
-				throw new TransactionFailedError('Gas estimation failed', cause)
-			})
-
-		const signedTx = await this.signService.signTx(wallet, tx)
-
-		const txHash = await client.sendRawTransaction({
-			serializedTransaction: signedTx,
-		})
-
-		const receipt = await client.waitForTransactionReceipt({ hash: txHash })
-
-		if (receipt.status === 'reverted') {
-			throw new TransactionFailedError(`Transaction reverted: ${txHash}`)
-		}
+			)
 
 		const ticketsPurchasedLog = receipt.logs
 			.map((log) => {
@@ -198,24 +149,24 @@ export class RipsServiceIpml implements RipsService {
 			ticketsPurchasedLog.eventName !== 'TicketsPurchased'
 		) {
 			throw new TransactionFailedError(
-				`TicketsPurchased event not found in transaction: ${txHash}`,
+				`TicketsPurchased event not found in transaction: ${transaction.id}`,
 			)
 		}
 
-		const gasCost = receipt.gasUsed * receipt.effectiveGasPrice
-
 		return {
-			transaction: {
-				id: txHash,
-				cost: {
-					currency: this.mainCurrency,
-					amount: gasCost,
-				},
-			},
+			transaction,
 			ticketAmount: {
 				roundId: Number(ticketsPurchasedLog.args.roundId),
 				amount: Number(ticketsPurchasedLog.args.ticketCount),
 			},
 		}
+	}
+
+	private requireEvmCurrency(): EvmCurrency {
+		if (!(this.mainCurrency instanceof EvmCurrency)) {
+			throw new Error(`Unsupported currency: ${this.mainCurrency.id}`)
+		}
+
+		return this.mainCurrency
 	}
 }
