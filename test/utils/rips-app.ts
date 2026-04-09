@@ -4,17 +4,25 @@ import { Test, TestingModuleBuilder } from '@nestjs/testing'
 import path from 'path'
 import { AppModule } from 'src/app.module'
 import { KmsService } from 'src/application/interfaces/kms.service'
+import { EIP155 } from 'src/constants'
+import { Executor } from 'src/domain/entities/executor'
 import { EVM_CLIENT_CONFIG } from 'src/infrastructure/evm/evm-client/types'
 import { IndexerModule } from 'src/infrastructure/indexer/indexer.module'
 import { MnemonicKmsService } from 'src/infrastructure/kms/mnemonic-kms.service'
-import {
-	KEEPER_PK,
-	RIPS_SC_ADDRESS,
-} from 'src/infrastructure/rips/rips.constants'
+import { ProvisionService } from 'src/infrastructure/provision/provision.service'
+import { ripsAbi } from 'src/infrastructure/rips/rips-abi'
+import { RIPS_SC_ADDRESS } from 'src/infrastructure/rips/rips.constants'
 import { UseCaseExceptionFilter } from 'src/presentation/filters/use-case-exception.filter'
-import { createPublicClient, http } from 'viem'
+import {
+	createPublicClient,
+	createWalletClient,
+	http,
+	parseEther,
+	type Address,
+} from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 import { base } from 'viem/chains'
-import { Anvil, useAnvil } from './anvil'
+import { Anvil, setNativeBalance, useAnvil } from './anvil'
 import { MockIndexerModule } from './mock-indexer.module'
 import { usePostgres } from './postgres'
 import deployments from './state/deployments.json'
@@ -25,10 +33,13 @@ class NoopScheduleModule {}
 const KMS_MNEMONIC =
 	'spy record fury either collect ill pony monkey praise cool matter state'
 
-const KEEPER_PRIVATE_KEY =
+const DEPLOYER_PRIVATE_KEY =
 	'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 
-const ANVIL_STATE_PATH = path.resolve(__dirname, 'anvil-state.json')
+const EXECUTOR_COUNT = 2
+const EXECUTOR_BALANCE = parseEther('10')
+
+const ANVIL_STATE_PATH = path.resolve(__dirname, 'state/anvil-state.json')
 
 const chain = base
 
@@ -85,8 +96,6 @@ export function useRipsApp(
 			.useModule(MockIndexerModule)
 			.overrideProvider(RIPS_SC_ADDRESS)
 			.useValue(deployments.rips)
-			.overrideProvider(KEEPER_PK)
-			.useValue(KEEPER_PRIVATE_KEY)
 
 		if (applyOverrides) {
 			builder = applyOverrides(builder)
@@ -97,6 +106,11 @@ export function useRipsApp(
 		result.app = moduleRef.createNestApplication()
 		result.app.useGlobalFilters(new UseCaseExceptionFilter())
 		await result.app.init()
+
+		const provisionService = result.app.get(ProvisionService)
+		const executors = await provisionService.ensureExecutors(EXECUTOR_COUNT)
+
+		await setupExecutors(executors, result.publicClient, rpcUrl)
 	})
 
 	afterAll(async () => {
@@ -104,4 +118,37 @@ export function useRipsApp(
 	})
 
 	return result
+}
+
+async function setupExecutors(
+	executors: Executor[],
+	publicClient: PublicClient,
+	rpcUrl: string,
+): Promise<void> {
+	const deployerAccount = privateKeyToAccount(DEPLOYER_PRIVATE_KEY)
+
+	const walletClient = createWalletClient({
+		account: deployerAccount,
+		chain,
+		transport: http(rpcUrl),
+	})
+
+	const operatorRole = await publicClient.readContract({
+		address: deployments.rips as Address,
+		abi: ripsAbi,
+		functionName: 'OPERATOR_ROLE',
+	})
+
+	for (const executor of executors) {
+		const address = executor.wallet.namespaceToAddress[EIP155] as Address
+
+		await setNativeBalance(publicClient, address, EXECUTOR_BALANCE)
+
+		await walletClient.writeContract({
+			address: deployments.rips as Address,
+			abi: ripsAbi,
+			functionName: 'grantRole',
+			args: [operatorRole, address],
+		})
+	}
 }

@@ -16,4 +16,5 @@ import { RipsController } from 'src/presentation/rips/rips.controller'
 	],
 	controllers: [RipsController],
 })
+//TODO: bad naming, there is also RipsInfraModule
 export class RipsModule {}
