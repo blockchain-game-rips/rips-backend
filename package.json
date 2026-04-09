@@ -18,6 +18,7 @@
         "test:e2e": "jest --selectProjects=e2e --runInBand",
         "test:all": "jest",
         "test:watch": "jest --selectProjects=unit --watch",
+        "executor:ensure": "ts-node -r tsconfig-paths/register scripts/ensure-executors.ts",
         "test:cov": "jest --selectProjects=unit --coverage",
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "gen-config-schema": "ts-node -r tsconfig-paths/register utils/generate-configuration-schema.ts"

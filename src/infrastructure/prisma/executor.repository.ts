@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { ExecutorRepository } from 'src/application/interfaces/repositories/executor.repository'
 import { EIP155 } from 'src/constants'
 import { Executor } from 'src/domain/entities/executor'
+import { KmsKeyId } from 'src/domain/value-objects/kms-key-id'
 import { Prisma } from 'src/generated/prisma'
 import { PrismaService } from './prisma.service'
 
@@ -17,6 +18,21 @@ export class PrismaExecutorRepository extends ExecutorRepository {
 		})
 
 		return records.filter((r) => r.executorWallet !== null).map(toExecutor)
+	}
+
+	async create(address: string, kmsKeyId: KmsKeyId): Promise<Executor> {
+		const record = await this.prisma.executor.create({
+			data: {
+				executorWallet: { create: { address, kmsKeyId } },
+			},
+			include: { executorWallet: true },
+		})
+
+		return toExecutor(
+			record as ExecutorRecord & {
+				executorWallet: NonNullable<ExecutorRecord['executorWallet']>
+			},
+		)
 	}
 }
 
