@@ -13,7 +13,7 @@ const KMS_KEY_ID = 'kms-key-123'
 const MOCK_USER: User = {
 	id: 1n,
 	telegramProfile: { telegramId: TELEGRAM_ID },
-	wallet: { namespaceToAddress: { [EIP155]: EVM_ADDRESS } },
+	wallet: { kind: 'user', namespaceToAddress: { [EIP155]: EVM_ADDRESS } },
 	createdAt: new Date('2026-01-01'),
 }
 

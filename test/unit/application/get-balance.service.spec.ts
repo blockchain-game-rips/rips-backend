@@ -17,6 +17,7 @@ const TELEGRAM_ID = toTelegramId(123456n)
 const EVM_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'
 
 const MOCK_WALLET: Wallet = {
+	kind: 'user',
 	namespaceToAddress: { [EIP155]: EVM_ADDRESS },
 }
 

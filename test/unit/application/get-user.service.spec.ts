@@ -10,6 +10,7 @@ const MOCK_USER: User = {
 	id: 1n,
 	telegramProfile: { telegramId: TELEGRAM_ID },
 	wallet: {
+		kind: 'user',
 		namespaceToAddress: {
 			[EIP155]: '0x1234567890abcdef1234567890abcdef12345678',
 		},
