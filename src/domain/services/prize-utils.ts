@@ -1,34 +1,58 @@
 import { PrizeTier } from '../entities/config'
+import { Round } from '../entities/round'
+import { Card } from '../value-objects/card'
+import { CardCollection } from '../value-objects/card-collection'
+import { TicketPrize } from '../value-objects/ticket-prize'
 
-export function resolveTicketPrize(
+//TODO: test against smart contract calling
+
+export function resolvePrize(
 	ticketNumber: number,
-	randomA: bigint,
-	randomB: bigint,
-	ticketCap: number,
-	prizeDistribution: PrizeTier[],
-): bigint {
-	const n = BigInt(ticketCap)
-	const prizeNumber = ((randomA * BigInt(ticketNumber) + randomB) % n) + 1n
+	round: Round & { randoms: NonNullable<Round['randoms']> },
+	stakeCardCollections: CardCollection[],
+): TicketPrize {
+	const { a, b } = round.randoms
+	const { ticketCup, prizeDistribution } = round.config
 
-	return resolvePrizeAmount(prizeNumber, prizeDistribution)
+	const n = BigInt(ticketCup)
+	const prizeNumber = ((a * BigInt(ticketNumber) + b) % n) + 1n
+
+	const { tierIndex, rank } = resolveTier(prizeNumber, prizeDistribution)
+	const prizeAmount = resolvePrizeInTier(prizeDistribution[tierIndex], rank)
+
+	// TODO: implement weighted card selection based on user's existing collection
+	const card = resolveRandomCard(stakeCardCollections[tierIndex])
+
+	return {
+		roundId: round.id,
+		ticketNumber,
+		prizeAmount,
+		revealed: false,
+		card,
+	}
 }
 
-function resolvePrizeAmount(
+function resolveTier(
 	prizeNumber: bigint,
 	prizeDistribution: PrizeTier[],
-): bigint {
+): { tierIndex: number; rank: bigint } {
 	let boundary = 0n
 
-	for (const tier of prizeDistribution) {
-		boundary += tier.prizeCount
+	for (let i = 0; i < prizeDistribution.length; i++) {
+		boundary += prizeDistribution[i].prizeCount
 
 		if (prizeNumber <= boundary) {
-			const rank = prizeNumber - (boundary - tier.prizeCount)
-			return resolvePrizeInTier(tier, rank)
+			const rank = prizeNumber - (boundary - prizeDistribution[i].prizeCount)
+			return { tierIndex: i, rank }
 		}
 	}
 
 	throw new Error(`Prize number ${prizeNumber} exceeded all tier boundaries`)
+}
+
+function resolveRandomCard(collection: CardCollection): Card {
+	const index = Math.floor(Math.random() * collection.length)
+	return collection[index].card
 }
 
 function resolvePrizeInTier(tier: PrizeTier, rank: bigint): bigint {

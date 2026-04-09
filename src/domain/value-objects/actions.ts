@@ -18,6 +18,6 @@ export type ClaimAction = {
 
 export type PurchaseAction = {
 	userAddress: Address
-	ticketAmount: bigint
+	ticketCount: bigint
 	startTicketIndex: bigint
 }

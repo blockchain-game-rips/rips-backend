@@ -1,5 +1,5 @@
-import { TicketPrize } from 'src/domain/entities/ticket-prize'
 import { TelegramId } from 'src/domain/value-objects/telegram-id'
+import { TicketPrize } from 'src/domain/value-objects/ticket-prize'
 
 export type GetUnrevealedPrizesInput = {
 	telegramId: TelegramId

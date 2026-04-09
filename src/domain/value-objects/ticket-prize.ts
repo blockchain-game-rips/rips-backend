@@ -1,4 +1,4 @@
-import { Card } from '../entities/card'
+import { Card } from './card'
 
 export type TicketPrize = {
 	roundId: number

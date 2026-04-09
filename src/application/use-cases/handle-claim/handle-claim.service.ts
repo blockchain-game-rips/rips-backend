@@ -3,8 +3,9 @@ import { TicketPrizeRepository } from 'src/application/interfaces/repositories/t
 import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
 import { RipsService } from 'src/application/interfaces/rips.service'
 import { Round } from 'src/domain/entities/round'
-import { resolveTicketPrize } from 'src/domain/services/prize-utils'
+import { resolvePrize } from 'src/domain/services/prize-utils'
 import { PurchaseAction } from 'src/domain/value-objects/actions'
+import { TicketPrize } from 'src/domain/value-objects/ticket-prize'
 import { HandleClaimInput, HandleClaimUseCase } from './handle-claim.use-case'
 
 @Injectable()
@@ -37,39 +38,49 @@ export class HandleClaimService extends HandleClaimUseCase {
 		}
 	}
 
+	private hasRandoms(
+		round: Round,
+	): round is Round & { randoms: NonNullable<Round['randoms']> } {
+		return round.randoms !== undefined
+	}
+
 	private async savePrizes(
 		round: Round,
 		purchase: PurchaseAction,
 	): Promise<void> {
-		if (!round.randoms) return
+		if (!this.hasRandoms(round)) throw new Error("Randoms don't exist")
 
 		const user = await this.userRepository.findByEvmAddress(
 			purchase.userAddress,
 		)
 		if (!user) return
 
-		const { a, b } = round.randoms
-		const { ticketCup, prizeDistribution } = round.config
+		const stakeCardCollections =
+			await this.ticketPrizeRepository.getStakeCardCollections(
+				user.id,
+				round.stake.id,
+			)
 
-		const prizes = Array.from(
-			{ length: Number(purchase.ticketAmount) },
-			(_, i) => {
-				const ticketNumber = Number(purchase.startTicketIndex) + i + 1
+		const prizes: TicketPrize[] = []
 
-				return {
-					roundId: round.id,
-					ticketNumber,
-					stakeId: round.stake.id,
-					prizeAmount: resolveTicketPrize(
-						ticketNumber,
-						a,
-						b,
-						ticketCup,
-						prizeDistribution,
-					),
-				}
-			},
-		)
+		for (let i = 0; i < purchase.ticketCount; i++) {
+			const ticketNumber = Number(purchase.startTicketIndex) + i + 1
+
+			const prize = resolvePrize(
+				ticketNumber,
+				round,
+				stakeCardCollections,
+			)
+
+			const cardWithCountIndex = stakeCardCollections[
+				prize.card.tier
+			].findIndex(
+				(cardWithCount) => cardWithCount.card.id === prize.card.id,
+			)
+			stakeCardCollections[prize.card.tier][cardWithCountIndex].count += 1
+
+			prizes.push(prize)
+		}
 
 		await this.ticketPrizeRepository.upsertMany(user.id, prizes) //TODO: why upsert, what if prize is revealed
 	}

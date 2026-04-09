@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { TicketPrizeRepository } from 'src/application/interfaces/repositories/ticket-prize.repository'
-import { TicketPrize } from 'src/domain/entities/ticket-prize'
+import { TicketPrize } from 'src/domain/value-objects/ticket-prize'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import {
 	GetUnrevealedPrizesInput,
