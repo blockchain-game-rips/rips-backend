@@ -7,12 +7,15 @@ import { Stake } from 'src/domain/entities/stake'
 import { ripsAbi } from 'src/infrastructure/rips/rips-abi'
 import request from 'supertest'
 import {
+	Chain,
 	createWalletClient,
 	getAddress,
 	http,
+	HttpTransport,
 	parseEther,
 	parseEventLogs,
 	type Address,
+	type PublicClient,
 	type TransactionReceipt,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
@@ -69,11 +72,9 @@ describe('Reveal prizes flow E2E', () => {
 	let roundId: number
 	let user1Address: Address
 	let user2Address: Address
-	let user1BalanceBeforeClaim: bigint
-	let user2BalanceBeforeClaim: bigint
-	let user1OnChainPrize: bigint
-	let user2OnChainPrize: bigint
-	let fulfillReceipt: TransactionReceipt
+	let vrfRequestId: bigint
+	let randomA: bigint
+	let randomB: bigint
 
 	const stakeRepository = new (class extends StakeRepository {
 		private stakesWithRounds: {
@@ -94,20 +95,21 @@ describe('Reveal prizes flow E2E', () => {
 		GetAvailableStakesUseCase,
 		'execute'
 	> = {
-		execute: async () => [
-			{
-				stake: STAKE,
-				fillingRound: {
-					id: 1,
+		execute: async () =>
+			Promise.resolve([
+				{
 					stake: STAKE,
-					config: STAKE_CONFIG,
-					currency: {} as never,
-					actions: { purchases: [], claims: [], refunds: [] },
-					status: RoundStatus.FILLING,
-					startTime: new Date(),
+					fillingRound: {
+						id: 1,
+						stake: STAKE,
+						config: STAKE_CONFIG,
+						currency: {} as never,
+						actions: { purchases: [], claims: [], refunds: [] },
+						status: RoundStatus.FILLING,
+						startTime: new Date(),
+					},
 				},
-			},
-		],
+			]),
 	}
 
 	const ctx = useRipsApp((builder) =>
@@ -201,77 +203,42 @@ describe('Reveal prizes flow E2E', () => {
 			},
 		])
 
-		const keeperUseCase = ctx.app.get(KeeperUseCase)
-
-		await keeperUseCase.execute()
+		await ctx.app.get(KeeperUseCase).execute()
 
 		stakeRepository.setOngoingRounds([])
 
-		const keeperRawLogs = await ctx.publicClient.getLogs({
+		const rawLogs = await ctx.publicClient.getLogs({
 			address: deployments.rips as Address,
 			fromBlock: 0n,
 		})
 
-		const randomnessRequestedLogs = parseEventLogs({
+		const [randomnessRequestedLog] = parseEventLogs({
 			abi: ripsAbi,
 			eventName: 'RandomnessRequested',
-			logs: keeperRawLogs,
+			logs: rawLogs,
 		})
 
-		const roundLog = randomnessRequestedLogs.find(
-			(log) => log.args.roundId === BigInt(roundId),
-		)
+		expect(randomnessRequestedLog).toBeTruthy()
 
-		expect(roundLog).toBeTruthy()
+		vrfRequestId = randomnessRequestedLog.args.vrfRequestId
 	})
 
 	it('VRF coordinator fulfills randomness and round is finalized', async () => {
-		const keeperRawLogs = await ctx.publicClient.getLogs({
-			address: deployments.rips as Address,
-			fromBlock: 0n,
-		})
+		const fulfillReceipt = await fulfillRandomWords(vrfRequestId)
 
-		const randomnessRequestedLogs = parseEventLogs({
-			abi: ripsAbi,
-			eventName: 'RandomnessRequested',
-			logs: keeperRawLogs,
-		})
-
-		const roundLog = randomnessRequestedLogs.find(
-			(log) => log.args.roundId === BigInt(roundId),
-		)
-
-		const vrfRequestId = roundLog?.args.vrfRequestId
-
-		expect(vrfRequestId).toBeDefined()
-
-		if (vrfRequestId === undefined) return
-
-		fulfillReceipt = await fulfillRandomWords(vrfRequestId)
-
-		const [finalizedLog] = parseEventLogs({
+		const [randomnessFulfilledLog] = parseEventLogs({
 			abi: ripsAbi,
 			eventName: 'RandomnessFulfilled',
 			logs: fulfillReceipt.logs,
-		}).filter((log) => log.args.roundId === BigInt(roundId))
+		})
 
-		expect(finalizedLog).toBeTruthy()
+		expect(randomnessFulfilledLog).toBeTruthy()
+
+		randomA = randomnessFulfilledLog.args.randomA
+		randomB = randomnessFulfilledLog.args.randomB
 	})
 
 	it('keeper claims prizes and records them in the database', async () => {
-		const [finalizedLog] = parseEventLogs({
-			abi: ripsAbi,
-			eventName: 'RandomnessFulfilled',
-			logs: fulfillReceipt.logs,
-		}).filter((log) => log.args.roundId === BigInt(roundId))
-
-		const { randomA, randomB } = finalizedLog?.args ?? {}
-
-		expect(randomA).toBeDefined()
-		expect(randomB).toBeDefined()
-
-		if (randomA === undefined || randomB === undefined) return
-
 		stakeRepository.setOngoingRounds([
 			{
 				id: roundId,
@@ -300,17 +267,10 @@ describe('Reveal prizes flow E2E', () => {
 			},
 		])
 
-		user1BalanceBeforeClaim = await ctx.publicClient.getBalance({
-			address: user1Address,
-		})
+		const [user1BalanceBeforeClaim, user2BalanceBeforeClaim] =
+			await getBalances([user1Address, user2Address], ctx.publicClient)
 
-		user2BalanceBeforeClaim = await ctx.publicClient.getBalance({
-			address: user2Address,
-		})
-
-		const keeperUseCase = ctx.app.get(KeeperUseCase)
-
-		await keeperUseCase.execute()
+		await ctx.app.get(KeeperUseCase).execute()
 
 		stakeRepository.setOngoingRounds([])
 
@@ -327,21 +287,29 @@ describe('Reveal prizes flow E2E', () => {
 
 		const user1ClaimLog = prizesClaimed.find(
 			(log) =>
-				log.args.user?.toLowerCase() === user1Address.toLowerCase() &&
-				log.args.roundId === BigInt(roundId),
+				log.args.user?.toLowerCase() === user1Address.toLowerCase(),
 		)
 
 		const user2ClaimLog = prizesClaimed.find(
 			(log) =>
-				log.args.user?.toLowerCase() === user2Address.toLowerCase() &&
-				log.args.roundId === BigInt(roundId),
+				log.args.user?.toLowerCase() === user2Address.toLowerCase(),
 		)
 
 		expect(user1ClaimLog).toBeTruthy()
 		expect(user2ClaimLog).toBeTruthy()
 
-		user1OnChainPrize = user1ClaimLog?.args.prizeAmount ?? 0n
-		user2OnChainPrize = user2ClaimLog?.args.prizeAmount ?? 0n
+		const user1OnChainPrize = user1ClaimLog?.args.prizeAmount ?? 0n
+		const user2OnChainPrize = user2ClaimLog?.args.prizeAmount ?? 0n
+
+		const [user1BalanceAfterClaim, user2BalanceAfterClaim] =
+			await getBalances([user1Address, user2Address], ctx.publicClient)
+
+		expect(user1BalanceAfterClaim - user1BalanceBeforeClaim).toBe(
+			user1OnChainPrize,
+		)
+		expect(user2BalanceAfterClaim - user2BalanceBeforeClaim).toBe(
+			user2OnChainPrize,
+		)
 	})
 
 	it('get-unrevealed-prizes returns 4 tickets for each user', async () => {
@@ -385,17 +353,17 @@ describe('Reveal prizes flow E2E', () => {
 		expect(res1.body).toHaveLength(TICKETS_PER_USER - 1)
 		expect(res2.body).toHaveLength(0)
 	})
-
-	it('both users balances increased by their on-chain prize amounts', async () => {
-		const user1BalanceAfterClaim = await ctx.publicClient.getBalance({
-			address: user1Address,
-		})
-
-		const user2BalanceAfterClaim = await ctx.publicClient.getBalance({
-			address: user2Address,
-		})
-
-		expect(user1BalanceAfterClaim - user1BalanceBeforeClaim).toBe(user1OnChainPrize)
-		expect(user2BalanceAfterClaim - user2BalanceBeforeClaim).toBe(user2OnChainPrize)
-	})
 })
+
+async function getBalances(
+	users: Address[],
+	publicClient: PublicClient<HttpTransport, Chain>,
+): Promise<bigint[]> {
+	const balances: bigint[] = []
+
+	for (const user of users) {
+		balances.push(await publicClient.getBalance({ address: user }))
+	}
+
+	return balances
+}

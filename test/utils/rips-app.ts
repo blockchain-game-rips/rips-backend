@@ -16,12 +16,15 @@ import { UseCaseExceptionFilter } from 'src/presentation/filters/use-case-except
 import {
 	createPublicClient,
 	createWalletClient,
+	defineChain,
 	http,
 	parseEther,
 	type Address,
+	type Chain,
+	type HttpTransport,
+	type PublicClient,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { base } from 'viem/chains'
 import { Anvil, setNativeBalance, useAnvil } from './anvil'
 import { MockIndexerModule } from './mock-indexer.module'
 import { usePostgres } from './postgres'
@@ -41,15 +44,18 @@ const EXECUTOR_BALANCE = parseEther('10')
 
 const ANVIL_STATE_PATH = path.resolve(__dirname, 'state/anvil-state.json')
 
-const chain = base
+const BASE_CHAIN_ID = 8453
 
-type PublicClient = ReturnType<
-	typeof createPublicClient<ReturnType<typeof http>, typeof chain>
->
+const chain = defineChain({
+	id: BASE_CHAIN_ID,
+	name: 'Base',
+	nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+	rpcUrls: { default: { http: [] } },
+})
 
 export type RipsApp = {
 	app: INestApplication
-	publicClient: PublicClient
+	publicClient: PublicClient<HttpTransport, Chain>
 	anvil: Anvil
 }
 
@@ -122,7 +128,7 @@ export function useRipsApp(
 
 async function setupExecutors(
 	executors: Executor[],
-	publicClient: PublicClient,
+	publicClient: PublicClient<HttpTransport, Chain>,
 	rpcUrl: string,
 ): Promise<void> {
 	const deployerAccount = privateKeyToAccount(DEPLOYER_PRIVATE_KEY)
