@@ -12,9 +12,6 @@ import { SignService } from '../sign/sign.service'
 import { EvmClientService } from './evm-client/evm-client.service'
 import { EvmCurrencyService } from './evm-currency.service'
 
-// TODO: SignService uses EvmWalletRepository which only resolves user accounts.
-// Keeper wallet signing is not yet supported — to be addressed later.
-
 export type TransactionResult = {
 	transaction: Transaction
 	receipt: TransactionReceipt

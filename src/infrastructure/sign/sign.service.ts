@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { KmsService } from 'src/application/interfaces/kms.service'
-import { EvmWalletRepository } from 'src/application/interfaces/repositories/evm-wallet.repository'
+import { WalletRepository } from 'src/application/interfaces/repositories/wallet.repository'
 import { EIP155 } from 'src/constants'
+import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
 import { Wallet } from 'src/domain/value-objects/wallet'
 import {
 	getAddress,
@@ -16,28 +17,26 @@ import {
 export class SignService {
 	constructor(
 		private readonly kmsService: KmsService,
-		private readonly evmWalletRepository: EvmWalletRepository,
+		private readonly walletRepository: WalletRepository,
 	) {}
 
 	async signTx(
 		wallet: Wallet,
 		tx: TransactionSerializableEIP1559,
 	): Promise<TransactionSerialized> {
-		const address = getAddress(wallet.namespaceToAddress[EIP155])
+		const namespace = toChainNamespace(EIP155)
+		const address = getAddress(wallet.namespaceToAddress[namespace])
 
-		const evmWallet = await this.evmWalletRepository.findByAddress(address)
-
-		if (!evmWallet) {
-			throw new NotFoundException(
-				`EvmWallet not found for address ${address}`,
-			)
-		}
+		const kmsKeyId = await this.walletRepository.getKmsKeyId(
+			wallet,
+			namespace,
+		)
 
 		const serializedUnsigned = serializeTransaction(tx)
 		const hash = keccak256(serializedUnsigned)
 
 		const signatureHex = await this.kmsService.signTransaction(
-			evmWallet.kmsKeyId,
+			kmsKeyId,
 			hash,
 			address,
 		)
