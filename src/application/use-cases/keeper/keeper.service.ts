@@ -4,7 +4,6 @@ import { RipsService } from 'src/application/interfaces/rips.service'
 import { Executor } from 'src/domain/entities/executor'
 import { OngoingRound, Round, RoundStatus } from 'src/domain/entities/round'
 import { GetOngoingRoundsUseCase } from '../get-ongoing-rounds/get-ongoing-rounds.use-case'
-import { HandleClaimUseCase } from '../handle-claim/handle-claim.use-case'
 import { KeeperUseCase } from './keeper.use-case'
 
 type KeeperAction =
@@ -18,7 +17,6 @@ export class KeeperService extends KeeperUseCase {
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly executorRepository: ExecutorRepository,
 		private readonly ripsService: RipsService,
-		private readonly handleClaimUseCase: HandleClaimUseCase,
 	) {
 		super()
 	}
@@ -59,6 +57,7 @@ export class KeeperService extends KeeperUseCase {
 		return groups
 	}
 
+	// TODO: I don't understand, will 3 executors run 3 claims in parallel
 	private collectActions(rounds: OngoingRound[]): KeeperAction[] {
 		return rounds.flatMap((round): KeeperAction[] => {
 			switch (round.status) {
@@ -99,15 +98,27 @@ export class KeeperService extends KeeperUseCase {
 				break
 
 			case 'claim':
-				await this.handleClaimUseCase.execute({
-					round: action.round,
-					executor,
-				})
+				await this.handleClaim(executor, action.round)
 				break
 
 			case 'refund':
 				await this.handleRefund(executor, action.round)
 				break
+		}
+	}
+
+	private async handleClaim(executor: Executor, round: Round): Promise<void> {
+		const uniqueClaimedAddresses = new Set(
+			round.actions.claims.map((c) => c.userAddress),
+		)
+
+		for (const purchase of round.actions.purchases) {
+			if (uniqueClaimedAddresses.has(purchase.userAddress)) continue
+
+			await this.ripsService.claim(executor.wallet, {
+				roundId: round.id,
+				userAddress: purchase.userAddress,
+			})
 		}
 	}
 

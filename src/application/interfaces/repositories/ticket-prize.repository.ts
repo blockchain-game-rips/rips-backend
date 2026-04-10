@@ -17,4 +17,10 @@ export abstract class TicketPrizeRepository {
 		userId: bigint,
 		stakeId: number,
 	): Promise<CardCollection[]>
+
+	abstract getHighestRoundId(): Promise<number | null>
+
+	abstract saveManyForRound(
+		entries: { userId: bigint; prizes: TicketPrize[] }[],
+	): Promise<void>
 }

@@ -42,7 +42,8 @@ function resolveTier(
 		boundary += prizeDistribution[i].prizeCount
 
 		if (prizeNumber <= boundary) {
-			const rank = prizeNumber - (boundary - prizeDistribution[i].prizeCount)
+			const rank =
+				prizeNumber - (boundary - prizeDistribution[i].prizeCount)
 			return { tierIndex: i, rank }
 		}
 	}
