@@ -4,7 +4,9 @@ import { SyncClaimEventsUseCase } from 'src/application/use-cases/sync-claim-eve
 
 @Injectable()
 export class SyncClaimEventsWorker {
-	constructor(private readonly syncClaimEventsUseCase: SyncClaimEventsUseCase) {}
+	constructor(
+		private readonly syncClaimEventsUseCase: SyncClaimEventsUseCase,
+	) {}
 
 	@Cron(CronExpression.EVERY_5_SECONDS, { waitForCompletion: true })
 	async run() {

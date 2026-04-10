@@ -58,6 +58,7 @@ model CardDefinition {
     userCards    UserCard[]
     ticketPrizes TicketPrize[]
 
+    @@unique([stakeId, tier, name])
     @@map("card_definitions")
 }
 

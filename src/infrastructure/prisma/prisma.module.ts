@@ -22,6 +22,7 @@ import { PrismaWalletRepository } from './wallet.repository'
 		},
 	],
 	exports: [
+		PrismaService,
 		UserRepository,
 		ExecutorRepository,
 		WalletRepository,

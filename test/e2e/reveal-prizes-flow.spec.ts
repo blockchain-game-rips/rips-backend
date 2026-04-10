@@ -1,12 +1,20 @@
+import { Test } from '@nestjs/testing'
 import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
 import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
 import { GetAvailableStakesUseCase } from 'src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { KeeperUseCase } from 'src/application/use-cases/keeper/keeper.use-case'
 import { SyncClaimEventsUseCase } from 'src/application/use-cases/sync-claim-events/sync-claim-events.use-case'
 import { Config } from 'src/domain/entities/config'
-import { CompletedRound, OngoingRound, RoundStatus } from 'src/domain/entities/round'
+import {
+	CompletedRound,
+	OngoingRound,
+	RoundStatus,
+} from 'src/domain/entities/round'
 import { Stake } from 'src/domain/entities/stake'
+import { IndexerModule } from 'src/infrastructure/indexer/indexer.module'
 import { ripsAbi } from 'src/infrastructure/rips/rips-abi'
+import { SeedCardDefinitionsService } from 'src/infrastructure/seed/seed-card-definitions.service'
+import { SeedModule } from 'src/infrastructure/seed/seed.module'
 import request from 'supertest'
 import {
 	Chain,
@@ -22,10 +30,14 @@ import {
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { setNativeBalance } from '../utils/anvil'
-import { MockRoundRepository } from '../utils/mock-indexer.module'
+import {
+	MockIndexerModule,
+	MockRoundRepository,
+} from '../utils/mock-indexer.module'
 import { useRipsApp } from '../utils/rips-app'
 import deployments from '../utils/state/deployments.json'
 import { vrfCoordinatorAbi } from '../utils/vrf-coordinator-abi'
+import cardsConfig from './cards.json'
 
 const STAKE_ID = 1
 const TICKET_COST = parseEther('0.005')
@@ -114,6 +126,10 @@ describe('Reveal prizes flow E2E', () => {
 						startTime: new Date(),
 					},
 				},
+				{
+					stake: { ...STAKE_2, currentConfig: STAKE_2_CONFIG },
+					fillingRound: null,
+				},
 			]),
 	}
 
@@ -126,6 +142,25 @@ describe('Reveal prizes flow E2E', () => {
 			.overrideProvider(RoundRepository)
 			.useValue(roundRepository),
 	)
+
+	beforeAll(async () => {
+		const moduleRef = await Test.createTestingModule({
+			imports: [SeedModule],
+		})
+			.overrideModule(IndexerModule)
+			.useModule(MockIndexerModule)
+			.overrideProvider(GetAvailableStakesUseCase)
+			.useValue(mockGetAvailableStakesUseCase)
+			.compile()
+
+		const seedApp = moduleRef.createNestApplication()
+		await seedApp.init()
+
+		const seedService = seedApp.get(SeedCardDefinitionsService)
+		await seedService.seed(seedService.parseConfig(cardsConfig))
+
+		await seedApp.close()
+	})
 
 	async function createUserAndFund(telegramId: string): Promise<Address> {
 		await request(ctx.app.getHttpServer())
@@ -352,7 +387,7 @@ const STAKE_CONFIG: Config = {
 		currency: {} as never,
 		amount: TICKET_COST,
 	},
-	durationSeconds: 86400,
+	durationSeconds: 300,
 	prizeDistribution: [
 		{
 			prizeCount: 5n,
@@ -366,8 +401,36 @@ const STAKE_CONFIG: Config = {
 		},
 		{
 			prizeCount: 1n,
-			minPrize: parseEther('0.02'),
-			maxPrize: parseEther('0.02'),
+			minPrize: parseEther('0.018'),
+			maxPrize: parseEther('0.018'),
+		},
+	],
+}
+
+const STAKE_2_CONFIG: Config = {
+	id: 2,
+	ticketCup: TICKET_CAP,
+	feePercent: 0,
+	ticketPrice: {
+		currency: {} as never,
+		amount: parseEther('0.01'),
+	},
+	durationSeconds: 300,
+	prizeDistribution: [
+		{
+			prizeCount: 5n,
+			minPrize: parseEther('0.0016'),
+			maxPrize: parseEther('0.0024'),
+		},
+		{
+			prizeCount: 2n,
+			minPrize: parseEther('0.014'),
+			maxPrize: parseEther('0.016'),
+		},
+		{
+			prizeCount: 1n,
+			minPrize: parseEther('0.036'),
+			maxPrize: parseEther('0.036'),
 		},
 	],
 }
@@ -375,6 +438,11 @@ const STAKE_CONFIG: Config = {
 const STAKE: Stake = {
 	id: STAKE_ID,
 	currentConfig: STAKE_CONFIG,
+}
+
+const STAKE_2: Stake = {
+	id: 2,
+	currentConfig: STAKE_2_CONFIG,
 }
 
 function parseRandomnessRequested(logs: TransactionReceipt['logs']): bigint {

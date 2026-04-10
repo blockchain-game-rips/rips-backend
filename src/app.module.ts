@@ -8,6 +8,7 @@ import { ProvisionModule } from './infrastructure/provision/provision.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
 import { PriceModule } from './modules/price/price.module'
 import { RipsModule } from './modules/rips/rips.module'
+import { SyncClaimEventsModule } from './modules/sync-claim-events/sync-claim-events.module'
 import { UsersModule } from './modules/users/users.module'
 import { WalletsModule } from './modules/wallets/wallets.module'
 
@@ -42,6 +43,7 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 		RipsModule,
 		PriceModule,
 		KeeperModule,
+		SyncClaimEventsModule,
 	],
 })
 export class AppModule {}
