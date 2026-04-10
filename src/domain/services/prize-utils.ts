@@ -5,7 +5,6 @@ import { CardCollection } from '../value-objects/card-collection'
 import { TicketPrize } from '../value-objects/ticket-prize'
 
 //TODO: test against smart contract calling
-
 export function resolvePrize(
 	ticketNumber: number,
 	round: Round & { randoms: NonNullable<Round['randoms']> },

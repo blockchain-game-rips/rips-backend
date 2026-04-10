@@ -1,10 +1,21 @@
 import { Module } from '@nestjs/common'
 import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
 import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
+import { CompletedRound } from 'src/domain/entities/round'
 
-class MockRoundRepository extends RoundRepository {
+export class MockRoundRepository extends RoundRepository {
+	private nextClaimedRound: CompletedRound | null = null
+
+	setNextClaimedRound(round: CompletedRound | null) {
+		this.nextClaimedRound = round
+	}
+
 	async getCompletedRounds() {
 		return []
+	}
+
+	async getNextClaimedRound() {
+		return this.nextClaimedRound
 	}
 }
 

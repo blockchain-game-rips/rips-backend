@@ -54,7 +54,7 @@ function resolveActions(roundRaw: RoundRaw): AddressesActions {
 	return {
 		purchases: roundRaw.ticketPurchases.map((p) => ({
 			userAddress: getAddress(p.user),
-			ticketAmount: BigInt(p.ticketCount),
+			ticketCount: BigInt(p.ticketCount),
 			startTicketIndex: BigInt(p.startTicketIndex),
 		})),
 		claims: roundRaw.prizesClaimed.map((c) => ({

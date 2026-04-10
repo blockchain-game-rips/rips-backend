@@ -6,7 +6,7 @@ import {
 
 type PurchaseActionDto = {
 	userAddress: string
-	ticketAmount: string
+	ticketCount: string
 	startTicketIndex: string
 }
 
@@ -51,7 +51,7 @@ function toActionsDto(actions: OngoingRound['actions']): AddressesActionsDto {
 	return {
 		purchases: actions.purchases.map((p) => ({
 			userAddress: p.userAddress,
-			ticketAmount: p.ticketAmount.toString(),
+			ticketCount: p.ticketCount.toString(),
 			startTicketIndex: p.startTicketIndex.toString(),
 		})),
 		claims: actions.claims.map((c) => ({

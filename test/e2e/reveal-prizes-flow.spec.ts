@@ -1,8 +1,10 @@
+import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
 import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
 import { GetAvailableStakesUseCase } from 'src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { KeeperUseCase } from 'src/application/use-cases/keeper/keeper.use-case'
+import { SyncClaimEventsUseCase } from 'src/application/use-cases/sync-claim-events/sync-claim-events.use-case'
 import { Config } from 'src/domain/entities/config'
-import { OngoingRound, RoundStatus } from 'src/domain/entities/round'
+import { CompletedRound, OngoingRound, RoundStatus } from 'src/domain/entities/round'
 import { Stake } from 'src/domain/entities/stake'
 import { ripsAbi } from 'src/infrastructure/rips/rips-abi'
 import request from 'supertest'
@@ -20,6 +22,7 @@ import {
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { setNativeBalance } from '../utils/anvil'
+import { MockRoundRepository } from '../utils/mock-indexer.module'
 import { useRipsApp } from '../utils/rips-app'
 import deployments from '../utils/state/deployments.json'
 import { vrfCoordinatorAbi } from '../utils/vrf-coordinator-abi'
@@ -42,6 +45,8 @@ describe('Reveal prizes flow E2E', () => {
 	let vrfRequestId: bigint
 	let randomA: bigint
 	let randomB: bigint
+
+	const roundRepository = new MockRoundRepository()
 
 	const stakeRepository = new (class extends StakeRepository {
 		private stakesWithRounds: {
@@ -117,7 +122,9 @@ describe('Reveal prizes flow E2E', () => {
 			.overrideProvider(GetAvailableStakesUseCase)
 			.useValue(mockGetAvailableStakesUseCase)
 			.overrideProvider(StakeRepository)
-			.useValue(stakeRepository),
+			.useValue(stakeRepository)
+			.overrideProvider(RoundRepository)
+			.useValue(roundRepository),
 	)
 
 	async function createUserAndFund(telegramId: string): Promise<Address> {
@@ -238,22 +245,33 @@ describe('Reveal prizes flow E2E', () => {
 	})
 
 	it('keeper claims prizes and records them in the database', async () => {
-		stakeRepository.setRoundClaiming(
-			roundId,
-			[
-				{
-					userAddress: user1Address,
-					ticketAmount: BigInt(TICKETS_PER_USER),
-					startTicketIndex: 0n,
-				},
-				{
-					userAddress: user2Address,
-					ticketAmount: BigInt(TICKETS_PER_USER),
-					startTicketIndex: BigInt(TICKETS_PER_USER),
-				},
-			],
-			{ a: randomA, b: randomB },
-		)
+		const purchases: OngoingRound['actions']['purchases'] = [
+			{
+				userAddress: user1Address,
+				ticketCount: BigInt(TICKETS_PER_USER),
+				startTicketIndex: 0n,
+			},
+			{
+				userAddress: user2Address,
+				ticketCount: BigInt(TICKETS_PER_USER),
+				startTicketIndex: BigInt(TICKETS_PER_USER),
+			},
+		]
+
+		const randoms = { a: randomA, b: randomB }
+
+		stakeRepository.setRoundClaiming(roundId, purchases, randoms)
+
+		const claimedRound: CompletedRound = {
+			id: roundId,
+			stake: STAKE,
+			config: STAKE_CONFIG,
+			currency: {} as never,
+			status: RoundStatus.CLAIMED,
+			startTime: new Date(),
+			actions: { purchases, claims: [], refunds: [] },
+			randoms,
+		}
 
 		const [user1BalanceBeforeClaim, user2BalanceBeforeClaim] =
 			await getBalances([user1Address, user2Address], ctx.publicClient)
@@ -261,6 +279,10 @@ describe('Reveal prizes flow E2E', () => {
 		await ctx.app.get(KeeperUseCase).execute()
 
 		stakeRepository.setOngoingRounds([])
+
+		roundRepository.setNextClaimedRound(claimedRound)
+		await ctx.app.get(SyncClaimEventsUseCase).execute()
+		roundRepository.setNextClaimedRound(null)
 
 		const user1OnChainPrize = await getPrizeClaimedByUser(user1Address)
 		const user2OnChainPrize = await getPrizeClaimedByUser(user2Address)
