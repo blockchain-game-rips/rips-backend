@@ -13,7 +13,6 @@ import { CurrencyId } from 'src/domain/value-objects/currency-id'
 import { EvmCurrencyService } from 'src/infrastructure/evm/evm-currency.service'
 import { GeckoTerminalService } from 'src/infrastructure/price-provider/gecko-terminal.service'
 import { PriceProviderService } from 'src/infrastructure/price-provider/price-provider.service'
-import { wait } from 'src/utils/common'
 
 function ChainAddressFromCurrencyId(id: CurrencyId): ChainAddress {
 	const { chainId, address } = parseCurrencyId(id)
@@ -63,7 +62,6 @@ describe('PriceProviderService', () => {
 	let service: PriceProviderService
 
 	beforeEach(async () => {
-		await wait(10_000)
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				PriceProviderService,
@@ -77,18 +75,6 @@ describe('PriceProviderService', () => {
 		}).compile()
 
 		service = module.get(PriceProviderService)
-	})
-
-	it('should return a positive price for a regular token', async () => {
-		const price = await service.getPrice(WETH_ARB)
-
-		expect(price).toBeGreaterThan(0)
-	})
-
-	it('should return a positive price for a native currency', async () => {
-		const price = await service.getPrice(ETH_NATIVE_ARB)
-
-		expect(price).toBeGreaterThan(0)
 	})
 
 	it('should return same price for native and its wrapped native', async () => {

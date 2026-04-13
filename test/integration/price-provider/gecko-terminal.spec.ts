@@ -1,5 +1,4 @@
 import { GeckoTerminalService } from 'src/infrastructure/price-provider/gecko-terminal.service'
-import { wait } from 'src/utils/common'
 
 const USDT_ETH = '0xdac17f958d2ee523a2206206994597c13d831ec7'
 const USDC_ETH = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
@@ -41,14 +40,11 @@ const OVER_30_TOKENS_ETH = [
 	'0x56072C95FAA701256059aa122697B133aDEd9279',
 ]
 
-const RATE_LIMIT_DELAY_MS = 10_000
-
 describe('GeckoTerminalService', () => {
 	let service: GeckoTerminalService
 
-	beforeEach(async () => {
+	beforeEach(() => {
 		service = new GeckoTerminalService()
-		await wait(RATE_LIMIT_DELAY_MS)
 	})
 
 	describe('getTokenPrice', () => {
