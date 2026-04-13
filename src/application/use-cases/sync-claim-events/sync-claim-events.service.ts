@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
 import { TicketPrizeRepository } from 'src/application/interfaces/repositories/ticket-prize.repository'
 import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
-import { TIER_BIASES } from 'src/application/interfaces/tokens'
+import { STAKE_TO_TIER_BIASES } from 'src/application/interfaces/tokens'
 import { CompletedRound } from 'src/domain/entities/round'
 import { resolvePrize } from 'src/domain/services/prize-utils'
 import { PurchaseAction } from 'src/domain/value-objects/actions'
@@ -16,8 +16,8 @@ export class SyncClaimEventsService extends SyncClaimEventsUseCase {
 		private readonly userRepository: UserRepository,
 		private readonly ticketPrizeRepository: TicketPrizeRepository,
 
-		@Inject(TIER_BIASES)
-		private readonly tierBiases: number[],
+		@Inject(STAKE_TO_TIER_BIASES)
+		private readonly stakeToBiases: Map<number, number[]>,
 	) {
 		super()
 	}
@@ -69,10 +69,12 @@ export class SyncClaimEventsService extends SyncClaimEventsUseCase {
 		if (!user) return null
 
 		const stakeCardCollections =
-			await this.ticketPrizeRepository.getStakeCardCollections(
+			await this.ticketPrizeRepository.getCardCollectionsByStake(
 				user.id,
 				round.stake.id,
 			)
+
+		const tierBiases = this.stakeToBiases.get(round.stake.id) ?? []
 
 		const prizes: TicketPrize[] = []
 
@@ -83,6 +85,7 @@ export class SyncClaimEventsService extends SyncClaimEventsUseCase {
 				ticketNumber,
 				round,
 				stakeCardCollections,
+				tierBiases,
 			)
 
 			const tierCollection = stakeCardCollections[prize.card.tier]

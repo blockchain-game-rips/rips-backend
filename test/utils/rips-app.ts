@@ -4,6 +4,7 @@ import { Test, TestingModuleBuilder } from '@nestjs/testing'
 import path from 'path'
 import { AppModule } from 'src/app.module'
 import { KmsService } from 'src/application/interfaces/kms.service'
+import { STAKE_TO_TIER_BIASES } from 'src/application/interfaces/tokens'
 import { EIP155 } from 'src/constants'
 import { Executor } from 'src/domain/entities/executor'
 import { EVM_CLIENT_CONFIG } from 'src/infrastructure/evm/evm-client/types'
@@ -32,6 +33,9 @@ import deployments from './state/deployments.json'
 
 @Module({})
 class NoopScheduleModule {}
+
+@Module({})
+class NoopConfigModule {}
 
 const KMS_MNEMONIC =
 	'spy record fury either collect ill pony monkey praise cool matter state'
@@ -81,6 +85,8 @@ export function useRipsApp(
 		})
 
 		process.env.KMS_MNEMONIC = KMS_MNEMONIC
+		//TODO: I need it only for ConfigModule.forRoot() in AppModule, figure out how to override this module
+		process.env.CONFIG_PATH = 'test/utils/config.yaml'
 
 		const testEvmClientConfig = {
 			rpcSettings: {
@@ -102,6 +108,13 @@ export function useRipsApp(
 			.useModule(MockIndexerModule)
 			.overrideProvider(RIPS_SC_ADDRESS)
 			.useValue(deployments.rips)
+			.overrideProvider(STAKE_TO_TIER_BIASES)
+			.useValue(
+				new Map([
+					['1', [2, 2, 2]],
+					['2', [1, 1, 1]],
+				]),
+			)
 
 		if (applyOverrides) {
 			builder = applyOverrides(builder)

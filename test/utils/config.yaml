@@ -1,0 +1,4 @@
+# yaml-language-server: $schema=./../../config/config-schema.json
+cardConfig:
+  stakesBiases:
+    "1": [2, 2, 2]

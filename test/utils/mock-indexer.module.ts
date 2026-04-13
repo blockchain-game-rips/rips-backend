@@ -11,17 +11,17 @@ export class MockRoundRepository extends RoundRepository {
 	}
 
 	async getCompletedRounds() {
-		return []
+		return Promise.resolve([])
 	}
 
 	async getNextClaimedRound() {
-		return this.nextClaimedRound
+		return Promise.resolve(this.nextClaimedRound)
 	}
 }
 
 class MockStakeRepository extends StakeRepository {
 	async getStakesWithOngoingRounds() {
-		return []
+		return Promise.resolve([])
 	}
 }
 

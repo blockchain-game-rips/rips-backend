@@ -8,8 +8,18 @@ import { getEnvSafe } from 'src/utils/common'
 import { parsePretty } from 'src/utils/zod'
 import z from 'zod'
 
+export const CARD_CONFIG_KEY = 'cardConfig'
+
+export const CardConfigSchema = z.object({
+	// stakeId (as string key in yaml) → array of biases, one per prize tier
+	stakesBiases: z.record(z.string(), z.array(z.number())),
+})
+
+export type CardConfig = z.infer<typeof CardConfigSchema>
+
 export const ConfigSchema = z.object({
 	[CHAIN_CLIENT_CONFIG_KEY]: ChainClientConfigSchema,
+	[CARD_CONFIG_KEY]: CardConfigSchema,
 })
 
 export function loadConfig() {

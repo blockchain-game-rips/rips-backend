@@ -82,7 +82,7 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 		})
 	}
 
-	async getStakeCardCollections(
+	async getCardCollectionsByStake(
 		userId: bigint,
 		stakeId: number,
 	): Promise<CardCollection[]> {
@@ -103,6 +103,22 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 				card: toCard(def),
 				count: def.userCards[0]?.quantity ?? 0,
 			})
+		}
+
+		return Array.from(tierMap.values())
+	}
+
+	async getCardDefinitionsByStake(stakeId: number): Promise<Card[][]> {
+		const cardDefinitions = await this.prisma.cardDefinition.findMany({
+			where: { stakeId },
+			orderBy: { tier: 'asc' },
+		})
+
+		const tierMap = new Map<number, Card[]>()
+
+		for (const def of cardDefinitions) {
+			if (!tierMap.has(def.tier)) tierMap.set(def.tier, [])
+			tierMap.get(def.tier)!.push(toCard(def))
 		}
 
 		return Array.from(tierMap.values())
