@@ -5,6 +5,7 @@ import path from 'path'
 import { AppModule } from 'src/app.module'
 import { KmsService } from 'src/application/interfaces/kms.service'
 import { STAKE_TO_TIER_BIASES } from 'src/application/interfaces/tokens'
+import { AppConfigModule } from 'src/configuration/app-config.module'
 import { EIP155 } from 'src/constants'
 import { Executor } from 'src/domain/entities/executor'
 import { EVM_CLIENT_CONFIG } from 'src/infrastructure/evm/evm-client/types'
@@ -30,6 +31,7 @@ import { Anvil, setNativeBalance, useAnvil } from './anvil'
 import { MockIndexerModule } from './mock-indexer.module'
 import { usePostgres } from './postgres'
 import deployments from './state/deployments.json'
+import { TestConfigModule } from './test-config.module'
 
 @Module({})
 class NoopScheduleModule {}
@@ -85,8 +87,6 @@ export function useRipsApp(
 		})
 
 		process.env.KMS_MNEMONIC = KMS_MNEMONIC
-		//TODO: I need it only for ConfigModule.forRoot() in AppModule, figure out how to override this module
-		process.env.CONFIG_PATH = 'test/utils/config.yaml'
 
 		const testEvmClientConfig = {
 			rpcSettings: {
@@ -98,6 +98,8 @@ export function useRipsApp(
 		}
 
 		let builder = Test.createTestingModule({ imports: [AppModule] })
+			.overrideModule(AppConfigModule)
+			.useModule(TestConfigModule)
 			.overrideModule(ScheduleModule)
 			.useModule(NoopScheduleModule)
 			.overrideProvider(KmsService)
