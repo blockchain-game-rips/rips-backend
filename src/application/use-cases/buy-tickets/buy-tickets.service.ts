@@ -17,7 +17,7 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 	}
 
 	async execute(input: BuyTicketsInput): Promise<Purchase> {
-		const { telegramId, stakeId, amount } = input
+		const { telegramId, stakeId, ticketCount } = input
 
 		const [user, availableStakes] = await Promise.all([
 			this.getUserUseCase.execute({ telegramId }),
@@ -38,10 +38,10 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 				? availableStake.fillingRound.config
 				: availableStake.stake.currentConfig
 
-		return this.ripsService.buyTickets(user.wallet, {
+		return await this.ripsService.buyTickets(user.wallet, {
 			stakeId: availableStake.stake.id,
 			config,
-			amount,
+			ticketCount,
 		})
 	}
 }

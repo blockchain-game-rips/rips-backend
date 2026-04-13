@@ -51,7 +51,7 @@ export class RipsController {
 		const purchase = await this.buyTicketsUseCase.execute({
 			telegramId,
 			stakeId: body.stakeId,
-			amount: body.amount,
+			ticketCount: body.ticketCount,
 		})
 
 		return toBuyTicketsResponseDto(purchase)

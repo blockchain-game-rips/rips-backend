@@ -4,7 +4,7 @@ import { TelegramId } from 'src/domain/value-objects/telegram-id'
 export type BuyTicketsInput = {
 	telegramId: TelegramId
 	stakeId: number
-	amount: number
+	ticketCount: number
 }
 
 export abstract class BuyTicketsUseCase {

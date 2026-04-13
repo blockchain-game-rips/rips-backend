@@ -232,20 +232,20 @@ describe('Reveal prizes flow E2E', () => {
 
 		const res1 = await request(ctx.app.getHttpServer())
 			.post(`/rips/users/${TELEGRAM_ID_USER_1}/buy-tickets`)
-			.send({ stakeId: STAKE_ID, amount: TICKETS_PER_USER })
+			.send({ stakeId: STAKE_ID, ticketCount: TICKETS_PER_USER })
 			.expect(201)
 
 		roundId = res1.body.roundId
 
-		expect(res1.body.ticketAmount).toBe(TICKETS_PER_USER)
+		expect(res1.body.ticketCount).toBe(TICKETS_PER_USER)
 
 		const res2 = await request(ctx.app.getHttpServer())
 			.post(`/rips/users/${TELEGRAM_ID_USER_2}/buy-tickets`)
-			.send({ stakeId: STAKE_ID, amount: TICKETS_PER_USER })
+			.send({ stakeId: STAKE_ID, ticketCount: TICKETS_PER_USER })
 			.expect(201)
 
 		expect(res2.body.roundId).toBe(roundId)
-		expect(res2.body.ticketAmount).toBe(TICKETS_PER_USER)
+		expect(res2.body.ticketCount).toBe(TICKETS_PER_USER)
 	})
 
 	it('keeper requests VRF on the sealed round', async () => {

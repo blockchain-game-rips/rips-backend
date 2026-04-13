@@ -25,6 +25,6 @@ export abstract class RipsService {
 
 	abstract buyTickets(
 		wallet: Wallet,
-		args: { stakeId: number; config: Config; amount: number },
+		args: { stakeId: number; config: Config; ticketCount: number },
 	): Promise<Purchase>
 }

@@ -13,7 +13,7 @@ export type BuyTicketsResponseDto = {
 		amount: string
 	}
 	roundId: number
-	ticketAmount: number
+	ticketCount: number
 }
 
 export function toBuyTicketsResponseDto(
@@ -30,7 +30,7 @@ export function toBuyTicketsResponseDto(
 			},
 			amount: purchase.transaction.cost.amount.toString(),
 		},
-		roundId: purchase.ticketAmount.roundId,
-		ticketAmount: purchase.ticketAmount.amount,
+		roundId: purchase.roundId,
+		ticketCount: purchase.ticketCount,
 	}
 }

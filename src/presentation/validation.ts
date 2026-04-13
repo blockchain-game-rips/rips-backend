@@ -33,7 +33,7 @@ export const withdrawBodySchema = z.object({
 
 export const buyTicketsBodySchema = z.object({
 	stakeId: z.number().int().positive(),
-	amount: z.number().int().positive(),
+	ticketCount: z.number().int().positive(),
 })
 
 export const completedRoundsQuerySchema = z.object({

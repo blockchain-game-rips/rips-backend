@@ -108,23 +108,23 @@ export class RipsServiceIpml implements RipsService {
 
 	async buyTickets(
 		wallet: Wallet,
-		args: { stakeId: number; config: Config; amount: number },
+		args: { stakeId: number; config: Config; ticketCount: number },
 	): Promise<Purchase> {
 		const evmCurrency = this.requireEvmCurrency()
 
-		const { stakeId, config, amount } = args
+		const { stakeId, config, ticketCount } = args
 
 		const chainId = Number(evmCurrency.chainAddress.chain.reference)
 		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
 
-		const totalValue = config.ticketPrice.amount * BigInt(amount)
+		const totalValue = config.ticketPrice.amount * BigInt(ticketCount)
 
 		const request: TransactionRequestEIP1559 = {
 			to: this.contractAddress,
 			data: encodeFunctionData({
 				abi: ripsAbi,
 				functionName: 'buyTickets',
-				args: [BigInt(stakeId), BigInt(amount), userAddress],
+				args: [BigInt(stakeId), BigInt(ticketCount), userAddress],
 			}),
 			value: totalValue,
 		}
@@ -157,10 +157,8 @@ export class RipsServiceIpml implements RipsService {
 
 		return {
 			transaction,
-			ticketAmount: {
-				roundId: Number(ticketsPurchasedLog.args.roundId),
-				amount: Number(ticketsPurchasedLog.args.ticketCount),
-			},
+			roundId: Number(ticketsPurchasedLog.args.roundId),
+			ticketCount: Number(ticketsPurchasedLog.args.ticketCount),
 		}
 	}
 

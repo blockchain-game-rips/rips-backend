@@ -6,7 +6,7 @@ import { useRipsApp } from '../utils/rips-app'
 
 const STAKE_ID = 1
 const TICKET_COST = parseEther('0.005')
-const TICKET_AMOUNT = 2
+const TICKET_COUNT = 2
 
 const USER_TG_ID = '999888777'
 
@@ -59,18 +59,18 @@ describe('Buy tickets E2E', () => {
 			.expect(200)
 
 		const walletAddress = userRes.body.wallets['eip155']
-		const requiredBalance = TICKET_COST * BigInt(TICKET_AMOUNT) * 2n
+		const requiredBalance = TICKET_COST * BigInt(TICKET_COUNT) * 2n
 
 		await setNativeBalance(ctx.publicClient, walletAddress, requiredBalance)
 
 		const res = await request(ctx.app.getHttpServer())
 			.post(`/rips/users/${USER_TG_ID}/buy-tickets`)
-			.send({ stakeId: STAKE_ID, amount: TICKET_AMOUNT })
+			.send({ stakeId: STAKE_ID, ticketCount: TICKET_COUNT })
 			.expect(201)
 
 		expect(res.body.txId).toMatch(/^0x[0-9a-fA-F]{64}$/)
 		expect(res.body.roundId).toBeGreaterThan(0)
-		expect(res.body.ticketAmount).toBe(TICKET_AMOUNT)
+		expect(res.body.ticketCount).toBe(TICKET_COUNT)
 		expect(typeof res.body.cost.amount).toBe('string')
 	})
 })
