@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
 import { TicketPrizeRepository } from 'src/application/interfaces/repositories/ticket-prize.repository'
 import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
+import { TIER_BIASES } from 'src/application/interfaces/tokens'
 import { CompletedRound } from 'src/domain/entities/round'
 import { resolvePrize } from 'src/domain/services/prize-utils'
 import { PurchaseAction } from 'src/domain/value-objects/actions'
@@ -14,6 +15,9 @@ export class SyncClaimEventsService extends SyncClaimEventsUseCase {
 		private readonly roundRepository: RoundRepository,
 		private readonly userRepository: UserRepository,
 		private readonly ticketPrizeRepository: TicketPrizeRepository,
+
+		@Inject(TIER_BIASES)
+		private readonly tierBiases: number[],
 	) {
 		super()
 	}

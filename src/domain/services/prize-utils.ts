@@ -4,11 +4,11 @@ import { Card } from '../value-objects/card'
 import { CardCollection } from '../value-objects/card-collection'
 import { TicketPrize } from '../value-objects/ticket-prize'
 
-//TODO: test against smart contract calling
 export function resolvePrize(
 	ticketNumber: number,
 	round: Round & { randoms: NonNullable<Round['randoms']> },
 	stakeCardCollections: CardCollection[],
+	tierBiases: number[],
 ): TicketPrize {
 	const { a, b } = round.randoms
 	const { ticketCup, prizeDistribution } = round.config
@@ -16,11 +16,15 @@ export function resolvePrize(
 	const n = BigInt(ticketCup)
 	const prizeNumber = ((a * BigInt(ticketNumber) + b) % n) + 1n
 
-	const { tierIndex, rank } = resolveTier(prizeNumber, prizeDistribution)
-	const prizeAmount = resolvePrizeInTier(prizeDistribution[tierIndex], rank)
+	const { tierIndex, prizeAmount } = resolveOnchainPrize(
+		prizeNumber,
+		prizeDistribution,
+	)
 
-	// TODO: implement weighted card selection based on user's existing collection
-	const card = resolveRandomCard(stakeCardCollections[tierIndex])
+	const card = resolveRandomCard(
+		stakeCardCollections[tierIndex],
+		tierBiases[tierIndex],
+	)
 
 	return {
 		roundId: round.id,
@@ -29,6 +33,19 @@ export function resolvePrize(
 		revealed: false,
 		card,
 	}
+}
+
+export function resolveOnchainPrize(
+	prizeNumber: bigint,
+	prizeDistribution: PrizeTier[],
+): {
+	tierIndex: number
+	prizeAmount: bigint
+} {
+	const { tierIndex, rank } = resolveTier(prizeNumber, prizeDistribution)
+	const prizeAmount = resolvePrizeInTier(prizeDistribution[tierIndex], rank)
+
+	return { tierIndex, prizeAmount }
 }
 
 function resolveTier(
@@ -50,7 +67,10 @@ function resolveTier(
 	throw new Error(`Prize number ${prizeNumber} exceeded all tier boundaries`)
 }
 
-function resolveRandomCard(collection: CardCollection): Card {
+export function resolveRandomCard(
+	collection: CardCollection,
+	tierBias: number,
+): Card {
 	const index = Math.floor(Math.random() * collection.length)
 	return collection[index].card
 }
