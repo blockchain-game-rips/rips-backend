@@ -1,0 +1,475 @@
+import path from 'path'
+import { resolvePrize } from 'src/domain/services/prize-utils'
+import { CardCollection } from 'src/domain/value-objects/card-collection'
+import { ripsAbi } from 'src/infrastructure/rips/rips-abi'
+import {
+	Chain,
+	createPublicClient,
+	createWalletClient,
+	defineChain,
+	http,
+	HttpTransport,
+	parseEther,
+	parseEventLogs,
+	WalletClient,
+	zeroAddress,
+	type Address,
+	type PublicClient,
+	type TransactionReceipt,
+} from 'viem'
+import { Account, privateKeyToAccount } from 'viem/accounts'
+import { getBalances, useAnvil, waitForReceipt } from '../../utils/anvil'
+import deployments from '../../utils/state/deployments.json'
+import { vrfCoordinatorAbi } from '../../utils/vrf-coordinator-abi'
+
+const CHAIN_ID = 8453
+const CHAIN = defineChain({
+	id: CHAIN_ID,
+	name: 'Base',
+	nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+	rpcUrls: { default: { http: [] } },
+})
+
+const RIPS_ADDRESS = deployments.rips as Address
+const VRF_COORDINATOR_ADDRESS = deployments.vrfCoordinator as Address
+const ANVIL_STATE_PATH = path.resolve(
+	__dirname,
+	'../../utils/state/anvil-state.json',
+)
+
+const STAKE_ID = 1n
+const TICKET_COST = parseEther('0.005')
+const USER_1_TICKET_COUNT = 6n
+const USER_2_TICKET_COUNT = 2n
+
+// Anvil default accounts
+const KEEPER_PRIVATE_KEY =
+	'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+const USER_1_PRIVATE_KEY =
+	'0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
+const USER_2_PRIVATE_KEY =
+	'0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
+
+const PRIZE_DISTRIBUTION = [
+	{
+		prizeCount: 5n,
+		minPrize: parseEther('0.0008'),
+		maxPrize: parseEther('0.0012'),
+	},
+	{
+		prizeCount: 2n,
+		minPrize: parseEther('0.007'),
+		maxPrize: parseEther('0.008'),
+	},
+	{
+		prizeCount: 1n,
+		minPrize: parseEther('0.018'),
+		maxPrize: parseEther('0.018'),
+	},
+]
+
+const STUB_CARD: CardCollection = [
+	{ card: { id: 1, name: 'Stub', tier: 1, imageUrl: '' }, count: 1 },
+]
+const STUB_COLLECTIONS: CardCollection[] = [STUB_CARD, STUB_CARD, STUB_CARD]
+
+describe('prize-utils: resolvePrize matches on-chain balance diff', () => {
+	const { anvils } = useAnvil({
+		chainId: CHAIN_ID,
+		pathToState: ANVIL_STATE_PATH,
+	})
+
+	let publicClient: PublicClient<HttpTransport, Chain>
+	let user1Address: Address
+	let user2Address: Address
+	let randomA: bigint
+	let randomB: bigint
+	let user1BalanceBefore: bigint
+	let user2BalanceBefore: bigint
+
+	beforeAll(() => {
+		const rpcUrl = `http://127.0.0.1:${anvils[0].port}`
+		publicClient = createPublicClient({ transport: http(rpcUrl) })
+	})
+
+	function makeWallet(
+		privateKey: `0x${string}`,
+	): WalletClient<HttpTransport, Chain, Account> {
+		const rpcUrl = `http://127.0.0.1:${anvils[0].port}`
+		return createWalletClient({
+			account: privateKeyToAccount(privateKey),
+			chain: CHAIN,
+			transport: http(rpcUrl),
+		})
+	}
+
+	describe('given users bought tickets, VRF fulfilled, and prizes claimed', () => {
+		beforeAll(async () => {
+			const user1Wallet = makeWallet(USER_1_PRIVATE_KEY)
+			const user2Wallet = makeWallet(USER_2_PRIVATE_KEY)
+			const keeperWallet = makeWallet(KEEPER_PRIVATE_KEY)
+
+			const roundId = 1n
+
+			user1Address = user1Wallet.account.address
+			user2Address = user2Wallet.account.address
+
+			await buyTickets(
+				user1Wallet,
+				user1Address,
+				USER_1_TICKET_COUNT,
+				publicClient,
+			)
+			await buyTickets(
+				user2Wallet,
+				user2Address,
+				USER_2_TICKET_COUNT,
+				publicClient,
+			)
+
+			const vrfReceipt = await waitForReceipt(
+				keeperWallet.writeContract({
+					address: RIPS_ADDRESS,
+					abi: ripsAbi,
+					functionName: 'requestRandomness',
+					args: [roundId],
+				}),
+				publicClient,
+			)
+
+			const [randomnessLog] = parseEventLogs({
+				abi: ripsAbi,
+				eventName: 'RandomnessRequested',
+				logs: vrfReceipt.logs,
+			})
+
+			const fulfillReceipt = await waitForReceipt(
+				await keeperWallet.writeContract({
+					address: VRF_COORDINATOR_ADDRESS,
+					abi: vrfCoordinatorAbi,
+					functionName: 'fulfillRandomWords',
+					args: [randomnessLog.args.vrfRequestId, RIPS_ADDRESS],
+				}),
+				publicClient,
+			)
+
+			const randoms = parseRandomnessFulfilled(fulfillReceipt.logs)
+			randomA = randoms.randomA
+			randomB = randoms.randomB
+
+			const balances = await getBalances(
+				[user1Address, user2Address],
+				publicClient,
+			)
+			user1BalanceBefore = balances[0]
+			user2BalanceBefore = balances[1]
+
+			await claimPrizes(keeperWallet, roundId, user1Address, publicClient)
+			await claimPrizes(keeperWallet, roundId, user2Address, publicClient)
+		})
+
+		it('balance diff equals sum of resolvePrize for each user', async () => {
+			const [user1BalanceAfter, user2BalanceAfter] = await getBalances(
+				[user1Address, user2Address],
+				publicClient,
+			)
+
+			const randoms = { a: randomA, b: randomB }
+
+			const user1ExpectedPrize = sumPrizes(
+				USER_1_TICKET_COUNT,
+				0n,
+				randoms,
+			)
+			const user2ExpectedPrize = sumPrizes(
+				USER_2_TICKET_COUNT,
+				USER_1_TICKET_COUNT,
+				randoms,
+			)
+
+			expect(user1BalanceAfter - user1BalanceBefore).toBe(
+				user1ExpectedPrize,
+			)
+			expect(user2BalanceAfter - user2BalanceBefore).toBe(
+				user2ExpectedPrize,
+			)
+		})
+	})
+
+	describe('fuzz: resolvePrize matches on-chain calculateTicketPrize', () => {
+		const FUZZ_N = 1024n
+		const FUZZ_ITERATIONS = 100
+
+		const FUZZ_PRIZE_DISTRIBUTION = [
+			{
+				prizeCount: 500n,
+				minPrize: parseEther('0.0001'),
+				maxPrize: parseEther('0.0005'),
+			},
+			{
+				prizeCount: 250n,
+				minPrize: parseEther('0.001'),
+				maxPrize: parseEther('0.002'),
+			},
+			{
+				prizeCount: 150n,
+				minPrize: parseEther('0.005'),
+				maxPrize: parseEther('0.008'),
+			},
+			{
+				prizeCount: 75n,
+				minPrize: parseEther('0.01'),
+				maxPrize: parseEther('0.015'),
+			},
+			{
+				prizeCount: 35n,
+				minPrize: parseEther('0.03'),
+				maxPrize: parseEther('0.05'),
+			},
+			{
+				prizeCount: 10n,
+				minPrize: parseEther('0.1'),
+				maxPrize: parseEther('0.15'),
+			},
+			{
+				prizeCount: 4n,
+				minPrize: parseEther('0.5'),
+				maxPrize: parseEther('1.0'),
+			},
+		]
+
+		const FUZZ_TIER_BOUNDARIES: bigint[] = FUZZ_PRIZE_DISTRIBUTION.reduce<
+			bigint[]
+		>((acc, tier) => [...acc, (acc.at(-1) ?? 0n) + tier.prizeCount], [])
+
+		const FUZZ_COLLECTIONS: CardCollection[] = FUZZ_PRIZE_DISTRIBUTION.map(
+			(_, i) => [
+				{
+					card: {
+						id: i + 1,
+						name: `Tier ${i}`,
+						tier: i,
+						imageUrl: '',
+					},
+					count: 1,
+				},
+			],
+		)
+
+		const harnessAbi = [
+			{
+				type: 'function',
+				name: 'exposed_calculateTicketPrize',
+				inputs: [
+					{
+						name: 'ticketNumber',
+						type: 'uint256',
+						internalType: 'uint256',
+					},
+					{ name: 'a', type: 'uint64', internalType: 'uint64' },
+					{ name: 'b', type: 'uint64', internalType: 'uint64' },
+					{ name: 'n', type: 'uint64', internalType: 'uint64' },
+					{
+						name: 'tiers',
+						type: 'tuple[]',
+						internalType: 'struct IRips.PrizeTier[]',
+						components: [
+							{
+								name: 'prizeCount',
+								type: 'uint64',
+								internalType: 'uint64',
+							},
+							{
+								name: 'minPrize',
+								type: 'uint128',
+								internalType: 'uint128',
+							},
+							{
+								name: 'maxPrize',
+								type: 'uint128',
+								internalType: 'uint128',
+							},
+						],
+					},
+					{
+						name: 'tierBoundaries',
+						type: 'uint64[]',
+						internalType: 'uint64[]',
+					},
+				],
+				outputs: [
+					{ name: '', type: 'uint256', internalType: 'uint256' },
+				],
+				stateMutability: 'pure',
+			},
+		] as const
+
+		it('prizeAmount and tier card match on-chain for random inputs', async () => {
+			const round = {
+				id: 1,
+				stake: {} as never,
+				currency: {} as never,
+				actions: {} as never,
+				status: {} as never,
+				startTime: new Date(),
+				config: {
+					id: 1,
+					ticketCup: Number(FUZZ_N),
+					feePercent: 0,
+					ticketPrice: { currency: {} as never, amount: 0n },
+					durationSeconds: 0,
+					prizeDistribution: FUZZ_PRIZE_DISTRIBUTION,
+				},
+				randoms: { a: 0n, b: 0n },
+			}
+
+			for (let i = 0; i < FUZZ_ITERATIONS; i++) {
+				const a = randomOddBigInt64()
+				const b = randomBigInt64()
+				const ticketNumber = randomBigIntInRange(1n, FUZZ_N)
+
+				round.randoms = { a, b }
+
+				const tsPrize = resolvePrize(
+					Number(ticketNumber),
+					round,
+					FUZZ_COLLECTIONS,
+				)
+
+				const onChainPrize = await publicClient.readContract({
+					address: RIPS_ADDRESS,
+					abi: harnessAbi,
+					functionName: 'exposed_calculateTicketPrize',
+					args: [
+						ticketNumber,
+						a,
+						b,
+						FUZZ_N,
+						FUZZ_PRIZE_DISTRIBUTION,
+						FUZZ_TIER_BOUNDARIES,
+					],
+				})
+
+				const prizeNumber = ((a * ticketNumber + b) % FUZZ_N) + 1n
+				const expectedTierIndex = FUZZ_TIER_BOUNDARIES.findIndex(
+					(boundary) => prizeNumber <= boundary,
+				)
+
+				const actualTierIndex = FUZZ_COLLECTIONS.findIndex(
+					(col) => col[0].card.id === tsPrize.card.id,
+				)
+
+				const msg = `a=${a} b=${b} ticketNumber=${ticketNumber}`
+
+				if (tsPrize.prizeAmount !== onChainPrize) {
+					throw new Error(
+						`${msg}: prizeAmount ts=${tsPrize.prizeAmount} onChain=${onChainPrize}`,
+					)
+				}
+
+				if (actualTierIndex !== expectedTierIndex) {
+					throw new Error(
+						`${msg}: tier actual=${actualTierIndex} expected=${expectedTierIndex}`,
+					)
+				}
+			}
+		})
+	})
+})
+
+type Wallet = WalletClient<HttpTransport, Chain, Account>
+
+async function buyTickets(
+	wallet: Wallet,
+	recipient: Address,
+	ticketCount: bigint,
+	publicClient: PublicClient<HttpTransport, Chain>,
+): Promise<void> {
+	await waitForReceipt(
+		wallet.writeContract({
+			address: RIPS_ADDRESS,
+			abi: ripsAbi,
+			functionName: 'buyTickets',
+			args: [STAKE_ID, ticketCount, recipient],
+			value: TICKET_COST * ticketCount,
+		}),
+		publicClient,
+	)
+}
+
+async function claimPrizes(
+	wallet: Wallet,
+	roundId: bigint,
+	recipient: Address,
+	publicClient: PublicClient<HttpTransport, Chain>,
+): Promise<void> {
+	await waitForReceipt(
+		wallet.writeContract({
+			address: RIPS_ADDRESS,
+			abi: ripsAbi,
+			functionName: 'claimPrizes',
+			args: [roundId, 0n, 100n, recipient, zeroAddress],
+		}),
+		publicClient,
+	)
+}
+
+function sumPrizes(
+	ticketCount: bigint,
+	startTicketIndex: bigint,
+	randoms: { a: bigint; b: bigint },
+): bigint {
+	const round = {
+		id: 1,
+		stake: {} as never,
+		currency: {} as never,
+		actions: {} as never,
+		status: {} as never,
+		startTime: new Date(),
+		config: {
+			id: 1,
+			ticketCup: 8,
+			feePercent: 0,
+			ticketPrice: { currency: {} as never, amount: TICKET_COST },
+			durationSeconds: 300,
+			prizeDistribution: PRIZE_DISTRIBUTION,
+		},
+		randoms,
+	}
+
+	let total = 0n
+
+	for (let i = 0n; i < ticketCount; i++) {
+		const ticketNumber = Number(startTicketIndex + i) + 1
+		total += resolvePrize(ticketNumber, round, STUB_COLLECTIONS).prizeAmount
+	}
+
+	return total
+}
+
+const MAX_UINT64 = 2n ** 64n - 1n
+
+function randomBigInt64(): bigint {
+	return BigInt(Math.floor(Math.random() * Number(MAX_UINT64)))
+}
+
+function randomOddBigInt64(): bigint {
+	const n = randomBigInt64()
+	return n % 2n === 0n ? n + 1n : n
+}
+
+function randomBigIntInRange(min: bigint, max: bigint): bigint {
+	return min + BigInt(Math.floor(Math.random() * Number(max - min + 1n)))
+}
+
+function parseRandomnessFulfilled(logs: TransactionReceipt['logs']): {
+	randomA: bigint
+	randomB: bigint
+} {
+	const [log] = parseEventLogs({
+		abi: ripsAbi,
+		eventName: 'RandomnessFulfilled',
+		logs,
+	})
+	return { randomA: log.args.randomA, randomB: log.args.randomB }
+}

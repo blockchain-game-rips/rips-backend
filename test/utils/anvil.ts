@@ -1,6 +1,14 @@
 import { ChildProcess, exec } from 'child_process'
 import getPort from 'get-port'
-import { Chain, Client, defineChain, toHex } from 'viem'
+import {
+	Chain,
+	Client,
+	defineChain,
+	Hash,
+	HttpTransport,
+	PublicClient,
+	toHex,
+} from 'viem'
 import { Address } from 'viem/accounts'
 import * as chains from 'viem/chains'
 import { AnvilConfig, ParamsUseAnvil } from './types'
@@ -257,4 +265,35 @@ export async function increaseTime(client: Client, seconds: number) {
 		method: 'evm_mine',
 		params: [],
 	})
+}
+
+export async function getBalances(
+	users: Address[],
+	publicClient: PublicClient<HttpTransport, Chain>,
+): Promise<bigint[]> {
+	const balances: bigint[] = []
+
+	for (const user of users) {
+		balances.push(await publicClient.getBalance({ address: user }))
+	}
+
+	return balances
+}
+
+export async function waitForReceipt(
+	hash: Hash | Promise<Hash>,
+	client: PublicClient,
+) {
+	const awaitedHash = await hash
+
+	const receipt = await client.waitForTransactionReceipt({
+		hash: awaitedHash,
+	})
+
+	if (receipt.status === 'reverted') {
+		console.log('tx reverted, receipt:', receipt)
+		throw new Error('Tx reverted')
+	}
+
+	return receipt
 }

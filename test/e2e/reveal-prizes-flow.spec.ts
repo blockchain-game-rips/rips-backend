@@ -17,19 +17,16 @@ import { SeedCardDefinitionsService } from 'src/infrastructure/seed/seed-card-de
 import { SeedModule } from 'src/infrastructure/seed/seed.module'
 import request from 'supertest'
 import {
-	Chain,
 	createWalletClient,
 	getAddress,
 	http,
-	HttpTransport,
 	parseEther,
 	parseEventLogs,
 	type Address,
-	type PublicClient,
 	type TransactionReceipt,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { setNativeBalance } from '../utils/anvil'
+import { getBalances, setNativeBalance } from '../utils/anvil'
 import {
 	MockIndexerModule,
 	MockRoundRepository,
@@ -464,17 +461,4 @@ function parseRandomnessFulfilled(logs: TransactionReceipt['logs']): {
 		logs,
 	})
 	return { randomA: log.args.randomA, randomB: log.args.randomB }
-}
-
-async function getBalances(
-	users: Address[],
-	publicClient: PublicClient<HttpTransport, Chain>,
-): Promise<bigint[]> {
-	const balances: bigint[] = []
-
-	for (const user of users) {
-		balances.push(await publicClient.getBalance({ address: user }))
-	}
-
-	return balances
 }
