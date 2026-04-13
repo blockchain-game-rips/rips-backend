@@ -34,6 +34,7 @@ export class CreateUserService extends CreateUserUseCase {
 			input.telegramId,
 			evmAddress,
 			kmsKeyId,
+			input.referrerAddress,
 		)
 	}
 }

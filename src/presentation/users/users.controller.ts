@@ -72,6 +72,7 @@ export class UsersController {
 	): Promise<UserResponseDto> {
 		const user = await this.createUserUseCase.execute({
 			telegramId: body.telegramId,
+			referrerAddress: body.referrerAddress,
 		})
 
 		return toUserResponseDto(user)

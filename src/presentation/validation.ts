@@ -16,6 +16,11 @@ export const createUserBodySchema = z.object({
 	telegramId: z
 		.union([z.string(), z.number()])
 		.transform((v) => toTelegramId(BigInt(v))),
+	referrerAddress: z
+		.string()
+		.regex(EVM_ADDRESS_REGEX)
+		.nullable()
+		.default(null),
 })
 
 export const withdrawBodySchema = z.object({

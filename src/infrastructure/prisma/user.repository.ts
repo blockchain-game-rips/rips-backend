@@ -40,10 +40,12 @@ export class PrismaUserRepository extends UserRepository {
 		telegramId: TelegramId,
 		address: Address,
 		kmsKeyId: KmsKeyId,
+		referrerAddress: string | null,
 	): Promise<User> {
 		const record = await this.prisma.user.create({
 			data: {
 				telegramId,
+				referrerAddress,
 				evmWallet: { create: { address, kmsKeyId } },
 			},
 			include: { evmWallet: true },

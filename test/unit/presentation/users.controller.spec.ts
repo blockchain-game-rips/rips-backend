@@ -93,6 +93,7 @@ describe('UsersController', () => {
 
 			const result = await controller.createUser({
 				telegramId: TELEGRAM_ID,
+				referrerAddress: null,
 			})
 
 			expect(result).toEqual({
@@ -108,7 +109,10 @@ describe('UsersController', () => {
 			)
 
 			await expect(
-				controller.createUser({ telegramId: TELEGRAM_ID }),
+				controller.createUser({
+					telegramId: TELEGRAM_ID,
+					referrerAddress: null,
+				}),
 			).rejects.toThrow(UserAlreadyExistsError)
 		})
 	})

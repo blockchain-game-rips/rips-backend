@@ -54,13 +54,17 @@ describe('CreateUserService', () => {
 		repo.findByTelegramId.mockResolvedValue(null)
 		repo.create.mockResolvedValue(MOCK_USER)
 
-		const result = await service.execute({ telegramId: TELEGRAM_ID })
+		const result = await service.execute({
+			telegramId: TELEGRAM_ID,
+			referrerAddress: null,
+		})
 
 		expect(kms.createEvmKey).toHaveBeenCalledTimes(1)
 		expect(repo.create).toHaveBeenCalledWith(
 			TELEGRAM_ID,
 			EVM_ADDRESS,
 			KMS_KEY_ID,
+			null,
 		)
 		expect(result).toEqual(MOCK_USER)
 	})
@@ -69,7 +73,7 @@ describe('CreateUserService', () => {
 		repo.findByTelegramId.mockResolvedValue(MOCK_USER)
 
 		await expect(
-			service.execute({ telegramId: TELEGRAM_ID }),
+			service.execute({ telegramId: TELEGRAM_ID, referrerAddress: null }),
 		).rejects.toThrow(UserAlreadyExistsError)
 
 		expect(kms.createEvmKey).not.toHaveBeenCalled()
