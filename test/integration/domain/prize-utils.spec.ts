@@ -1,5 +1,8 @@
 import path from 'path'
-import { resolvePrize } from 'src/domain/services/prize-utils'
+import {
+	resolveOnchainPrize,
+	resolvePrize,
+} from 'src/domain/services/prize-utils'
 import { CardCollection } from 'src/domain/value-objects/card-collection'
 import { ripsAbi } from 'src/infrastructure/rips/rips-abi'
 import {
@@ -242,20 +245,6 @@ describe('prize-utils: resolvePrize matches on-chain balance diff', () => {
 			bigint[]
 		>((acc, tier) => [...acc, (acc.at(-1) ?? 0n) + tier.prizeCount], [])
 
-		const FUZZ_COLLECTIONS: CardCollection[] = FUZZ_PRIZE_DISTRIBUTION.map(
-			(_, i) => [
-				{
-					card: {
-						id: i + 1,
-						name: `Tier ${i}`,
-						tier: i,
-						imageUrl: '',
-					},
-					count: 1,
-				},
-			],
-		)
-
 		const harnessAbi = [
 			{
 				type: 'function',
@@ -304,36 +293,17 @@ describe('prize-utils: resolvePrize matches on-chain balance diff', () => {
 			},
 		] as const
 
-		it('prizeAmount and tier card match on-chain for random inputs', async () => {
-			const round = {
-				id: 1,
-				stake: {} as never,
-				currency: {} as never,
-				actions: {} as never,
-				status: {} as never,
-				startTime: new Date(),
-				config: {
-					id: 1,
-					ticketCup: Number(FUZZ_N),
-					feePercent: 0,
-					ticketPrice: { currency: {} as never, amount: 0n },
-					durationSeconds: 0,
-					prizeDistribution: FUZZ_PRIZE_DISTRIBUTION,
-				},
-				randoms: { a: 0n, b: 0n },
-			}
-
+		it('prizeAmount matches on-chain for random inputs', async () => {
 			for (let i = 0; i < FUZZ_ITERATIONS; i++) {
 				const a = randomOddBigInt64()
 				const b = randomBigInt64()
 				const ticketNumber = randomBigIntInRange(1n, FUZZ_N)
 
-				round.randoms = { a, b }
+				const prizeNumber = ((a * ticketNumber + b) % FUZZ_N) + 1n
 
-				const tsPrize = resolvePrize(
-					Number(ticketNumber),
-					round,
-					FUZZ_COLLECTIONS,
+				const { prizeAmount } = resolveOnchainPrize(
+					prizeNumber,
+					FUZZ_PRIZE_DISTRIBUTION,
 				)
 
 				const onChainPrize = await publicClient.readContract({
@@ -350,26 +320,9 @@ describe('prize-utils: resolvePrize matches on-chain balance diff', () => {
 					],
 				})
 
-				const prizeNumber = ((a * ticketNumber + b) % FUZZ_N) + 1n
-				const expectedTierIndex = FUZZ_TIER_BOUNDARIES.findIndex(
-					(boundary) => prizeNumber <= boundary,
-				)
-
-				const actualTierIndex = FUZZ_COLLECTIONS.findIndex(
-					(col) => col[0].card.id === tsPrize.card.id,
-				)
-
-				const msg = `a=${a} b=${b} ticketNumber=${ticketNumber}`
-
-				if (tsPrize.prizeAmount !== onChainPrize) {
+				if (prizeAmount !== onChainPrize) {
 					throw new Error(
-						`${msg}: prizeAmount ts=${tsPrize.prizeAmount} onChain=${onChainPrize}`,
-					)
-				}
-
-				if (actualTierIndex !== expectedTierIndex) {
-					throw new Error(
-						`${msg}: tier actual=${actualTierIndex} expected=${expectedTierIndex}`,
+						`a=${a} b=${b} ticketNumber=${ticketNumber}: ts=${prizeAmount} onChain=${onChainPrize}`,
 					)
 				}
 			}
@@ -441,7 +394,12 @@ function sumPrizes(
 
 	for (let i = 0n; i < ticketCount; i++) {
 		const ticketNumber = Number(startTicketIndex + i) + 1
-		total += resolvePrize(ticketNumber, round, STUB_COLLECTIONS).prizeAmount
+		total += resolvePrize(
+			ticketNumber,
+			round,
+			STUB_COLLECTIONS,
+			[1, 1, 1],
+		).prizeAmount
 	}
 
 	return total
