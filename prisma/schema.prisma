@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-    id           BigInt        @id @default(autoincrement())
-    telegramId   BigInt        @unique @map("telegram_id")
-    createdAt    DateTime      @default(now()) @map("created_at")
-    evmWallet    EvmWallet?
-    ticketPrizes TicketPrize[]
-    userCards    UserCard[]
+    id              BigInt        @id @default(autoincrement())
+    telegramId      BigInt        @unique @map("telegram_id")
+    referrerAddress String?       @map("referrer_address")
+    createdAt       DateTime      @default(now()) @map("created_at")
+    evmWallet       EvmWallet?
+    ticketPrizes    TicketPrize[]
+    userCards       UserCard[]
 
     @@map("users")
 }

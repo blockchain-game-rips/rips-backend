@@ -12,4 +12,6 @@ export abstract class UserRepository {
 		address: string,
 		kmsKeyId: KmsKeyId,
 	): Promise<User>
+
+	abstract setReferrer(userId: bigint, referrerAddress: string): Promise<User>
 }

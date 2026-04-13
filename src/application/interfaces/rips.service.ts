@@ -6,7 +6,11 @@ import { Wallet } from 'src/domain/value-objects/wallet'
 export abstract class RipsService {
 	abstract claim(
 		wallet: Wallet,
-		args: { roundId: number; userAddress: string },
+		args: {
+			roundId: number
+			userAddress: string
+			referrerAddress: string | null
+		},
 	): Promise<Transaction>
 
 	abstract refund(

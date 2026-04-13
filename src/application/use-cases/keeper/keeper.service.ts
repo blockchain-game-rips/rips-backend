@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { ExecutorRepository } from 'src/application/interfaces/repositories/executor.repository'
+import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
 import { RipsService } from 'src/application/interfaces/rips.service'
 import { Executor } from 'src/domain/entities/executor'
 import { OngoingRound, Round, RoundStatus } from 'src/domain/entities/round'
@@ -16,6 +17,7 @@ export class KeeperService extends KeeperUseCase {
 	constructor(
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly executorRepository: ExecutorRepository,
+		private readonly userRepository: UserRepository,
 		private readonly ripsService: RipsService,
 	) {
 		super()
@@ -115,9 +117,14 @@ export class KeeperService extends KeeperUseCase {
 		for (const purchase of round.actions.purchases) {
 			if (uniqueClaimedAddresses.has(purchase.userAddress)) continue
 
+			const user = await this.userRepository.findByEvmAddress(
+				purchase.userAddress,
+			)
+
 			await this.ripsService.claim(executor.wallet, {
 				roundId: round.id,
 				userAddress: purchase.userAddress,
+				referrerAddress: user?.referrerAddress ?? null,
 			})
 		}
 	}

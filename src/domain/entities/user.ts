@@ -5,5 +5,6 @@ export type User = {
 	id: bigint
 	telegramProfile: TelegramProfile
 	wallet: UserWallet
+	referrerAddress: string | null
 	createdAt: Date
 }

@@ -19,6 +19,7 @@ const MOCK_USER: User = {
 	id: 1n,
 	telegramProfile: { telegramId: TELEGRAM_ID },
 	wallet: { kind: 'user', namespaceToAddress: { [EIP155]: EVM_ADDRESS } },
+	referrerAddress: null,
 	createdAt: new Date('2026-01-01'),
 }
 

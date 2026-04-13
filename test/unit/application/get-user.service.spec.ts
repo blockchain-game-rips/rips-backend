@@ -15,6 +15,7 @@ const MOCK_USER: User = {
 			[EIP155]: '0x1234567890abcdef1234567890abcdef12345678',
 		},
 	},
+	referrerAddress: null,
 	createdAt: new Date('2026-01-01'),
 }
 
@@ -23,6 +24,7 @@ function makeMockUserRepository(): jest.Mocked<UserRepository> {
 		findByTelegramId: jest.fn(),
 		findByEvmAddress: jest.fn(),
 		create: jest.fn(),
+		setReferrer: jest.fn(),
 	}
 	return mock
 }

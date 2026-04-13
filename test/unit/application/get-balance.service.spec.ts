@@ -25,6 +25,7 @@ const MOCK_USER: User = {
 	id: 1n,
 	telegramProfile: { telegramId: TELEGRAM_ID },
 	wallet: MOCK_WALLET,
+	referrerAddress: null,
 	createdAt: new Date('2026-01-01'),
 }
 

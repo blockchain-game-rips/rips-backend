@@ -51,6 +51,16 @@ export class PrismaUserRepository extends UserRepository {
 
 		return toDomainUser(record)
 	}
+
+	async setReferrer(userId: bigint, referrerAddress: string): Promise<User> {
+		const record = await this.prisma.user.update({
+			where: { id: userId },
+			data: { referrerAddress },
+			include: { evmWallet: true },
+		})
+
+		return toDomainUser(record)
+	}
 }
 
 type UserRecord = Prisma.UserGetPayload<{ include: { evmWallet: true } }>
@@ -71,6 +81,7 @@ function toDomainUser(record: UserRecord): User {
 				[EIP155]: getAddress(record.evmWallet.address),
 			},
 		},
+		referrerAddress: record.referrerAddress,
 		createdAt: record.createdAt,
 	}
 }

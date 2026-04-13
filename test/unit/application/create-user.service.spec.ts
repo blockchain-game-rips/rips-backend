@@ -14,6 +14,7 @@ const MOCK_USER: User = {
 	id: 1n,
 	telegramProfile: { telegramId: TELEGRAM_ID },
 	wallet: { kind: 'user', namespaceToAddress: { [EIP155]: EVM_ADDRESS } },
+	referrerAddress: null,
 	createdAt: new Date('2026-01-01'),
 }
 
@@ -22,6 +23,7 @@ function makeMockUserRepository(): jest.Mocked<UserRepository> {
 		findByTelegramId: jest.fn(),
 		findByEvmAddress: jest.fn(),
 		create: jest.fn(),
+		setReferrer: jest.fn(),
 	}
 	return mock
 }

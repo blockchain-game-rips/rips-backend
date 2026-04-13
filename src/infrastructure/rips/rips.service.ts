@@ -36,7 +36,11 @@ export class RipsServiceIpml implements RipsService {
 
 	claim(
 		wallet: Wallet,
-		args: { roundId: number; userAddress: string },
+		args: {
+			roundId: number
+			userAddress: string
+			referrerAddress: string | null
+		},
 	): Promise<Transaction> {
 		return this.sendKeeperTransaction(wallet, {
 			data: encodeFunctionData({
@@ -47,7 +51,7 @@ export class RipsServiceIpml implements RipsService {
 					CLAIM_START_INDEX,
 					CLAIM_MAX_RANGES,
 					args.userAddress as Address,
-					zeroAddress,
+					(args.referrerAddress ?? zeroAddress) as Address,
 				],
 			}),
 		})
