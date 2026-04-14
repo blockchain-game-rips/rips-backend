@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { KmsService } from 'src/application/interfaces/kms.service'
-import { ExecutorRepository } from 'src/application/interfaces/repositories/executor.repository'
-import { Executor } from 'src/domain/entities/executor'
 import { getAddress } from 'viem'
+import { KmsService } from '../../application/interfaces/kms.service'
+import { ExecutorRepository } from '../../application/interfaces/repositories/executor.repository'
+import { Executor } from '../../domain/entities/executor'
 
 @Injectable()
 export class ProvisionService {

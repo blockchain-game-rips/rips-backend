@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
-import { KeeperService } from 'src/application/use-cases/keeper/keeper.service'
-import { KeeperUseCase } from 'src/application/use-cases/keeper/keeper.use-case'
-import { PrismaModule } from 'src/infrastructure/prisma/prisma.module'
-import { RipsInfraModule } from 'src/infrastructure/rips/rips.module'
+import { KeeperService } from '../../application/use-cases/keeper/keeper.service'
+import { KeeperUseCase } from '../../application/use-cases/keeper/keeper.use-case'
+import { PrismaModule } from '../../infrastructure/prisma/prisma.module'
+import { RipsInfraModule } from '../../infrastructure/rips/rips.module'
 import { GetOngoingRoundsModule } from './get-ongoing-rounds.module'
 
 @Module({

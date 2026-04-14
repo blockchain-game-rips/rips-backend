@@ -4,13 +4,13 @@ import {
 	KMSClient,
 } from '@aws-sdk/client-kms'
 import { Injectable } from '@nestjs/common'
+import { getAddress, keccak256, type Address, type Hex } from 'viem'
 import {
 	KmsService,
 	type KmsKeyResult,
-} from 'src/application/interfaces/kms.service'
-import { KmsKeyId, toKmsKeyId } from 'src/domain/value-objects/kms-key-id'
-import { getEnvSafe } from 'src/utils/common'
-import { getAddress, keccak256, type Address, type Hex } from 'viem'
+} from '../../application/interfaces/kms.service'
+import { KmsKeyId, toKmsKeyId } from '../../domain/value-objects/kms-key-id'
+import { getEnvSafe } from '../../utils/common'
 
 const DER_UNCOMPRESSED_PUBLIC_KEY_OFFSET = 27
 

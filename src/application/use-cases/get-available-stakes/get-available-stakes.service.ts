@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
-import { RoundStatus } from 'src/domain/entities/round'
-import { AvailableStake } from 'src/domain/value-objects/available-stake'
+import { RoundStatus } from '../../../domain/entities/round'
+import { AvailableStake } from '../../../domain/value-objects/available-stake'
+import { StakeRepository } from '../../interfaces/repositories/stake.repository'
 import { GetAvailableStakesUseCase } from './get-available-stakes.use-case'
 
 @Injectable()

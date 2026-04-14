@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
-import { GetUnrevealedPrizesService } from 'src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.service'
-import { GetUnrevealedPrizesUseCase } from 'src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
-import { PrismaModule } from 'src/infrastructure/prisma/prisma.module'
+import { GetUnrevealedPrizesService } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.service'
+import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
+import { PrismaModule } from '../../infrastructure/prisma/prisma.module'
 import { GetUserModule } from './get-user.module'
 
 @Module({

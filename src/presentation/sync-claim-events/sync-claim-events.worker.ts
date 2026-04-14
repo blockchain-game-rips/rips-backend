@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { SyncClaimEventsUseCase } from 'src/application/use-cases/sync-claim-events/sync-claim-events.use-case'
+import { SyncClaimEventsUseCase } from '../../application/use-cases/sync-claim-events/sync-claim-events.use-case'
 
 @Injectable()
 export class SyncClaimEventsWorker {

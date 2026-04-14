@@ -6,12 +6,12 @@ import {
 	HttpStatus,
 } from '@nestjs/common'
 import { Response } from 'express'
-import { InsufficientBalanceError } from 'src/domain/errors/insufficient-balance.error'
-import { TicketNotFoundError } from 'src/domain/errors/stake-not-found.error'
-import { TransactionFailedError } from 'src/domain/errors/transaction-failed.error'
-import { UserAlreadyExistsError } from 'src/domain/errors/user-already-exists.error'
-import { UserNotFoundError } from 'src/domain/errors/user-not-found.error'
-import { ContextError } from 'src/utils/common'
+import { InsufficientBalanceError } from '../../domain/errors/insufficient-balance.error'
+import { TicketNotFoundError } from '../../domain/errors/stake-not-found.error'
+import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
+import { UserAlreadyExistsError } from '../../domain/errors/user-already-exists.error'
+import { UserNotFoundError } from '../../domain/errors/user-not-found.error'
+import { ContextError } from '../../utils/common'
 
 type ErrorConstructor = new (...args: never[]) => ContextError
 

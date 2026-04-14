@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
-import { GetOngoingRoundsService } from 'src/application/use-cases/get-ongoing-rounds/get-ongoing-rounds.service'
-import { GetOngoingRoundsUseCase } from 'src/application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
-import { IndexerModule } from 'src/infrastructure/indexer/indexer.module'
+import { GetOngoingRoundsService } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.service'
+import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
+import { IndexerModule } from '../../infrastructure/indexer/indexer.module'
 
 @Module({
 	imports: [IndexerModule],

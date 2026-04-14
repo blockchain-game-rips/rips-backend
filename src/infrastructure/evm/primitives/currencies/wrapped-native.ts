@@ -1,4 +1,4 @@
-import { CurrencyMetadata } from 'src/domain/entities/currency'
+import { CurrencyMetadata } from '../../../../domain/entities/currency'
 import { WRAPPED_TOKENS } from './constants'
 import { NativeCurrency } from './native-currency'
 import { Token } from './token'

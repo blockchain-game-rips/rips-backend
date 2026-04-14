@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
-import { OngoingRound } from 'src/domain/entities/round'
+import { OngoingRound } from '../../../domain/entities/round'
+import { StakeRepository } from '../../interfaces/repositories/stake.repository'
 import { GetOngoingRoundsUseCase } from './get-ongoing-rounds.use-case'
 
 @Injectable()

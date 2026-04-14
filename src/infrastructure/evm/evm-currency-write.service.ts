@@ -1,7 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { ChainAddress } from 'src/domain/value-objects/chain-address'
-import { Transaction } from 'src/domain/value-objects/transaction'
-import { Wallet } from 'src/domain/value-objects/wallet'
 import {
 	encodeFunctionData,
 	erc20Abi,
@@ -9,6 +6,9 @@ import {
 	type Address,
 	type TransactionRequestEIP1559,
 } from 'viem'
+import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { Transaction } from '../../domain/value-objects/transaction'
+import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from './evm-transaction.service'
 import { EvmCurrency } from './primitives/currencies/evm-currency'
 import { Token } from './primitives/currencies/token'

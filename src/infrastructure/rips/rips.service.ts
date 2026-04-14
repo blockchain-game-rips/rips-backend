@@ -1,13 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { RipsService } from 'src/application/interfaces/rips.service'
-import { MAIN_CURRENCY } from 'src/application/interfaces/tokens'
-import { EIP155 } from 'src/constants'
-import { Config } from 'src/domain/entities/config'
-import { Currency } from 'src/domain/entities/currency'
-import { TransactionFailedError } from 'src/domain/errors/transaction-failed.error'
-import { Purchase } from 'src/domain/value-objects/purchase'
-import { Transaction } from 'src/domain/value-objects/transaction'
-import { Wallet } from 'src/domain/value-objects/wallet'
 import {
 	decodeEventLog,
 	encodeFunctionData,
@@ -16,6 +7,15 @@ import {
 	type Address,
 	type TransactionRequestEIP1559,
 } from 'viem'
+import { RipsService } from '../../application/interfaces/rips.service'
+import { MAIN_CURRENCY } from '../../application/interfaces/tokens'
+import { EIP155 } from '../../constants'
+import { Config } from '../../domain/entities/config'
+import { Currency } from '../../domain/entities/currency'
+import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
+import { Purchase } from '../../domain/value-objects/purchase'
+import { Transaction } from '../../domain/value-objects/transaction'
+import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
 import { ripsAbi } from './rips-abi'

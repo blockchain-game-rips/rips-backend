@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { MAIN_CURRENCY } from 'src/application/interfaces/tokens'
-import { WalletService } from 'src/application/interfaces/wallet.service'
-import { GetUserUseCase } from 'src/application/use-cases/get-user/get-user.use-case'
-import { Currency } from 'src/domain/entities/currency'
-import { CurrencyAmount } from 'src/domain/value-objects/currency-amount'
+import { Currency } from '../../../domain/entities/currency'
+import { CurrencyAmount } from '../../../domain/value-objects/currency-amount'
+import { MAIN_CURRENCY } from '../../interfaces/tokens'
+import { WalletService } from '../../interfaces/wallet.service'
+import { GetUserUseCase } from '../get-user/get-user.use-case'
 import { GetBalanceInput, GetBalanceUseCase } from './get-balance.use-case'
 
 @Injectable()

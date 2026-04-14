@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { TicketPrizeRepository } from 'src/application/interfaces/repositories/ticket-prize.repository'
-import { Card } from 'src/domain/value-objects/card'
-import { CardCollection } from 'src/domain/value-objects/card-collection'
-import { TicketPrize } from 'src/domain/value-objects/ticket-prize'
+import { TicketPrizeRepository } from '../../application/interfaces/repositories/ticket-prize.repository'
+import { Card } from '../../domain/value-objects/card'
+import { CardCollection } from '../../domain/value-objects/card-collection'
+import { TicketPrize } from '../../domain/value-objects/ticket-prize'
 import { PrismaService } from './prisma.service'
 
 @Injectable()

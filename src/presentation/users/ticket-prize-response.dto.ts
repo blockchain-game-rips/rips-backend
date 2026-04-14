@@ -1,4 +1,4 @@
-import { TicketPrize } from 'src/domain/value-objects/ticket-prize'
+import { TicketPrize } from '../../domain/value-objects/ticket-prize'
 
 export type TicketPrizeResponseDto = {
 	ticketNumber: number

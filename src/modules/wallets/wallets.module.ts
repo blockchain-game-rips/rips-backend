@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
-import { GetBalanceModule } from 'src/modules/use-cases/get-balance.module'
-import { GetUserModule } from 'src/modules/use-cases/get-user.module'
-import { WithdrawModule } from 'src/modules/use-cases/withdraw.module'
-import { WalletsController } from 'src/presentation/wallets/wallets.controller'
+import { WalletsController } from '../../presentation/wallets/wallets.controller'
+import { GetBalanceModule } from '../use-cases/get-balance.module'
+import { GetUserModule } from '../use-cases/get-user.module'
+import { WithdrawModule } from '../use-cases/withdraw.module'
 
 @Module({
 	imports: [GetUserModule, GetBalanceModule, WithdrawModule],

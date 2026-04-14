@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
+import { RoundRepository } from '../../interfaces/repositories/round.repository'
 import {
 	GetCompletedRoundsInput,
 	GetCompletedRoundsResult,

@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { CurrencyMetadata } from 'src/domain/entities/currency'
-import { CurrencyId } from 'src/domain/value-objects/currency-id'
 import {
 	Address,
 	erc20Abi,
@@ -9,6 +7,8 @@ import {
 	isAddress,
 	isAddressEqual,
 } from 'viem'
+import { CurrencyMetadata } from '../../domain/entities/currency'
+import { CurrencyId } from '../../domain/value-objects/currency-id'
 import { EvmClientService } from './evm-client/evm-client.service'
 import {
 	ETH_METADATA,

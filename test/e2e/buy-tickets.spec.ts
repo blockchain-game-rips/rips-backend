@@ -1,6 +1,6 @@
-import { GetAvailableStakesUseCase } from 'src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import request from 'supertest'
 import { parseEther } from 'viem'
+import { GetAvailableStakesUseCase } from '../../src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { setNativeBalance } from '../utils/anvil'
 import { useRipsApp } from '../utils/rips-app'
 

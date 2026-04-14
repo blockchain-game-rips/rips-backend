@@ -1,5 +1,5 @@
-import { ChainAddress } from 'src/domain/value-objects/chain-address'
-import { CurrencyAmount } from 'src/domain/value-objects/currency-amount'
+import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { CurrencyAmount } from '../../domain/value-objects/currency-amount'
 
 export type BalanceResponseDto = {
 	currency: {

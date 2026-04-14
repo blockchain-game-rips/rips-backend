@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { KeeperUseCase } from 'src/application/use-cases/keeper/keeper.use-case'
+import { KeeperUseCase } from '../../application/use-cases/keeper/keeper.use-case'
 
 @Injectable()
 export class KeeperWorker {

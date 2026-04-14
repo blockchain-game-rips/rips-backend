@@ -1,5 +1,5 @@
-import { ChainAddress } from 'src/domain/value-objects/chain-address'
-import { Transaction } from 'src/domain/value-objects/transaction'
+import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { Transaction } from '../../domain/value-objects/transaction'
 
 export type WithdrawResponseDto = {
 	txId: string

@@ -1,17 +1,17 @@
 import {
 	CreateUserUseCase,
 	UserAlreadyExistsError,
-} from 'src/application/use-cases/create-user/create-user.use-case'
-import { GetUnrevealedPrizesUseCase } from 'src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
+} from '../../../src/application/use-cases/create-user/create-user.use-case'
+import { GetUnrevealedPrizesUseCase } from '../../../src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import {
 	GetUserUseCase,
 	UserNotFoundError,
-} from 'src/application/use-cases/get-user/get-user.use-case'
-import { RevealTicketPrizesUseCase } from 'src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
-import { EIP155 } from 'src/constants'
-import { User } from 'src/domain/entities/user'
-import { toTelegramId } from 'src/domain/value-objects/telegram-id'
-import { UsersController } from 'src/presentation/users/users.controller'
+} from '../../../src/application/use-cases/get-user/get-user.use-case'
+import { RevealTicketPrizesUseCase } from '../../../src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
+import { EIP155 } from '../../../src/constants'
+import { User } from '../../../src/domain/entities/user'
+import { toTelegramId } from '../../../src/domain/value-objects/telegram-id'
+import { UsersController } from '../../../src/presentation/users/users.controller'
 const TELEGRAM_ID = toTelegramId(123456n)
 const EVM_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'
 

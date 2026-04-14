@@ -1,5 +1,5 @@
-import { ChainAddress } from 'src/domain/value-objects/chain-address'
-import { Purchase } from 'src/domain/value-objects/purchase'
+import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { Purchase } from '../../domain/value-objects/purchase'
 
 export type BuyTicketsResponseDto = {
 	txId: string

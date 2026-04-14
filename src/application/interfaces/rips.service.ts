@@ -1,7 +1,7 @@
-import { Config } from 'src/domain/entities/config'
-import { Purchase } from 'src/domain/value-objects/purchase'
-import { Transaction } from 'src/domain/value-objects/transaction'
-import { Wallet } from 'src/domain/value-objects/wallet'
+import { Config } from '../../domain/entities/config'
+import { Purchase } from '../../domain/value-objects/purchase'
+import { Transaction } from '../../domain/value-objects/transaction'
+import { Wallet } from '../../domain/value-objects/wallet'
 
 export abstract class RipsService {
 	abstract claim(

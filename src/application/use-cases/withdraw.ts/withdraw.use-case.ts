@@ -1,6 +1,6 @@
-import { ChainAddress } from 'src/domain/value-objects/chain-address'
-import { TelegramId } from 'src/domain/value-objects/telegram-id'
-import { Transaction } from 'src/domain/value-objects/transaction'
+import { ChainAddress } from '../../../domain/value-objects/chain-address'
+import { TelegramId } from '../../../domain/value-objects/telegram-id'
+import { Transaction } from '../../../domain/value-objects/transaction'
 
 export type WithdrawInput = {
 	telegramId: TelegramId

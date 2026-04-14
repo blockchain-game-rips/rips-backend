@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { GetPriceModule } from 'src/modules/use-cases/get-price.module'
-import { PriceController } from 'src/presentation/price/price.controller'
+import { PriceController } from '../../presentation/price/price.controller'
+import { GetPriceModule } from '../use-cases/get-price.module'
 
 @Module({
 	imports: [GetPriceModule],

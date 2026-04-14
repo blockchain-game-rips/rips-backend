@@ -1,9 +1,9 @@
-import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
-import { GetUserService } from 'src/application/use-cases/get-user/get-user.service'
-import { UserNotFoundError } from 'src/application/use-cases/get-user/get-user.use-case'
-import { EIP155 } from 'src/constants'
-import { User } from 'src/domain/entities/user'
-import { toTelegramId } from 'src/domain/value-objects/telegram-id'
+import { UserRepository } from '../../../src/application/interfaces/repositories/user.repository'
+import { GetUserService } from '../../../src/application/use-cases/get-user/get-user.service'
+import { UserNotFoundError } from '../../../src/application/use-cases/get-user/get-user.use-case'
+import { EIP155 } from '../../../src/constants'
+import { User } from '../../../src/domain/entities/user'
+import { toTelegramId } from '../../../src/domain/value-objects/telegram-id'
 const TELEGRAM_ID = toTelegramId(123456n)
 
 const MOCK_USER: User = {

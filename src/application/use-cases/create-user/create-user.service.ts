@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { KmsService } from 'src/application/interfaces/kms.service'
-import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
-import { User } from 'src/domain/entities/user'
+import { User } from '../../../domain/entities/user'
+import { KmsService } from '../../interfaces/kms.service'
+import { UserRepository } from '../../interfaces/repositories/user.repository'
 import {
 	CreateUserInput,
 	CreateUserUseCase,

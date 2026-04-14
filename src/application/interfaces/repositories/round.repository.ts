@@ -1,4 +1,4 @@
-import { CompletedRound } from 'src/domain/entities/round'
+import { CompletedRound } from '../../../domain/entities/round'
 
 export type GetCompletedRoundsArgs = {
 	limit: number

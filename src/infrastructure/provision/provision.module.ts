@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { KmsModule } from 'src/infrastructure/kms/kms.module'
-import { PrismaModule } from 'src/infrastructure/prisma/prisma.module'
+import { KmsModule } from '../kms/kms.module'
+import { PrismaModule } from '../prisma/prisma.module'
 import { ProvisionService } from './provision.service'
 
 @Module({

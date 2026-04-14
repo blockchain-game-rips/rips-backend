@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { RipsService } from 'src/application/interfaces/rips.service'
-import { ZapService } from 'src/application/interfaces/zap.service'
-import { TicketNotFoundError } from 'src/domain/errors/stake-not-found.error'
+import { TicketNotFoundError } from '../../../domain/errors/stake-not-found.error'
+import { RipsService } from '../../interfaces/rips.service'
+import { ZapService } from '../../interfaces/zap.service'
 import { GetAvailableStakesUseCase } from '../get-available-stakes/get-available-stakes.use-case'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import {

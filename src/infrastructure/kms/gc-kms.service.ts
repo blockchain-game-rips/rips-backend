@@ -2,18 +2,18 @@ import { KeyManagementServiceClient } from '@google-cloud/kms'
 import { Injectable } from '@nestjs/common'
 import { createPublicKey } from 'crypto'
 import {
-	KmsService,
-	type KmsKeyResult,
-} from 'src/application/interfaces/kms.service'
-import { KmsKeyId, toKmsKeyId } from 'src/domain/value-objects/kms-key-id'
-import { getEnvSafe } from 'src/utils/common'
-import {
 	getAddress,
 	keccak256,
 	recoverAddress,
 	type Address,
 	type Hex,
 } from 'viem'
+import {
+	KmsService,
+	type KmsKeyResult,
+} from '../../application/interfaces/kms.service'
+import { KmsKeyId, toKmsKeyId } from '../../domain/value-objects/kms-key-id'
+import { getEnvSafe } from '../../utils/common'
 
 const UNCOMPRESSED_PUBLIC_KEY_PREFIX = 0x04
 const UNCOMPRESSED_PUBLIC_KEY_LENGTH = 65

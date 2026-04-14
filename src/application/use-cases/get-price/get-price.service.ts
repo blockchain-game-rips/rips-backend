@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { PriceProvider } from 'src/application/interfaces/price-service'
-import { MAIN_CURRENCY } from 'src/application/interfaces/tokens'
-import { Currency } from 'src/domain/entities/currency'
+import { Currency } from '../../../domain/entities/currency'
+import { PriceProvider } from '../../interfaces/price-service'
+import { MAIN_CURRENCY } from '../../interfaces/tokens'
 import { GetPriceUseCase } from './get-price.use-case'
 
 @Injectable()

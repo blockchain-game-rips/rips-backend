@@ -1,11 +1,5 @@
 import path from 'path'
 import {
-	resolveOnchainPrize,
-	resolvePrize,
-} from 'src/domain/services/prize-utils'
-import { CardCollection } from 'src/domain/value-objects/card-collection'
-import { ripsAbi } from 'src/infrastructure/rips/rips-abi'
-import {
 	Chain,
 	createPublicClient,
 	createWalletClient,
@@ -21,6 +15,12 @@ import {
 	type TransactionReceipt,
 } from 'viem'
 import { Account, privateKeyToAccount } from 'viem/accounts'
+import {
+	resolveOnchainPrize,
+	resolvePrize,
+} from '../../../src/domain/services/prize-utils'
+import { CardCollection } from '../../../src/domain/value-objects/card-collection'
+import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
 import { getBalances, useAnvil, waitForReceipt } from '../../utils/anvil'
 import deployments from '../../utils/state/deployments.json'
 import { vrfCoordinatorAbi } from '../../utils/vrf-coordinator-abi'

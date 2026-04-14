@@ -1,7 +1,7 @@
 import {
 	TelegramIdError,
 	toTelegramId,
-} from 'src/domain/value-objects/telegram-id'
+} from '../../../src/domain/value-objects/telegram-id'
 
 describe('toTelegramId', () => {
 	it('should return TelegramId for a positive bigint', () => {

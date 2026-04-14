@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { createCustomError } from 'src/utils/common'
 import {
 	Chain,
 	createPublicClient,
@@ -12,6 +11,7 @@ import {
 } from 'viem'
 import * as chains from 'viem/chains'
 import { HttpRpcClientOptions } from 'viem/utils'
+import { createCustomError } from '../../../utils/common'
 import { EVM_CLIENT_CONFIG, ResolvedEvmClientConfig } from './types'
 
 const DEFAULT_BATCH_SIZE = 1_000

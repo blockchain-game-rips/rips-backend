@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common'
-import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
-import { EIP155 } from 'src/constants'
-import { User } from 'src/domain/entities/user'
-import { KmsKeyId } from 'src/domain/value-objects/kms-key-id'
-import { TelegramId, toTelegramId } from 'src/domain/value-objects/telegram-id'
-import { Prisma } from 'src/generated/prisma'
 import { getAddress, type Address } from 'viem'
+import { UserRepository } from '../../application/interfaces/repositories/user.repository'
+import { EIP155 } from '../../constants'
+import { User } from '../../domain/entities/user'
+import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
+import {
+	TelegramId,
+	toTelegramId,
+} from '../../domain/value-objects/telegram-id'
+import { Prisma } from '../../generated/prisma'
 import { PrismaService } from './prisma.service'
 
 @Injectable()

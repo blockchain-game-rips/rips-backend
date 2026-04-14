@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
-import { GetUserService } from 'src/application/use-cases/get-user/get-user.service'
-import { GetUserUseCase } from 'src/application/use-cases/get-user/get-user.use-case'
-import { PrismaModule } from 'src/infrastructure/prisma/prisma.module'
+import { GetUserService } from '../../application/use-cases/get-user/get-user.service'
+import { GetUserUseCase } from '../../application/use-cases/get-user/get-user.use-case'
+import { PrismaModule } from '../../infrastructure/prisma/prisma.module'
 
 @Module({
 	imports: [PrismaModule],

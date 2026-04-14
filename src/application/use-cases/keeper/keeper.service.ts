@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common'
-import { ExecutorRepository } from 'src/application/interfaces/repositories/executor.repository'
-import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
-import { RipsService } from 'src/application/interfaces/rips.service'
-import { Executor } from 'src/domain/entities/executor'
-import { OngoingRound, Round, RoundStatus } from 'src/domain/entities/round'
+import { Executor } from '../../../domain/entities/executor'
+import {
+	OngoingRound,
+	Round,
+	RoundStatus,
+} from '../../../domain/entities/round'
+import { ExecutorRepository } from '../../interfaces/repositories/executor.repository'
+import { UserRepository } from '../../interfaces/repositories/user.repository'
+import { RipsService } from '../../interfaces/rips.service'
 import { GetOngoingRoundsUseCase } from '../get-ongoing-rounds/get-ongoing-rounds.use-case'
 import { KeeperUseCase } from './keeper.use-case'
 

@@ -1,4 +1,3 @@
-import { MnemonicKmsService } from 'src/infrastructure/kms/mnemonic-kms.service'
 import {
 	createPublicClient,
 	createWalletClient,
@@ -10,6 +9,7 @@ import {
 	type TransactionSerializableEIP1559,
 } from 'viem'
 import { base } from 'viem/chains'
+import { MnemonicKmsService } from '../../../src/infrastructure/kms/mnemonic-kms.service'
 import { Anvil, setNativeBalance, useAnvil } from '../../utils/anvil'
 
 const TEST_MNEMONIC =

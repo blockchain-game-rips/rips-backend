@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
-import { BuyTicketsModule } from 'src/modules/use-cases/buy-tickets.module'
-import { GetAvailableStakesModule } from 'src/modules/use-cases/get-available-stakes.module'
-import { GetCompletedRoundsModule } from 'src/modules/use-cases/get-completed-rounds.module'
-import { GetOngoingRoundsModule } from 'src/modules/use-cases/get-ongoing-rounds.module'
-import { GetUserModule } from 'src/modules/use-cases/get-user.module'
-import { RipsController } from 'src/presentation/rips/rips.controller'
+import { RipsController } from '../../presentation/rips/rips.controller'
+import { BuyTicketsModule } from '../use-cases/buy-tickets.module'
+import { GetAvailableStakesModule } from '../use-cases/get-available-stakes.module'
+import { GetCompletedRoundsModule } from '../use-cases/get-completed-rounds.module'
+import { GetOngoingRoundsModule } from '../use-cases/get-ongoing-rounds.module'
+import { GetUserModule } from '../use-cases/get-user.module'
 
 @Module({
 	imports: [

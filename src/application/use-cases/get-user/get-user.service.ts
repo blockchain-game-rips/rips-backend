@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { UserRepository } from 'src/application/interfaces/repositories/user.repository'
-import { User } from 'src/domain/entities/user'
+import { User } from '../../../domain/entities/user'
+import { UserRepository } from '../../interfaces/repositories/user.repository'
 import {
 	GetUserInput,
 	GetUserUseCase,

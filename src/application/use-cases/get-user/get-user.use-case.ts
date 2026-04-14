@@ -1,6 +1,6 @@
-import { User } from 'src/domain/entities/user'
-import { UserNotFoundError } from 'src/domain/errors/user-not-found.error'
-import { TelegramId } from 'src/domain/value-objects/telegram-id'
+import { User } from '../../../domain/entities/user'
+import { UserNotFoundError } from '../../../domain/errors/user-not-found.error'
+import { TelegramId } from '../../../domain/value-objects/telegram-id'
 
 export { UserNotFoundError }
 

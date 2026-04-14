@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { PrismaModule } from 'src/infrastructure/prisma/prisma.module'
-import { GetAvailableStakesModule } from 'src/modules/use-cases/get-available-stakes.module'
+import { GetAvailableStakesModule } from '../../modules/use-cases/get-available-stakes.module'
+import { PrismaModule } from '../prisma/prisma.module'
 import { SeedCardDefinitionsService } from './seed-card-definitions.service'
 
 @Module({

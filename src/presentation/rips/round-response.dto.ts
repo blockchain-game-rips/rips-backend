@@ -2,7 +2,7 @@ import {
 	CompletedRound,
 	OngoingRound,
 	RoundStatus,
-} from 'src/domain/entities/round'
+} from '../../domain/entities/round'
 
 type PurchaseActionDto = {
 	userAddress: string

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
-import { RipsService } from 'src/application/interfaces/rips.service'
-import { EvmModule } from 'src/infrastructure/evm/evm.module'
-import { MainCurrencyModule } from 'src/modules/main-currency/main-currency.module'
-import { getEnvSafe } from 'src/utils/common'
+import { RipsService } from '../../application/interfaces/rips.service'
+import { MainCurrencyModule } from '../../modules/main-currency/main-currency.module'
+import { getEnvSafe } from '../../utils/common'
+import { EvmModule } from '../evm/evm.module'
 import { RIPS_SC_ADDRESS } from './rips.constants'
 import { RipsServiceIpml } from './rips.service'
 

@@ -1,12 +1,12 @@
 import { readFileSync } from 'fs'
 import * as yaml from 'js-yaml'
+import z from 'zod'
 import {
 	CHAIN_CLIENT_CONFIG_KEY,
 	ChainClientConfigSchema,
-} from 'src/infrastructure/evm/evm-client/configuration/chain-client-config'
-import { getEnvSafe } from 'src/utils/common'
-import { parsePretty } from 'src/utils/zod'
-import z from 'zod'
+} from '../infrastructure/evm/evm-client/configuration/chain-client-config'
+import { getEnvSafe } from '../utils/common'
+import { parsePretty } from '../utils/zod'
 
 export const CARD_CONFIG_KEY = 'cardConfig'
 

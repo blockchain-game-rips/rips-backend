@@ -1,7 +1,7 @@
-import { Currency } from 'src/domain/entities/currency'
-import { Purchase } from 'src/domain/value-objects/purchase'
-import { TelegramId } from 'src/domain/value-objects/telegram-id'
-import { Transaction } from 'src/domain/value-objects/transaction'
+import { Currency } from '../../../domain/entities/currency'
+import { Purchase } from '../../../domain/value-objects/purchase'
+import { TelegramId } from '../../../domain/value-objects/telegram-id'
+import { Transaction } from '../../../domain/value-objects/transaction'
 
 export type BuyTicketsInput = {
 	telegramId: TelegramId

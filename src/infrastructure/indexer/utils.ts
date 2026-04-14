@@ -1,12 +1,12 @@
-import { Config } from 'src/domain/entities/config'
-import { Currency } from 'src/domain/entities/currency'
-import { Round, RoundStatus } from 'src/domain/entities/round'
-import { AddressesActions } from 'src/domain/value-objects/actions'
+import { getAddress } from 'viem'
+import { Config } from '../../domain/entities/config'
+import { Currency } from '../../domain/entities/currency'
+import { Round, RoundStatus } from '../../domain/entities/round'
+import { AddressesActions } from '../../domain/value-objects/actions'
 import {
 	GetCompletedRoundsQuery,
 	RoundStatus as RoundStatusRaw,
-} from 'src/generated/graphql/generated'
-import { getAddress } from 'viem'
+} from '../../generated/graphql/generated'
 
 export type RoundRaw = GetCompletedRoundsQuery['rounds'][number]
 

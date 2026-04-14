@@ -1,7 +1,7 @@
-import { Currency } from 'src/domain/entities/currency'
-import { ChainAddress } from 'src/domain/value-objects/chain-address'
-import { Transaction } from 'src/domain/value-objects/transaction'
-import { Wallet } from 'src/domain/value-objects/wallet'
+import { Currency } from '../../domain/entities/currency'
+import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { Transaction } from '../../domain/value-objects/transaction'
+import { Wallet } from '../../domain/value-objects/wallet'
 
 export abstract class WalletService {
 	abstract balanceOf(wallet: Wallet, currency: Currency): Promise<bigint>

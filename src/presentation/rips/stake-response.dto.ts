@@ -1,6 +1,6 @@
-import { Config } from 'src/domain/entities/config'
-import { AvailableStake } from 'src/domain/value-objects/available-stake'
-import { ChainAddress } from 'src/domain/value-objects/chain-address'
+import { Config } from '../../domain/entities/config'
+import { AvailableStake } from '../../domain/value-objects/available-stake'
+import { ChainAddress } from '../../domain/value-objects/chain-address'
 
 type PrizeTierDto = {
 	prizeCount: string

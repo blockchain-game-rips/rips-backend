@@ -1,4 +1,4 @@
-import { CurrencyMetadata } from 'src/domain/entities/currency'
+import { CurrencyMetadata } from '../../../../domain/entities/currency'
 import { NATIVE_ADDRESS } from './constants'
 import { EvmCurrency } from './evm-currency'
 

@@ -1,9 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { KmsService } from 'src/application/interfaces/kms.service'
-import { WalletRepository } from 'src/application/interfaces/repositories/wallet.repository'
-import { EIP155 } from 'src/constants'
-import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
-import { Wallet } from 'src/domain/value-objects/wallet'
 import {
 	getAddress,
 	keccak256,
@@ -12,6 +7,11 @@ import {
 	type TransactionSerializableEIP1559,
 	type TransactionSerialized,
 } from 'viem'
+import { KmsService } from '../../application/interfaces/kms.service'
+import { WalletRepository } from '../../application/interfaces/repositories/wallet.repository'
+import { EIP155 } from '../../constants'
+import { toChainNamespace } from '../../domain/value-objects/chain-namespace'
+import { Wallet } from '../../domain/value-objects/wallet'
 
 @Injectable()
 export class SignService {

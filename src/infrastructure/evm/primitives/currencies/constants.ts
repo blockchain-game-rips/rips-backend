@@ -1,6 +1,6 @@
-import { CurrencyMetadata } from 'src/domain/entities/currency'
 import { Address, getAddress } from 'viem'
 import * as chains from 'viem/chains'
+import { CurrencyMetadata } from '../../../../domain/entities/currency'
 
 export const NATIVE_ADDRESS: Address =
 	'0x0000000000000000000000000000000000000000'

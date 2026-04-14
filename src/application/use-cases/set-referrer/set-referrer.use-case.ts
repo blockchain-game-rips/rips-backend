@@ -1,5 +1,5 @@
-import { User } from 'src/domain/entities/user'
-import { TelegramId } from 'src/domain/value-objects/telegram-id'
+import { User } from '../../../domain/entities/user'
+import { TelegramId } from '../../../domain/value-objects/telegram-id'
 
 export type SetReferrerInput = {
 	telegramId: TelegramId

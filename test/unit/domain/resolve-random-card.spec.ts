@@ -1,5 +1,5 @@
-import { resolveRandomCard } from 'src/domain/services/prize-utils'
-import { CardCollection } from 'src/domain/value-objects/card-collection'
+import { resolveRandomCard } from '../../../src/domain/services/prize-utils'
+import { CardCollection } from '../../../src/domain/value-objects/card-collection'
 
 const CARD_A = { id: 1, name: 'A', tier: 0, imageUrl: '' }
 const CARD_B = { id: 2, name: 'B', tier: 0, imageUrl: '' }

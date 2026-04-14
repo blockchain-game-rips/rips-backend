@@ -1,10 +1,13 @@
-import { EIP155 } from 'src/constants'
-import { Currency, CurrencyMetadata } from 'src/domain/entities/currency'
-import { composeChainId } from 'src/domain/services/chain-id-utils'
-import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
-import { Chain } from 'src/domain/value-objects/chain'
-import { CurrencyId } from 'src/domain/value-objects/currency-id'
 import { Address, getAddress } from 'viem'
+import { EIP155 } from '../../../../constants'
+import {
+	Currency,
+	CurrencyMetadata,
+} from '../../../../domain/entities/currency'
+import { composeChainId } from '../../../../domain/services/chain-id-utils'
+import { composeCurrencyId } from '../../../../domain/services/currency-id-utils'
+import { Chain } from '../../../../domain/value-objects/chain'
+import { CurrencyId } from '../../../../domain/value-objects/currency-id'
 
 export abstract class EvmCurrency implements Currency {
 	readonly id: CurrencyId

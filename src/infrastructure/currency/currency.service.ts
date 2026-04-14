@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { CurrencyService } from 'src/application/interfaces/currency.service'
-import { EIP155 } from 'src/constants'
-import { Currency } from 'src/domain/entities/currency'
-import { ChainAddress } from 'src/domain/value-objects/chain-address'
 import { getAddress } from 'viem'
+import { CurrencyService } from '../../application/interfaces/currency.service'
+import { EIP155 } from '../../constants'
+import { Currency } from '../../domain/entities/currency'
+import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 
 @Injectable()

@@ -1,7 +1,7 @@
-import { Config } from 'src/domain/entities/config'
-import { Currency } from 'src/domain/entities/currency'
-import { Transaction } from 'src/domain/value-objects/transaction'
-import { Wallet } from 'src/domain/value-objects/wallet'
+import { Config } from '../../domain/entities/config'
+import { Currency } from '../../domain/entities/currency'
+import { Transaction } from '../../domain/value-objects/transaction'
+import { Wallet } from '../../domain/value-objects/wallet'
 
 export abstract class ZapService {
 	abstract quote(

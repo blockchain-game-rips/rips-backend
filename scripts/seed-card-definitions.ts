@@ -1,9 +1,9 @@
 import { NestFactory } from '@nestjs/core'
 import fs from 'fs'
 import path from 'path'
-import { SeedCardDefinitionsService } from 'src/infrastructure/seed/seed-card-definitions.service'
-import { SeedModule } from 'src/infrastructure/seed/seed.module'
-import { getEnvSafe } from 'src/utils/common'
+import { SeedCardDefinitionsService } from '../src/infrastructure/seed/seed-card-definitions.service'
+import { SeedModule } from '../src/infrastructure/seed/seed.module'
+import { getEnvSafe } from '../src/utils/common'
 
 async function main() {
 	const configPath = getEnvSafe('CARD_DEFINITIONS_PATH')

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { GetAvailableStakesUseCase } from 'src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service'
 import { z } from 'zod'
+import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
+import { PrismaService } from '../prisma/prisma.service'
 
 const CardDefinitionInputSchema = z.object({
 	stakeId: z.number().int().positive(),

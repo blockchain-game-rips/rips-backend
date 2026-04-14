@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
+import { type Address, type Hex } from 'viem'
+import { mnemonicToAccount } from 'viem/accounts'
 import {
 	KmsService,
 	type KmsKeyResult,
-} from 'src/application/interfaces/kms.service'
-import { KmsKeyId, toKmsKeyId } from 'src/domain/value-objects/kms-key-id'
-import { getEnvSafe } from 'src/utils/common'
-import { type Address, type Hex } from 'viem'
-import { mnemonicToAccount } from 'viem/accounts'
+} from '../../application/interfaces/kms.service'
+import { KmsKeyId, toKmsKeyId } from '../../domain/value-objects/kms-key-id'
+import { getEnvSafe } from '../../utils/common'
 
 const CONFIG_DIR = join(process.cwd(), 'config')
 const LAST_KEY_FILE = join(CONFIG_DIR, 'last-key.txt')

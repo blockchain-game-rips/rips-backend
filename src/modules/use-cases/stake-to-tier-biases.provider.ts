@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config'
-import { TicketPrizeRepository } from 'src/application/interfaces/repositories/ticket-prize.repository'
-import { STAKE_TO_TIER_BIASES } from 'src/application/interfaces/tokens'
-import { CARD_CONFIG_KEY, CardConfig } from 'src/configuration/configuration'
+import { TicketPrizeRepository } from '../../application/interfaces/repositories/ticket-prize.repository'
+import { STAKE_TO_TIER_BIASES } from '../../application/interfaces/tokens'
+import { CARD_CONFIG_KEY, CardConfig } from '../../configuration/configuration'
 
 export const stakeToTierBiasesProvider = {
 	provide: STAKE_TO_TIER_BIASES,

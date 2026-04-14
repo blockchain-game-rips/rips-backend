@@ -1,15 +1,12 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common'
-import { GetBalanceUseCase } from 'src/application/use-cases/get-balance/get-balance.use-case'
-import { WithdrawUseCase } from 'src/application/use-cases/withdraw.ts/withdraw.use-case'
-import { EIP155 } from 'src/constants'
-import { TelegramId } from 'src/domain/value-objects/telegram-id'
-import { MAIN_CURRENCY_VALUE } from 'src/modules/main-currency/main-currency.constants'
-import { ZodValidationPipe } from 'src/presentation/pipes/zod-validation.pipe'
-import {
-	telegramIdParamSchema,
-	withdrawBodySchema,
-} from 'src/presentation/validation'
 import { z } from 'zod'
+import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
+import { WithdrawUseCase } from '../../application/use-cases/withdraw.ts/withdraw.use-case'
+import { EIP155 } from '../../constants'
+import { TelegramId } from '../../domain/value-objects/telegram-id'
+import { MAIN_CURRENCY_VALUE } from '../../modules/main-currency/main-currency.constants'
+import { ZodValidationPipe } from '../pipes/zod-validation.pipe'
+import { telegramIdParamSchema, withdrawBodySchema } from '../validation'
 import {
 	BalanceResponseDto,
 	toBalanceResponseDto,

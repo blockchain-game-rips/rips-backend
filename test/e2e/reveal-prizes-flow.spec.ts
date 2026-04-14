@@ -1,20 +1,4 @@
 import { Test } from '@nestjs/testing'
-import { RoundRepository } from 'src/application/interfaces/repositories/round.repository'
-import { StakeRepository } from 'src/application/interfaces/repositories/stake.repository'
-import { GetAvailableStakesUseCase } from 'src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
-import { KeeperUseCase } from 'src/application/use-cases/keeper/keeper.use-case'
-import { SyncClaimEventsUseCase } from 'src/application/use-cases/sync-claim-events/sync-claim-events.use-case'
-import { Config } from 'src/domain/entities/config'
-import {
-	CompletedRound,
-	OngoingRound,
-	RoundStatus,
-} from 'src/domain/entities/round'
-import { Stake } from 'src/domain/entities/stake'
-import { IndexerModule } from 'src/infrastructure/indexer/indexer.module'
-import { ripsAbi } from 'src/infrastructure/rips/rips-abi'
-import { SeedCardDefinitionsService } from 'src/infrastructure/seed/seed-card-definitions.service'
-import { SeedModule } from 'src/infrastructure/seed/seed.module'
 import request from 'supertest'
 import {
 	createWalletClient,
@@ -26,6 +10,22 @@ import {
 	type TransactionReceipt,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
+import { RoundRepository } from '../../src/application/interfaces/repositories/round.repository'
+import { StakeRepository } from '../../src/application/interfaces/repositories/stake.repository'
+import { GetAvailableStakesUseCase } from '../../src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
+import { KeeperUseCase } from '../../src/application/use-cases/keeper/keeper.use-case'
+import { SyncClaimEventsUseCase } from '../../src/application/use-cases/sync-claim-events/sync-claim-events.use-case'
+import { Config } from '../../src/domain/entities/config'
+import {
+	CompletedRound,
+	OngoingRound,
+	RoundStatus,
+} from '../../src/domain/entities/round'
+import { Stake } from '../../src/domain/entities/stake'
+import { IndexerModule } from '../../src/infrastructure/indexer/indexer.module'
+import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
+import { SeedCardDefinitionsService } from '../../src/infrastructure/seed/seed-card-definitions.service'
+import { SeedModule } from '../../src/infrastructure/seed/seed.module'
 import { getBalances, setNativeBalance } from '../utils/anvil'
 import {
 	MockIndexerModule,

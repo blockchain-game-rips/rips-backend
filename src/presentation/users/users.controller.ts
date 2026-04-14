@@ -1,16 +1,16 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common'
-import { CreateUserUseCase } from 'src/application/use-cases/create-user/create-user.use-case'
-import { GetUnrevealedPrizesUseCase } from 'src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
-import { GetUserUseCase } from 'src/application/use-cases/get-user/get-user.use-case'
-import { RevealTicketPrizesUseCase } from 'src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
-import { TelegramId } from 'src/domain/value-objects/telegram-id'
-import { ZodValidationPipe } from 'src/presentation/pipes/zod-validation.pipe'
+import { z } from 'zod'
+import { CreateUserUseCase } from '../../application/use-cases/create-user/create-user.use-case'
+import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
+import { GetUserUseCase } from '../../application/use-cases/get-user/get-user.use-case'
+import { RevealTicketPrizesUseCase } from '../../application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
+import { TelegramId } from '../../domain/value-objects/telegram-id'
+import { ZodValidationPipe } from '../pipes/zod-validation.pipe'
 import {
 	createUserBodySchema,
 	revealBodySchema,
 	telegramIdParamSchema,
-} from 'src/presentation/validation'
-import { z } from 'zod'
+} from '../validation'
 import {
 	TicketPrizeResponseDto,
 	toTicketPrizeResponseDto,

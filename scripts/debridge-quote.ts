@@ -1,11 +1,11 @@
 import { AxiosError } from 'axios'
-import { Config } from 'src/domain/entities/config'
-import { Currency } from 'src/domain/entities/currency'
-import { composeChainId } from 'src/domain/services/chain-id-utils'
-import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
-import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
-import { UserWallet } from 'src/domain/value-objects/wallet'
-import { DeBridgeService } from 'src/infrastructure/de-bridge/de-bridge.service'
+import { Config } from '../src/domain/entities/config'
+import { Currency } from '../src/domain/entities/currency'
+import { composeChainId } from '../src/domain/services/chain-id-utils'
+import { composeCurrencyId } from '../src/domain/services/currency-id-utils'
+import { toChainNamespace } from '../src/domain/value-objects/chain-namespace'
+import { UserWallet } from '../src/domain/value-objects/wallet'
+import { DeBridgeService } from '../src/infrastructure/de-bridge/de-bridge.service'
 
 const EIP155 = toChainNamespace('eip155')
 

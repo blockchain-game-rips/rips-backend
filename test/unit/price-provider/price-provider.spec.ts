@@ -1,16 +1,16 @@
-import { EIP155 } from 'src/constants'
-import { Currency } from 'src/domain/entities/currency'
-import { composeChainId } from 'src/domain/services/chain-id-utils'
+import { EIP155 } from '../../../src/constants'
+import { Currency } from '../../../src/domain/entities/currency'
+import { composeChainId } from '../../../src/domain/services/chain-id-utils'
 import {
 	composeCurrencyId,
 	parseCurrencyId,
-} from 'src/domain/services/currency-id-utils'
-import { ChainAddress } from 'src/domain/value-objects/chain-address'
-import { toChainNamespace } from 'src/domain/value-objects/chain-namespace'
-import { CurrencyId } from 'src/domain/value-objects/currency-id'
-import { EvmCurrencyService } from 'src/infrastructure/evm/evm-currency.service'
-import { GeckoTerminalService } from 'src/infrastructure/price-provider/gecko-terminal.service'
-import { PriceProviderService } from 'src/infrastructure/price-provider/price-provider.service'
+} from '../../../src/domain/services/currency-id-utils'
+import { ChainAddress } from '../../../src/domain/value-objects/chain-address'
+import { toChainNamespace } from '../../../src/domain/value-objects/chain-namespace'
+import { CurrencyId } from '../../../src/domain/value-objects/currency-id'
+import { EvmCurrencyService } from '../../../src/infrastructure/evm/evm-currency.service'
+import { GeckoTerminalService } from '../../../src/infrastructure/price-provider/gecko-terminal.service'
+import { PriceProviderService } from '../../../src/infrastructure/price-provider/price-provider.service'
 
 function accountFromCurrencyId(id: CurrencyId): ChainAddress {
 	const { chainId, address } = parseCurrencyId(id)

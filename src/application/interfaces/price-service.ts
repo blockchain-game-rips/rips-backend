@@ -1,5 +1,5 @@
-import { CurrencyId } from 'src/domain/value-objects/currency-id'
 import { Currency } from '../../domain/entities/currency'
+import { CurrencyId } from '../../domain/value-objects/currency-id'
 
 export abstract class PriceProvider {
 	abstract getPrice(token: Currency): Promise<number>

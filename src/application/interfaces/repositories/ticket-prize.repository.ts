@@ -1,6 +1,6 @@
-import { Card } from 'src/domain/value-objects/card'
-import { CardCollection } from 'src/domain/value-objects/card-collection'
-import { TicketPrize } from 'src/domain/value-objects/ticket-prize'
+import { Card } from '../../../domain/value-objects/card'
+import { CardCollection } from '../../../domain/value-objects/card-collection'
+import { TicketPrize } from '../../../domain/value-objects/ticket-prize'
 
 export abstract class TicketPrizeRepository {
 	abstract upsertMany(userId: bigint, prizes: TicketPrize[]): Promise<void>

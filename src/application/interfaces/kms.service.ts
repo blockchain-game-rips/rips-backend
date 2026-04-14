@@ -1,4 +1,4 @@
-import { KmsKeyId } from 'src/domain/value-objects/kms-key-id'
+import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
 
 export interface KmsKeyResult {
 	kmsKeyId: KmsKeyId

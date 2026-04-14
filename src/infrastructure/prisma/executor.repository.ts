@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { ExecutorRepository } from 'src/application/interfaces/repositories/executor.repository'
-import { EIP155 } from 'src/constants'
-import { Executor } from 'src/domain/entities/executor'
-import { KmsKeyId } from 'src/domain/value-objects/kms-key-id'
-import { Prisma } from 'src/generated/prisma'
+import { ExecutorRepository } from '../../application/interfaces/repositories/executor.repository'
+import { EIP155 } from '../../constants'
+import { Executor } from '../../domain/entities/executor'
+import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
+import { Prisma } from '../../generated/prisma'
 import { PrismaService } from './prisma.service'
 
 @Injectable()

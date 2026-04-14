@@ -2,10 +2,10 @@ import { Inject, Injectable } from '@nestjs/common'
 import {
 	GetCompletedRoundsArgs,
 	RoundRepository,
-} from 'src/application/interfaces/repositories/round.repository'
-import { MAIN_CURRENCY } from 'src/application/interfaces/tokens'
-import { Currency } from 'src/domain/entities/currency'
-import { CompletedRound } from 'src/domain/entities/round'
+} from '../../application/interfaces/repositories/round.repository'
+import { MAIN_CURRENCY } from '../../application/interfaces/tokens'
+import { Currency } from '../../domain/entities/currency'
+import { CompletedRound } from '../../domain/entities/round'
 import { IndexerService } from './indexer.service'
 import { fromRoundRaw } from './utils'
 

@@ -1,16 +1,16 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
-import { BuyTicketsUseCase } from 'src/application/use-cases/buy-tickets/buy-tickets.use-case'
-import { GetAvailableStakesUseCase } from 'src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
-import { GetCompletedRoundsUseCase } from 'src/application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
-import { GetOngoingRoundsUseCase } from 'src/application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
-import { TelegramId } from 'src/domain/value-objects/telegram-id'
-import { ZodValidationPipe } from 'src/presentation/pipes/zod-validation.pipe'
+import { z } from 'zod'
+import { BuyTicketsUseCase } from '../../application/use-cases/buy-tickets/buy-tickets.use-case'
+import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
+import { GetCompletedRoundsUseCase } from '../../application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
+import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
+import { TelegramId } from '../../domain/value-objects/telegram-id'
+import { ZodValidationPipe } from '../pipes/zod-validation.pipe'
 import {
 	buyTicketsBodySchema,
 	completedRoundsQuerySchema,
 	telegramIdParamSchema,
-} from 'src/presentation/validation'
-import { z } from 'zod'
+} from '../validation'
 import {
 	BuyTicketsResponseDto,
 	toBuyTicketsResponseDto,

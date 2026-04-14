@@ -1,3 +1,3 @@
-import { createCustomError } from 'src/utils/common'
+import { createCustomError } from '../../utils/common'
 
 export const InsufficientBalanceError = createCustomError('InsufficientBalance')

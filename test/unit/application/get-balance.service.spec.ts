@@ -1,17 +1,17 @@
-import { WalletService } from 'src/application/interfaces/wallet.service'
-import { GetBalanceService } from 'src/application/use-cases/get-balance/get-balance.service'
+import { WalletService } from '../../../src/application/interfaces/wallet.service'
+import { GetBalanceService } from '../../../src/application/use-cases/get-balance/get-balance.service'
 import {
 	GetUserUseCase,
 	UserNotFoundError,
-} from 'src/application/use-cases/get-user/get-user.use-case'
-import { EIP155 } from 'src/constants'
-import { Currency } from 'src/domain/entities/currency'
-import { User } from 'src/domain/entities/user'
-import { composeChainId } from 'src/domain/services/chain-id-utils'
-import { composeCurrencyId } from 'src/domain/services/currency-id-utils'
-import { CurrencyAmount } from 'src/domain/value-objects/currency-amount'
-import { toTelegramId } from 'src/domain/value-objects/telegram-id'
-import { Wallet } from 'src/domain/value-objects/wallet'
+} from '../../../src/application/use-cases/get-user/get-user.use-case'
+import { EIP155 } from '../../../src/constants'
+import { Currency } from '../../../src/domain/entities/currency'
+import { User } from '../../../src/domain/entities/user'
+import { composeChainId } from '../../../src/domain/services/chain-id-utils'
+import { composeCurrencyId } from '../../../src/domain/services/currency-id-utils'
+import { CurrencyAmount } from '../../../src/domain/value-objects/currency-amount'
+import { toTelegramId } from '../../../src/domain/value-objects/telegram-id'
+import { Wallet } from '../../../src/domain/value-objects/wallet'
 
 const TELEGRAM_ID = toTelegramId(123456n)
 const EVM_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'

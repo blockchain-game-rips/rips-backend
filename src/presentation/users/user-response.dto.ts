@@ -1,5 +1,5 @@
-import { User } from 'src/domain/entities/user'
-import { ChainNamespace } from 'src/domain/value-objects/chain-namespace'
+import { User } from '../../domain/entities/user'
+import { ChainNamespace } from '../../domain/value-objects/chain-namespace'
 
 export type UserResponseDto = {
 	id: string
