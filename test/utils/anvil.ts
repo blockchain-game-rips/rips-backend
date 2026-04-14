@@ -220,7 +220,7 @@ export class Anvil {
 
 			const timer = setTimeout(() => {
 				reject(new Error('Anvil failed to start'))
-			}, this.config.timeoutStartAnvil || 5000)
+			}, this.config.timeoutStartAnvil || 10000)
 
 			anvilProcess?.stdout?.on('data', () => clearTimeout(timer))
 		})
