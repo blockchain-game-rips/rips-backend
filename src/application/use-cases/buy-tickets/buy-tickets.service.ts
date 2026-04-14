@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { RipsService } from 'src/application/interfaces/rips.service'
+import { ZapService } from 'src/application/interfaces/zap.service'
 import { TicketNotFoundError } from 'src/domain/errors/stake-not-found.error'
-import { Purchase } from 'src/domain/value-objects/purchase'
 import { GetAvailableStakesUseCase } from '../get-available-stakes/get-available-stakes.use-case'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
-import { BuyTicketsInput, BuyTicketsUseCase } from './buy-tickets.use-case'
+import {
+	BuyTicketsInput,
+	BuyTicketsResult,
+	BuyTicketsUseCase,
+} from './buy-tickets.use-case'
 
 @Injectable()
 export class BuyTicketsService extends BuyTicketsUseCase {
@@ -12,11 +16,12 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
 		private readonly ripsService: RipsService,
+		private readonly zapService: ZapService,
 	) {
 		super()
 	}
 
-	async execute(input: BuyTicketsInput): Promise<Purchase> {
+	async execute(input: BuyTicketsInput): Promise<BuyTicketsResult> {
 		const { telegramId, stakeId, ticketCount } = input
 
 		const [user, availableStakes] = await Promise.all([
@@ -38,10 +43,27 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 				? availableStake.fillingRound.config
 				: availableStake.stake.currentConfig
 
-		return await this.ripsService.buyTickets(user.wallet, {
+		if (config.ticketPrice.currency.id === input.paymentCurrency.id) {
+			const res = await this.ripsService.buyTickets(user.wallet, {
+				stakeId: availableStake.stake.id,
+				config,
+				ticketCount,
+			})
+
+			return { type: 'settled', purchase: res }
+		}
+
+		const res = await this.zapService.buyTickets(user.wallet, {
+			paymentCurrency: input.paymentCurrency,
 			stakeId: availableStake.stake.id,
 			config,
 			ticketCount,
 		})
+		//TODO: write tg notif in database where zap is finished
+
+		return {
+			type: 'pending',
+			transaction: res,
+		}
 	}
 }
