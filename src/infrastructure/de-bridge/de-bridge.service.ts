@@ -1,18 +1,27 @@
-import { Inject } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import ky from 'ky'
 import {
 	Address,
+	decodeEventLog,
 	encodeAbiParameters,
 	encodeFunctionData,
 	getAddress,
+	maxUint256,
 } from 'viem'
 import { ZapService } from '../../application/interfaces/zap.service'
 import { EIP155 } from '../../constants'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
+import { Purchase } from '../../domain/value-objects/purchase'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { wait } from '../../utils/common'
+import { EvmClientService } from '../evm/evm-client/evm-client.service'
+import { EvmCurrencyReadService } from '../evm/evm-currency-read.service'
+import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
+import { EvmCurrencyService } from '../evm/evm-currency.service'
+import { EvmTransactionService } from '../evm/evm-transaction.service'
+import { Token } from '../evm/primitives/currencies/token'
 import { ripsAbi } from '../rips/rips-abi'
 import { RIPS_SC_ADDRESS } from '../rips/rips.constants'
 import { CreateTxSchema } from './schemas/create-tx.schema'
@@ -21,9 +30,15 @@ import { OrderSchema } from './schemas/order-status.schema'
 const DEBRIDGE_API_URL = 'https://api.dln.trade/v1.0'
 const UNIVERSAL_HOOK_ADDRESS = '0x0000000000000000000000000000000000000000'
 
+@Injectable()
 export class DeBridgeService implements ZapService {
 	constructor(
 		@Inject(RIPS_SC_ADDRESS) private readonly ripsContractAddress: Address,
+		private readonly evmClientService: EvmClientService,
+		private readonly evmCurrencyService: EvmCurrencyService,
+		private readonly evmCurrencyReadService: EvmCurrencyReadService,
+		private readonly evmCurrencyWriteService: EvmCurrencyWriteService,
+		private readonly evmTransactionService: EvmTransactionService,
 	) {}
 
 	async quote(
@@ -36,11 +51,31 @@ export class DeBridgeService implements ZapService {
 		},
 	): Promise<bigint> {
 		const { config, paymentCurrency, ticketCount, stakeId } = args
+		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
+
+		const { srcAmount } = await this.getBuyTicketsOrder({
+			userAddress,
+			stakeId,
+			ticketCount,
+			config,
+			paymentCurrency,
+		})
+
+		return srcAmount
+	}
+
+	private async getBuyTicketsOrder(args: {
+		userAddress: Address
+		stakeId: number
+		ticketCount: number
+		config: Config
+		paymentCurrency: Currency
+	}) {
+		const { userAddress, stakeId, ticketCount, config, paymentCurrency } =
+			args
 
 		const ticketCurrency = config.ticketPrice.currency
-		const totalTicketAmount =
-			config.ticketPrice.amount * BigInt(ticketCount)
-		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
+		const paymentAmount = config.ticketPrice.amount * BigInt(ticketCount)
 
 		const hookTo = getAddress(this.ripsContractAddress)
 		const hookCalldata = encodeFunctionData({
@@ -75,15 +110,18 @@ export class DeBridgeService implements ZapService {
 			},
 		}
 
-		const data = await this.createTx({
+		const { estimation, tx } = await this.createTx({
 			userAddress,
 			srcCurrency: paymentCurrency,
 			dstCurrency: ticketCurrency,
-			exactOut: totalTicketAmount,
+			exactOut: paymentAmount,
 			dlnHook,
 		})
 
-		return BigInt(data.estimation.srcChainTokenIn.amount)
+		return {
+			srcAmount: BigInt(estimation.srcChainTokenIn.amount),
+			tx,
+		}
 	}
 
 	private async createTx(
@@ -175,7 +213,70 @@ export class DeBridgeService implements ZapService {
 		return OrderSchema.parse(rawData)
 	}
 
-	buyTickets(
+	async getFulfilledOrderResult(
+		dstTxHash: `0x${string}`,
+		dstChainId: number,
+	): Promise<
+		| { status: 'success'; purchase: Purchase }
+		| { status: 'hook_failed'; transaction: Transaction }
+	> {
+		const client = this.evmClientService.getClient(dstChainId)
+		const nativeCurrency = this.evmCurrencyService.getNative(dstChainId)
+
+		const receipt = await client.getTransactionReceipt({ hash: dstTxHash })
+
+		const FULFILLED_ORDER_TOPIC =
+			'0xc164aca37b9805a1c9027b6f32260a069723a82926f6e9ece4926e4dd3ea8ecf'
+
+		const fulfilledOrderLog = receipt.logs.find(
+			(log) => log.topics[0] === FULFILLED_ORDER_TOPIC,
+		)
+
+		if (!fulfilledOrderLog) {
+			throw new Error(`No FulfilledOrder event found in tx ${dstTxHash}`)
+		}
+
+		const gasCost = receipt.gasUsed * receipt.effectiveGasPrice
+
+		const transaction: Transaction = {
+			id: dstTxHash,
+			cost: { currency: nativeCurrency, amount: gasCost },
+		}
+
+		const ticketsPurchasedLog = receipt.logs
+			.map((log) => {
+				try {
+					return decodeEventLog({
+						abi: ripsAbi,
+						data: log.data,
+						topics: log.topics,
+						strict: false,
+					})
+				} catch {
+					return null
+				}
+			})
+			.find((decoded) => decoded?.eventName === 'TicketsPurchased')
+
+		if (!ticketsPurchasedLog) {
+			return { status: 'hook_failed', transaction }
+		}
+
+		const { roundId, ticketCount } = ticketsPurchasedLog.args as {
+			roundId: bigint
+			ticketCount: bigint
+		}
+
+		const purchase: Purchase = {
+			transaction,
+			ticketCount: Number(ticketCount),
+			roundId: Number(roundId),
+		}
+
+		return { status: 'success', purchase }
+	}
+
+	async buyTickets(
 		wallet: Wallet,
 		args: {
 			paymentCurrency: Currency
@@ -184,6 +285,48 @@ export class DeBridgeService implements ZapService {
 			ticketCount: number
 		},
 	): Promise<Transaction> {
-		throw new Error('Method not implemented.')
+		const { config, paymentCurrency, ticketCount, stakeId } = args
+
+		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
+		const srcChainId = Number(paymentCurrency.chainAddress.chain.reference)
+
+		const { srcAmount, tx } = await this.getBuyTicketsOrder({
+			userAddress,
+			stakeId,
+			ticketCount,
+			config,
+			paymentCurrency,
+		})
+
+		const spender = getAddress(tx.to)
+
+		if (paymentCurrency instanceof Token) {
+			const allowance = await this.evmCurrencyReadService.allowance(
+				paymentCurrency,
+				userAddress,
+				spender,
+			)
+
+			if (allowance < srcAmount) {
+				await this.evmCurrencyWriteService.approve(wallet, {
+					token: paymentCurrency,
+					spender,
+					amount: maxUint256,
+				})
+			}
+		}
+
+		const { transaction } =
+			await this.evmTransactionService.sendTransaction(
+				wallet,
+				{
+					to: spender,
+					data: tx.data as `0x${string}`,
+					value: BigInt(tx.value),
+				},
+				srcChainId,
+			)
+
+		return transaction
 	}
 }

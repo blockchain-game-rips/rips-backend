@@ -56,6 +56,7 @@ export class EvmCurrencyWriteService {
 		const chainId = Number(token.chainAddress.chain.reference)
 
 		const request: TransactionRequestEIP1559 = {
+			to: getAddress(token.chainAddress.address),
 			data: encodeFunctionData({
 				abi: erc20Abi,
 				functionName: 'approve',
