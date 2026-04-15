@@ -47,6 +47,32 @@ export class EvmCurrencyWriteService {
 		return transaction
 	}
 
+	async approve(
+		wallet: Wallet,
+		args: { token: Token; spender: Address; amount: bigint },
+	): Promise<Transaction> {
+		const { token, spender, amount } = args
+
+		const chainId = Number(token.chainAddress.chain.reference)
+
+		const request: TransactionRequestEIP1559 = {
+			data: encodeFunctionData({
+				abi: erc20Abi,
+				functionName: 'approve',
+				args: [spender, amount],
+			}),
+		}
+
+		const { transaction } =
+			await this.evmTransactionService.sendTransaction(
+				wallet,
+				request,
+				chainId,
+			)
+
+		return transaction
+	}
+
 	private buildTransactionRequest(
 		currency: EvmCurrency,
 		params: {
