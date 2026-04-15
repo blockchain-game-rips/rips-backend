@@ -4,8 +4,10 @@ const sharedConfig = {
 	testEnvironment: 'node',
 	modulePathIgnorePatterns: ['<rootDir>/dist/'],
 	transform: {
-		'^.+.tsx?$': ['ts-jest', {}],
+		'^.+\\.tsx?$': ['ts-jest', {}],
+		'^(?!.*/generated/).*\\.js$': ['ts-jest', { diagnostics: false }],
 	},
+	transformIgnorePatterns: ['node_modules/(?!(ky)/)'],
 	moduleNameMapper: {
 		'^src/(.*)$': '<rootDir>/src/$1',
 		'^generated/(.*)$': '<rootDir>/generated/$1',
