@@ -210,6 +210,7 @@ export class DeBridgeService implements ZapService {
 
 		const createTxResponse = await this.fetchCreateTx({
 			userAddress,
+			recipient: userAddress,
 			srcCurrency: paymentCurrency,
 			dstCurrency: ticketCurrency,
 			exactOut: paymentAmount,
@@ -258,6 +259,7 @@ export class DeBridgeService implements ZapService {
 	private async fetchCreateTx(
 		args: {
 			userAddress: Address
+			recipient: Address
 			srcCurrency: Currency
 			dstCurrency: Currency
 			dlnHook?: unknown
@@ -266,7 +268,8 @@ export class DeBridgeService implements ZapService {
 			| { exactOut: bigint; exactIn?: never }
 		),
 	) {
-		const { userAddress, srcCurrency, dstCurrency, dlnHook } = args
+		const { userAddress, recipient, srcCurrency, dstCurrency, dlnHook } =
+			args
 
 		const amountParams =
 			args.exactOut !== undefined
@@ -290,7 +293,7 @@ export class DeBridgeService implements ZapService {
 					srcChainOrderAuthorityAddress: userAddress,
 					dstChainId: dstCurrency.chainAddress.chain.reference,
 					dstChainTokenOut: dstCurrency.chainAddress.address,
-					dstChainTokenOutRecipient: userAddress,
+					dstChainTokenOutRecipient: recipient,
 					dstChainOrderAuthorityAddress: userAddress,
 					...amountParams,
 					...(dlnHook !== undefined && {
