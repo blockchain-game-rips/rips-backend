@@ -51,7 +51,7 @@ export class DeBridgeService implements ZapService {
 		private readonly evmTransactionService: EvmTransactionService,
 	) {}
 
-	quoteSwap(
+	async quoteSwap(
 		wallet: Wallet,
 		args: {
 			currencyIn: Currency
@@ -60,7 +60,22 @@ export class DeBridgeService implements ZapService {
 			recipient: ChainAddress
 		},
 	): Promise<ZapQuoteSwapResult> {
-		throw new Error('Method not implemented.')
+		const { currencyIn, currencyOut, amountIn, recipient } = args
+		const userAddress = evmAddressFromWallet(wallet)
+
+		const createTxResponse = await this.fetchCreateTx({
+			userAddress,
+			recipient: getAddress(recipient.address),
+			srcCurrency: currencyIn,
+			dstCurrency: currencyOut,
+			exactIn: amountIn,
+		})
+
+		return {
+			amountOut: BigInt(
+				createTxResponse.estimation.dstChainTokenOut.amount,
+			),
+		}
 	}
 
 	async quoteBuyTickets(
@@ -158,7 +173,7 @@ export class DeBridgeService implements ZapService {
 		}
 	}
 
-	swap(
+	async swap(
 		wallet: Wallet,
 		args: {
 			currencyIn: Currency
@@ -167,8 +182,34 @@ export class DeBridgeService implements ZapService {
 			recipient: ChainAddress
 		},
 	): Promise<PendingZap> {
-		// TODO: implement swap
-		throw new Error('Not implemented')
+		const { currencyIn, currencyOut, amountIn, recipient } = args
+		const userAddress = evmAddressFromWallet(wallet)
+		const srcChainId = evmChainIdFromCurrency(currencyIn)
+
+		const createTxResponse = await this.fetchCreateTx({
+			userAddress,
+			recipient: getAddress(recipient.address),
+			srcCurrency: currencyIn,
+			dstCurrency: currencyOut,
+			exactIn: amountIn,
+		})
+
+		await this.approveIfNeeded({
+			wallet,
+			paymentCurrency: currencyIn,
+			amountIn,
+			spender: getAddress(createTxResponse.tx.to),
+			userAddress,
+		})
+
+		const { transaction } =
+			await this.evmTransactionService.sendTransaction(
+				wallet,
+				this.txRequestFromOrder(createTxResponse),
+				srcChainId,
+			)
+
+		return { srcTransaction: transaction, zapId: createTxResponse.orderId }
 	}
 
 	waitForSwap(pendingZap: PendingZap): Promise<ZapSwapResult> {
