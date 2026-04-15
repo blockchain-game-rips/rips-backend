@@ -5,11 +5,13 @@ import { Wallet } from '../../domain/value-objects/wallet'
 import {
 	PendingZap,
 	ZapBuyResult,
+	ZapQuoteBuyResult,
+	ZapQuoteSwapResult,
 	ZapSwapResult,
 } from '../../domain/value-objects/zap'
 
 export abstract class ZapService {
-	abstract quote(
+	abstract quoteBuyTickets(
 		wallet: Wallet,
 		args: {
 			stakeId: number
@@ -17,7 +19,7 @@ export abstract class ZapService {
 			paymentCurrency: Currency
 			ticketCount: number
 		},
-	): Promise<bigint>
+	): Promise<ZapQuoteBuyResult>
 
 	abstract buyTickets(
 		wallet: Wallet,
@@ -28,6 +30,16 @@ export abstract class ZapService {
 			ticketCount: number
 		},
 	): Promise<PendingZap>
+
+	abstract quoteSwap(
+		wallet: Wallet,
+		args: {
+			currencyIn: Currency
+			currencyOut: Currency
+			amountIn: bigint
+			recipient: ChainAddress
+		},
+	): Promise<ZapQuoteSwapResult>
 
 	abstract swap(
 		wallet: Wallet,

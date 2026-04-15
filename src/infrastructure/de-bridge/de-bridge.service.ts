@@ -19,6 +19,8 @@ import { Wallet } from '../../domain/value-objects/wallet'
 import {
 	PendingZap,
 	ZapBuyResult,
+	ZapQuoteBuyResult,
+	ZapQuoteSwapResult,
 	ZapSwapResult,
 } from '../../domain/value-objects/zap'
 import { wait } from '../../utils/common'
@@ -49,7 +51,19 @@ export class DeBridgeService implements ZapService {
 		private readonly evmTransactionService: EvmTransactionService,
 	) {}
 
-	async quote(
+	quoteSwap(
+		wallet: Wallet,
+		args: {
+			currencyIn: Currency
+			currencyOut: Currency
+			amountIn: bigint
+			recipient: ChainAddress
+		},
+	): Promise<ZapQuoteSwapResult> {
+		throw new Error('Method not implemented.')
+	}
+
+	async quoteBuyTickets(
 		wallet: Wallet,
 		args: {
 			stakeId: number
@@ -57,7 +71,7 @@ export class DeBridgeService implements ZapService {
 			paymentCurrency: Currency
 			ticketCount: number
 		},
-	): Promise<bigint> {
+	): Promise<ZapQuoteBuyResult> {
 		const { config, paymentCurrency, ticketCount, stakeId } = args
 		const userAddress = evmAddressFromWallet(wallet)
 
@@ -73,7 +87,7 @@ export class DeBridgeService implements ZapService {
 			createTxResponse.estimation.srcChainTokenIn.amount,
 		)
 
-		return amountIn
+		return { amountIn }
 	}
 
 	async buyTickets(

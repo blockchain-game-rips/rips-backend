@@ -17,3 +17,11 @@ export type ZapBuyResult = ZapResult<Purchase>
 export type ZapSwapResult = ZapResult<{
 	amountOut: CurrencyAmount
 }>
+
+export type ZapQuoteBuyResult = {
+	amountIn: bigint
+}
+
+export type ZapQuoteSwapResult = {
+	amountOut: bigint
+}
