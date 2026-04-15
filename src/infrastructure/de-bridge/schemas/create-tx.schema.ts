@@ -101,4 +101,4 @@ export const CreateTxSchema = z.object({
 	protocolFeeApproximateUsdValue: z.number(),
 	usdPriceImpact: z.number(),
 })
-export type CreateTx = z.infer<typeof CreateTxSchema>
+export type CreateTxResponse = z.infer<typeof CreateTxSchema>

@@ -7,6 +7,7 @@ import {
 	getAddress,
 	Hex,
 	maxUint256,
+	TransactionRequestEIP1559,
 } from 'viem'
 import { ZapService } from '../../application/interfaces/zap.service'
 import { Config } from '../../domain/entities/config'
@@ -31,7 +32,7 @@ import { Token } from '../evm/primitives/currencies/token'
 import { parsePurchase } from '../rips/parse-purchase'
 import { ripsAbi } from '../rips/rips-abi'
 import { RIPS_SC_ADDRESS } from '../rips/rips.constants'
-import { CreateTxSchema } from './schemas/create-tx.schema'
+import { CreateTxResponse, CreateTxSchema } from './schemas/create-tx.schema'
 import { OrderSchema } from './schemas/order-status.schema'
 
 const DEBRIDGE_API_URL = 'https://api.dln.trade/v1.0'
@@ -60,7 +61,7 @@ export class DeBridgeService implements ZapService {
 		const { config, paymentCurrency, ticketCount, stakeId } = args
 		const userAddress = evmAddressFromWallet(wallet)
 
-		const { srcAmount } = await this.getBuyTicketsOrder({
+		const createTxResponse = await this.fetchCreateTxForBuyTickets({
 			userAddress,
 			stakeId,
 			ticketCount,
@@ -68,7 +69,11 @@ export class DeBridgeService implements ZapService {
 			paymentCurrency,
 		})
 
-		return srcAmount
+		const amountIn = BigInt(
+			createTxResponse.estimation.srcChainTokenIn.amount,
+		)
+
+		return amountIn
 	}
 
 	async buyTickets(
@@ -85,7 +90,7 @@ export class DeBridgeService implements ZapService {
 		const userAddress = evmAddressFromWallet(wallet)
 		const srcChainId = evmChainIdFromCurrency(paymentCurrency)
 
-		const { srcAmount, tx, orderId } = await this.getBuyTicketsOrder({
+		const createTxResponse = await this.fetchCreateTxForBuyTickets({
 			userAddress,
 			stakeId,
 			ticketCount,
@@ -93,16 +98,20 @@ export class DeBridgeService implements ZapService {
 			paymentCurrency,
 		})
 
-		const spender = getAddress(tx.to)
-
 		if (paymentCurrency instanceof Token) {
+			const spender = getAddress(createTxResponse.tx.to)
+
 			const allowance = await this.evmCurrencyReadService.allowance(
 				paymentCurrency,
 				userAddress,
 				spender,
 			)
 
-			if (allowance < srcAmount) {
+			const amountIn = BigInt(
+				createTxResponse.estimation.srcChainTokenIn.amount,
+			)
+
+			if (allowance < amountIn) {
 				await this.evmCurrencyWriteService.approve(wallet, {
 					token: paymentCurrency,
 					spender,
@@ -114,15 +123,11 @@ export class DeBridgeService implements ZapService {
 		const { transaction } =
 			await this.evmTransactionService.sendTransaction(
 				wallet,
-				{
-					to: spender,
-					data: tx.data as `0x${string}`,
-					value: BigInt(tx.value),
-				},
+				this.txRequestFromOrder(createTxResponse),
 				srcChainId,
 			)
 
-		return { srcTransaction: transaction, zapId: orderId }
+		return { srcTransaction: transaction, zapId: createTxResponse.orderId }
 	}
 
 	swap(
@@ -148,13 +153,23 @@ export class DeBridgeService implements ZapService {
 		throw new Error('Not implemented')
 	}
 
-	private async getBuyTicketsOrder(args: {
+	private txRequestFromOrder(
+		createTxResponse: CreateTxResponse,
+	): TransactionRequestEIP1559 {
+		return {
+			to: createTxResponse.tx.to as Address,
+			data: createTxResponse.tx.data as `0x${string}`,
+			value: BigInt(createTxResponse.tx.value),
+		}
+	}
+
+	private async fetchCreateTxForBuyTickets(args: {
 		userAddress: Address
 		stakeId: number
 		ticketCount: number
 		config: Config
 		paymentCurrency: Currency
-	}) {
+	}): Promise<CreateTxResponse> {
 		const { userAddress, stakeId, ticketCount, config, paymentCurrency } =
 			args
 
@@ -179,7 +194,7 @@ export class DeBridgeService implements ZapService {
 			},
 		}
 
-		const { estimation, tx, orderId } = await this.createTx({
+		const createTxResponse = await this.fetchCreateTx({
 			userAddress,
 			srcCurrency: paymentCurrency,
 			dstCurrency: ticketCurrency,
@@ -187,11 +202,7 @@ export class DeBridgeService implements ZapService {
 			dlnHook,
 		})
 
-		return {
-			srcAmount: BigInt(estimation.srcChainTokenIn.amount),
-			tx,
-			orderId,
-		}
+		return createTxResponse
 	}
 
 	private buildBuyTicketsPayload(args: {
@@ -230,7 +241,7 @@ export class DeBridgeService implements ZapService {
 		return targetPayload
 	}
 
-	private async createTx(
+	private async fetchCreateTx(
 		args: {
 			userAddress: Address
 			srcCurrency: Currency
