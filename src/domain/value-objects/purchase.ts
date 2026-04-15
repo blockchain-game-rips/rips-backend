@@ -1,7 +1,7 @@
-import { Transaction } from './transaction'
+import { CurrencyAmount } from './currency-amount'
 
 export type Purchase = {
-	transaction: Transaction
 	ticketCount: number
 	roundId: number
+	leftover?: CurrencyAmount
 }
