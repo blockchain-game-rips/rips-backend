@@ -98,17 +98,40 @@ export class DeBridgeService implements ZapService {
 			paymentCurrency,
 		})
 
-		if (paymentCurrency instanceof Token) {
-			const spender = getAddress(createTxResponse.tx.to)
+		const spender = await this.approveIfNeeded({
+			wallet,
+			paymentCurrency,
+			amountIn: BigInt(
+				createTxResponse.estimation.srcChainTokenIn.amount,
+			),
+			spender: getAddress(createTxResponse.tx.to),
+			userAddress,
+		})
 
+		const { transaction } =
+			await this.evmTransactionService.sendTransaction(
+				wallet,
+				this.txRequestFromOrder(createTxResponse),
+				srcChainId,
+			)
+
+		return { srcTransaction: transaction, zapId: createTxResponse.orderId }
+	}
+
+	async approveIfNeeded(args: {
+		wallet: Wallet
+		paymentCurrency: Currency
+		amountIn: bigint
+		spender: Address
+		userAddress: Address
+	}) {
+		const { wallet, paymentCurrency, amountIn, spender, userAddress } = args
+
+		if (paymentCurrency instanceof Token) {
 			const allowance = await this.evmCurrencyReadService.allowance(
 				paymentCurrency,
 				userAddress,
 				spender,
-			)
-
-			const amountIn = BigInt(
-				createTxResponse.estimation.srcChainTokenIn.amount,
 			)
 
 			if (allowance < amountIn) {
@@ -119,15 +142,6 @@ export class DeBridgeService implements ZapService {
 				})
 			}
 		}
-
-		const { transaction } =
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				this.txRequestFromOrder(createTxResponse),
-				srcChainId,
-			)
-
-		return { srcTransaction: transaction, zapId: createTxResponse.orderId }
 	}
 
 	swap(
