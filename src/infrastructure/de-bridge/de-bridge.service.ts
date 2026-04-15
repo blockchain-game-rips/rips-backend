@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common'
 import ky from 'ky'
 import {
 	Address,
-	decodeEventLog,
 	encodeAbiParameters,
 	encodeFunctionData,
 	getAddress,
@@ -28,6 +27,7 @@ import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { Token } from '../evm/primitives/currencies/token'
+import { parsePurchase } from '../rips/parse-purchase'
 import { ripsAbi } from '../rips/rips-abi'
 import { RIPS_SC_ADDRESS } from '../rips/rips.constants'
 import { CreateTxSchema } from './schemas/create-tx.schema'
@@ -250,34 +250,10 @@ export class DeBridgeService implements ZapService {
 			cost: { currency: nativeCurrency, amount: gasCost },
 		}
 
-		//TODO: move it to separate service, this logic should be alse used in rips service implementation
-		const ticketsPurchasedLog = receipt.logs
-			.map((log) => {
-				try {
-					return decodeEventLog({
-						abi: ripsAbi,
-						data: log.data,
-						topics: log.topics,
-						strict: false,
-					})
-				} catch {
-					return null
-				}
-			})
-			.find((decoded) => decoded?.eventName === 'TicketsPurchased')
+		const purchase = parsePurchase(receipt, this.ripsContractAddress)
 
-		if (!ticketsPurchasedLog) {
+		if (!purchase) {
 			return { status: 'hook_failed', transaction }
-		}
-
-		const { roundId, ticketCount } = ticketsPurchasedLog.args as {
-			roundId: bigint
-			ticketCount: bigint
-		}
-
-		const purchase: Purchase = {
-			ticketCount: Number(ticketCount),
-			roundId: Number(roundId),
 		}
 
 		return { status: 'success', purchase }

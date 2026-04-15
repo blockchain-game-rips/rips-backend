@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
 import {
-	decodeEventLog,
 	encodeFunctionData,
 	getAddress,
 	zeroAddress,
@@ -18,6 +17,7 @@ import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
+import { parsePurchase } from './parse-purchase'
 import { ripsAbi } from './rips-abi'
 import { RIPS_SC_ADDRESS } from './rips.constants'
 
@@ -136,32 +136,15 @@ export class RipsServiceIpml implements RipsService {
 				chainId,
 			)
 
-		const ticketsPurchasedLog = receipt.logs
-			.map((log) => {
-				try {
-					return decodeEventLog({ abi: ripsAbi, ...log })
-				} catch {
-					return null
-				}
-			})
-			.find((event) => event?.eventName === 'TicketsPurchased')
+		const purchase = parsePurchase(receipt, this.contractAddress)
 
-		if (
-			!ticketsPurchasedLog ||
-			ticketsPurchasedLog.eventName !== 'TicketsPurchased'
-		) {
+		if (!purchase) {
 			throw new TransactionFailedError(
 				`TicketsPurchased event not found in transaction: ${transaction.id}`,
 			)
 		}
 
-		return {
-			transaction,
-			purchase: {
-				roundId: Number(ticketsPurchasedLog.args.roundId),
-				ticketCount: Number(ticketsPurchasedLog.args.ticketCount),
-			},
-		}
+		return { transaction, purchase }
 	}
 
 	private requireEvmCurrency(): EvmCurrency {
