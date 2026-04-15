@@ -98,7 +98,7 @@ export class DeBridgeService implements ZapService {
 			paymentCurrency,
 		})
 
-		const spender = await this.approveIfNeeded({
+		await this.approveIfNeeded({
 			wallet,
 			paymentCurrency,
 			amountIn: BigInt(
