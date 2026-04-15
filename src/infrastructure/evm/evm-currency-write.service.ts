@@ -10,6 +10,7 @@ import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from './evm-transaction.service'
+import { evmChainIdFromCurrency } from './helpers'
 import { EvmCurrency } from './primitives/currencies/evm-currency'
 import { Token } from './primitives/currencies/token'
 
@@ -29,7 +30,7 @@ export class EvmCurrencyWriteService {
 	): Promise<Transaction> {
 		const { currency, to: recipient, amount } = args
 
-		const chainId = Number(currency.chainAddress.chain.reference)
+		const chainId = evmChainIdFromCurrency(currency)
 		const recipientAddress = getAddress(recipient.address)
 
 		const request = this.buildTransactionRequest(currency, {
@@ -53,7 +54,7 @@ export class EvmCurrencyWriteService {
 	): Promise<Transaction> {
 		const { token, spender, amount } = args
 
-		const chainId = Number(token.chainAddress.chain.reference)
+		const chainId = evmChainIdFromCurrency(token)
 
 		const request: TransactionRequestEIP1559 = {
 			to: getAddress(token.chainAddress.address),

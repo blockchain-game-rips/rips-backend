@@ -18,9 +18,9 @@ import { AppModule } from '../../src/app.module'
 import { KmsService } from '../../src/application/interfaces/kms.service'
 import { STAKE_TO_TIER_BIASES } from '../../src/application/interfaces/tokens'
 import { AppConfigModule } from '../../src/configuration/app-config.module'
-import { EIP155 } from '../../src/constants'
 import { Executor } from '../../src/domain/entities/executor'
 import { EVM_CLIENT_CONFIG } from '../../src/infrastructure/evm/evm-client/types'
+import { evmAddressFromWallet } from '../../src/infrastructure/evm/helpers'
 import { IndexerModule } from '../../src/infrastructure/indexer/indexer.module'
 import { MnemonicKmsService } from '../../src/infrastructure/kms/mnemonic-kms.service'
 import { ProvisionService } from '../../src/infrastructure/provision/provision.service'
@@ -161,7 +161,7 @@ async function setupExecutors(
 	})
 
 	for (const executor of executors) {
-		const address = executor.wallet.namespaceToAddress[EIP155] as Address
+		const address = evmAddressFromWallet(executor.wallet)
 
 		await setNativeBalance(publicClient, address, EXECUTOR_BALANCE)
 

@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { getAddress } from 'viem'
 import { WalletService } from '../../application/interfaces/wallet.service'
-import { EIP155 } from '../../constants'
 import { Currency } from '../../domain/entities/currency'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmCurrencyReadService } from '../evm/evm-currency-read.service'
 import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
+import { evmAddressFromWallet } from '../evm/helpers'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
 
 @Injectable()
@@ -21,7 +20,7 @@ export class WalletServiceImpl extends WalletService {
 
 	balanceOf(wallet: Wallet, currency: Currency): Promise<bigint> {
 		if (currency instanceof EvmCurrency) {
-			const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
+			const userAddress = evmAddressFromWallet(wallet)
 			return this.evmCurrencyReadService.balanceOf(currency, userAddress)
 		}
 

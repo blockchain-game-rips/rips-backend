@@ -9,7 +9,6 @@ import {
 	maxUint256,
 } from 'viem'
 import { ZapService } from '../../application/interfaces/zap.service'
-import { EIP155 } from '../../constants'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
@@ -27,6 +26,7 @@ import { EvmCurrencyReadService } from '../evm/evm-currency-read.service'
 import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
+import { evmAddressFromWallet, evmChainIdFromCurrency } from '../evm/helpers'
 import { Token } from '../evm/primitives/currencies/token'
 import { parsePurchase } from '../rips/parse-purchase'
 import { ripsAbi } from '../rips/rips-abi'
@@ -58,7 +58,7 @@ export class DeBridgeService implements ZapService {
 		},
 	): Promise<bigint> {
 		const { config, paymentCurrency, ticketCount, stakeId } = args
-		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
+		const userAddress = evmAddressFromWallet(wallet)
 
 		const { srcAmount } = await this.getBuyTicketsOrder({
 			userAddress,
@@ -82,8 +82,8 @@ export class DeBridgeService implements ZapService {
 	): Promise<PendingZap> {
 		const { config, paymentCurrency, ticketCount, stakeId } = args
 
-		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
-		const srcChainId = Number(paymentCurrency.chainAddress.chain.reference)
+		const userAddress = evmAddressFromWallet(wallet)
+		const srcChainId = evmChainIdFromCurrency(paymentCurrency)
 
 		const { srcAmount, tx, orderId } = await this.getBuyTicketsOrder({
 			userAddress,

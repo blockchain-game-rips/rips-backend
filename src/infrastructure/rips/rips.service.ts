@@ -1,14 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common'
 import {
 	encodeFunctionData,
-	getAddress,
 	zeroAddress,
 	type Address,
 	type TransactionRequestEIP1559,
 } from 'viem'
 import { RipsService } from '../../application/interfaces/rips.service'
 import { MAIN_CURRENCY } from '../../application/interfaces/tokens'
-import { EIP155 } from '../../constants'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
@@ -16,6 +14,7 @@ import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
+import { evmAddressFromWallet, evmChainIdFromCurrency } from '../evm/helpers'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
 import { parsePurchase } from './parse-purchase'
 import { ripsAbi } from './rips-abi'
@@ -89,7 +88,7 @@ export class RipsServiceIpml implements RipsService {
 	): Promise<Transaction> {
 		const evmCurrency = this.requireEvmCurrency()
 
-		const chainId = Number(evmCurrency.chainAddress.chain.reference)
+		const chainId = evmChainIdFromCurrency(evmCurrency)
 
 		const request: TransactionRequestEIP1559 = {
 			...requestFields,
@@ -114,8 +113,8 @@ export class RipsServiceIpml implements RipsService {
 
 		const { stakeId, config, ticketCount } = args
 
-		const chainId = Number(evmCurrency.chainAddress.chain.reference)
-		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
+		const chainId = evmChainIdFromCurrency(evmCurrency)
+		const userAddress = evmAddressFromWallet(wallet)
 
 		const totalValue = config.ticketPrice.amount * BigInt(ticketCount)
 

@@ -1,16 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import {
-	getAddress,
-	TransactionReceipt,
-	type TransactionRequestEIP1559,
-} from 'viem'
-import { EIP155 } from '../../constants'
+import { TransactionReceipt, type TransactionRequestEIP1559 } from 'viem'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { SignService } from '../sign/sign.service'
 import { EvmClientService } from './evm-client/evm-client.service'
 import { EvmCurrencyService } from './evm-currency.service'
+import { evmAddressFromWallet } from './helpers'
 
 export type TransactionResult = {
 	transaction: Transaction
@@ -32,7 +28,7 @@ export class EvmTransactionService {
 	): Promise<TransactionResult> {
 		const client = this.evmClientService.getClient(chainId)
 		const nativeCurrency = this.evmCurrencyService.getNative(chainId)
-		const senderAddress = getAddress(wallet.namespaceToAddress[EIP155])
+		const senderAddress = evmAddressFromWallet(wallet)
 
 		const tx = await client
 			.prepareTransactionRequest({
