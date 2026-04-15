@@ -185,7 +185,7 @@ describe('DeBridge integration', () => {
 
 			// Step 2: fulfill order on Base
 			const fulfillReceipt = await fulfillDlnOrder({
-				srcTxHash: transaction.id as Hash,
+				srcTxHash: transaction.srcTransaction.id as Hash,
 				srcPublicClient: arbitrumClient,
 				dstPublicClient: baseClient,
 			})

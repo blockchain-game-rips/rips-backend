@@ -12,9 +12,15 @@ import { ZapService } from '../../application/interfaces/zap.service'
 import { EIP155 } from '../../constants'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
+import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { Purchase } from '../../domain/value-objects/purchase'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
+import {
+	PendingZap,
+	ZapBuyResult,
+	ZapSwapResult,
+} from '../../domain/value-objects/zap'
 import { wait } from '../../utils/common'
 import { EvmClientService } from '../evm/evm-client/evm-client.service'
 import { EvmCurrencyReadService } from '../evm/evm-currency-read.service'
@@ -110,7 +116,7 @@ export class DeBridgeService implements ZapService {
 			},
 		}
 
-		const { estimation, tx } = await this.createTx({
+		const { estimation, tx, orderId } = await this.createTx({
 			userAddress,
 			srcCurrency: paymentCurrency,
 			dstCurrency: ticketCurrency,
@@ -121,6 +127,7 @@ export class DeBridgeService implements ZapService {
 		return {
 			srcAmount: BigInt(estimation.srcChainTokenIn.amount),
 			tx,
+			orderId,
 		}
 	}
 
@@ -243,6 +250,7 @@ export class DeBridgeService implements ZapService {
 			cost: { currency: nativeCurrency, amount: gasCost },
 		}
 
+		//TODO: move it to separate service, this logic should be alse used in rips service implementation
 		const ticketsPurchasedLog = receipt.logs
 			.map((log) => {
 				try {
@@ -268,7 +276,6 @@ export class DeBridgeService implements ZapService {
 		}
 
 		const purchase: Purchase = {
-			transaction,
 			ticketCount: Number(ticketCount),
 			roundId: Number(roundId),
 		}
@@ -284,13 +291,13 @@ export class DeBridgeService implements ZapService {
 			config: Config
 			ticketCount: number
 		},
-	): Promise<Transaction> {
+	): Promise<PendingZap> {
 		const { config, paymentCurrency, ticketCount, stakeId } = args
 
 		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
 		const srcChainId = Number(paymentCurrency.chainAddress.chain.reference)
 
-		const { srcAmount, tx } = await this.getBuyTicketsOrder({
+		const { srcAmount, tx, orderId } = await this.getBuyTicketsOrder({
 			userAddress,
 			stakeId,
 			ticketCount,
@@ -327,6 +334,29 @@ export class DeBridgeService implements ZapService {
 				srcChainId,
 			)
 
-		return transaction
+		return { srcTransaction: transaction, zapId: orderId }
+	}
+
+	swap(
+		wallet: Wallet,
+		args: {
+			currencyIn: Currency
+			currencyOut: Currency
+			amountIn: bigint
+			recipient: ChainAddress
+		},
+	): Promise<PendingZap> {
+		// TODO: implement swap
+		throw new Error('Not implemented')
+	}
+
+	waitForSwap(pendingZap: PendingZap): Promise<ZapSwapResult> {
+		// TODO: implement waitForSwap
+		throw new Error('Not implemented')
+	}
+
+	waitForBuyTickets(pendingZap: PendingZap): Promise<ZapBuyResult> {
+		// TODO: implement waitForBuyTickets
+		throw new Error('Not implemented')
 	}
 }

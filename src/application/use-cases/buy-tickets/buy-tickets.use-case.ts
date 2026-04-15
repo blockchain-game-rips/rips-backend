@@ -1,7 +1,7 @@
 import { Currency } from '../../../domain/entities/currency'
-import { Purchase } from '../../../domain/value-objects/purchase'
+import { PurchaseReceipt } from '../../../domain/value-objects/purchase-receipt'
 import { TelegramId } from '../../../domain/value-objects/telegram-id'
-import { Transaction } from '../../../domain/value-objects/transaction'
+import { PendingZap } from '../../../domain/value-objects/zap'
 
 export type BuyTicketsInput = {
 	telegramId: TelegramId
@@ -11,8 +11,8 @@ export type BuyTicketsInput = {
 }
 
 export type BuyTicketsResult =
-	| { type: 'settled'; purchase: Purchase }
-	| { type: 'pending'; transaction: Transaction }
+	| { type: 'settled'; purchaseReceipt: PurchaseReceipt }
+	| { type: 'pending'; pendingZap: PendingZap }
 
 export abstract class BuyTicketsUseCase {
 	abstract execute(input: BuyTicketsInput): Promise<BuyTicketsResult>

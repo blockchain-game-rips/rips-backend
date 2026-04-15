@@ -13,7 +13,7 @@ import { EIP155 } from '../../constants'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
-import { Purchase } from '../../domain/value-objects/purchase'
+import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
@@ -109,7 +109,7 @@ export class RipsServiceIpml implements RipsService {
 	async buyTickets(
 		wallet: Wallet,
 		args: { stakeId: number; config: Config; ticketCount: number },
-	): Promise<Purchase> {
+	): Promise<PurchaseReceipt> {
 		const evmCurrency = this.requireEvmCurrency()
 
 		const { stakeId, config, ticketCount } = args
@@ -157,8 +157,10 @@ export class RipsServiceIpml implements RipsService {
 
 		return {
 			transaction,
-			roundId: Number(ticketsPurchasedLog.args.roundId),
-			ticketCount: Number(ticketsPurchasedLog.args.ticketCount),
+			purchase: {
+				roundId: Number(ticketsPurchasedLog.args.roundId),
+				ticketCount: Number(ticketsPurchasedLog.args.ticketCount),
+			},
 		}
 	}
 

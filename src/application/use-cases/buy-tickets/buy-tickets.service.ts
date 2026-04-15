@@ -50,7 +50,7 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 				ticketCount,
 			})
 
-			return { type: 'settled', purchase: res }
+			return { type: 'settled', purchaseReceipt: res }
 		}
 
 		const res = await this.zapService.buyTickets(user.wallet, {
@@ -63,7 +63,7 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 
 		return {
 			type: 'pending',
-			transaction: res,
+			pendingZap: res,
 		}
 	}
 }
