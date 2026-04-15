@@ -5,6 +5,7 @@ import {
 	encodeAbiParameters,
 	encodeFunctionData,
 	getAddress,
+	Hex,
 	maxUint256,
 } from 'viem'
 import { ZapService } from '../../application/interfaces/zap.service'
@@ -70,6 +71,83 @@ export class DeBridgeService implements ZapService {
 		return srcAmount
 	}
 
+	async buyTickets(
+		wallet: Wallet,
+		args: {
+			paymentCurrency: Currency
+			stakeId: number
+			config: Config
+			ticketCount: number
+		},
+	): Promise<PendingZap> {
+		const { config, paymentCurrency, ticketCount, stakeId } = args
+
+		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
+		const srcChainId = Number(paymentCurrency.chainAddress.chain.reference)
+
+		const { srcAmount, tx, orderId } = await this.getBuyTicketsOrder({
+			userAddress,
+			stakeId,
+			ticketCount,
+			config,
+			paymentCurrency,
+		})
+
+		const spender = getAddress(tx.to)
+
+		if (paymentCurrency instanceof Token) {
+			const allowance = await this.evmCurrencyReadService.allowance(
+				paymentCurrency,
+				userAddress,
+				spender,
+			)
+
+			if (allowance < srcAmount) {
+				await this.evmCurrencyWriteService.approve(wallet, {
+					token: paymentCurrency,
+					spender,
+					amount: maxUint256,
+				})
+			}
+		}
+
+		const { transaction } =
+			await this.evmTransactionService.sendTransaction(
+				wallet,
+				{
+					to: spender,
+					data: tx.data as `0x${string}`,
+					value: BigInt(tx.value),
+				},
+				srcChainId,
+			)
+
+		return { srcTransaction: transaction, zapId: orderId }
+	}
+
+	swap(
+		wallet: Wallet,
+		args: {
+			currencyIn: Currency
+			currencyOut: Currency
+			amountIn: bigint
+			recipient: ChainAddress
+		},
+	): Promise<PendingZap> {
+		// TODO: implement swap
+		throw new Error('Not implemented')
+	}
+
+	waitForSwap(pendingZap: PendingZap): Promise<ZapSwapResult> {
+		// TODO: implement waitForSwap
+		throw new Error('Not implemented')
+	}
+
+	waitForBuyTickets(pendingZap: PendingZap): Promise<ZapBuyResult> {
+		// TODO: implement waitForBuyTickets
+		throw new Error('Not implemented')
+	}
+
 	private async getBuyTicketsOrder(args: {
 		userAddress: Address
 		stakeId: number
@@ -83,7 +161,46 @@ export class DeBridgeService implements ZapService {
 		const ticketCurrency = config.ticketPrice.currency
 		const paymentAmount = config.ticketPrice.amount * BigInt(ticketCount)
 
-		const hookTo = getAddress(this.ripsContractAddress)
+		const payload = this.buildBuyTicketsPayload({
+			stakeId: BigInt(stakeId),
+			ticketCount: BigInt(ticketCount),
+			userAddress,
+		})
+
+		const dlnHook = {
+			type: 'evm_hook_data_v1',
+			data: {
+				fallbackAddress: userAddress,
+				target: UNIVERSAL_HOOK_ADDRESS,
+				reward: '0',
+				isNonAtomic: false,
+				isSuccessRequired: false,
+				targetPayload: payload,
+			},
+		}
+
+		const { estimation, tx, orderId } = await this.createTx({
+			userAddress,
+			srcCurrency: paymentCurrency,
+			dstCurrency: ticketCurrency,
+			exactOut: paymentAmount,
+			dlnHook,
+		})
+
+		return {
+			srcAmount: BigInt(estimation.srcChainTokenIn.amount),
+			tx,
+			orderId,
+		}
+	}
+
+	private buildBuyTicketsPayload(args: {
+		stakeId: bigint
+		ticketCount: bigint
+		userAddress: Address
+	}): Hex {
+		const { stakeId, ticketCount, userAddress } = args
+
 		const hookCalldata = encodeFunctionData({
 			abi: ripsAbi,
 			functionName: 'buyTickets',
@@ -101,34 +218,16 @@ export class DeBridgeService implements ZapService {
 					],
 				},
 			],
-			[{ to: hookTo, txGas: 2_000_000n, callData: hookCalldata }],
+			[
+				{
+					to: this.ripsContractAddress,
+					txGas: 2_000_000n,
+					callData: hookCalldata,
+				},
+			],
 		)
 
-		const dlnHook = {
-			type: 'evm_hook_data_v1',
-			data: {
-				fallbackAddress: userAddress,
-				target: UNIVERSAL_HOOK_ADDRESS,
-				reward: '0',
-				isNonAtomic: false,
-				isSuccessRequired: false,
-				targetPayload,
-			},
-		}
-
-		const { estimation, tx, orderId } = await this.createTx({
-			userAddress,
-			srcCurrency: paymentCurrency,
-			dstCurrency: ticketCurrency,
-			exactOut: paymentAmount,
-			dlnHook,
-		})
-
-		return {
-			srcAmount: BigInt(estimation.srcChainTokenIn.amount),
-			tx,
-			orderId,
-		}
+		return targetPayload
 	}
 
 	private async createTx(
@@ -257,82 +356,5 @@ export class DeBridgeService implements ZapService {
 		}
 
 		return { status: 'success', purchase }
-	}
-
-	async buyTickets(
-		wallet: Wallet,
-		args: {
-			paymentCurrency: Currency
-			stakeId: number
-			config: Config
-			ticketCount: number
-		},
-	): Promise<PendingZap> {
-		const { config, paymentCurrency, ticketCount, stakeId } = args
-
-		const userAddress = getAddress(wallet.namespaceToAddress[EIP155])
-		const srcChainId = Number(paymentCurrency.chainAddress.chain.reference)
-
-		const { srcAmount, tx, orderId } = await this.getBuyTicketsOrder({
-			userAddress,
-			stakeId,
-			ticketCount,
-			config,
-			paymentCurrency,
-		})
-
-		const spender = getAddress(tx.to)
-
-		if (paymentCurrency instanceof Token) {
-			const allowance = await this.evmCurrencyReadService.allowance(
-				paymentCurrency,
-				userAddress,
-				spender,
-			)
-
-			if (allowance < srcAmount) {
-				await this.evmCurrencyWriteService.approve(wallet, {
-					token: paymentCurrency,
-					spender,
-					amount: maxUint256,
-				})
-			}
-		}
-
-		const { transaction } =
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				{
-					to: spender,
-					data: tx.data as `0x${string}`,
-					value: BigInt(tx.value),
-				},
-				srcChainId,
-			)
-
-		return { srcTransaction: transaction, zapId: orderId }
-	}
-
-	swap(
-		wallet: Wallet,
-		args: {
-			currencyIn: Currency
-			currencyOut: Currency
-			amountIn: bigint
-			recipient: ChainAddress
-		},
-	): Promise<PendingZap> {
-		// TODO: implement swap
-		throw new Error('Not implemented')
-	}
-
-	waitForSwap(pendingZap: PendingZap): Promise<ZapSwapResult> {
-		// TODO: implement waitForSwap
-		throw new Error('Not implemented')
-	}
-
-	waitForBuyTickets(pendingZap: PendingZap): Promise<ZapBuyResult> {
-		// TODO: implement waitForBuyTickets
-		throw new Error('Not implemented')
 	}
 }
