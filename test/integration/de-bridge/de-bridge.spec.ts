@@ -3,6 +3,7 @@ import path from 'path'
 import {
 	createPublicClient,
 	defineChain,
+	Hash,
 	http,
 	keccak256,
 	parseEther,
@@ -25,10 +26,7 @@ import { Token } from '../../../src/infrastructure/evm/primitives/currencies/tok
 import { RIPS_SC_ADDRESS } from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
 import { setNativeBalance, setTokenBalance, useAnvil } from '../../utils/anvil'
-import {
-	fulfillDlnOrder,
-	parseCreatedOrderLog,
-} from '../../utils/de-bridge-dln'
+import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
 import deployments from '../../utils/state/deployments.json'
 
 const ARBITRUM_CHAIN_ID = 42161
@@ -185,16 +183,10 @@ describe('DeBridge integration', () => {
 				ticketCount: 5,
 			})
 
-			// Step 2: get receipt and verify CreatedOrder event
-			const srcReceipt = await arbitrumClient.getTransactionReceipt({
-				hash: transaction.id as `0x${string}`,
-			})
-
-			expect(parseCreatedOrderLog(srcReceipt)).toBeDefined()
-
-			// Step 3: fulfill order on Base
+			// Step 2: fulfill order on Base
 			const fulfillReceipt = await fulfillDlnOrder({
-				srcTxReceipt: srcReceipt,
+				srcTxHash: transaction.id as Hash,
+				srcPublicClient: arbitrumClient,
 				dstPublicClient: baseClient,
 			})
 

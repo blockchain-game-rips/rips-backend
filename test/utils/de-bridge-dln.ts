@@ -116,10 +116,15 @@ export function parseCreatedOrderLog(receipt: TransactionReceipt) {
 }
 
 export async function fulfillDlnOrder(args: {
-	srcTxReceipt: TransactionReceipt
+	srcTxHash: `0x${string}`
+	srcPublicClient: PublicClient<HttpTransport, Chain>
 	dstPublicClient: PublicClient<HttpTransport, Chain>
 }): Promise<TransactionReceipt> {
-	const { srcTxReceipt, dstPublicClient } = args
+	const { srcTxHash, srcPublicClient, dstPublicClient } = args
+
+	const srcTxReceipt = await srcPublicClient.getTransactionReceipt({
+		hash: srcTxHash,
+	})
 
 	const { order, orderId } = parseCreatedOrderLog(srcTxReceipt)
 
