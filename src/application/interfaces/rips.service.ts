@@ -1,4 +1,4 @@
-import { Config } from '../../domain/entities/config'
+import { AvailableStake } from '../../domain/value-objects/available-stake'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
@@ -25,6 +25,6 @@ export abstract class RipsService {
 
 	abstract buyTickets(
 		wallet: Wallet,
-		args: { stakeId: number; config: Config; ticketCount: number },
+		args: { availableStake: AvailableStake; ticketCount: number },
 	): Promise<PurchaseReceipt>
 }

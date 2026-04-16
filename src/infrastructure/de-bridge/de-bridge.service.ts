@@ -2,9 +2,11 @@ import { Inject, Injectable } from '@nestjs/common'
 import ky from 'ky'
 import {
 	Address,
+	decodeEventLog,
 	encodeAbiParameters,
 	encodeFunctionData,
 	getAddress,
+	Hash,
 	Hex,
 	maxUint256,
 	TransactionRequestEIP1559,
@@ -13,8 +15,6 @@ import { ZapService } from '../../application/interfaces/zap.service'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
-import { Purchase } from '../../domain/value-objects/purchase'
-import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
 	PendingZap,
@@ -23,7 +23,6 @@ import {
 	ZapQuoteSwapResult,
 	ZapSwapResult,
 } from '../../domain/value-objects/zap'
-import { wait } from '../../utils/common'
 import { EvmClientService } from '../evm/evm-client/evm-client.service'
 import { EvmCurrencyReadService } from '../evm/evm-currency-read.service'
 import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
@@ -34,9 +33,16 @@ import { Token } from '../evm/primitives/currencies/token'
 import { parsePurchase } from '../rips/parse-purchase'
 import { ripsAbi } from '../rips/rips-abi'
 import { RIPS_SC_ADDRESS } from '../rips/rips.constants'
+import { fulfilledOrderAbi } from './abi'
 import { CreateTxResponse, CreateTxSchema } from './schemas/create-tx.schema'
-import { OrderSchema } from './schemas/order-status.schema'
+import { Order, OrderSchema } from './schemas/order-status.schema'
 
+const FULFILLED_STATES = new Set(['Fulfilled', 'SentUnlock', 'ClaimedUnlock'])
+const CANCELLED_STATES = new Set([
+	'SentOrderCancel',
+	'OrderCancelled',
+	'ClaimedOrderCancel',
+])
 const DEBRIDGE_API_URL = 'https://api.dln.trade/v1.0'
 const UNIVERSAL_HOOK_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -50,6 +56,122 @@ export class DeBridgeService implements ZapService {
 		private readonly evmCurrencyWriteService: EvmCurrencyWriteService,
 		private readonly evmTransactionService: EvmTransactionService,
 	) {}
+
+	async getBuyResult(pendingZap: PendingZap): Promise<ZapBuyResult | null> {
+		const orderId = pendingZap.zapId
+
+		const order = await this.getOrder(orderId)
+
+		if (FULFILLED_STATES.has(order.state)) {
+			const receipt = await this.getDstReceipt(order, orderId)
+
+			const purchase = parsePurchase(receipt, this.ripsContractAddress)
+
+			if (purchase !== null) {
+				return {
+					status: 'success',
+					result: purchase,
+					transaction: { id: receipt.transactionHash },
+				}
+			}
+
+			const refund = await this.parseCurrencyAmountOut(receipt, orderId)
+
+			return { status: 'failed', refund }
+		}
+
+		if (CANCELLED_STATES.has(order.state)) {
+			return { status: 'cancelled' }
+		}
+
+		return null
+	}
+
+	async getSwapResult(pendingZap: PendingZap): Promise<ZapSwapResult | null> {
+		const orderId = pendingZap.zapId
+
+		const order = await this.getOrder(orderId)
+
+		if (FULFILLED_STATES.has(order.state)) {
+			const receipt = await this.getDstReceipt(order, orderId)
+
+			const amountOut = await this.parseCurrencyAmountOut(
+				receipt,
+				orderId,
+			)
+
+			return {
+				status: 'success',
+				result: { amountOut },
+				transaction: { id: receipt.transactionHash },
+			}
+		}
+
+		if (CANCELLED_STATES.has(order.state)) {
+			return { status: 'cancelled' }
+		}
+
+		return null
+	}
+
+	private async getDstReceipt(order: Order, orderId: string) {
+		const dstTxHash =
+			order.fulfilledDstEventMetadata?.transactionHash.stringValue
+
+		if (!dstTxHash) {
+			throw new Error(
+				`Order ${orderId} fulfilled but dst tx hash missing`,
+			)
+		}
+
+		const dstChainId = order.takeOfferWithMetadata?.chainId.stringValue
+
+		if (!dstChainId) {
+			throw new Error(
+				`Order ${orderId} fulfilled but dst chain id missing`,
+			)
+		}
+
+		return this.evmClientService
+			.getClient(Number(dstChainId))
+			.getTransactionReceipt({ hash: dstTxHash as Hash })
+	}
+
+	private async parseCurrencyAmountOut(
+		receipt: Awaited<ReturnType<typeof this.getDstReceipt>>,
+		orderId: string,
+	) {
+		const fulfilledLog = receipt.logs
+			.map((l) => {
+				try {
+					return decodeEventLog({
+						abi: fulfilledOrderAbi,
+						...l,
+						strict: true,
+					})
+				} catch {
+					return null
+				}
+			})
+			.find((l) => l?.eventName === 'FulfilledOrder')
+
+		if (!fulfilledLog) {
+			throw new Error(
+				`FulfilledOrder event not found in dst tx for order ${orderId}`,
+			)
+		}
+
+		const { takeTokenAddress, takeChainId } = fulfilledLog.args.order
+		const { actualFulfillAmount } = fulfilledLog.args
+
+		const tokenAddress = getAddress(`0x${takeTokenAddress.slice(-40)}`)
+		const currency = await this.evmCurrencyService.fromAddress(
+			tokenAddress,
+			Number(takeChainId),
+		)
+
+		return { currency, amount: actualFulfillAmount }
+	}
 
 	async quoteSwap(
 		wallet: Wallet,
@@ -212,16 +334,6 @@ export class DeBridgeService implements ZapService {
 		return { srcTransaction: transaction, zapId: createTxResponse.orderId }
 	}
 
-	waitForSwap(pendingZap: PendingZap): Promise<ZapSwapResult> {
-		// TODO: implement waitForSwap
-		throw new Error('Not implemented')
-	}
-
-	waitForBuyTickets(pendingZap: PendingZap): Promise<ZapBuyResult> {
-		// TODO: implement waitForBuyTickets
-		throw new Error('Not implemented')
-	}
-
 	private txRequestFromOrder(
 		createTxResponse: CreateTxResponse,
 	): TransactionRequestEIP1559 {
@@ -361,36 +473,6 @@ export class DeBridgeService implements ZapService {
 		return CreateTxSchema.parse(rawData)
 	}
 
-	async waitForOrderFulfillment(orderId: string) {
-		const POLL_INTERVAL_MS = 2_000
-		const FULFILLED_STATES = new Set([
-			'Fulfilled',
-			'SentUnlock',
-			'ClaimedUnlock',
-		])
-		const CANCELLED_STATES = new Set([
-			'SentOrderCancel',
-			'OrderCancelled',
-			'ClaimedOrderCancel',
-		])
-
-		while (true) {
-			const order = await this.getOrder(orderId)
-
-			if (FULFILLED_STATES.has(order.state)) {
-				return order
-			}
-
-			if (CANCELLED_STATES.has(order.state)) {
-				throw new Error(
-					`Order ${orderId} was cancelled (state: ${order.state})`,
-				)
-			}
-
-			await wait(POLL_INTERVAL_MS)
-		}
-	}
-
 	async getOrder(orderId: string) {
 		const rawData = await ky
 			.get(`https://dln-api.debridge.finance/api/Orders/${orderId}`, {
@@ -400,44 +482,5 @@ export class DeBridgeService implements ZapService {
 			.json()
 
 		return OrderSchema.parse(rawData)
-	}
-
-	async getFulfilledOrderResult(
-		dstTxHash: `0x${string}`,
-		dstChainId: number,
-	): Promise<
-		| { status: 'success'; purchase: Purchase }
-		| { status: 'hook_failed'; transaction: Transaction }
-	> {
-		const client = this.evmClientService.getClient(dstChainId)
-		const nativeCurrency = this.evmCurrencyService.getNative(dstChainId)
-
-		const receipt = await client.getTransactionReceipt({ hash: dstTxHash })
-
-		const FULFILLED_ORDER_TOPIC =
-			'0xc164aca37b9805a1c9027b6f32260a069723a82926f6e9ece4926e4dd3ea8ecf'
-
-		const fulfilledOrderLog = receipt.logs.find(
-			(log) => log.topics[0] === FULFILLED_ORDER_TOPIC,
-		)
-
-		if (!fulfilledOrderLog) {
-			throw new Error(`No FulfilledOrder event found in tx ${dstTxHash}`)
-		}
-
-		const gasCost = receipt.gasUsed * receipt.effectiveGasPrice
-
-		const transaction: Transaction = {
-			id: dstTxHash,
-			cost: { currency: nativeCurrency, amount: gasCost },
-		}
-
-		const purchase = parsePurchase(receipt, this.ripsContractAddress)
-
-		if (!purchase) {
-			return { status: 'hook_failed', transaction }
-		}
-
-		return { status: 'success', purchase }
 	}
 }

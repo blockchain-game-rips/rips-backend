@@ -10,9 +10,12 @@ import { MAIN_CURRENCY } from '../../application/interfaces/tokens'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
+import { AvailableStake } from '../../domain/value-objects/available-stake'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
+import { EvmClientService } from '../evm/evm-client/evm-client.service'
+import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { evmAddressFromWallet, evmChainIdFromCurrency } from '../evm/helpers'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
@@ -27,9 +30,10 @@ const CLAIM_MAX_RANGES = 100n
 export class RipsServiceIpml implements RipsService {
 	constructor(
 		private readonly evmTransactionService: EvmTransactionService,
+		private readonly evmClientService: EvmClientService,
+		private readonly evmCurrencyService: EvmCurrencyService,
 
 		@Inject(RIPS_SC_ADDRESS) private readonly contractAddress: Address,
-
 		@Inject(MAIN_CURRENCY) private readonly mainCurrency: Currency,
 	) {}
 
@@ -107,11 +111,16 @@ export class RipsServiceIpml implements RipsService {
 
 	async buyTickets(
 		wallet: Wallet,
-		args: { stakeId: number; config: Config; ticketCount: number },
+		args: { availableStake: AvailableStake; ticketCount: number },
 	): Promise<PurchaseReceipt> {
 		const evmCurrency = this.requireEvmCurrency()
 
-		const { stakeId, config, ticketCount } = args
+		const { availableStake, ticketCount } = args
+
+		const config =
+			availableStake.fillingRound !== null
+				? availableStake.fillingRound.config
+				: availableStake.stake.currentConfig
 
 		const chainId = evmChainIdFromCurrency(evmCurrency)
 		const userAddress = evmAddressFromWallet(wallet)
@@ -123,7 +132,11 @@ export class RipsServiceIpml implements RipsService {
 			data: encodeFunctionData({
 				abi: ripsAbi,
 				functionName: 'buyTickets',
-				args: [BigInt(stakeId), BigInt(ticketCount), userAddress],
+				args: [
+					BigInt(availableStake.stake.id),
+					BigInt(ticketCount),
+					userAddress,
+				],
 			}),
 			value: totalValue,
 		}
@@ -152,5 +165,45 @@ export class RipsServiceIpml implements RipsService {
 		}
 
 		return this.mainCurrency
+	}
+
+	async getConfigByRoundId(roundId: number): Promise<Config> {
+		const evmCurrency = this.requireEvmCurrency()
+		const chainId = evmChainIdFromCurrency(evmCurrency)
+		const client = this.evmClientService.getClient(chainId)
+
+		const round = await client.readContract({
+			address: this.contractAddress,
+			abi: ripsAbi,
+			functionName: 'roundIdToRound',
+			args: [BigInt(roundId)],
+		})
+
+		const configId = round.configId
+
+		const config = await client.readContract({
+			address: this.contractAddress,
+			abi: ripsAbi,
+			functionName: 'configIdToConfig',
+			args: [configId],
+		})
+
+		const currency = await this.evmCurrencyService.fromAddress(
+			config.currency,
+			chainId,
+		)
+
+		// TODO: fetch actual prize tiers from contract
+		return {
+			id: Number(configId),
+			ticketCup: Number(config.ticketCap),
+			feePercent: Number(config.feePercent),
+			ticketPrice: {
+				currency,
+				amount: config.ticketCost,
+			},
+			durationSeconds: Number(config.duration),
+			prizeDistribution: [],
+		}
 	}
 }

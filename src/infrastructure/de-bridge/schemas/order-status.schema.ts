@@ -12,18 +12,28 @@ export const OrderState = z.enum([
 ])
 export type OrderState = z.infer<typeof OrderState>
 
-const HashSchema = z.object({
-	stringValue: z.string().nullable(),
+const HashPropertySchema = z.object({
+	stringValue: z.string(),
 })
 
 const EventMetadataSchema = z.object({
-	transactionHash: HashSchema,
-	blockNumber: z.number(),
-	blockTimeStamp: z.number(),
+	transactionHash: HashPropertySchema,
+})
+
+const OfferWithMetadataSchema = z.object({
+	chainId: z.object({
+		stringValue: z.string(),
+	}),
+	finalAmount: z.object({
+		stringValue: z.string(),
+	}),
 })
 
 export const OrderSchema = z.object({
 	state: OrderState,
+	giveOfferWithMetadata: OfferWithMetadataSchema,
+	takeOfferWithMetadata: OfferWithMetadataSchema.nullable(),
+	createdSrcEventMetadata: EventMetadataSchema,
 	fulfilledDstEventMetadata: EventMetadataSchema.nullable(),
 })
 export type Order = z.infer<typeof OrderSchema>

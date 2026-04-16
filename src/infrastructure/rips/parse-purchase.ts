@@ -12,7 +12,7 @@ export function parsePurchase(
 		.filter((l) => getAddress(l.address) === ripsAddress)
 		.map((l) => {
 			try {
-				return decodeEventLog({ abi: ripsAbi, ...l, strict: false })
+				return decodeEventLog({ abi: ripsAbi, ...l, strict: true })
 			} catch {
 				return null
 			}
