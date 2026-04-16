@@ -52,7 +52,7 @@ const USER_PRIVATE_KEY =
 
 const USDC_ARBITRUM_ADDRESS = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
 const USDC_DECIMALS = 6
-const USDC_AMOUNT = parseUnits('200', USDC_DECIMALS)
+const USDC_AMOUNT = parseUnits('20000', USDC_DECIMALS)
 const ETH_AMOUNT = parseEther('0.01')
 
 const ripsContractAddress = getAddress(deployments.rips)
@@ -183,6 +183,37 @@ describe('DeBridge integration', () => {
 
 			zapService = moduleRef.get(ZapService)
 			debridgeService = moduleRef.get(DeBridgeService)
+		})
+
+		it('fails and refunds full native amount when wrong stake id causes internal call revert', async () => {
+			const wrongStakeId = 999
+			const ticketCount = 3
+			const expectedRefundAmount =
+				MOCK_CONFIG.ticketPrice.amount * BigInt(ticketCount)
+
+			const pendingZap = await zapService.buyTickets(userWallet, {
+				paymentCurrency: USDC_ARBITRUM,
+				stakeId: wrongStakeId,
+				config: MOCK_CONFIG,
+				ticketCount,
+			})
+
+			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
+
+			const result = await debridgeService.getBuyResult(pendingZap)
+
+			if (result === null || result.status !== 'failed')
+				throw new Error(
+					`result status is not failed, result status: ${result?.status}`,
+				)
+
+			expect(result.refund.amount).toBe(expectedRefundAmount)
+			expect(result.refund.currency.chainAddress.address).toBe(
+				'0x0000000000000000000000000000000000000000',
+			)
+			expect(result.refund.currency.chainAddress.chain.reference).toBe(
+				BASE_CHAIN_ID.toString(),
+			)
 		})
 
 		it('places order on Arbitrum and fulfills it on Base, buying over ticket cap refunds excess to user', async () => {
