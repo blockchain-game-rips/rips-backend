@@ -1,11 +1,12 @@
 import {
 	createWalletClient,
+	custom,
 	decodeEventLog,
 	encodeFunctionData,
 	getAddress,
-	http,
 	HttpTransport,
 	parseEther,
+	PrivateKeyAccount,
 	PublicClient,
 	TransactionReceipt,
 } from 'viem'
@@ -17,9 +18,11 @@ const DLN_DESTINATION_ADDRESSES: Record<number, string> = {
 	8453: '0xe7351fd770a37282b91d153ee690b63579d6dd7f',
 }
 
-// Anvil account #1
-const SOLVER_PRIVATE_KEY =
+// Anvil account #0
+const DEFAULT_SOLVER_PRIVATE_KEY =
 	'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+
+const ALLOWED_TAKER_ADDRESS_BYTES_LENGTH = 20
 
 const createdOrderAbi = [
 	{
@@ -119,6 +122,7 @@ export async function fulfillDlnOrder(args: {
 	srcTxHash: `0x${string}`
 	srcPublicClient: PublicClient<HttpTransport, Chain>
 	dstPublicClient: PublicClient<HttpTransport, Chain>
+	solver?: PrivateKeyAccount
 }): Promise<TransactionReceipt> {
 	const { srcTxHash, srcPublicClient, dstPublicClient } = args
 
@@ -137,42 +141,55 @@ export async function fulfillDlnOrder(args: {
 		throw new Error(`No DlnDestination address for chain ${dstChain.id}`)
 	}
 
-	const solver = privateKeyToAccount(SOLVER_PRIVATE_KEY)
-
 	const takeAmount = order.takeAmount
-	const GAS_RESERVE = parseEther('0.1')
+	const GAS_RESERVE = parseEther('1')
+
+	// If allowedTakerDst is set, impersonate that address — we can't sign with it
+	const allowedTakerDst = order.allowedTakerDst
+	const solverAddress =
+		allowedTakerDst.length === ALLOWED_TAKER_ADDRESS_BYTES_LENGTH * 2 + 2
+			? getAddress(`0x${allowedTakerDst.slice(-40)}`)
+			: (args.solver ?? privateKeyToAccount(DEFAULT_SOLVER_PRIVATE_KEY))
+					.address
 
 	await setNativeBalance(
 		dstPublicClient,
-		solver.address,
+		solverAddress,
 		takeAmount + GAS_RESERVE,
 	)
-
-	const solverWallet = createWalletClient({
-		account: solver,
-		chain: dstChain,
-		transport: http(rpcUrl),
-	})
 
 	const fulfillData = encodeFunctionData({
 		abi: fulfillOrderAbi,
 		functionName: 'fulfillOrder',
-		args: [
-			order,
-			takeAmount,
-			orderId,
-			'0x',
-			solver.address,
-			solver.address,
-		],
+		args: [order, takeAmount, orderId, '0x', solverAddress, solverAddress],
 	})
 
-	return waitForReceipt(
-		solverWallet.sendTransaction({
-			to: getAddress(dlnDestination),
-			data: fulfillData,
-			value: takeAmount,
-		}),
-		dstPublicClient,
-	)
+	await dstPublicClient.request({
+		// @ts-expect-error anvil method
+		method: 'anvil_impersonateAccount',
+		params: [solverAddress],
+	})
+
+	try {
+		const impersonatedWallet = createWalletClient({
+			account: solverAddress,
+			chain: dstChain,
+			transport: custom(dstPublicClient.transport),
+		})
+
+		return await waitForReceipt(
+			impersonatedWallet.sendTransaction({
+				to: getAddress(dlnDestination),
+				data: fulfillData,
+				value: takeAmount,
+			}),
+			dstPublicClient,
+		)
+	} finally {
+		await dstPublicClient.request({
+			// @ts-expect-error anvil method
+			method: 'anvil_stopImpersonatingAccount',
+			params: [solverAddress],
+		})
+	}
 }

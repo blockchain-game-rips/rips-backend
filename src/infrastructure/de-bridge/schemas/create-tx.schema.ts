@@ -90,7 +90,7 @@ export type Estimation = z.infer<typeof EstimationSchema>
 export const CreateTxSchema = z.object({
 	estimation: EstimationSchema,
 	tx: TxSchema,
-	prependedOperatingExpenseCost: z.string(),
+	prependedOperatingExpenseCost: z.string().optional(),
 	order: OrderSchema,
 	orderId: z.string(),
 	fixFee: z.string(),

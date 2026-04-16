@@ -21,6 +21,7 @@ import { arbitrum } from 'viem/chains'
 import { ZapService } from '../../../src/application/interfaces/zap.service'
 import { EIP155 } from '../../../src/constants'
 import { Config } from '../../../src/domain/entities/config'
+import { ChainAddress } from '../../../src/domain/value-objects/chain-address'
 import { UserWallet } from '../../../src/domain/value-objects/wallet'
 import { DeBridgeApiService } from '../../../src/infrastructure/de-bridge/de-bridge-api.service'
 import { DeBridgeModule } from '../../../src/infrastructure/de-bridge/de-bridge.module'
@@ -296,6 +297,53 @@ describe('DeBridge integration', () => {
 					args: [BigInt(roundId), userAccount.address],
 				}),
 			).toBe(5n)
+		})
+
+		it('swaps USDC on Arbitrum to ETH on Base', async () => {
+			// Anvil account #2 — distinct from user and solver
+			const receiverAccount = privateKeyToAccount(
+				'0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
+			)
+
+			const recipient: ChainAddress = {
+				address: receiverAccount.address,
+				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
+			}
+
+			const receiverBalanceBefore = await baseClient.getBalance({
+				address: receiverAccount.address,
+			})
+
+			const pendingZap = await zapService.swap(userWallet, {
+				currencyIn: USDC_ARBITRUM,
+				currencyOut: ETH_BASE,
+				amountIn: 100_000000n,
+				recipient,
+			})
+
+			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
+
+			const result = await debridgeService.getSwapResult(pendingZap)
+
+			if (result === null || result.status !== 'success')
+				throw new Error(
+					`result status is not success, result status: ${result?.status}`,
+				)
+
+			const receiverBalanceAfter = await baseClient.getBalance({
+				address: receiverAccount.address,
+			})
+
+			expect(result.result.amountOut.amount).toBeGreaterThan(0n)
+			expect(result.result.amountOut.amount).toBe(
+				receiverBalanceAfter - receiverBalanceBefore,
+			)
+			expect(result.result.amountOut.currency.chainAddress.address).toBe(
+				'0x0000000000000000000000000000000000000000',
+			)
+			expect(
+				result.result.amountOut.currency.chainAddress.chain.reference,
+			).toBe(String(BASE_CHAIN_ID))
 		})
 
 		async function fulfillOrderAndMockApi(srcTxHash: Hash): Promise<void> {
