@@ -3,6 +3,7 @@ import { ZapService } from '../../application/interfaces/zap.service'
 import { getEnvSafe } from '../../utils/common'
 import { EvmModule } from '../evm/evm.module'
 import { RIPS_SC_ADDRESS } from '../rips/rips.constants'
+import { DeBridgeApiService } from './de-bridge-api.service'
 import { DeBridgeService } from './de-bridge.service'
 
 @Module({
@@ -17,6 +18,7 @@ import { DeBridgeService } from './de-bridge.service'
 			useClass: DeBridgeService,
 		},
 		DeBridgeService,
+		DeBridgeApiService,
 	],
 	//TODO: remove DeBridgeService export
 	exports: [ZapService, DeBridgeService],

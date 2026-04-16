@@ -24,9 +24,6 @@ const OfferWithMetadataSchema = z.object({
 	chainId: z.object({
 		stringValue: z.string(),
 	}),
-	finalAmount: z.object({
-		stringValue: z.string(),
-	}),
 })
 
 export const OrderSchema = z.object({

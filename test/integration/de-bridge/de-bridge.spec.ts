@@ -18,8 +18,10 @@ import { ZapService } from '../../../src/application/interfaces/zap.service'
 import { EIP155 } from '../../../src/constants'
 import { Config } from '../../../src/domain/entities/config'
 import { UserWallet } from '../../../src/domain/value-objects/wallet'
+import { DeBridgeApiService } from '../../../src/infrastructure/de-bridge/de-bridge-api.service'
 import { DeBridgeModule } from '../../../src/infrastructure/de-bridge/de-bridge.module'
 import { DeBridgeService } from '../../../src/infrastructure/de-bridge/de-bridge.service'
+import { Order } from '../../../src/infrastructure/de-bridge/schemas/order-status.schema'
 import { EVM_CLIENT_CONFIG } from '../../../src/infrastructure/evm/evm-client/types'
 import { NativeCurrency } from '../../../src/infrastructure/evm/primitives/currencies/native-currency'
 import { Token } from '../../../src/infrastructure/evm/primitives/currencies/token'
@@ -31,7 +33,6 @@ import deployments from '../../utils/state/deployments.json'
 
 const ARBITRUM_CHAIN_ID = 42161
 const BASE_CHAIN_ID = 8453
-const MIN_BLOCK_NUMBER = 1000n
 
 const ANVIL_STATE_PATH = path.resolve(
 	__dirname,
@@ -81,7 +82,7 @@ describe('DeBridge integration', () => {
 	const { anvils } = useAnvil([
 		{
 			chainId: ARBITRUM_CHAIN_ID,
-			fork: {},
+			fork: { rpcUrl: 'https://arb1.arbitrum.io/rpc' },
 		},
 		{
 			chainId: BASE_CHAIN_ID,
@@ -110,6 +111,7 @@ describe('DeBridge integration', () => {
 
 		let zapService: ZapService
 		let debridgeService: DeBridgeService
+		let mockDeBridgeApiService: DeBridgeApiService
 
 		beforeAll(async () => {
 			const [arbitrumAnvil, baseAnvil] = anvils
@@ -136,6 +138,14 @@ describe('DeBridge integration', () => {
 			const arbitrumRpcUrl = `http://127.0.0.1:${arbitrumAnvil.port}`
 			const baseRpcUrl = `http://127.0.0.1:${baseAnvil.port}`
 
+			const realDeBridgeApiService = new DeBridgeApiService()
+			mockDeBridgeApiService = {
+				fetchCreateTx: realDeBridgeApiService.fetchCreateTx.bind(
+					realDeBridgeApiService,
+				),
+				getOrder: jest.fn(),
+			}
+
 			const moduleRef = await Test.createTestingModule({
 				imports: [DeBridgeModule],
 			})
@@ -156,6 +166,8 @@ describe('DeBridge integration', () => {
 				})
 				.overrideProvider(SignService)
 				.useValue(mockSignService)
+				.overrideProvider(DeBridgeApiService)
+				.useValue(mockDeBridgeApiService)
 				.compile()
 
 			zapService = moduleRef.get(ZapService)
@@ -176,7 +188,7 @@ describe('DeBridge integration', () => {
 			})
 
 			// Step 1: place order on Arbitrum
-			const transaction = await zapService.buyTickets(userWallet, {
+			const pendingZap = await zapService.buyTickets(userWallet, {
 				paymentCurrency: USDC_ARBITRUM,
 				stakeId: 1,
 				config: MOCK_CONFIG,
@@ -185,18 +197,40 @@ describe('DeBridge integration', () => {
 
 			// Step 2: fulfill order on Base
 			const fulfillReceipt = await fulfillDlnOrder({
-				srcTxHash: transaction.srcTransaction.id as Hash,
+				srcTxHash: pendingZap.srcTransaction.id as Hash,
 				srcPublicClient: arbitrumClient,
 				dstPublicClient: baseClient,
 			})
 
-			// Step 4: parse fulfillment result
-			const result = await debridgeService.getFulfilledOrderResult(
-				fulfillReceipt.transactionHash,
-				BASE_CHAIN_ID,
+			// Step 3: mock getOrder to return fulfilled state
+			const mockOrder: Order = {
+				state: 'Fulfilled',
+				giveOfferWithMetadata: {
+					chainId: { stringValue: String(ARBITRUM_CHAIN_ID) },
+				},
+				takeOfferWithMetadata: {
+					chainId: { stringValue: String(BASE_CHAIN_ID) },
+				},
+				createdSrcEventMetadata: {
+					transactionHash: {
+						stringValue: pendingZap.srcTransaction.id,
+					},
+				},
+				fulfilledDstEventMetadata: {
+					transactionHash: {
+						stringValue: fulfillReceipt.transactionHash,
+					},
+				},
+			}
+
+			jest.mocked(mockDeBridgeApiService.getOrder).mockResolvedValue(
+				mockOrder,
 			)
 
-			console.log('Fulfillment result:', result)
+			// Step 4: get buy result
+			const result = await debridgeService.getBuyResult(pendingZap)
+
+			console.log('Buy result:', result)
 		})
 	})
 })
