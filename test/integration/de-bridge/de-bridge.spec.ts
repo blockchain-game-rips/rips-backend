@@ -185,6 +185,53 @@ describe('DeBridge integration', () => {
 			debridgeService = moduleRef.get(DeBridgeService)
 		})
 
+		it('places order on Arbitrum and fulfills it on Base, buying over ticket cap refunds excess to user', async () => {
+			const ticketCap = MOCK_CONFIG.ticketCup
+			const overCapTicketCount = ticketCap + 2
+
+			const balanceBefore = await baseClient.getBalance({
+				address: userAccount.address,
+			})
+
+			// Step 1: place order on Arbitrum with ticket count over cap
+			const pendingZap = await zapService.buyTickets(userWallet, {
+				paymentCurrency: USDC_ARBITRUM,
+				stakeId: 1,
+				config: MOCK_CONFIG,
+				ticketCount: overCapTicketCount,
+			})
+
+			// Step 2: fulfill order on Base and mock API response
+			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
+
+			// Step 3: get buy result
+			const result = await debridgeService.getBuyResult(pendingZap)
+
+			if (result === null || result.status !== 'success')
+				throw new Error(
+					`result status is not success, result status: ${result?.status}`,
+				)
+
+			const balanceAfter = await baseClient.getBalance({
+				address: userAccount.address,
+			})
+
+			const excessTickets = BigInt(overCapTicketCount - ticketCap)
+			const expectedRefund =
+				MOCK_CONFIG.ticketPrice.amount * excessTickets
+
+			expect(result.result.ticketCount).toBe(ticketCap)
+			expect(balanceAfter - balanceBefore).toBe(expectedRefund)
+			expect(
+				await baseClient.readContract({
+					address: ripsContractAddress,
+					abi: ripsAbi,
+					functionName: 'userTicketCount',
+					args: [1n, userAccount.address],
+				}),
+			).toBe(BigInt(ticketCap))
+		})
+
 		it('places order on Arbitrum and fulfills it on Base', async () => {
 			// Step 1: place order on Arbitrum
 			const pendingZap = await zapService.buyTickets(userWallet, {
@@ -194,23 +241,10 @@ describe('DeBridge integration', () => {
 				ticketCount: 5,
 			})
 
-			// Step 2: fulfill order on Base
-			const fulfillReceipt = await fulfillDlnOrder({
-				srcTxHash: pendingZap.srcTransaction.id as Hash,
-				srcPublicClient: arbitrumClient,
-				dstPublicClient: baseClient,
-			})
+			// Step 2: fulfill order on Base and mock API response
+			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
-			// Step 3: mock getOrder to return fulfilled state
-			mockGetOrder(mockDeBridgeApiService, {
-				state: 'Fulfilled',
-				srcChainId: ARBITRUM_CHAIN_ID,
-				dstChainId: BASE_CHAIN_ID,
-				srcTxHash: pendingZap.srcTransaction.id,
-				dstTxHash: fulfillReceipt.transactionHash,
-			})
-
-			// Step 4: get buy result
+			// Step 3: get buy result
 			const result = await debridgeService.getBuyResult(pendingZap)
 
 			if (result === null || result.status !== 'success')
@@ -218,17 +252,35 @@ describe('DeBridge integration', () => {
 					`result status is not success, result status: ${result?.status}`,
 				)
 
+			const roundId = 2 // roundId 1 is finished in previous test
+
 			expect(result.transaction).toBeDefined()
-			expect(result.result.roundId).toBe(1)
+			expect(result.result.roundId).toBe(roundId)
 			expect(result.result.ticketCount).toBe(5)
 			expect(
 				await baseClient.readContract({
 					address: ripsContractAddress,
 					abi: ripsAbi,
 					functionName: 'userTicketCount',
-					args: [1n, userAccount.address],
+					args: [BigInt(roundId), userAccount.address],
 				}),
 			).toBe(5n)
 		})
+
+		async function fulfillOrderAndMockApi(srcTxHash: Hash): Promise<void> {
+			const fulfillReceipt = await fulfillDlnOrder({
+				srcTxHash,
+				srcPublicClient: arbitrumClient,
+				dstPublicClient: baseClient,
+			})
+
+			mockGetOrder(mockDeBridgeApiService, {
+				state: 'Fulfilled',
+				srcChainId: ARBITRUM_CHAIN_ID,
+				dstChainId: BASE_CHAIN_ID,
+				srcTxHash,
+				dstTxHash: fulfillReceipt.transactionHash,
+			})
+		}
 	})
 })
