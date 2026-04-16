@@ -346,6 +346,49 @@ describe('DeBridge integration', () => {
 			).toBe(String(BASE_CHAIN_ID))
 		})
 
+		it('quoteBuyTickets returns amountIn, durationMs and fee in payment currency', async () => {
+			const result = await zapService.quoteBuyTickets(userWallet, {
+				stakeId: 1,
+				config: MOCK_CONFIG,
+				paymentCurrency: USDC_ARBITRUM,
+				ticketCount: 5,
+			})
+
+			expect(result.amountIn).toBeGreaterThan(0n)
+			expect(result.durationMs).toBeGreaterThan(0)
+			expect(result.fee.amount).toBeGreaterThan(0n)
+			expect(result.fee.currency.chainAddress.address).toBe(
+				USDC_ARBITRUM.chainAddress.address,
+			)
+			expect(result.fee.currency.chainAddress.chain.reference).toBe(
+				String(ARBITRUM_CHAIN_ID),
+			)
+		})
+
+		it('quoteSwap returns amountOut, durationMs and fee in src currency', async () => {
+			const recipient: ChainAddress = {
+				address: userAccount.address,
+				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
+			}
+
+			const result = await zapService.quoteSwap(userWallet, {
+				currencyIn: USDC_ARBITRUM,
+				currencyOut: ETH_BASE,
+				amountIn: 100_000000n,
+				recipient,
+			})
+
+			expect(result.amountOut).toBeGreaterThan(0n)
+			expect(result.durationMs).toBeGreaterThan(0)
+			expect(result.fee.amount).toBeGreaterThan(0n)
+			expect(result.fee.currency.chainAddress.address).toBe(
+				USDC_ARBITRUM.chainAddress.address,
+			)
+			expect(result.fee.currency.chainAddress.chain.reference).toBe(
+				String(ARBITRUM_CHAIN_ID),
+			)
+		})
+
 		async function fulfillOrderAndMockApi(srcTxHash: Hash): Promise<void> {
 			const fulfillReceipt = await fulfillDlnOrder({
 				srcTxHash,

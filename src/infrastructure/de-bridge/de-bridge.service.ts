@@ -198,6 +198,12 @@ export class DeBridgeService implements ZapService {
 			amountOut: BigInt(
 				createTxResponse.estimation.dstChainTokenOut.amount,
 			),
+			durationMs:
+				createTxResponse.order.approximateFulfillmentDelay * 1000,
+			fee: {
+				currency: currencyIn,
+				amount: BigInt(createTxResponse.fixFee),
+			},
 		}
 	}
 
@@ -225,7 +231,15 @@ export class DeBridgeService implements ZapService {
 			createTxResponse.estimation.srcChainTokenIn.amount,
 		)
 
-		return { amountIn }
+		return {
+			amountIn,
+			durationMs:
+				createTxResponse.order.approximateFulfillmentDelay * 1000,
+			fee: {
+				currency: paymentCurrency,
+				amount: BigInt(createTxResponse.fixFee),
+			},
+		}
 	}
 
 	async buyTickets(

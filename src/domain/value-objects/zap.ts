@@ -35,8 +35,12 @@ export type ZapSwapResult = ZapResult<{
 
 export type ZapQuoteBuyResult = {
 	amountIn: bigint
+	durationMs: number
+	fee: CurrencyAmount
 }
 
 export type ZapQuoteSwapResult = {
 	amountOut: bigint
+	durationMs: number
+	fee: CurrencyAmount
 }
