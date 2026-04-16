@@ -1,14 +1,18 @@
 import { Test } from '@nestjs/testing'
 import path from 'path'
 import {
+	Chain,
 	createPublicClient,
 	defineChain,
+	getAddress,
 	Hash,
 	http,
+	HttpTransport,
 	keccak256,
 	parseEther,
 	parseSignature,
 	parseUnits,
+	PublicClient,
 	serializeTransaction,
 	TransactionSerializableEIP1559,
 } from 'viem'
@@ -21,14 +25,18 @@ import { UserWallet } from '../../../src/domain/value-objects/wallet'
 import { DeBridgeApiService } from '../../../src/infrastructure/de-bridge/de-bridge-api.service'
 import { DeBridgeModule } from '../../../src/infrastructure/de-bridge/de-bridge.module'
 import { DeBridgeService } from '../../../src/infrastructure/de-bridge/de-bridge.service'
-import { Order } from '../../../src/infrastructure/de-bridge/schemas/order-status.schema'
 import { EVM_CLIENT_CONFIG } from '../../../src/infrastructure/evm/evm-client/types'
 import { NativeCurrency } from '../../../src/infrastructure/evm/primitives/currencies/native-currency'
 import { Token } from '../../../src/infrastructure/evm/primitives/currencies/token'
+import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
 import { RIPS_SC_ADDRESS } from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
 import { setNativeBalance, setTokenBalance, useAnvil } from '../../utils/anvil'
 import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
+import {
+	createMockDeBridgeApiService,
+	mockGetOrder,
+} from '../../utils/mock-de-bridge-api.service'
 import deployments from '../../utils/state/deployments.json'
 
 const ARBITRUM_CHAIN_ID = 42161
@@ -46,6 +54,8 @@ const USDC_ARBITRUM_ADDRESS = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
 const USDC_DECIMALS = 6
 const USDC_AMOUNT = parseUnits('200', USDC_DECIMALS)
 const ETH_AMOUNT = parseEther('0.01')
+
+const ripsContractAddress = getAddress(deployments.rips)
 
 const baseChain = defineChain({
 	id: BASE_CHAIN_ID,
@@ -112,13 +122,20 @@ describe('DeBridge integration', () => {
 		let zapService: ZapService
 		let debridgeService: DeBridgeService
 		let mockDeBridgeApiService: DeBridgeApiService
+		let arbitrumClient: PublicClient<HttpTransport, Chain>
+		let baseClient: PublicClient<HttpTransport, Chain>
 
 		beforeAll(async () => {
 			const [arbitrumAnvil, baseAnvil] = anvils
 
-			const arbitrumClient = createPublicClient({
+			arbitrumClient = createPublicClient({
 				chain: arbitrum,
 				transport: http(`http://127.0.0.1:${arbitrumAnvil.port}`),
+			})
+
+			baseClient = createPublicClient({
+				chain: baseChain,
+				transport: http(`http://127.0.0.1:${baseAnvil.port}`),
 			})
 
 			await Promise.all([
@@ -138,19 +155,13 @@ describe('DeBridge integration', () => {
 			const arbitrumRpcUrl = `http://127.0.0.1:${arbitrumAnvil.port}`
 			const baseRpcUrl = `http://127.0.0.1:${baseAnvil.port}`
 
-			const realDeBridgeApiService = new DeBridgeApiService()
-			mockDeBridgeApiService = {
-				fetchCreateTx: realDeBridgeApiService.fetchCreateTx.bind(
-					realDeBridgeApiService,
-				),
-				getOrder: jest.fn(),
-			}
+			mockDeBridgeApiService = createMockDeBridgeApiService()
 
 			const moduleRef = await Test.createTestingModule({
 				imports: [DeBridgeModule],
 			})
 				.overrideProvider(RIPS_SC_ADDRESS)
-				.useValue(deployments.rips)
+				.useValue(ripsContractAddress)
 				.overrideProvider(EVM_CLIENT_CONFIG)
 				.useValue({
 					rpcSettings: {
@@ -175,18 +186,6 @@ describe('DeBridge integration', () => {
 		})
 
 		it('places order on Arbitrum and fulfills it on Base', async () => {
-			const [arbitrumAnvil, baseAnvil] = anvils
-
-			const arbitrumClient = createPublicClient({
-				chain: arbitrum,
-				transport: http(`http://127.0.0.1:${arbitrumAnvil.port}`),
-			})
-
-			const baseClient = createPublicClient({
-				chain: baseChain,
-				transport: http(`http://127.0.0.1:${baseAnvil.port}`),
-			})
-
 			// Step 1: place order on Arbitrum
 			const pendingZap = await zapService.buyTickets(userWallet, {
 				paymentCurrency: USDC_ARBITRUM,
@@ -203,34 +202,33 @@ describe('DeBridge integration', () => {
 			})
 
 			// Step 3: mock getOrder to return fulfilled state
-			const mockOrder: Order = {
+			mockGetOrder(mockDeBridgeApiService, {
 				state: 'Fulfilled',
-				giveOfferWithMetadata: {
-					chainId: { stringValue: String(ARBITRUM_CHAIN_ID) },
-				},
-				takeOfferWithMetadata: {
-					chainId: { stringValue: String(BASE_CHAIN_ID) },
-				},
-				createdSrcEventMetadata: {
-					transactionHash: {
-						stringValue: pendingZap.srcTransaction.id,
-					},
-				},
-				fulfilledDstEventMetadata: {
-					transactionHash: {
-						stringValue: fulfillReceipt.transactionHash,
-					},
-				},
-			}
-
-			jest.mocked(mockDeBridgeApiService.getOrder).mockResolvedValue(
-				mockOrder,
-			)
+				srcChainId: ARBITRUM_CHAIN_ID,
+				dstChainId: BASE_CHAIN_ID,
+				srcTxHash: pendingZap.srcTransaction.id,
+				dstTxHash: fulfillReceipt.transactionHash,
+			})
 
 			// Step 4: get buy result
 			const result = await debridgeService.getBuyResult(pendingZap)
 
-			console.log('Buy result:', result)
+			if (result === null || result.status !== 'success')
+				throw new Error(
+					`result status is not success, result status: ${result?.status}`,
+				)
+
+			expect(result.transaction).toBeDefined()
+			expect(result.result.roundId).toBe(1)
+			expect(result.result.ticketCount).toBe(5)
+			expect(
+				await baseClient.readContract({
+					address: ripsContractAddress,
+					abi: ripsAbi,
+					functionName: 'userTicketCount',
+					args: [1n, userAccount.address],
+				}),
+			).toBe(5n)
 		})
 	})
 })

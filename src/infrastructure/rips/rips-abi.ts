@@ -1109,6 +1109,30 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
+		name: 'userTicketCount',
+		inputs: [
+			{
+				name: 'roundId',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'buyer',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [
+			{
+				name: 'ticketCount',
+				type: 'uint64',
+				internalType: 'uint64',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
 		name: 'vrfCoordinator',
 		inputs: [],
 		outputs: [

@@ -7,10 +7,25 @@ export type PendingZap = {
 	zapId: string
 }
 
+export type ZapResultCancelled = {
+	status: 'cancelled'
+}
+
+export type ZapResultFailed = {
+	status: 'failed'
+	refund: CurrencyAmount
+}
+
+export type ZapResultSuccess<T> = {
+	status: 'success'
+	transaction: Transaction
+	result: T
+}
+
 export type ZapResult<T> =
-	| { status: 'cancelled' }
-	| { status: 'failed'; refund: CurrencyAmount }
-	| { status: 'success'; transaction: Transaction; result: T }
+	| ZapResultCancelled
+	| ZapResultFailed
+	| ZapResultSuccess<T>
 
 export type ZapBuyResult = ZapResult<Purchase>
 
