@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common'
-import ky from 'ky'
 import {
 	Address,
 	decodeEventLog,
@@ -34,8 +33,9 @@ import { parsePurchase } from '../rips/parse-purchase'
 import { ripsAbi } from '../rips/rips-abi'
 import { RIPS_SC_ADDRESS } from '../rips/rips.constants'
 import { fulfilledOrderAbi } from './abi'
-import { CreateTxResponse, CreateTxSchema } from './schemas/create-tx.schema'
-import { Order, OrderSchema } from './schemas/order-status.schema'
+import { DeBridgeApiService } from './de-bridge-api.service'
+import { CreateTxResponse } from './schemas/create-tx.schema'
+import { Order } from './schemas/order-status.schema'
 
 const FULFILLED_STATES = new Set(['Fulfilled', 'SentUnlock', 'ClaimedUnlock'])
 const CANCELLED_STATES = new Set([
@@ -43,8 +43,8 @@ const CANCELLED_STATES = new Set([
 	'OrderCancelled',
 	'ClaimedOrderCancel',
 ])
-const DEBRIDGE_API_URL = 'https://api.dln.trade/v1.0'
 const UNIVERSAL_HOOK_ADDRESS = '0x0000000000000000000000000000000000000000'
+const DEFAULT_GAS_LIMIT = 2_000_000n
 
 @Injectable()
 export class DeBridgeService implements ZapService {
@@ -55,12 +55,13 @@ export class DeBridgeService implements ZapService {
 		private readonly evmCurrencyReadService: EvmCurrencyReadService,
 		private readonly evmCurrencyWriteService: EvmCurrencyWriteService,
 		private readonly evmTransactionService: EvmTransactionService,
+		private readonly deBridgeApiService: DeBridgeApiService,
 	) {}
 
 	async getBuyResult(pendingZap: PendingZap): Promise<ZapBuyResult | null> {
 		const orderId = pendingZap.zapId
 
-		const order = await this.getOrder(orderId)
+		const order = await this.deBridgeApiService.getOrder(orderId)
 
 		if (FULFILLED_STATES.has(order.state)) {
 			const receipt = await this.getDstReceipt(order, orderId)
@@ -90,7 +91,7 @@ export class DeBridgeService implements ZapService {
 	async getSwapResult(pendingZap: PendingZap): Promise<ZapSwapResult | null> {
 		const orderId = pendingZap.zapId
 
-		const order = await this.getOrder(orderId)
+		const order = await this.deBridgeApiService.getOrder(orderId)
 
 		if (FULFILLED_STATES.has(order.state)) {
 			const receipt = await this.getDstReceipt(order, orderId)
@@ -185,7 +186,7 @@ export class DeBridgeService implements ZapService {
 		const { currencyIn, currencyOut, amountIn, recipient } = args
 		const userAddress = evmAddressFromWallet(wallet)
 
-		const createTxResponse = await this.fetchCreateTx({
+		const createTxResponse = await this.deBridgeApiService.fetchCreateTx({
 			userAddress,
 			recipient: getAddress(recipient.address),
 			srcCurrency: currencyIn,
@@ -308,7 +309,7 @@ export class DeBridgeService implements ZapService {
 		const userAddress = evmAddressFromWallet(wallet)
 		const srcChainId = evmChainIdFromCurrency(currencyIn)
 
-		const createTxResponse = await this.fetchCreateTx({
+		const createTxResponse = await this.deBridgeApiService.fetchCreateTx({
 			userAddress,
 			recipient: getAddress(recipient.address),
 			srcCurrency: currencyIn,
@@ -375,7 +376,7 @@ export class DeBridgeService implements ZapService {
 			},
 		}
 
-		const createTxResponse = await this.fetchCreateTx({
+		const createTxResponse = await this.deBridgeApiService.fetchCreateTx({
 			userAddress,
 			recipient: userAddress,
 			srcCurrency: paymentCurrency,
@@ -414,73 +415,12 @@ export class DeBridgeService implements ZapService {
 			[
 				{
 					to: this.ripsContractAddress,
-					txGas: 2_000_000n,
+					txGas: DEFAULT_GAS_LIMIT,
 					callData: hookCalldata,
 				},
 			],
 		)
 
 		return targetPayload
-	}
-
-	private async fetchCreateTx(
-		args: {
-			userAddress: Address
-			recipient: Address
-			srcCurrency: Currency
-			dstCurrency: Currency
-			dlnHook?: unknown
-		} & (
-			| { exactIn: bigint; exactOut?: never }
-			| { exactOut: bigint; exactIn?: never }
-		),
-	) {
-		const { userAddress, recipient, srcCurrency, dstCurrency, dlnHook } =
-			args
-
-		const amountParams =
-			args.exactOut !== undefined
-				? {
-						srcChainTokenInAmount: 'auto',
-						dstChainTokenOutAmount: args.exactOut.toString(),
-					}
-				: {
-						srcChainTokenInAmount: args.exactIn.toString(),
-						dstChainTokenOutAmount: 'auto',
-					}
-
-		const rawData = await ky
-			.get(`${DEBRIDGE_API_URL}/dln/order/create-tx`, {
-				timeout: 30000,
-				retry: 0,
-				searchParams: {
-					senderAddress: userAddress,
-					srcChainId: srcCurrency.chainAddress.chain.reference,
-					srcChainTokenIn: srcCurrency.chainAddress.address,
-					srcChainOrderAuthorityAddress: userAddress,
-					dstChainId: dstCurrency.chainAddress.chain.reference,
-					dstChainTokenOut: dstCurrency.chainAddress.address,
-					dstChainTokenOutRecipient: recipient,
-					dstChainOrderAuthorityAddress: userAddress,
-					...amountParams,
-					...(dlnHook !== undefined && {
-						dlnHook: JSON.stringify(dlnHook),
-					}),
-				},
-			})
-			.json()
-
-		return CreateTxSchema.parse(rawData)
-	}
-
-	async getOrder(orderId: string) {
-		const rawData = await ky
-			.get(`https://dln-api.debridge.finance/api/Orders/${orderId}`, {
-				timeout: 30000,
-				retry: 0,
-			})
-			.json()
-
-		return OrderSchema.parse(rawData)
 	}
 }
