@@ -16,5 +16,4 @@ import { GetUserModule } from '../use-cases/get-user.module'
 	],
 	controllers: [RipsController],
 })
-//TODO: bad naming, there is also RipsInfraModule
-export class RipsModule {}
+export class RipsApiModule {}

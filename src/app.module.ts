@@ -6,7 +6,7 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module'
 import { ProvisionModule } from './infrastructure/provision/provision.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
 import { PriceModule } from './modules/price/price.module'
-import { RipsModule } from './modules/rips/rips.module'
+import { RipsApiModule } from './modules/rips-api/rips-api.module'
 import { SyncClaimEventsModule } from './modules/sync-claim-events/sync-claim-events.module'
 import { UsersModule } from './modules/users/users.module'
 import { WalletsModule } from './modules/wallets/wallets.module'
@@ -26,7 +26,7 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 			},
 			{
 				path: 'rips',
-				module: RipsModule,
+				module: RipsApiModule,
 			},
 			{
 				path: 'price',
@@ -39,7 +39,7 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 		ProvisionModule,
 		UsersModule,
 		WalletsModule,
-		RipsModule,
+		RipsApiModule,
 		PriceModule,
 		KeeperModule,
 		SyncClaimEventsModule,

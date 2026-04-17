@@ -20,4 +20,4 @@ import { RipsServiceIpml } from './rips.service'
 	],
 	exports: [RipsService],
 })
-export class RipsInfraModule {}
+export class RipsModule {}
