@@ -1,0 +1,59 @@
+import { KmsService } from '../../src/application/interfaces/kms.service'
+import { UserRepository } from '../../src/application/interfaces/repositories/user.repository'
+import { WalletService } from '../../src/application/interfaces/wallet.service'
+import { CreateUserUseCase } from '../../src/application/use-cases/create-user/create-user.use-case'
+import { GetBalanceUseCase } from '../../src/application/use-cases/get-balance/get-balance.use-case'
+import { GetUnrevealedPrizesUseCase } from '../../src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
+import { GetUserUseCase } from '../../src/application/use-cases/get-user/get-user.use-case'
+import { RevealTicketPrizesUseCase } from '../../src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
+import { WithdrawUseCase } from '../../src/application/use-cases/withdraw.ts/withdraw.use-case'
+import { EVM_ADDRESS } from '../fixtures/entities'
+
+const KMS_KEY_ID = 'kms-key-123'
+
+export function makeMockUserRepository(): jest.Mocked<UserRepository> {
+	return {
+		findByTelegramId: jest.fn(),
+		findByEvmAddress: jest.fn(),
+		create: jest.fn(),
+		setReferrer: jest.fn(),
+	}
+}
+
+export function makeMockWalletService(): jest.Mocked<WalletService> {
+	return { balanceOf: jest.fn(), transfer: jest.fn() }
+}
+
+export function makeMockKmsService(): jest.Mocked<KmsService> {
+	return {
+		createEvmKey: jest.fn().mockResolvedValue({
+			kmsKeyId: KMS_KEY_ID,
+			evmAddress: EVM_ADDRESS,
+		}),
+		signTransaction: jest.fn(),
+	}
+}
+
+export function makeMockGetUserUseCase(): jest.Mocked<GetUserUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockCreateUserUseCase(): jest.Mocked<CreateUserUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockGetBalanceUseCase(): jest.Mocked<GetBalanceUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockRevealTicketPrizesUseCase(): jest.Mocked<RevealTicketPrizesUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockGetUnrevealedPrizesUseCase(): jest.Mocked<GetUnrevealedPrizesUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockWithdrawUseCase(): jest.Mocked<WithdrawUseCase> {
+	return { execute: jest.fn() }
+}

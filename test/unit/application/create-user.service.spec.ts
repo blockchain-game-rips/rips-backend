@@ -1,53 +1,20 @@
-import { getAddress } from 'viem'
-import { KmsService } from '../../../src/application/interfaces/kms.service'
-import { UserRepository } from '../../../src/application/interfaces/repositories/user.repository'
 import { CreateUserService } from '../../../src/application/use-cases/create-user/create-user.service'
 import { UserAlreadyExistsError } from '../../../src/application/use-cases/create-user/create-user.use-case'
-import { EIP155 } from '../../../src/constants'
-import { User } from '../../../src/domain/entities/user'
-import { toTelegramId } from '../../../src/domain/value-objects/telegram-id'
-const TELEGRAM_ID = toTelegramId(123456n)
-const EVM_ADDRESS = getAddress('0x1234567890abcdef1234567890abcdef12345678')
+import { EVM_ADDRESS, MOCK_USER, TELEGRAM_ID } from '../../fixtures/entities'
+import {
+	makeMockKmsService,
+	makeMockUserRepository,
+} from '../../mocks/use-cases'
+
 const KMS_KEY_ID = 'kms-key-123'
 
-const MOCK_USER: User = {
-	id: 1n,
-	telegramProfile: { telegramId: TELEGRAM_ID },
-	wallet: { kind: 'user', namespaceToAddress: { [EIP155]: EVM_ADDRESS } },
-	referrerAddress: null,
-	createdAt: new Date('2026-01-01'),
-}
-
-function makeMockUserRepository(): jest.Mocked<UserRepository> {
-	const mock: jest.Mocked<UserRepository> = {
-		findByTelegramId: jest.fn(),
-		findByEvmAddress: jest.fn(),
-		create: jest.fn(),
-		setReferrer: jest.fn(),
-	}
-	return mock
-}
-
-function makeMockKmsService(): jest.Mocked<KmsService> {
-	const mock: jest.Mocked<KmsService> = {
-		createEvmKey: jest.fn().mockResolvedValue({
-			kmsKeyId: KMS_KEY_ID,
-			evmAddress: EVM_ADDRESS,
-		}),
-		signTransaction: jest.fn(),
-	}
-	return mock
-}
-
 describe('CreateUserService', () => {
-	let repo: jest.Mocked<UserRepository>
-	let kms: jest.Mocked<KmsService>
-	let service: CreateUserService
+	const repo = makeMockUserRepository()
+	const kms = makeMockKmsService()
+	const service = new CreateUserService(repo, kms)
 
 	beforeEach(() => {
-		repo = makeMockUserRepository()
-		kms = makeMockKmsService()
-		service = new CreateUserService(repo, kms)
+		jest.clearAllMocks()
 	})
 
 	it('should create user with KMS key and return it', async () => {

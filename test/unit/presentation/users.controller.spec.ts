@@ -1,67 +1,37 @@
-import {
-	CreateUserUseCase,
-	UserAlreadyExistsError,
-} from '../../../src/application/use-cases/create-user/create-user.use-case'
-import { GetUnrevealedPrizesUseCase } from '../../../src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
-import {
-	GetUserUseCase,
-	UserNotFoundError,
-} from '../../../src/application/use-cases/get-user/get-user.use-case'
-import { RevealTicketPrizesUseCase } from '../../../src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
+import { UserAlreadyExistsError } from '../../../src/application/use-cases/create-user/create-user.use-case'
+import { UserNotFoundError } from '../../../src/application/use-cases/get-user/get-user.use-case'
 import { EIP155 } from '../../../src/constants'
-import { User } from '../../../src/domain/entities/user'
-import { toTelegramId } from '../../../src/domain/value-objects/telegram-id'
 import { UsersController } from '../../../src/presentation/users/users.controller'
-const TELEGRAM_ID = toTelegramId(123456n)
-const EVM_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'
-
-const MOCK_USER: User = {
-	id: 1n,
-	telegramProfile: { telegramId: TELEGRAM_ID },
-	wallet: { kind: 'user', namespaceToAddress: { [EIP155]: EVM_ADDRESS } },
-	referrerAddress: null,
-	createdAt: new Date('2026-01-01'),
-}
-
-function makeMockGetUserUseCase(): jest.Mocked<GetUserUseCase> {
-	const mock: jest.Mocked<GetUserUseCase> = { execute: jest.fn() }
-	return mock
-}
-
-function makeMockCreateUserUseCase(): jest.Mocked<CreateUserUseCase> {
-	const mock: jest.Mocked<CreateUserUseCase> = { execute: jest.fn() }
-	return mock
-}
-
-function makeMockRevealTicketPrizesUseCase(): jest.Mocked<RevealTicketPrizesUseCase> {
-	const mock: jest.Mocked<RevealTicketPrizesUseCase> = { execute: jest.fn() }
-	return mock
-}
-
-function makeMockGetUnrevealedPrizesUseCase(): jest.Mocked<GetUnrevealedPrizesUseCase> {
-	const mock: jest.Mocked<GetUnrevealedPrizesUseCase> = { execute: jest.fn() }
-	return mock
-}
+import { EVM_ADDRESS, MOCK_USER, TELEGRAM_ID } from '../../fixtures/entities'
+import {
+	makeMockCreateUserUseCase,
+	makeMockGetUnrevealedPrizesUseCase,
+	makeMockGetUserUseCase,
+	makeMockRevealTicketPrizesUseCase,
+} from '../../mocks/use-cases'
 
 describe('UsersController', () => {
-	let getUser: jest.Mocked<GetUserUseCase>
-	let createUser: jest.Mocked<CreateUserUseCase>
-	let revealTicketPrizes: jest.Mocked<RevealTicketPrizesUseCase>
-	let getUnrevealedPrizes: jest.Mocked<GetUnrevealedPrizesUseCase>
-	let controller: UsersController
+	const getUser = makeMockGetUserUseCase()
+	const createUser = makeMockCreateUserUseCase()
+	const revealTicketPrizes = makeMockRevealTicketPrizesUseCase()
+	const getUnrevealedPrizes = makeMockGetUnrevealedPrizesUseCase()
+	const controller = new UsersController(
+		getUser,
+		createUser,
+		revealTicketPrizes,
+		getUnrevealedPrizes,
+	)
 
 	beforeEach(() => {
-		getUser = makeMockGetUserUseCase()
-		createUser = makeMockCreateUserUseCase()
-		revealTicketPrizes = makeMockRevealTicketPrizesUseCase()
-		getUnrevealedPrizes = makeMockGetUnrevealedPrizesUseCase()
-		controller = new UsersController(
-			getUser,
-			createUser,
-			revealTicketPrizes,
-			getUnrevealedPrizes,
-		)
+		jest.clearAllMocks()
 	})
+
+	const EXPECTED_USER_DTO = {
+		id: '1',
+		telegramId: '123456',
+		wallets: { [EIP155]: EVM_ADDRESS },
+		createdAt: '2026-01-01T00:00:00.000Z',
+	}
 
 	describe('GET /users/:telegramId', () => {
 		it('should return user response dto', async () => {
@@ -69,12 +39,7 @@ describe('UsersController', () => {
 
 			const result = await controller.getUser(TELEGRAM_ID)
 
-			expect(result).toEqual({
-				id: '1',
-				telegramId: '123456',
-				wallets: { [EIP155]: EVM_ADDRESS },
-				createdAt: '2026-01-01T00:00:00.000Z',
-			})
+			expect(result).toEqual(EXPECTED_USER_DTO)
 		})
 
 		it('should propagate UserNotFoundError', async () => {
@@ -97,12 +62,7 @@ describe('UsersController', () => {
 				referrerAddress: null,
 			})
 
-			expect(result).toEqual({
-				id: '1',
-				telegramId: '123456',
-				wallets: { [EIP155]: EVM_ADDRESS },
-				createdAt: '2026-01-01T00:00:00.000Z',
-			})
+			expect(result).toEqual(EXPECTED_USER_DTO)
 		})
 
 		it('should propagate UserAlreadyExistsError', async () => {

@@ -1,41 +1,14 @@
-import { UserRepository } from '../../../src/application/interfaces/repositories/user.repository'
 import { GetUserService } from '../../../src/application/use-cases/get-user/get-user.service'
 import { UserNotFoundError } from '../../../src/application/use-cases/get-user/get-user.use-case'
-import { EIP155 } from '../../../src/constants'
-import { User } from '../../../src/domain/entities/user'
-import { toTelegramId } from '../../../src/domain/value-objects/telegram-id'
-const TELEGRAM_ID = toTelegramId(123456n)
-
-const MOCK_USER: User = {
-	id: 1n,
-	telegramProfile: { telegramId: TELEGRAM_ID },
-	wallet: {
-		kind: 'user',
-		namespaceToAddress: {
-			[EIP155]: '0x1234567890abcdef1234567890abcdef12345678',
-		},
-	},
-	referrerAddress: null,
-	createdAt: new Date('2026-01-01'),
-}
-
-function makeMockUserRepository(): jest.Mocked<UserRepository> {
-	const mock: jest.Mocked<UserRepository> = {
-		findByTelegramId: jest.fn(),
-		findByEvmAddress: jest.fn(),
-		create: jest.fn(),
-		setReferrer: jest.fn(),
-	}
-	return mock
-}
+import { MOCK_USER, TELEGRAM_ID } from '../../fixtures/entities'
+import { makeMockUserRepository } from '../../mocks/use-cases'
 
 describe('GetUserService', () => {
-	let repo: jest.Mocked<UserRepository>
-	let service: GetUserService
+	const repo = makeMockUserRepository()
+	const service = new GetUserService(repo)
 
 	beforeEach(() => {
-		repo = makeMockUserRepository()
-		service = new GetUserService(repo)
+		jest.clearAllMocks()
 	})
 
 	it('should return user when found', async () => {
