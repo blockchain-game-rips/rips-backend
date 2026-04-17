@@ -45,6 +45,7 @@ export class RipsController {
 	async buyTickets(
 		@Param(TELEGRAM_ID_PARAM, new ZodValidationPipe(telegramIdParamSchema))
 		telegramId: TelegramId,
+
 		@Body(new ZodValidationPipe(buyTicketsBodySchema))
 		body: z.infer<typeof buyTicketsBodySchema>,
 	): Promise<BuyTicketsResponseDto> {
@@ -52,6 +53,7 @@ export class RipsController {
 			telegramId,
 			stakeId: body.stakeId,
 			ticketCount: body.ticketCount,
+			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
 		return toBuyTicketsResponseDto(purchase)

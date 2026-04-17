@@ -71,6 +71,7 @@ describe('UsersController', () => {
 
 			expect(result).toEqual({
 				id: '1',
+				telegramId: '123456',
 				wallets: { [EIP155]: EVM_ADDRESS },
 				createdAt: '2026-01-01T00:00:00.000Z',
 			})
@@ -98,6 +99,7 @@ describe('UsersController', () => {
 
 			expect(result).toEqual({
 				id: '1',
+				telegramId: '123456',
 				wallets: { [EIP155]: EVM_ADDRESS },
 				createdAt: '2026-01-01T00:00:00.000Z',
 			})

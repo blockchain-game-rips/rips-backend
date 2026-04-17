@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { toChainNamespace } from '../domain/value-objects/chain-namespace'
 import { toTelegramId } from '../domain/value-objects/telegram-id'
 
 const EVM_ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/
@@ -31,9 +32,18 @@ export const withdrawBodySchema = z.object({
 	recipientAddress: z.string().regex(EVM_ADDRESS_REGEX),
 })
 
+const chainAddressSchema = z.object({
+	address: z.string().min(1),
+	chain: z.object({
+		namespace: z.string().transform(toChainNamespace),
+		reference: z.string().min(1),
+	}),
+})
+
 export const buyTicketsBodySchema = z.object({
 	stakeId: z.number().int().positive(),
 	ticketCount: z.number().int().positive(),
+	paymentCurrencyChainAddress: chainAddressSchema,
 })
 
 export const completedRoundsQuerySchema = z.object({
