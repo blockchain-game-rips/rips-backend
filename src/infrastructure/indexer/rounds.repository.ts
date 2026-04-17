@@ -33,10 +33,10 @@ export class IndexerRoundRepository extends RoundRepository {
 		)
 	}
 
-	async getNextClaimedRound(
+	async getNextCompletedRound(
 		afterRoundId: number,
 	): Promise<CompletedRound | null> {
-		// TODO: implement GraphQL query for next claimed round after afterRoundId
+		// TODO: implement GraphQL query for next completed round after afterRoundId
 		throw new Error('Not implemented')
 	}
 }

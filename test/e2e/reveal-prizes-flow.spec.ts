@@ -323,9 +323,9 @@ describe('Reveal prizes flow E2E', () => {
 
 		stakeRepository.setOngoingRounds([])
 
-		roundRepository.setNextClaimedRound(claimedRound)
+		roundRepository.setNextCompletedRound(claimedRound)
 		await ctx.app.get(SyncClaimEventsUseCase).execute()
-		roundRepository.setNextClaimedRound(null)
+		roundRepository.setNextCompletedRound(null)
 
 		const user1OnChainPrize = await getPrizeClaimedByUser(user1Address)
 		const user2OnChainPrize = await getPrizeClaimedByUser(user2Address)

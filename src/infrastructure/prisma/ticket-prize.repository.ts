@@ -123,35 +123,6 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 
 		return Array.from(tierMap.values())
 	}
-
-	async getHighestRoundId(): Promise<number | null> {
-		const result = await this.prisma.ticketPrize.findFirst({
-			orderBy: { roundId: 'desc' },
-			select: { roundId: true },
-		})
-
-		return result?.roundId ?? null
-	}
-
-	async saveManyForRound(
-		entries: { userId: bigint; prizes: TicketPrize[] }[],
-	): Promise<void> {
-		await this.prisma.$transaction(
-			entries.flatMap(({ userId, prizes }) =>
-				prizes.map((prize) =>
-					this.prisma.ticketPrize.create({
-						data: {
-							userId,
-							roundId: prize.roundId,
-							ticketNumber: prize.ticketNumber,
-							prizeAmount: prize.prizeAmount,
-							cardDefinitionId: BigInt(prize.card.id),
-						},
-					}),
-				),
-			),
-		)
-	}
 }
 
 function toCard(def: {

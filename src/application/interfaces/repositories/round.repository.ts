@@ -10,7 +10,7 @@ export abstract class RoundRepository {
 		args: GetCompletedRoundsArgs,
 	): Promise<CompletedRound[]>
 
-	abstract getNextClaimedRound(
+	abstract getNextCompletedRound(
 		afterRoundId: number,
 	): Promise<CompletedRound | null>
 }

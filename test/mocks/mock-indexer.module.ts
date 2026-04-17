@@ -4,18 +4,18 @@ import { StakeRepository } from '../../src/application/interfaces/repositories/s
 import { CompletedRound } from '../../src/domain/entities/round'
 
 export class MockRoundRepository extends RoundRepository {
-	private nextClaimedRound: CompletedRound | null = null
+	private nextCompletedRound: CompletedRound | null = null
 
-	setNextClaimedRound(round: CompletedRound | null) {
-		this.nextClaimedRound = round
+	setNextCompletedRound(round: CompletedRound | null) {
+		this.nextCompletedRound = round
 	}
 
 	async getCompletedRounds() {
 		return Promise.resolve([])
 	}
 
-	async getNextClaimedRound() {
-		return Promise.resolve(this.nextClaimedRound)
+	async getNextCompletedRound() {
+		return Promise.resolve(this.nextCompletedRound)
 	}
 }
 

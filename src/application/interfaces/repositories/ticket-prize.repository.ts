@@ -20,10 +20,4 @@ export abstract class TicketPrizeRepository {
 	): Promise<CardCollection[]>
 
 	abstract getCardDefinitionsByStake(stakeId: number): Promise<Card[][]>
-
-	abstract getHighestRoundId(): Promise<number | null>
-
-	abstract saveManyForRound(
-		entries: { userId: bigint; prizes: TicketPrize[] }[],
-	): Promise<void>
 }
