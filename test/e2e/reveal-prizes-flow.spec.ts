@@ -30,6 +30,7 @@ import { IndexerModule } from '../../src/infrastructure/indexer/indexer.module'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { SeedCardDefinitionsService } from '../../src/infrastructure/seed/seed-card-definitions.service'
 import { SeedModule } from '../../src/infrastructure/seed/seed.module'
+import { ANVIL_ACCOUNT_0_PRIVATE_KEY } from '../fixtures/anvil-accounts'
 import cardsConfig from '../fixtures/cards.json'
 import { deployments } from '../fixtures/state'
 import { vrfCoordinatorAbi } from '../fixtures/vrf-coordinator-abi'
@@ -45,8 +46,7 @@ const TICKET_COST = parseEther('0.005')
 const TICKETS_PER_USER = 4
 const TICKET_CAP = 8
 
-const KEEPER_PRIVATE_KEY =
-	'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+const KEEPER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
 
 const TELEGRAM_ID_USER_1 = '111222333'
 const TELEGRAM_ID_USER_2 = '444555666'

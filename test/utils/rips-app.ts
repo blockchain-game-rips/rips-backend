@@ -26,6 +26,10 @@ import { ProvisionService } from '../../src/infrastructure/provision/provision.s
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { RIPS_SC_ADDRESS } from '../../src/infrastructure/rips/rips.constants'
 import { UseCaseExceptionFilter } from '../../src/presentation/filters/use-case-exception.filter'
+import {
+	ANVIL_ACCOUNT_0_PRIVATE_KEY,
+	ANVIL_MNEMONIC,
+} from '../fixtures/anvil-accounts'
 import { ANVIL_STATE_PATH, deployments } from '../fixtures/state'
 import { MockIndexerModule } from '../mocks/mock-indexer.module'
 import { Anvil, setNativeBalance, useAnvil } from './anvil'
@@ -38,11 +42,8 @@ class NoopScheduleModule {}
 @Module({})
 class NoopConfigModule {}
 
-const KMS_MNEMONIC =
-	'spy record fury either collect ill pony monkey praise cool matter state'
-
-const DEPLOYER_PRIVATE_KEY =
-	'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+const KMS_MNEMONIC = ANVIL_MNEMONIC
+const DEPLOYER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
 
 const EXECUTOR_COUNT = 2
 const EXECUTOR_BALANCE = parseEther('10')

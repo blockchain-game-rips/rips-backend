@@ -10,10 +10,10 @@ import {
 } from 'viem'
 import { base } from 'viem/chains'
 import { MnemonicKmsService } from '../../../src/infrastructure/kms/mnemonic-kms.service'
+import { ANVIL_MNEMONIC } from '../../fixtures/anvil-accounts'
 import { Anvil, setNativeBalance, useAnvil } from '../../utils/anvil'
 
-const TEST_MNEMONIC =
-	'spy record fury either collect ill pony monkey praise cool matter state'
+const TEST_MNEMONIC = ANVIL_MNEMONIC
 
 const FUNDED_BALANCE = parseEther('1')
 

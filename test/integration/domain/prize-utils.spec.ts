@@ -20,6 +20,11 @@ import {
 } from '../../../src/domain/services/prize-utils'
 import { CardCollection } from '../../../src/domain/value-objects/card-collection'
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
+import {
+	ANVIL_ACCOUNT_0_PRIVATE_KEY,
+	ANVIL_ACCOUNT_1_PRIVATE_KEY,
+	ANVIL_ACCOUNT_2_PRIVATE_KEY,
+} from '../../fixtures/anvil-accounts'
 import { ANVIL_STATE_PATH, deployments } from '../../fixtures/state'
 import { vrfCoordinatorAbi } from '../../fixtures/vrf-coordinator-abi'
 import { getBalances, useAnvil, waitForReceipt } from '../../utils/anvil'
@@ -39,13 +44,9 @@ const TICKET_COST = parseEther('0.005')
 const USER_1_TICKET_COUNT = 6n
 const USER_2_TICKET_COUNT = 2n
 
-// Anvil default accounts
-const KEEPER_PRIVATE_KEY =
-	'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-const USER_1_PRIVATE_KEY =
-	'0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
-const USER_2_PRIVATE_KEY =
-	'0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
+const KEEPER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
+const USER_1_PRIVATE_KEY = ANVIL_ACCOUNT_1_PRIVATE_KEY
+const USER_2_PRIVATE_KEY = ANVIL_ACCOUNT_2_PRIVATE_KEY
 
 const PRIZE_DISTRIBUTION = [
 	{

@@ -38,14 +38,14 @@ import {
 	createMockDeBridgeApiService,
 	mockGetOrder,
 } from '../../mocks/mock-de-bridge-api.service'
+import { ANVIL_ACCOUNT_1_PRIVATE_KEY } from '../../fixtures/anvil-accounts'
 import { setNativeBalance, setTokenBalance, useAnvil } from '../../utils/anvil'
 import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
 
 const ARBITRUM_CHAIN_ID = 42161
 const BASE_CHAIN_ID = 8453
 
-const USER_PRIVATE_KEY =
-	'0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
+const USER_PRIVATE_KEY = ANVIL_ACCOUNT_1_PRIVATE_KEY
 
 const USDC_ARBITRUM_ADDRESS = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
 const USDC_DECIMALS = 6

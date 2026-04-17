@@ -12,15 +12,14 @@ import {
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { Chain } from 'viem/chains'
+import { ANVIL_ACCOUNT_0_PRIVATE_KEY } from '../fixtures/anvil-accounts'
 import { setNativeBalance, waitForReceipt } from './anvil'
 
 const DLN_DESTINATION_ADDRESSES: Record<number, string> = {
 	8453: '0xe7351fd770a37282b91d153ee690b63579d6dd7f',
 }
 
-// Anvil account #0
-const DEFAULT_SOLVER_PRIVATE_KEY =
-	'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+const DEFAULT_SOLVER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
 
 const ALLOWED_TAKER_ADDRESS_BYTES_LENGTH = 20
 
