@@ -1,5 +1,4 @@
 import { Test } from '@nestjs/testing'
-import path from 'path'
 import {
 	Chain,
 	createPublicClient,
@@ -34,21 +33,16 @@ import { Token } from '../../../src/infrastructure/evm/primitives/currencies/tok
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
 import { RIPS_SC_ADDRESS } from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
-import { setNativeBalance, setTokenBalance, useAnvil } from '../../utils/anvil'
-import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
+import { ANVIL_STATE_PATH, deployments } from '../../fixtures/state'
 import {
 	createMockDeBridgeApiService,
 	mockGetOrder,
-} from '../../utils/mock-de-bridge-api.service'
-import deployments from '../../utils/state/deployments.json'
+} from '../../mocks/mock-de-bridge-api.service'
+import { setNativeBalance, setTokenBalance, useAnvil } from '../../utils/anvil'
+import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
 
 const ARBITRUM_CHAIN_ID = 42161
 const BASE_CHAIN_ID = 8453
-
-const ANVIL_STATE_PATH = path.resolve(
-	__dirname,
-	'../../utils/state/anvil-state.json',
-)
 
 const USER_PRIVATE_KEY =
 	'0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'

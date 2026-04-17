@@ -1,4 +1,3 @@
-import path from 'path'
 import {
 	Chain,
 	createPublicClient,
@@ -21,9 +20,9 @@ import {
 } from '../../../src/domain/services/prize-utils'
 import { CardCollection } from '../../../src/domain/value-objects/card-collection'
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
+import { ANVIL_STATE_PATH, deployments } from '../../fixtures/state'
+import { vrfCoordinatorAbi } from '../../fixtures/vrf-coordinator-abi'
 import { getBalances, useAnvil, waitForReceipt } from '../../utils/anvil'
-import deployments from '../../utils/state/deployments.json'
-import { vrfCoordinatorAbi } from '../../utils/vrf-coordinator-abi'
 
 const CHAIN_ID = 8453
 const CHAIN = defineChain({
@@ -35,11 +34,6 @@ const CHAIN = defineChain({
 
 const RIPS_ADDRESS = deployments.rips as Address
 const VRF_COORDINATOR_ADDRESS = deployments.vrfCoordinator as Address
-const ANVIL_STATE_PATH = path.resolve(
-	__dirname,
-	'../../utils/state/anvil-state.json',
-)
-
 const STAKE_ID = 1n
 const TICKET_COST = parseEther('0.005')
 const USER_1_TICKET_COUNT = 6n

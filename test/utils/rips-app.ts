@@ -1,7 +1,6 @@
 import { INestApplication, Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { Test, TestingModuleBuilder } from '@nestjs/testing'
-import path from 'path'
 import {
 	createPublicClient,
 	createWalletClient,
@@ -27,10 +26,10 @@ import { ProvisionService } from '../../src/infrastructure/provision/provision.s
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { RIPS_SC_ADDRESS } from '../../src/infrastructure/rips/rips.constants'
 import { UseCaseExceptionFilter } from '../../src/presentation/filters/use-case-exception.filter'
+import { ANVIL_STATE_PATH, deployments } from '../fixtures/state'
+import { MockIndexerModule } from '../mocks/mock-indexer.module'
 import { Anvil, setNativeBalance, useAnvil } from './anvil'
-import { MockIndexerModule } from './mock-indexer.module'
 import { usePostgres } from './postgres'
-import deployments from './state/deployments.json'
 import { TestConfigModule } from './test-config.module'
 
 @Module({})
@@ -47,8 +46,6 @@ const DEPLOYER_PRIVATE_KEY =
 
 const EXECUTOR_COUNT = 2
 const EXECUTOR_BALANCE = parseEther('10')
-
-const ANVIL_STATE_PATH = path.resolve(__dirname, 'state/anvil-state.json')
 
 const BASE_CHAIN_ID = 8453
 

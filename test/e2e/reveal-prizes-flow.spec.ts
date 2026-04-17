@@ -30,15 +30,15 @@ import { IndexerModule } from '../../src/infrastructure/indexer/indexer.module'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { SeedCardDefinitionsService } from '../../src/infrastructure/seed/seed-card-definitions.service'
 import { SeedModule } from '../../src/infrastructure/seed/seed.module'
-import { getBalances, setNativeBalance } from '../utils/anvil'
+import cardsConfig from '../fixtures/cards.json'
+import { deployments } from '../fixtures/state'
+import { vrfCoordinatorAbi } from '../fixtures/vrf-coordinator-abi'
 import {
 	MockIndexerModule,
 	MockRoundRepository,
-} from '../utils/mock-indexer.module'
+} from '../mocks/mock-indexer.module'
+import { getBalances, setNativeBalance } from '../utils/anvil'
 import { useRipsApp } from '../utils/rips-app'
-import deployments from '../utils/state/deployments.json'
-import { vrfCoordinatorAbi } from '../utils/vrf-coordinator-abi'
-import cardsConfig from './cards.json'
 
 const STAKE_ID = 1
 const TICKET_COST = parseEther('0.005')
