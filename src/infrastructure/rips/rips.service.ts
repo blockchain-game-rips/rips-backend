@@ -10,7 +10,6 @@ import { MAIN_CURRENCY } from '../../application/interfaces/tokens'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
-import { AvailableStake } from '../../domain/value-objects/available-stake'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
@@ -111,16 +110,11 @@ export class RipsServiceIpml implements RipsService {
 
 	async buyTickets(
 		wallet: Wallet,
-		args: { availableStake: AvailableStake; ticketCount: number },
+		args: { stakeId: number; config: Config; ticketCount: number },
 	): Promise<PurchaseReceipt> {
 		const evmCurrency = this.requireEvmCurrency()
 
-		const { availableStake, ticketCount } = args
-
-		const config =
-			availableStake.fillingRound !== null
-				? availableStake.fillingRound.config
-				: availableStake.stake.currentConfig
+		const { stakeId, config, ticketCount } = args
 
 		const chainId = evmChainIdFromCurrency(evmCurrency)
 		const userAddress = evmAddressFromWallet(wallet)
@@ -132,11 +126,7 @@ export class RipsServiceIpml implements RipsService {
 			data: encodeFunctionData({
 				abi: ripsAbi,
 				functionName: 'buyTickets',
-				args: [
-					BigInt(availableStake.stake.id),
-					BigInt(ticketCount),
-					userAddress,
-				],
+				args: [BigInt(stakeId), BigInt(ticketCount), userAddress],
 			}),
 			value: totalValue,
 		}
