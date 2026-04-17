@@ -225,6 +225,8 @@ describe('DeBridge integration', () => {
 				address: userAccount.address,
 			})
 
+			const usdcBalanceBefore = await readUsdcBalance(userAccount.address)
+
 			// Step 1: place order on Arbitrum with ticket count over cap
 			const pendingZap = await zapService.buyTickets(userWallet, {
 				paymentCurrency: USDC_ARBITRUM,
@@ -232,6 +234,15 @@ describe('DeBridge integration', () => {
 				config: MOCK_CONFIG,
 				ticketCount: overCapTicketCount,
 			})
+
+			expect(pendingZap.amountIn.amount).toBeGreaterThan(0n)
+			expect(pendingZap.amountIn.currency.chainAddress.address).toBe(
+				USDC_ARBITRUM.chainAddress.address,
+			)
+			expect(
+				usdcBalanceBefore -
+					(await readUsdcBalance(userAccount.address)),
+			).toBe(pendingZap.amountIn.amount)
 
 			// Step 2: fulfill order on Base and mock API response
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
@@ -265,6 +276,8 @@ describe('DeBridge integration', () => {
 		})
 
 		it('places order on Arbitrum and fulfills it on Base', async () => {
+			const usdcBalanceBefore = await readUsdcBalance(userAccount.address)
+
 			// Step 1: place order on Arbitrum
 			const pendingZap = await zapService.buyTickets(userWallet, {
 				paymentCurrency: USDC_ARBITRUM,
@@ -272,6 +285,15 @@ describe('DeBridge integration', () => {
 				config: MOCK_CONFIG,
 				ticketCount: 5,
 			})
+
+			expect(pendingZap.amountIn.amount).toBeGreaterThan(0n)
+			expect(pendingZap.amountIn.currency.chainAddress.address).toBe(
+				USDC_ARBITRUM.chainAddress.address,
+			)
+			expect(
+				usdcBalanceBefore -
+					(await readUsdcBalance(userAccount.address)),
+			).toBe(pendingZap.amountIn.amount)
 
 			// Step 2: fulfill order on Base and mock API response
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
@@ -314,12 +336,23 @@ describe('DeBridge integration', () => {
 				address: receiverAccount.address,
 			})
 
+			const usdcBalanceBefore = await readUsdcBalance(userAccount.address)
+
 			const pendingZap = await zapService.swap(userWallet, {
 				currencyIn: USDC_ARBITRUM,
 				currencyOut: ETH_BASE,
 				amountIn: 100_000000n,
 				recipient,
 			})
+
+			expect(pendingZap.amountIn.amount).toBeGreaterThan(0n)
+			expect(pendingZap.amountIn.currency.chainAddress.address).toBe(
+				USDC_ARBITRUM.chainAddress.address,
+			)
+			expect(
+				usdcBalanceBefore -
+					(await readUsdcBalance(userAccount.address)),
+			).toBe(pendingZap.amountIn.amount)
 
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
@@ -388,6 +421,25 @@ describe('DeBridge integration', () => {
 				String(ARBITRUM_CHAIN_ID),
 			)
 		})
+
+		async function readUsdcBalance(
+			address: `0x${string}`,
+		): Promise<bigint> {
+			return arbitrumClient.readContract({
+				address: USDC_ARBITRUM_ADDRESS,
+				abi: [
+					{
+						type: 'function',
+						name: 'balanceOf',
+						inputs: [{ name: 'account', type: 'address' }],
+						outputs: [{ name: '', type: 'uint256' }],
+						stateMutability: 'view',
+					},
+				] as const,
+				functionName: 'balanceOf',
+				args: [address],
+			})
+		}
 
 		async function fulfillOrderAndMockApi(srcTxHash: Hash): Promise<void> {
 			const fulfillReceipt = await fulfillDlnOrder({

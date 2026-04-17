@@ -281,7 +281,16 @@ export class DeBridgeService implements ZapService {
 				srcChainId,
 			)
 
-		return { srcTransaction: transaction, zapId: createTxResponse.orderId }
+		return {
+			srcTransaction: transaction,
+			zapId: createTxResponse.orderId,
+			amountIn: {
+				currency: paymentCurrency,
+				amount: BigInt(
+					createTxResponse.estimation.srcChainTokenIn.amount,
+				),
+			},
+		}
 	}
 
 	async approveIfNeeded(args: {
@@ -346,7 +355,16 @@ export class DeBridgeService implements ZapService {
 				srcChainId,
 			)
 
-		return { srcTransaction: transaction, zapId: createTxResponse.orderId }
+		return {
+			srcTransaction: transaction,
+			zapId: createTxResponse.orderId,
+			amountIn: {
+				currency: currencyIn,
+				amount: BigInt(
+					createTxResponse.estimation.srcChainTokenIn.amount,
+				),
+			},
+		}
 	}
 
 	private txRequestFromOrder(

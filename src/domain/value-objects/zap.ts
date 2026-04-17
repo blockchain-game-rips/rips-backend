@@ -4,6 +4,7 @@ import { Transaction } from './transaction'
 
 export type PendingZap = {
 	srcTransaction: Transaction
+	amountIn: CurrencyAmount
 	zapId: string
 }
 
