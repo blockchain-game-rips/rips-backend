@@ -169,7 +169,7 @@ export class RipsServiceIpml implements RipsService {
 			args: [BigInt(roundId)],
 		})
 
-		const configId = round.configId
+		const [, configId] = round
 
 		const config = await client.readContract({
 			address: this.contractAddress,
@@ -178,21 +178,24 @@ export class RipsServiceIpml implements RipsService {
 			args: [configId],
 		})
 
+		const [currencyAddress, ticketCap, duration, ticketCost, feePercent] =
+			config
+
 		const currency = await this.evmCurrencyService.fromAddress(
-			config.currency,
+			currencyAddress,
 			chainId,
 		)
 
 		// TODO: fetch actual prize tiers from contract
 		return {
 			id: Number(configId),
-			ticketCup: Number(config.ticketCap),
-			feePercent: Number(config.feePercent),
+			ticketCup: Number(ticketCap),
+			feePercent: Number(feePercent),
 			ticketPrice: {
 				currency,
-				amount: config.ticketCost,
+				amount: ticketCost,
 			},
-			durationSeconds: Number(config.duration),
+			durationSeconds: Number(duration),
 			prizeDistribution: [],
 		}
 	}
