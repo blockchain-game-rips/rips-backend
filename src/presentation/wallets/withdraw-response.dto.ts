@@ -3,7 +3,7 @@ import { Transaction } from '../../domain/value-objects/transaction'
 
 export type WithdrawResponseDto = {
 	txId: string
-	cost: {
+	cost?: {
 		currency: {
 			chainAddress: ChainAddress
 			symbol: string
@@ -15,6 +15,12 @@ export type WithdrawResponseDto = {
 }
 
 export function toWithdrawResponseDto(tx: Transaction): WithdrawResponseDto {
+	if (tx.cost === undefined) {
+		return {
+			txId: tx.id,
+		}
+	}
+
 	return {
 		txId: tx.id,
 		cost: {
