@@ -15,6 +15,7 @@ import {
 	PublicClient,
 	serializeTransaction,
 	TransactionSerializableEIP1559,
+	zeroAddress,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { arbitrum } from 'viem/chains'
@@ -22,7 +23,9 @@ import { ZapService } from '../../../src/application/interfaces/zap.service'
 import { EIP155 } from '../../../src/constants'
 import { Config } from '../../../src/domain/entities/config'
 import { ChainAddress } from '../../../src/domain/value-objects/chain-address'
+import { CurrencyAmount } from '../../../src/domain/value-objects/currency-amount'
 import { UserWallet } from '../../../src/domain/value-objects/wallet'
+import { PendingZap } from '../../../src/domain/value-objects/zap'
 import { DeBridgeApiService } from '../../../src/infrastructure/de-bridge/de-bridge-api.service'
 import { DeBridgeModule } from '../../../src/infrastructure/de-bridge/de-bridge.module'
 import { EVM_CLIENT_CONFIG } from '../../../src/infrastructure/evm/evm-client/types'
@@ -207,7 +210,7 @@ describe('DeBridge integration', () => {
 
 			expect(result.refund.amount).toBe(expectedRefundAmount)
 			expect(result.refund.currency.chainAddress.address).toBe(
-				'0x0000000000000000000000000000000000000000',
+				zeroAddress,
 			)
 			expect(result.refund.currency.chainAddress.chain.reference).toBe(
 				BASE_CHAIN_ID.toString(),
@@ -218,11 +221,12 @@ describe('DeBridge integration', () => {
 			const ticketCap = MOCK_CONFIG.ticketCup
 			const overCapTicketCount = ticketCap + 2
 
-			const balanceBefore = await baseClient.getBalance({
+			const basBalanceBefore = await baseClient.getBalance({
 				address: userAccount.address,
 			})
 
 			const usdcBalanceBefore = await readUsdcBalance(userAccount.address)
+			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
 			// Step 1: place order on Arbitrum with ticket count over cap
 			const pendingZap = await zapService.buyTickets(userWallet, {
@@ -232,14 +236,11 @@ describe('DeBridge integration', () => {
 				ticketCount: overCapTicketCount,
 			})
 
-			expect(pendingZap.amountIn.amount).toBeGreaterThan(0n)
-			expect(pendingZap.amountIn.currency.chainAddress.address).toBe(
-				USDC_ARBITRUM.chainAddress.address,
+			await assertNativeSpentEqualsFeeAndGas(
+				nativeBalanceBefore,
+				pendingZap,
 			)
-			expect(
-				usdcBalanceBefore -
-					(await readUsdcBalance(userAccount.address)),
-			).toBe(pendingZap.amountIn.amount)
+			await assertAmountInDeducted(usdcBalanceBefore, pendingZap)
 
 			// Step 2: fulfill order on Base and mock API response
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
@@ -252,7 +253,7 @@ describe('DeBridge integration', () => {
 					`result status is not success, result status: ${result?.status}`,
 				)
 
-			const balanceAfter = await baseClient.getBalance({
+			const baseBalanceAfter = await baseClient.getBalance({
 				address: userAccount.address,
 			})
 
@@ -261,7 +262,7 @@ describe('DeBridge integration', () => {
 				MOCK_CONFIG.ticketPrice.amount * excessTickets
 
 			expect(result.result.ticketCount).toBe(ticketCap)
-			expect(balanceAfter - balanceBefore).toBe(expectedRefund)
+			expect(baseBalanceAfter - basBalanceBefore).toBe(expectedRefund)
 			expect(
 				await baseClient.readContract({
 					address: ripsContractAddress,
@@ -274,6 +275,7 @@ describe('DeBridge integration', () => {
 
 		it('places order on Arbitrum and fulfills it on Base', async () => {
 			const usdcBalanceBefore = await readUsdcBalance(userAccount.address)
+			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
 			// Step 1: place order on Arbitrum
 			const pendingZap = await zapService.buyTickets(userWallet, {
@@ -283,14 +285,11 @@ describe('DeBridge integration', () => {
 				ticketCount: 5,
 			})
 
-			expect(pendingZap.amountIn.amount).toBeGreaterThan(0n)
-			expect(pendingZap.amountIn.currency.chainAddress.address).toBe(
-				USDC_ARBITRUM.chainAddress.address,
+			await assertNativeSpentEqualsFeeAndGas(
+				nativeBalanceBefore,
+				pendingZap,
 			)
-			expect(
-				usdcBalanceBefore -
-					(await readUsdcBalance(userAccount.address)),
-			).toBe(pendingZap.amountIn.amount)
+			await assertAmountInDeducted(usdcBalanceBefore, pendingZap)
 
 			// Step 2: fulfill order on Base and mock API response
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
@@ -305,7 +304,7 @@ describe('DeBridge integration', () => {
 
 			const roundId = 2 // roundId 1 is finished in previous test
 
-			expect(result.transaction).toBeDefined()
+			expect(result.dstTransaction).toBeDefined()
 			expect(result.result.roundId).toBe(roundId)
 			expect(result.result.ticketCount).toBe(5)
 			expect(
@@ -334,6 +333,7 @@ describe('DeBridge integration', () => {
 			})
 
 			const usdcBalanceBefore = await readUsdcBalance(userAccount.address)
+			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
 			const pendingZap = await zapService.swap(userWallet, {
 				currencyIn: USDC_ARBITRUM,
@@ -342,14 +342,11 @@ describe('DeBridge integration', () => {
 				recipient,
 			})
 
-			expect(pendingZap.amountIn.amount).toBeGreaterThan(0n)
-			expect(pendingZap.amountIn.currency.chainAddress.address).toBe(
-				USDC_ARBITRUM.chainAddress.address,
+			await assertNativeSpentEqualsFeeAndGas(
+				nativeBalanceBefore,
+				pendingZap,
 			)
-			expect(
-				usdcBalanceBefore -
-					(await readUsdcBalance(userAccount.address)),
-			).toBe(pendingZap.amountIn.amount)
+			await assertAmountInDeducted(usdcBalanceBefore, pendingZap)
 
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
@@ -369,14 +366,14 @@ describe('DeBridge integration', () => {
 				receiverBalanceAfter - receiverBalanceBefore,
 			)
 			expect(result.result.amountOut.currency.chainAddress.address).toBe(
-				'0x0000000000000000000000000000000000000000',
+				zeroAddress,
 			)
 			expect(
 				result.result.amountOut.currency.chainAddress.chain.reference,
 			).toBe(String(BASE_CHAIN_ID))
 		})
 
-		it('quoteBuyTickets returns amountIn, durationMs and fee in payment currency', async () => {
+		it('quoteBuyTickets returns amountIn, durationMs and fee in native currency', async () => {
 			const result = await zapService.quoteBuyTickets(userWallet, {
 				stakeId: 1,
 				config: MOCK_CONFIG,
@@ -386,16 +383,10 @@ describe('DeBridge integration', () => {
 
 			expect(result.amountIn).toBeGreaterThan(0n)
 			expect(result.durationMs).toBeGreaterThan(0)
-			expect(result.fee.amount).toBeGreaterThan(0n)
-			expect(result.fee.currency.chainAddress.address).toBe(
-				USDC_ARBITRUM.chainAddress.address,
-			)
-			expect(result.fee.currency.chainAddress.chain.reference).toBe(
-				String(ARBITRUM_CHAIN_ID),
-			)
+			assertNativeFeeOnChain(result.fee, ARBITRUM_CHAIN_ID)
 		})
 
-		it('quoteSwap returns amountOut, durationMs and fee in src currency', async () => {
+		it('quoteSwap returns amountOut, durationMs and fee in native currency', async () => {
 			const recipient: ChainAddress = {
 				address: userAccount.address,
 				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
@@ -410,14 +401,48 @@ describe('DeBridge integration', () => {
 
 			expect(result.amountOut).toBeGreaterThan(0n)
 			expect(result.durationMs).toBeGreaterThan(0)
-			expect(result.fee.amount).toBeGreaterThan(0n)
-			expect(result.fee.currency.chainAddress.address).toBe(
+			assertNativeFeeOnChain(result.fee, ARBITRUM_CHAIN_ID)
+		})
+
+		async function assertNativeSpentEqualsFeeAndGas(
+			nativeBalanceBefore: bigint,
+			pendingZap: PendingZap,
+		): Promise<void> {
+			const nativeBalanceAfter = await readArbitrumNativeBalance()
+			const txCost = pendingZap.srcTransaction.cost?.amount ?? 0n
+			expect(nativeBalanceBefore - nativeBalanceAfter).toBe(
+				pendingZap.fee.amount + txCost,
+			)
+		}
+
+		async function readArbitrumNativeBalance(): Promise<bigint> {
+			return arbitrumClient.getBalance({ address: userAccount.address })
+		}
+
+		async function assertAmountInDeducted(
+			usdcBalanceBefore: bigint,
+			pendingZap: PendingZap,
+		): Promise<void> {
+			expect(pendingZap.amountIn.amount).toBeGreaterThan(0n)
+			expect(pendingZap.amountIn.currency.chainAddress.address).toBe(
 				USDC_ARBITRUM.chainAddress.address,
 			)
-			expect(result.fee.currency.chainAddress.chain.reference).toBe(
-				String(ARBITRUM_CHAIN_ID),
+			expect(
+				usdcBalanceBefore -
+					(await readUsdcBalance(userAccount.address)),
+			).toBe(pendingZap.amountIn.amount)
+		}
+
+		function assertNativeFeeOnChain(
+			fee: CurrencyAmount,
+			chainId: number,
+		): void {
+			expect(fee.amount).toBeGreaterThan(0n)
+			expect(fee.currency.chainAddress.address).toBe(zeroAddress)
+			expect(fee.currency.chainAddress.chain.reference).toBe(
+				String(chainId),
 			)
-		})
+		}
 
 		async function readUsdcBalance(
 			address: `0x${string}`,

@@ -3,9 +3,11 @@ import { Purchase } from './purchase'
 import { Transaction } from './transaction'
 
 export type PendingZap = {
+	zapId: string
 	srcTransaction: Transaction
 	amountIn: CurrencyAmount
-	zapId: string
+	fee: CurrencyAmount
+	durationMs: number
 }
 
 export type ZapResultCancelled = {
@@ -19,7 +21,7 @@ export type ZapResultFailed = {
 
 export type ZapResultSuccess<T> = {
 	status: 'success'
-	transaction: Transaction
+	dstTransaction: Transaction
 	result: T
 }
 

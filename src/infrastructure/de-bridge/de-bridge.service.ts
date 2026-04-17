@@ -72,7 +72,7 @@ export class DeBridgeService implements ZapService {
 				return {
 					status: 'success',
 					result: purchase,
-					transaction: { id: receipt.transactionHash },
+					dstTransaction: { id: receipt.transactionHash },
 				}
 			}
 
@@ -104,7 +104,7 @@ export class DeBridgeService implements ZapService {
 			return {
 				status: 'success',
 				result: { amountOut },
-				transaction: { id: receipt.transactionHash },
+				dstTransaction: { id: receipt.transactionHash },
 			}
 		}
 
@@ -198,12 +198,7 @@ export class DeBridgeService implements ZapService {
 			amountOut: BigInt(
 				createTxResponse.estimation.dstChainTokenOut.amount,
 			),
-			durationMs:
-				createTxResponse.order.approximateFulfillmentDelay * 1000,
-			fee: {
-				currency: currencyIn,
-				amount: BigInt(createTxResponse.fixFee),
-			},
+			...this.durationAndFeeFromCreateTxResponse(createTxResponse),
 		}
 	}
 
@@ -233,12 +228,7 @@ export class DeBridgeService implements ZapService {
 
 		return {
 			amountIn,
-			durationMs:
-				createTxResponse.order.approximateFulfillmentDelay * 1000,
-			fee: {
-				currency: paymentCurrency,
-				amount: BigInt(createTxResponse.fixFee),
-			},
+			...this.durationAndFeeFromCreateTxResponse(createTxResponse),
 		}
 	}
 
@@ -336,7 +326,7 @@ export class DeBridgeService implements ZapService {
 		const { transaction } =
 			await this.evmTransactionService.sendTransaction(
 				wallet,
-				this.txRequestFromOrder(createTxResponse),
+				this.txRequestFromCreateTxResponse(createTxResponse),
 				srcChainId,
 			)
 
@@ -344,10 +334,25 @@ export class DeBridgeService implements ZapService {
 			srcTransaction: transaction,
 			zapId: createTxResponse.orderId,
 			amountIn: { currency: currencyIn, amount: amountIn },
+			...this.durationAndFeeFromCreateTxResponse(createTxResponse),
 		}
 	}
 
-	private txRequestFromOrder(
+	durationAndFeeFromCreateTxResponse(createTxResponse: CreateTxResponse) {
+		const nativeCurrency = this.evmCurrencyService.getNative(
+			createTxResponse.estimation.srcChainTokenIn.chainId,
+		)
+
+		return {
+			durationMs:
+				createTxResponse.order.approximateFulfillmentDelay * 1000,
+			fee: {
+				currency: nativeCurrency,
+				amount: BigInt(createTxResponse.fixFee),
+			},
+		}
+	}
+	private txRequestFromCreateTxResponse(
 		createTxResponse: CreateTxResponse,
 	): TransactionRequestEIP1559 {
 		return {
