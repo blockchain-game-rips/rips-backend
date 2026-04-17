@@ -252,9 +252,7 @@ export class DeBridgeService implements ZapService {
 		},
 	): Promise<PendingZap> {
 		const { config, paymentCurrency, ticketCount, stakeId } = args
-
 		const userAddress = evmAddressFromWallet(wallet)
-		const srcChainId = evmChainIdFromCurrency(paymentCurrency)
 
 		const createTxResponse = await this.fetchCreateTxForBuyTickets({
 			userAddress,
@@ -264,33 +262,7 @@ export class DeBridgeService implements ZapService {
 			paymentCurrency,
 		})
 
-		await this.approveIfNeeded({
-			wallet,
-			paymentCurrency,
-			amountIn: BigInt(
-				createTxResponse.estimation.srcChainTokenIn.amount,
-			),
-			spender: getAddress(createTxResponse.tx.to),
-			userAddress,
-		})
-
-		const { transaction } =
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				this.txRequestFromOrder(createTxResponse),
-				srcChainId,
-			)
-
-		return {
-			srcTransaction: transaction,
-			zapId: createTxResponse.orderId,
-			amountIn: {
-				currency: paymentCurrency,
-				amount: BigInt(
-					createTxResponse.estimation.srcChainTokenIn.amount,
-				),
-			},
-		}
+		return this.sendZap(wallet, createTxResponse, paymentCurrency)
 	}
 
 	async approveIfNeeded(args: {
@@ -330,7 +302,6 @@ export class DeBridgeService implements ZapService {
 	): Promise<PendingZap> {
 		const { currencyIn, currencyOut, amountIn, recipient } = args
 		const userAddress = evmAddressFromWallet(wallet)
-		const srcChainId = evmChainIdFromCurrency(currencyIn)
 
 		const createTxResponse = await this.deBridgeApiService.fetchCreateTx({
 			userAddress,
@@ -339,6 +310,20 @@ export class DeBridgeService implements ZapService {
 			dstCurrency: currencyOut,
 			exactIn: amountIn,
 		})
+
+		return this.sendZap(wallet, createTxResponse, currencyIn)
+	}
+
+	private async sendZap(
+		wallet: Wallet,
+		createTxResponse: CreateTxResponse,
+		currencyIn: Currency,
+	): Promise<PendingZap> {
+		const userAddress = evmAddressFromWallet(wallet)
+		const srcChainId = evmChainIdFromCurrency(currencyIn)
+		const amountIn = BigInt(
+			createTxResponse.estimation.srcChainTokenIn.amount,
+		)
 
 		await this.approveIfNeeded({
 			wallet,
@@ -358,12 +343,7 @@ export class DeBridgeService implements ZapService {
 		return {
 			srcTransaction: transaction,
 			zapId: createTxResponse.orderId,
-			amountIn: {
-				currency: currencyIn,
-				amount: BigInt(
-					createTxResponse.estimation.srcChainTokenIn.amount,
-				),
-			},
+			amountIn: { currency: currencyIn, amount: amountIn },
 		}
 	}
 
