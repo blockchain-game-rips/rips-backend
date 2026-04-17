@@ -73,6 +73,10 @@ yarn test:e2e
 yarn test:all
 ```
 
+### Flaky tests
+
+`test/unit/domain/resolve-random-card.spec.ts` uses probabilistic sampling and may occasionally fail near tolerance boundaries. Re-run to confirm.
+
 ## Configuration
 
 The app loads configuration from a YAML file at the path specified by `CONFIG_PATH`. Example:
