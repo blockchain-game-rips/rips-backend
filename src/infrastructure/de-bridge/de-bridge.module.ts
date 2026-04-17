@@ -17,10 +17,8 @@ import { DeBridgeService } from './de-bridge.service'
 			provide: ZapService,
 			useClass: DeBridgeService,
 		},
-		DeBridgeService,
 		DeBridgeApiService,
 	],
-	//TODO: remove DeBridgeService export
-	exports: [ZapService, DeBridgeService],
+	exports: [ZapService],
 })
 export class DeBridgeModule {}

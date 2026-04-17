@@ -25,7 +25,6 @@ import { ChainAddress } from '../../../src/domain/value-objects/chain-address'
 import { UserWallet } from '../../../src/domain/value-objects/wallet'
 import { DeBridgeApiService } from '../../../src/infrastructure/de-bridge/de-bridge-api.service'
 import { DeBridgeModule } from '../../../src/infrastructure/de-bridge/de-bridge.module'
-import { DeBridgeService } from '../../../src/infrastructure/de-bridge/de-bridge.service'
 import { EVM_CLIENT_CONFIG } from '../../../src/infrastructure/evm/evm-client/types'
 import { NativeCurrency } from '../../../src/infrastructure/evm/primitives/currencies/native-currency'
 import { Token } from '../../../src/infrastructure/evm/primitives/currencies/token'
@@ -121,7 +120,6 @@ describe('DeBridge integration', () => {
 		}
 
 		let zapService: ZapService
-		let debridgeService: DeBridgeService
 		let mockDeBridgeApiService: DeBridgeApiService
 		let arbitrumClient: PublicClient<HttpTransport, Chain>
 		let baseClient: PublicClient<HttpTransport, Chain>
@@ -183,7 +181,6 @@ describe('DeBridge integration', () => {
 				.compile()
 
 			zapService = moduleRef.get(ZapService)
-			debridgeService = moduleRef.get(DeBridgeService)
 		})
 
 		it('fails and refunds full native amount when wrong stake id causes internal call revert', async () => {
@@ -201,7 +198,7 @@ describe('DeBridge integration', () => {
 
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
-			const result = await debridgeService.getBuyResult(pendingZap)
+			const result = await zapService.getBuyResult(pendingZap)
 
 			if (result === null || result.status !== 'failed')
 				throw new Error(
@@ -248,7 +245,7 @@ describe('DeBridge integration', () => {
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
 			// Step 3: get buy result
-			const result = await debridgeService.getBuyResult(pendingZap)
+			const result = await zapService.getBuyResult(pendingZap)
 
 			if (result === null || result.status !== 'success')
 				throw new Error(
@@ -299,7 +296,7 @@ describe('DeBridge integration', () => {
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
 			// Step 3: get buy result
-			const result = await debridgeService.getBuyResult(pendingZap)
+			const result = await zapService.getBuyResult(pendingZap)
 
 			if (result === null || result.status !== 'success')
 				throw new Error(
@@ -356,7 +353,7 @@ describe('DeBridge integration', () => {
 
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
-			const result = await debridgeService.getSwapResult(pendingZap)
+			const result = await zapService.getSwapResult(pendingZap)
 
 			if (result === null || result.status !== 'success')
 				throw new Error(
