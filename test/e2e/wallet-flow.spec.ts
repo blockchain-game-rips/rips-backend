@@ -49,7 +49,7 @@ describe('Wallet flow E2E', () => {
 			})
 			.expect(201)
 
-		expect(res.body.txId).toMatch(/^0x[0-9a-fA-F]{64}$/)
+		expect(res.body.id).toMatch(/^0x[0-9a-fA-F]{64}$/)
 		expect(typeof res.body.cost.amount).toBe('string')
 		expect(typeof res.body.cost.currency.symbol).toBe('string')
 

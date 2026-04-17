@@ -15,13 +15,17 @@ import { StakeRepository } from '../../src/application/interfaces/repositories/s
 import { GetAvailableStakesUseCase } from '../../src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { KeeperUseCase } from '../../src/application/use-cases/keeper/keeper.use-case'
 import { SyncClaimEventsUseCase } from '../../src/application/use-cases/sync-claim-events/sync-claim-events.use-case'
+import { EIP155 } from '../../src/constants'
 import { Config } from '../../src/domain/entities/config'
+import { Currency } from '../../src/domain/entities/currency'
 import {
 	CompletedRound,
 	OngoingRound,
 	RoundStatus,
 } from '../../src/domain/entities/round'
 import { Stake } from '../../src/domain/entities/stake'
+import { composeChainId } from '../../src/domain/services/chain-id-utils'
+import { composeCurrencyId } from '../../src/domain/services/currency-id-utils'
 import { IndexerModule } from '../../src/infrastructure/indexer/indexer.module'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { SeedCardDefinitionsService } from '../../src/infrastructure/seed/seed-card-definitions.service'
@@ -73,7 +77,7 @@ describe('Reveal prizes flow E2E', () => {
 					id: roundId,
 					stake: STAKE,
 					config: STAKE_CONFIG,
-					currency: {} as never,
+					currency: nativeCurrency,
 					status: RoundStatus.SEALED,
 					startTime: new Date(),
 					actions: { purchases: [], claims: [], refunds: [] },
@@ -91,7 +95,7 @@ describe('Reveal prizes flow E2E', () => {
 					id: roundId,
 					stake: STAKE,
 					config: STAKE_CONFIG,
-					currency: {} as never,
+					currency: nativeCurrency,
 					status: RoundStatus.CLAIMING,
 					startTime: new Date(),
 					actions: { purchases, claims: [], refunds: [] },
@@ -117,7 +121,7 @@ describe('Reveal prizes flow E2E', () => {
 						id: 1,
 						stake: STAKE,
 						config: STAKE_CONFIG,
-						currency: {} as never,
+						currency: nativeCurrency,
 						actions: { purchases: [], claims: [], refunds: [] },
 						status: RoundStatus.FILLING,
 						startTime: new Date(),
@@ -230,9 +234,18 @@ describe('Reveal prizes flow E2E', () => {
 		user1Address = await createUserAndFund(TELEGRAM_ID_USER_1)
 		user2Address = await createUserAndFund(TELEGRAM_ID_USER_2)
 
+		const buyTicketsBody = (ticketCount: number) => ({
+			stakeId: STAKE_ID,
+			ticketCount,
+			paymentCurrencyChainAddress: {
+				address: '0x0000000000000000000000000000000000000000',
+				chain: { namespace: 'eip155', reference: '31337' },
+			},
+		})
+
 		const res1 = await request(ctx.app.getHttpServer())
 			.post(`/rips/users/${TELEGRAM_ID_USER_1}/buy-tickets`)
-			.send({ stakeId: STAKE_ID, ticketCount: TICKETS_PER_USER })
+			.send(buyTicketsBody(TICKETS_PER_USER))
 			.expect(201)
 
 		roundId = res1.body.roundId
@@ -241,7 +254,7 @@ describe('Reveal prizes flow E2E', () => {
 
 		const res2 = await request(ctx.app.getHttpServer())
 			.post(`/rips/users/${TELEGRAM_ID_USER_2}/buy-tickets`)
-			.send({ stakeId: STAKE_ID, ticketCount: TICKETS_PER_USER })
+			.send(buyTicketsBody(TICKETS_PER_USER))
 			.expect(201)
 
 		expect(res2.body.roundId).toBe(roundId)
@@ -298,7 +311,7 @@ describe('Reveal prizes flow E2E', () => {
 			id: roundId,
 			stake: STAKE,
 			config: STAKE_CONFIG,
-			currency: {} as never,
+			currency: nativeCurrency,
 			status: RoundStatus.CLAIMED,
 			startTime: new Date(),
 			actions: { purchases, claims: [], refunds: [] },
@@ -376,12 +389,29 @@ describe('Reveal prizes flow E2E', () => {
 	})
 })
 
+const ANVIL_CHAIN_ID = 31337
+const NATIVE_ADDRESS = getAddress('0x0000000000000000000000000000000000000000')
+
+const nativeCurrency: Currency = {
+	id: composeCurrencyId(
+		composeChainId(EIP155, ANVIL_CHAIN_ID.toString()),
+		NATIVE_ADDRESS,
+	),
+	chainAddress: {
+		chain: { namespace: EIP155, reference: ANVIL_CHAIN_ID.toString() },
+		address: NATIVE_ADDRESS,
+	},
+	symbol: 'ETH',
+	name: 'ETH',
+	decimals: 18,
+}
+
 const STAKE_CONFIG: Config = {
 	id: 1,
 	ticketCup: TICKET_CAP,
 	feePercent: 0,
 	ticketPrice: {
-		currency: {} as never,
+		currency: nativeCurrency,
 		amount: TICKET_COST,
 	},
 	durationSeconds: 300,
@@ -409,7 +439,7 @@ const STAKE_2_CONFIG: Config = {
 	ticketCup: TICKET_CAP,
 	feePercent: 0,
 	ticketPrice: {
-		currency: {} as never,
+		currency: nativeCurrency,
 		amount: parseEther('0.01'),
 	},
 	durationSeconds: 300,
