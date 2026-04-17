@@ -1,26 +1,10 @@
-import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { CurrencyAmount } from '../../domain/value-objects/currency-amount'
+import { PlainCurrencyAmount, toPlainCurrencyAmount } from '../to-plain'
 
-export type BalanceResponseDto = {
-	currency: {
-		chainAddress: ChainAddress
-		symbol: string
-		name?: string
-		decimals: number
-	}
-	amount: string
-}
+export type BalanceResponseDto = PlainCurrencyAmount
 
 export function toBalanceResponseDto(
 	currencyAmount: CurrencyAmount,
 ): BalanceResponseDto {
-	return {
-		currency: {
-			chainAddress: currencyAmount.currency.chainAddress,
-			symbol: currencyAmount.currency.symbol,
-			name: currencyAmount.currency.name,
-			decimals: currencyAmount.currency.decimals,
-		},
-		amount: currencyAmount.amount.toString(),
-	}
+	return toPlainCurrencyAmount(currencyAmount)
 }

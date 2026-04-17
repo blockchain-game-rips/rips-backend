@@ -1,6 +1,6 @@
 import { Config } from '../../domain/entities/config'
 import { AvailableStake } from '../../domain/value-objects/available-stake'
-import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { PlainCurrencyAmount, toPlainCurrencyAmount } from '../to-plain'
 
 type PrizeTierDto = {
 	prizeCount: string
@@ -10,15 +10,8 @@ type PrizeTierDto = {
 
 type ConfigDto = {
 	ticketCap: number
-	ticketPrice: {
-		amount: string
-		currency: {
-			chainAddress: ChainAddress
-			symbol: string
-			name: string
-			decimals: number
-		}
-	}
+	feePercent: number
+	ticketPrice: PlainCurrencyAmount
 	durationSeconds: number
 	prizeDistribution: PrizeTierDto[]
 }
@@ -32,15 +25,8 @@ export type StakeResponseDto = {
 function toConfigDto(config: Config): ConfigDto {
 	return {
 		ticketCap: config.ticketCup,
-		ticketPrice: {
-			amount: config.ticketPrice.amount.toString(),
-			currency: {
-				symbol: config.ticketPrice.currency.symbol,
-				decimals: config.ticketPrice.currency.decimals,
-				chainAddress: config.ticketPrice.currency.chainAddress,
-				name: config.ticketPrice.currency.name,
-			},
-		},
+		feePercent: config.feePercent,
+		ticketPrice: toPlainCurrencyAmount(config.ticketPrice),
 		durationSeconds: config.durationSeconds,
 		prizeDistribution: config.prizeDistribution.map((tier) => ({
 			prizeCount: tier.prizeCount.toString(),

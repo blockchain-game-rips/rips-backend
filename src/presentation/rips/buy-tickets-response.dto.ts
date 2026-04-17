@@ -1,36 +1,51 @@
-import { ChainAddress } from '../../domain/value-objects/chain-address'
-import { Purchase } from '../../domain/value-objects/purchase'
+import { PurchaseOutcome } from '../../domain/value-objects/purchase-outcome'
+import {
+	PlainCurrencyAmount,
+	PlainTransaction,
+	toPlainCurrencyAmount,
+	toPlainTransaction,
+} from '../to-plain'
 
-export type BuyTicketsResponseDto = {
-	txId: string
-	cost: {
-		currency: {
-			chainAddress: ChainAddress
-			symbol: string
-			name: string
-			decimals: number
-		}
-		amount: string
-	}
+type PurchasedDto = {
+	type: 'purchased'
+	transaction: PlainTransaction
 	roundId: number
 	ticketCount: number
 }
 
+type ZapDto = {
+	type: 'zap'
+	zapId: string
+	srcTransaction: PlainTransaction
+	amountIn: PlainCurrencyAmount
+	fee: PlainCurrencyAmount
+	durationMs: number
+}
+
+export type BuyTicketsResponseDto = PurchasedDto | ZapDto
+
 export function toBuyTicketsResponseDto(
-	purchase: Purchase,
+	outcome: PurchaseOutcome,
 ): BuyTicketsResponseDto {
+	if (outcome.type === 'purchased') {
+		const { purchase, transaction } = outcome.purchaseReceipt
+
+		return {
+			type: 'purchased',
+			transaction: toPlainTransaction(transaction),
+			roundId: purchase.roundId,
+			ticketCount: purchase.ticketCount,
+		}
+	}
+
+	const { pendingZap } = outcome
+
 	return {
-		txId: purchase.transaction.id,
-		cost: {
-			currency: {
-				chainAddress: purchase.transaction.cost.currency.chainAddress,
-				symbol: purchase.transaction.cost.currency.symbol,
-				name: purchase.transaction.cost.currency.name,
-				decimals: purchase.transaction.cost.currency.decimals,
-			},
-			amount: purchase.transaction.cost.amount.toString(),
-		},
-		roundId: purchase.roundId,
-		ticketCount: purchase.ticketCount,
+		type: 'zap',
+		zapId: pendingZap.zapId,
+		srcTransaction: toPlainTransaction(pendingZap.srcTransaction),
+		amountIn: toPlainCurrencyAmount(pendingZap.amountIn),
+		fee: toPlainCurrencyAmount(pendingZap.fee),
+		durationMs: pendingZap.durationMs,
 	}
 }
