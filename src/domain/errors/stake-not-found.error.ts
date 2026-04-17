@@ -1,3 +1,5 @@
 import { createCustomError } from '../../utils/common'
 
-export const TicketNotFoundError = createCustomError('TicketNotFoundError')
+export const AvailableStakeNotFoundError = createCustomError(
+	'AvailableStakeNotFoundError',
+)

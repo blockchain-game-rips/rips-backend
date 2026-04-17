@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { TicketNotFoundError } from '../../../domain/errors/stake-not-found.error'
+import { AvailableStakeNotFoundError } from '../../../domain/errors/stake-not-found.error'
 import { RipsService } from '../../interfaces/rips.service'
 import { ZapService } from '../../interfaces/zap.service'
 import { GetAvailableStakesUseCase } from '../get-available-stakes/get-available-stakes.use-case'
@@ -34,8 +34,9 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 		)
 
 		if (!availableStake) {
-			//TODO: imrove error naming
-			throw new TicketNotFoundError(`Stake with id ${stakeId} not found`)
+			throw new AvailableStakeNotFoundError(
+				`Stake with id ${stakeId} not found in available stakes`,
+			)
 		}
 
 		const config =
