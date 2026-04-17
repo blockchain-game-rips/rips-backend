@@ -1,11 +1,8 @@
 import request from 'supertest'
-import { getAddress, parseEther } from 'viem'
+import { parseEther } from 'viem'
 import { GetAvailableStakesUseCase } from '../../src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
-import { EIP155 } from '../../src/constants'
-import { Currency } from '../../src/domain/entities/currency'
-import { composeChainId } from '../../src/domain/services/chain-id-utils'
-import { composeCurrencyId } from '../../src/domain/services/currency-id-utils'
 import { AvailableStake } from '../../src/domain/value-objects/available-stake'
+import { ANVIL_NATIVE_CURRENCY } from '../fixtures/entities'
 import { setNativeBalance } from '../utils/anvil'
 import { useRipsApp } from '../utils/rips-app'
 
@@ -14,23 +11,6 @@ const TICKET_COST = parseEther('0.005')
 const TICKET_COUNT = 2
 
 const USER_TG_ID = '999888777'
-
-const ANVIL_CHAIN_ID = 31337
-const NATIVE_ADDRESS = getAddress('0x0000000000000000000000000000000000000000')
-
-const nativeCurrency: Currency = {
-	id: composeCurrencyId(
-		composeChainId(EIP155, ANVIL_CHAIN_ID.toString()),
-		NATIVE_ADDRESS,
-	),
-	chainAddress: {
-		chain: { namespace: EIP155, reference: ANVIL_CHAIN_ID.toString() },
-		address: NATIVE_ADDRESS,
-	},
-	symbol: 'ETH',
-	name: 'ETH',
-	decimals: 18,
-}
 
 const mockGetAvailableStakesUseCase: Pick<
 	GetAvailableStakesUseCase,
@@ -48,13 +28,13 @@ const mockGetAvailableStakesUseCase: Pick<
 						ticketCup: 8,
 						feePercent: 0,
 						ticketPrice: {
-							currency: nativeCurrency,
+							currency: ANVIL_NATIVE_CURRENCY,
 							amount: TICKET_COST,
 						},
 						durationSeconds: 86400,
 						prizeDistribution: [],
 					},
-					currency: nativeCurrency,
+					currency: ANVIL_NATIVE_CURRENCY,
 					actions: { purchases: [], claims: [], refunds: [] },
 					status: 'FILLING' as never,
 					startTime: new Date(),

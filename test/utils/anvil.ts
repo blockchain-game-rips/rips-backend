@@ -11,12 +11,8 @@ import {
 } from 'viem'
 import { Address } from 'viem/accounts'
 import * as chains from 'viem/chains'
+import { ANVIL_MNEMONIC } from '../fixtures/anvil-accounts'
 import { AnvilConfig, ParamsUseAnvil } from './types'
-
-/* ======== useAnvil ======== */
-
-const testMnemonic =
-	'spy record fury either collect ill pony monkey praise cool matter state'
 
 /**
  * Starts anvil in describe() and replace viem rpc url and private key
@@ -171,7 +167,7 @@ export class Anvil {
 	}
 
 	private buildCommand() {
-		let command = `anvil --chain-id ${this.config.chainId} --port ${this.port} --mnemonic "${testMnemonic}"`
+		let command = `anvil --chain-id ${this.config.chainId} --port ${this.port} --mnemonic "${ANVIL_MNEMONIC}"`
 
 		if (this.config.fork) {
 			command += ` --fork-url "${this.config.fork.rpcUrl}"`

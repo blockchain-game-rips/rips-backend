@@ -33,12 +33,12 @@ import { Token } from '../../../src/infrastructure/evm/primitives/currencies/tok
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
 import { RIPS_SC_ADDRESS } from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
+import { ANVIL_ACCOUNT_1_PRIVATE_KEY } from '../../fixtures/anvil-accounts'
 import { ANVIL_STATE_PATH, deployments } from '../../fixtures/state'
 import {
 	createMockDeBridgeApiService,
 	mockGetOrder,
 } from '../../mocks/mock-de-bridge-api.service'
-import { ANVIL_ACCOUNT_1_PRIVATE_KEY } from '../../fixtures/anvil-accounts'
 import { setNativeBalance, setTokenBalance, useAnvil } from '../../utils/anvil'
 import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
 

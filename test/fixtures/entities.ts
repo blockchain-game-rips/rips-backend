@@ -7,6 +7,8 @@ import { composeCurrencyId } from '../../src/domain/services/currency-id-utils'
 import { toTelegramId } from '../../src/domain/value-objects/telegram-id'
 import { Wallet } from '../../src/domain/value-objects/wallet'
 
+const ANVIL_CHAIN_ID = 31337
+
 export const TELEGRAM_ID = toTelegramId(123456n)
 export const EVM_ADDRESS = getAddress(
 	'0x1234567890abcdef1234567890abcdef12345678',
@@ -30,6 +32,20 @@ export const MOCK_CURRENCY: Currency = {
 	id: composeCurrencyId(composeChainId(EIP155, '8453'), NATIVE_ADDRESS),
 	chainAddress: {
 		chain: { namespace: EIP155, reference: '8453' },
+		address: NATIVE_ADDRESS,
+	},
+	symbol: 'ETH',
+	name: 'ETH',
+	decimals: 18,
+}
+
+export const ANVIL_NATIVE_CURRENCY: Currency = {
+	id: composeCurrencyId(
+		composeChainId(EIP155, ANVIL_CHAIN_ID.toString()),
+		NATIVE_ADDRESS,
+	),
+	chainAddress: {
+		chain: { namespace: EIP155, reference: ANVIL_CHAIN_ID.toString() },
 		address: NATIVE_ADDRESS,
 	},
 	symbol: 'ETH',

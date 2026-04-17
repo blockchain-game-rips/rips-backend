@@ -11,7 +11,6 @@ import {
 	zeroAddress,
 	type Address,
 	type PublicClient,
-	type TransactionReceipt,
 } from 'viem'
 import { Account, privateKeyToAccount } from 'viem/accounts'
 import {
@@ -28,6 +27,7 @@ import {
 import { ANVIL_STATE_PATH, deployments } from '../../fixtures/state'
 import { vrfCoordinatorAbi } from '../../fixtures/vrf-coordinator-abi'
 import { getBalances, useAnvil, waitForReceipt } from '../../utils/anvil'
+import { parseRandomnessFulfilled } from '../../utils/rips-events'
 
 const CHAIN_ID = 8453
 const CHAIN = defineChain({
@@ -413,16 +413,4 @@ function randomOddBigInt64(): bigint {
 
 function randomBigIntInRange(min: bigint, max: bigint): bigint {
 	return min + BigInt(Math.floor(Math.random() * Number(max - min + 1n)))
-}
-
-function parseRandomnessFulfilled(logs: TransactionReceipt['logs']): {
-	randomA: bigint
-	randomB: bigint
-} {
-	const [log] = parseEventLogs({
-		abi: ripsAbi,
-		eventName: 'RandomnessFulfilled',
-		logs,
-	})
-	return { randomA: log.args.randomA, randomB: log.args.randomB }
 }
