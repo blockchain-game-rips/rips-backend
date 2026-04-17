@@ -60,7 +60,6 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 			config,
 			ticketCount,
 		})
-		//TODO: write tg notif in database where zap is finished
 
 		return {
 			type: 'pending',
