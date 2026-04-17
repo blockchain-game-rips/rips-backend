@@ -13,8 +13,8 @@ import { KeeperUseCase } from './keeper.use-case'
 
 type KeeperAction =
 	| { type: 'requestVrf'; round: Round }
-	| { type: 'claim'; round: Round }
-	| { type: 'refund'; round: Round }
+	| { type: 'claim'; round: Round; userAddress: string }
+	| { type: 'refund'; round: Round; userAddress: string }
 
 @Injectable()
 export class KeeperService extends KeeperUseCase {
@@ -63,16 +63,40 @@ export class KeeperService extends KeeperUseCase {
 		return groups
 	}
 
-	// TODO: I don't understand, will 3 executors run 3 claims in parallel
 	private collectActions(rounds: OngoingRound[]): KeeperAction[] {
 		return rounds.flatMap((round): KeeperAction[] => {
 			switch (round.status) {
 				case RoundStatus.SEALED:
 					return [{ type: 'requestVrf', round }]
-				case RoundStatus.CLAIMING:
-					return [{ type: 'claim', round }]
-				case RoundStatus.REFUNDING:
-					return [{ type: 'refund', round }]
+
+				case RoundStatus.CLAIMING: {
+					const claimedAddresses = new Set(
+						round.actions.claims.map((c) => c.userAddress),
+					)
+
+					return round.actions.purchases
+						.filter((p) => !claimedAddresses.has(p.userAddress))
+						.map((p) => ({
+							type: 'claim',
+							round,
+							userAddress: p.userAddress,
+						}))
+				}
+
+				case RoundStatus.REFUNDING: {
+					const refundedAddresses = new Set(
+						round.actions.refunds.map((r) => r.userAddress),
+					)
+
+					return round.actions.purchases
+						.filter((p) => !refundedAddresses.has(p.userAddress))
+						.map((p) => ({
+							type: 'refund',
+							round,
+							userAddress: p.userAddress,
+						}))
+				}
+
 				default:
 					return []
 			}
@@ -103,51 +127,25 @@ export class KeeperService extends KeeperUseCase {
 				})
 				break
 
-			case 'claim':
-				await this.handleClaim(executor, action.round)
+			case 'claim': {
+				const user = await this.userRepository.findByEvmAddress(
+					action.userAddress,
+				)
+
+				await this.ripsService.claim(executor.wallet, {
+					roundId: action.round.id,
+					userAddress: action.userAddress,
+					referrerAddress: user?.referrerAddress ?? null,
+				})
 				break
+			}
 
 			case 'refund':
-				await this.handleRefund(executor, action.round)
+				await this.ripsService.refund(executor.wallet, {
+					roundId: action.round.id,
+					userAddress: action.userAddress,
+				})
 				break
-		}
-	}
-
-	private async handleClaim(executor: Executor, round: Round): Promise<void> {
-		const uniqueClaimedAddresses = new Set(
-			round.actions.claims.map((c) => c.userAddress),
-		)
-
-		for (const purchase of round.actions.purchases) {
-			if (uniqueClaimedAddresses.has(purchase.userAddress)) continue
-
-			const user = await this.userRepository.findByEvmAddress(
-				purchase.userAddress,
-			)
-
-			await this.ripsService.claim(executor.wallet, {
-				roundId: round.id,
-				userAddress: purchase.userAddress,
-				referrerAddress: user?.referrerAddress ?? null,
-			})
-		}
-	}
-
-	private async handleRefund(
-		executor: Executor,
-		round: Round,
-	): Promise<void> {
-		const claimedAddresses = new Set(
-			round.actions.refunds.map((r) => r.userAddress),
-		)
-
-		for (const purchase of round.actions.purchases) {
-			if (claimedAddresses.has(purchase.userAddress)) continue
-
-			await this.ripsService.refund(executor.wallet, {
-				roundId: round.id,
-				userAddress: purchase.userAddress,
-			})
 		}
 	}
 }
