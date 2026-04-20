@@ -29,6 +29,7 @@ export class IndexerRoundRepository extends RoundRepository {
 
 		return rounds.map(
 			(r) =>
+				//TODO: get rid of as unknown as
 				fromRoundRaw(r, this.mainCurrency) as unknown as CompletedRound,
 		)
 	}

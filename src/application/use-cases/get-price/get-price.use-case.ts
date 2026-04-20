@@ -1,3 +1,9 @@
+import { ChainAddress } from '../../../domain/value-objects/chain-address'
+
+export type GetPriceInput = {
+	currencyChainAddress: ChainAddress
+}
+
 export abstract class GetPriceUseCase {
-	abstract execute(): Promise<number>
+	abstract execute(input: GetPriceInput): Promise<number>
 }
