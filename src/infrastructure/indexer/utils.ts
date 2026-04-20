@@ -1,8 +1,8 @@
-import { getAddress } from 'viem'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
 import { Round, RoundStatus } from '../../domain/entities/round'
 import { AddressesActions } from '../../domain/value-objects/actions'
+import { toEvmAddress } from '../../domain/value-objects/evm-address'
 import {
 	GetCompletedRoundsQuery,
 	RoundStatus as RoundStatusRaw,
@@ -53,16 +53,16 @@ export function resolveRoundStatus(status: RoundStatusRaw): RoundStatus {
 function resolveActions(roundRaw: RoundRaw): AddressesActions {
 	return {
 		purchases: roundRaw.ticketPurchases.map((p) => ({
-			userAddress: getAddress(p.user),
+			userAddress: toEvmAddress(p.user),
 			ticketCount: BigInt(p.ticketCount),
 			startTicketIndex: BigInt(p.startTicketIndex),
 		})),
 		claims: roundRaw.prizesClaimed.map((c) => ({
-			userAddress: getAddress(c.user),
+			userAddress: toEvmAddress(c.user),
 			amount: BigInt(c.amount),
 		})),
 		refunds: roundRaw.refunds.map((r) => ({
-			userAddress: getAddress(r.user),
+			userAddress: toEvmAddress(r.user),
 			amount: BigInt(r.amount),
 		})),
 	}

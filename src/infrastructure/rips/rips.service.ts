@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common'
 import {
 	encodeFunctionData,
 	zeroAddress,
-	type Address,
 	type TransactionRequestEIP1559,
 } from 'viem'
 import { RipsService } from '../../application/interfaces/rips.service'
@@ -10,6 +9,7 @@ import { MAIN_CURRENCY } from '../../application/interfaces/tokens'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
+import { EvmAddress } from '../../domain/value-objects/evm-address'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
@@ -32,7 +32,7 @@ export class RipsServiceIpml implements RipsService {
 		private readonly evmClientService: EvmClientService,
 		private readonly evmCurrencyService: EvmCurrencyService,
 
-		@Inject(RIPS_SC_ADDRESS) private readonly contractAddress: Address,
+		@Inject(RIPS_SC_ADDRESS) private readonly contractAddress: EvmAddress,
 		@Inject(MAIN_CURRENCY) private readonly mainCurrency: Currency,
 	) {}
 
@@ -40,8 +40,8 @@ export class RipsServiceIpml implements RipsService {
 		wallet: Wallet,
 		args: {
 			roundId: number
-			userAddress: string
-			referrerAddress: string | null
+			userAddress: EvmAddress
+			referrerAddress: EvmAddress | null
 		},
 	): Promise<Transaction> {
 		return this.sendKeeperTransaction(wallet, {
@@ -52,8 +52,8 @@ export class RipsServiceIpml implements RipsService {
 					BigInt(args.roundId),
 					CLAIM_START_INDEX,
 					CLAIM_MAX_RANGES,
-					args.userAddress as Address,
-					(args.referrerAddress ?? zeroAddress) as Address,
+					args.userAddress,
+					args.referrerAddress ?? zeroAddress,
 				],
 			}),
 		})
@@ -61,13 +61,13 @@ export class RipsServiceIpml implements RipsService {
 
 	refund(
 		wallet: Wallet,
-		args: { roundId: number; userAddress: string },
+		args: { roundId: number; userAddress: EvmAddress },
 	): Promise<Transaction> {
 		return this.sendKeeperTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
 				functionName: 'refund',
-				args: [BigInt(args.roundId), args.userAddress as Address],
+				args: [BigInt(args.roundId), args.userAddress],
 			}),
 		})
 	}

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { toChainNamespace } from '../domain/value-objects/chain-namespace'
+import { toEvmAddress } from '../domain/value-objects/evm-address'
 import { toTelegramId } from '../domain/value-objects/telegram-id'
 
 const EVM_ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/
@@ -20,6 +21,7 @@ export const createUserBodySchema = z.object({
 	referrerAddress: z
 		.string()
 		.regex(EVM_ADDRESS_REGEX)
+		.transform(toEvmAddress)
 		.nullable()
 		.default(null),
 })

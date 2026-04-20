@@ -36,9 +36,7 @@ describe('MnemonicKmsService integration', () => {
 	})
 
 	it('signs a transaction and sends it on-chain', async () => {
-		const { kmsKeyId, evmAddress: evmAddressStr } =
-			await kmsService.createEvmKey()
-		const evmAddress = evmAddressStr as `0x${string}`
+		const { kmsKeyId, evmAddress } = await kmsService.createEvmKey()
 
 		const rpcUrl = `http://127.0.0.1:${anvilInstance.port}`
 

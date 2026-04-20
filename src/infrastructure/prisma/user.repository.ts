@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common'
-import { getAddress, type Address } from 'viem'
 import { UserRepository } from '../../application/interfaces/repositories/user.repository'
 import { EIP155 } from '../../constants'
 import { User } from '../../domain/entities/user'
+import {
+	EvmAddress,
+	toEvmAddress,
+} from '../../domain/value-objects/evm-address'
 import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
 import {
 	TelegramId,
@@ -28,7 +31,7 @@ export class PrismaUserRepository extends UserRepository {
 		return toDomainUser(record)
 	}
 
-	async findByEvmAddress(address: Address): Promise<User | null> {
+	async findByEvmAddress(address: EvmAddress): Promise<User | null> {
 		const record = await this.prisma.user.findFirst({
 			where: { evmWallet: { address } },
 			include: { evmWallet: true },
@@ -41,9 +44,9 @@ export class PrismaUserRepository extends UserRepository {
 
 	async create(
 		telegramId: TelegramId,
-		address: Address,
+		address: EvmAddress,
 		kmsKeyId: KmsKeyId,
-		referrerAddress: string | null,
+		referrerAddress: EvmAddress | null,
 	): Promise<User> {
 		const record = await this.prisma.user.create({
 			data: {
@@ -57,7 +60,10 @@ export class PrismaUserRepository extends UserRepository {
 		return toDomainUser(record)
 	}
 
-	async setReferrer(userId: bigint, referrerAddress: string): Promise<User> {
+	async setReferrer(
+		userId: bigint,
+		referrerAddress: EvmAddress,
+	): Promise<User> {
 		const record = await this.prisma.user.update({
 			where: { id: userId },
 			data: { referrerAddress },
@@ -83,10 +89,12 @@ function toDomainUser(record: UserRecord): User {
 		wallet: {
 			kind: 'user',
 			namespaceToAddress: {
-				[EIP155]: getAddress(record.evmWallet.address),
+				[EIP155]: toEvmAddress(record.evmWallet.address),
 			},
 		},
-		referrerAddress: record.referrerAddress,
+		referrerAddress: record.referrerAddress
+			? toEvmAddress(record.referrerAddress)
+			: null,
 		createdAt: record.createdAt,
 	}
 }

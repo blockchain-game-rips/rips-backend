@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { TicketPrizeRepository } from '../../application/interfaces/repositories/ticket-prize.repository'
 import { Card } from '../../domain/value-objects/card'
 import { CardCollection } from '../../domain/value-objects/card-collection'
+import {
+	EvmAddress,
+	toEvmAddress,
+} from '../../domain/value-objects/evm-address'
 import { TicketPrize } from '../../domain/value-objects/ticket-prize'
 import { PrismaService } from './prisma.service'
 
@@ -11,7 +15,7 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 		super()
 	}
 
-	async getUnrevealed(userAddress: string): Promise<TicketPrize[]> {
+	async getUnrevealed(userAddress: EvmAddress): Promise<TicketPrize[]> {
 		const records = await this.prisma.ticketPrize.findMany({
 			where: { userAddress, revealed: false },
 			orderBy: { ticketNumber: 'asc' },
@@ -21,7 +25,7 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 		return records.map(toDomainTicketPrize)
 	}
 
-	async revealAndGet(userAddress: string): Promise<TicketPrize | null> {
+	async revealAndGet(userAddress: EvmAddress): Promise<TicketPrize | null> {
 		return this.prisma.$transaction(async (tx) => {
 			const record = await tx.ticketPrize.findFirst({
 				where: { userAddress, revealed: false },
@@ -40,7 +44,7 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 		})
 	}
 
-	async revealAllAndGet(userAddress: string): Promise<TicketPrize[]> {
+	async revealAllAndGet(userAddress: EvmAddress): Promise<TicketPrize[]> {
 		return this.prisma.$transaction(async (tx) => {
 			const records = await tx.ticketPrize.findMany({
 				where: { userAddress, revealed: false },
@@ -60,7 +64,7 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 	}
 
 	async getCardCollectionsByStake(
-		userAddress: string,
+		userAddress: EvmAddress,
 		stakeId: number,
 	): Promise<CardCollection[]> {
 		const cardDefinitions = await this.prisma.cardDefinition.findMany({
@@ -125,7 +129,7 @@ function toDomainTicketPrize(record: {
 	cardDefinition: { id: bigint; tier: number; name: string; imageUrl: string }
 }): TicketPrize {
 	return {
-		userAddress: record.userAddress,
+		userAddress: toEvmAddress(record.userAddress),
 		roundId: record.roundId,
 		ticketNumber: record.ticketNumber,
 		prizeAmount: record.prizeAmount,

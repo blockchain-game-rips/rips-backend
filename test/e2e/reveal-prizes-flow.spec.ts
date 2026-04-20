@@ -2,7 +2,6 @@ import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import {
 	createWalletClient,
-	getAddress,
 	http,
 	parseEther,
 	parseEventLogs,
@@ -22,6 +21,10 @@ import {
 	RoundStatus,
 } from '../../src/domain/entities/round'
 import { Stake } from '../../src/domain/entities/stake'
+import {
+	EvmAddress,
+	toEvmAddress,
+} from '../../src/domain/value-objects/evm-address'
 import { IndexerModule } from '../../src/infrastructure/indexer/indexer.module'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { SeedCardDefinitionsService } from '../../src/infrastructure/seed/seed-card-definitions.service'
@@ -51,8 +54,8 @@ const TELEGRAM_ID_USER_2 = '444555666'
 
 describe('Reveal prizes flow E2E', () => {
 	let roundId: number
-	let user1Address: Address
-	let user2Address: Address
+	let user1Address: EvmAddress
+	let user2Address: EvmAddress
 	let vrfRequestId: bigint
 	let randomA: bigint
 	let randomB: bigint
@@ -161,7 +164,7 @@ describe('Reveal prizes flow E2E', () => {
 		await seedApp.close()
 	})
 
-	async function createUserAndFund(telegramId: string): Promise<Address> {
+	async function createUserAndFund(telegramId: string): Promise<EvmAddress> {
 		await request(ctx.app.getHttpServer())
 			.post('/users')
 			.send({ telegramId })
@@ -171,7 +174,7 @@ describe('Reveal prizes flow E2E', () => {
 			.get(`/users/${telegramId}`)
 			.expect(200)
 
-		const address: Address = getAddress(userRes.body.wallets['eip155'])
+		const address = toEvmAddress(userRes.body.wallets['eip155'])
 
 		await setNativeBalance(
 			ctx.publicClient,
@@ -210,7 +213,7 @@ describe('Reveal prizes flow E2E', () => {
 	}
 
 	async function getPrizeClaimedByUser(
-		userAddress: Address,
+		userAddress: EvmAddress,
 	): Promise<bigint | undefined> {
 		const rawLogs = await ctx.publicClient.getLogs({
 			address: deployments.rips as Address,

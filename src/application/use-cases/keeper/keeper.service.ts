@@ -5,6 +5,7 @@ import {
 	Round,
 	RoundStatus,
 } from '../../../domain/entities/round'
+import { EvmAddress } from '../../../domain/value-objects/evm-address'
 import { ExecutorRepository } from '../../interfaces/repositories/executor.repository'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
 import { RipsService } from '../../interfaces/rips.service'
@@ -13,8 +14,8 @@ import { KeeperUseCase } from './keeper.use-case'
 
 type KeeperAction =
 	| { type: 'requestVrf'; round: Round }
-	| { type: 'claim'; round: Round; userAddress: string }
-	| { type: 'refund'; round: Round; userAddress: string }
+	| { type: 'claim'; round: Round; userAddress: EvmAddress }
+	| { type: 'refund'; round: Round; userAddress: EvmAddress }
 
 @Injectable()
 export class KeeperService extends KeeperUseCase {

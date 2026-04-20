@@ -1,4 +1,4 @@
-import { Address } from 'viem'
+import { EvmAddress } from './evm-address'
 
 export type AddressesActions = {
 	purchases: PurchaseAction[]
@@ -7,17 +7,17 @@ export type AddressesActions = {
 }
 
 export type RefundAction = {
-	userAddress: Address
+	userAddress: EvmAddress
 	amount: bigint
 }
 
 export type ClaimAction = {
-	userAddress: Address
+	userAddress: EvmAddress
 	amount: bigint
 }
 
 export type PurchaseAction = {
-	userAddress: Address
+	userAddress: EvmAddress
 	ticketCount: bigint
 	startTicketIndex: bigint
 }

@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { getAddress } from 'viem'
 import { KmsService } from '../../application/interfaces/kms.service'
 import { ExecutorRepository } from '../../application/interfaces/repositories/executor.repository'
 import { Executor } from '../../domain/entities/executor'
@@ -32,17 +31,16 @@ export class ProvisionService {
 		for (let i = 0; i < missing; i++) {
 			const { kmsKeyId, evmAddress } =
 				await this.kmsService.createEvmKey()
-			const address = getAddress(evmAddress)
 
 			const executor = await this.executorRepository.create(
-				address,
+				evmAddress,
 				kmsKeyId,
 			)
 
 			createdExecutors.push(executor)
 
 			this.logger.log(
-				`Created executor ${executor.id} with address ${address}`,
+				`Created executor ${executor.id} with address ${evmAddress}`,
 			)
 		}
 

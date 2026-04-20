@@ -1,8 +1,9 @@
+import { EvmAddress } from '../../domain/value-objects/evm-address'
 import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
 
 export interface KmsKeyResult {
 	kmsKeyId: KmsKeyId
-	evmAddress: string
+	evmAddress: EvmAddress
 }
 
 export abstract class KmsService {
@@ -10,6 +11,6 @@ export abstract class KmsService {
 	abstract signTransaction(
 		kmsKeyId: KmsKeyId,
 		hash: string,
-		expectedAddress: string,
+		expectedAddress: EvmAddress,
 	): Promise<string>
 }

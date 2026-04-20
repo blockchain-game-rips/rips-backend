@@ -1,4 +1,5 @@
 import { Config } from '../../domain/entities/config'
+import { EvmAddress } from '../../domain/value-objects/evm-address'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
@@ -8,14 +9,14 @@ export abstract class RipsService {
 		wallet: Wallet,
 		args: {
 			roundId: number
-			userAddress: string
-			referrerAddress: string | null
+			userAddress: EvmAddress
+			referrerAddress: EvmAddress | null
 		},
 	): Promise<Transaction>
 
 	abstract refund(
 		wallet: Wallet,
-		args: { roundId: number; userAddress: string },
+		args: { roundId: number; userAddress: EvmAddress },
 	): Promise<Transaction>
 
 	abstract requestVrf(

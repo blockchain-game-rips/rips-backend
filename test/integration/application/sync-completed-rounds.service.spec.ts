@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing'
-import { getAddress, parseEther } from 'viem'
+import { parseEther } from 'viem'
 import { RoundRepository } from '../../../src/application/interfaces/repositories/round.repository'
 import { STAKE_TO_TIER_BIASES } from '../../../src/application/interfaces/tokens'
 import { SyncCompletedRoundsService } from '../../../src/application/use-cases/sync-completed-rounds/sync-completed-rounds.service'
@@ -7,6 +7,7 @@ import { SyncCompletedRoundsUseCase } from '../../../src/application/use-cases/s
 import { Config } from '../../../src/domain/entities/config'
 import { CompletedRound, RoundStatus } from '../../../src/domain/entities/round'
 import { Stake } from '../../../src/domain/entities/stake'
+import { toEvmAddress } from '../../../src/domain/value-objects/evm-address'
 import { NotificationType } from '../../../src/generated/prisma'
 import { PrismaModule } from '../../../src/infrastructure/prisma/prisma.module'
 import { PrismaService } from '../../../src/infrastructure/prisma/prisma.service'
@@ -38,9 +39,15 @@ const STAKE: Stake = {
 	currentConfig: STAKE_CONFIG,
 }
 
-const USER_A_ADDRESS = getAddress('0x1111111111111111111111111111111111111111')
-const USER_B_ADDRESS = getAddress('0x2222222222222222222222222222222222222222')
-const USER_C_ADDRESS = getAddress('0x3333333333333333333333333333333333333333')
+const USER_A_ADDRESS = toEvmAddress(
+	'0x1111111111111111111111111111111111111111',
+)
+const USER_B_ADDRESS = toEvmAddress(
+	'0x2222222222222222222222222222222222222222',
+)
+const USER_C_ADDRESS = toEvmAddress(
+	'0x3333333333333333333333333333333333333333',
+)
 
 describe('SyncCompletedRoundsService integration', () => {
 	usePostgres()

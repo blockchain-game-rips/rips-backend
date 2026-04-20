@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { EIP155 } from '../../../constants'
+import { toEvmAddress } from '../../../domain/value-objects/evm-address'
 import { TicketPrize } from '../../../domain/value-objects/ticket-prize'
 import { TicketPrizeRepository } from '../../interfaces/repositories/ticket-prize.repository'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
@@ -23,7 +24,7 @@ export class GetUnrevealedPrizesService extends GetUnrevealedPrizesUseCase {
 		const user = await this.getUserUseCase.execute({ telegramId })
 
 		return this.ticketPrizeRepository.getUnrevealed(
-			user.wallet.namespaceToAddress[EIP155],
+			toEvmAddress(user.wallet.namespaceToAddress[EIP155]),
 		)
 	}
 }

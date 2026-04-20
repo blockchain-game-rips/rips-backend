@@ -1,12 +1,13 @@
 import { User } from '../../../domain/entities/user'
 import { UserAlreadyExistsError } from '../../../domain/errors/user-already-exists.error'
+import { EvmAddress } from '../../../domain/value-objects/evm-address'
 import { TelegramId } from '../../../domain/value-objects/telegram-id'
 
 export { UserAlreadyExistsError }
 
 export type CreateUserInput = {
 	telegramId: TelegramId
-	referrerAddress: string | null
+	referrerAddress: EvmAddress | null
 }
 
 export abstract class CreateUserUseCase {

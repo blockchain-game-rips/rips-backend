@@ -4,11 +4,15 @@ import {
 	KMSClient,
 } from '@aws-sdk/client-kms'
 import { Injectable } from '@nestjs/common'
-import { getAddress, keccak256, type Address, type Hex } from 'viem'
+import { keccak256, type Hex } from 'viem'
 import {
 	KmsService,
 	type KmsKeyResult,
 } from '../../application/interfaces/kms.service'
+import {
+	EvmAddress,
+	toEvmAddress,
+} from '../../domain/value-objects/evm-address'
 import { KmsKeyId, toKmsKeyId } from '../../domain/value-objects/kms-key-id'
 import { getEnvSafe } from '../../utils/common'
 
@@ -47,17 +51,17 @@ export class AwsKmsService extends KmsService {
 	async signTransaction(
 		_kmsKeyId: KmsKeyId,
 		_hash: Hex,
-		_expectedAddress: Address,
+		_expectedAddress: EvmAddress,
 	): Promise<Hex> {
 		throw new Error('signTransaction is not supported for AWS KMS')
 	}
 }
 
-function deriveEvmAddress(derEncodedKey: Uint8Array): Address {
+function deriveEvmAddress(derEncodedKey: Uint8Array): EvmAddress {
 	const uncompressedKey = derEncodedKey.slice(
 		DER_UNCOMPRESSED_PUBLIC_KEY_OFFSET,
 	)
 	const hash = keccak256(uncompressedKey)
 	const addressHex = '0x' + hash.slice(-40)
-	return getAddress(addressHex)
+	return toEvmAddress(addressHex)
 }

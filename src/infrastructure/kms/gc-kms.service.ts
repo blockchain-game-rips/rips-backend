@@ -1,17 +1,15 @@
 import { KeyManagementServiceClient } from '@google-cloud/kms'
 import { Injectable } from '@nestjs/common'
 import { createPublicKey } from 'crypto'
-import {
-	getAddress,
-	keccak256,
-	recoverAddress,
-	type Address,
-	type Hex,
-} from 'viem'
+import { isAddressEqual, keccak256, recoverAddress, type Hex } from 'viem'
 import {
 	KmsService,
 	type KmsKeyResult,
 } from '../../application/interfaces/kms.service'
+import {
+	EvmAddress,
+	toEvmAddress,
+} from '../../domain/value-objects/evm-address'
 import { KmsKeyId, toKmsKeyId } from '../../domain/value-objects/kms-key-id'
 import { getEnvSafe } from '../../utils/common'
 
@@ -76,7 +74,7 @@ export class GcKmsService extends KmsService {
 	async signTransaction(
 		kmsKeyId: KmsKeyId,
 		hash: Hex,
-		expectedAddress: Address,
+		expectedAddress: EvmAddress,
 	): Promise<Hex> {
 		const [signResponse] = await this.client.asymmetricSign({
 			name: kmsKeyId,
@@ -123,7 +121,7 @@ export class GcKmsService extends KmsService {
 	}
 }
 
-function deriveEvmAddressFromPem(pem: string): Address {
+function deriveEvmAddressFromPem(pem: string): EvmAddress {
 	const publicKeyObject = createPublicKey(pem)
 
 	const derBuffer = publicKeyObject.export({ type: 'spki', format: 'der' })
@@ -134,7 +132,7 @@ function deriveEvmAddressFromPem(pem: string): Address {
 	const hash = keccak256(keyWithoutPrefix)
 	const addressHex = '0x' + hash.slice(-40)
 
-	return getAddress(addressHex)
+	return toEvmAddress(addressHex)
 }
 
 function extractUncompressedPublicKey(derBuffer: Buffer): Buffer {
@@ -195,7 +193,7 @@ async function recoverV(
 	hash: Hex,
 	r: bigint,
 	s: bigint,
-	expectedAddress: Address,
+	expectedAddress: EvmAddress,
 ): Promise<number> {
 	const EVM_V_OFFSET = 27
 
@@ -209,7 +207,7 @@ async function recoverV(
 
 		const recovered = await recoverAddress({ hash, signature })
 
-		if (recovered.toLowerCase() === expectedAddress.toLowerCase()) {
+		if (isAddressEqual(recovered, expectedAddress)) {
 			return v
 		}
 	}

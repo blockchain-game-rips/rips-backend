@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { type Address, type Hex } from 'viem'
+import { type Hex } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import {
 	KmsService,
 	type KmsKeyResult,
 } from '../../application/interfaces/kms.service'
+import {
+	EvmAddress,
+	toEvmAddress,
+} from '../../domain/value-objects/evm-address'
 import { KmsKeyId, toKmsKeyId } from '../../domain/value-objects/kms-key-id'
 import { getEnvSafe } from '../../utils/common'
 
@@ -34,14 +38,14 @@ export class MnemonicKmsService extends KmsService {
 
 		return Promise.resolve({
 			kmsKeyId: toKmsKeyId(String(keyIndex)),
-			evmAddress: account.address,
+			evmAddress: toEvmAddress(account.address),
 		})
 	}
 
 	async signTransaction(
 		kmsKeyId: KmsKeyId,
 		hash: Hex,
-		_expectedAddress: Address,
+		_expectedAddress: EvmAddress,
 	): Promise<Hex> {
 		const keyIndex = Number(kmsKeyId)
 

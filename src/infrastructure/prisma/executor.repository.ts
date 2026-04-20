@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { ExecutorRepository } from '../../application/interfaces/repositories/executor.repository'
 import { EIP155 } from '../../constants'
 import { Executor } from '../../domain/entities/executor'
+import {
+	EvmAddress,
+	toEvmAddress,
+} from '../../domain/value-objects/evm-address'
 import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
 import { Prisma } from '../../generated/prisma'
 import { PrismaService } from './prisma.service'
@@ -20,7 +24,7 @@ export class PrismaExecutorRepository extends ExecutorRepository {
 		return records.filter((r) => r.executorWallet !== null).map(toExecutor)
 	}
 
-	async create(address: string, kmsKeyId: KmsKeyId): Promise<Executor> {
+	async create(address: EvmAddress, kmsKeyId: KmsKeyId): Promise<Executor> {
 		const record = await this.prisma.executor.create({
 			data: {
 				executorWallet: { create: { address, kmsKeyId } },
@@ -50,7 +54,7 @@ function toExecutor(
 		wallet: {
 			kind: 'executor',
 			namespaceToAddress: {
-				[EIP155]: record.executorWallet.address,
+				[EIP155]: toEvmAddress(record.executorWallet.address),
 			},
 		},
 	}

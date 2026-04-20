@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { CompletedRound, RoundStatus } from '../../../domain/entities/round'
 import { resolvePrize } from '../../../domain/services/prize-utils'
 import { PurchaseAction } from '../../../domain/value-objects/actions'
+import { EvmAddress } from '../../../domain/value-objects/evm-address'
 import { TicketPrize } from '../../../domain/value-objects/ticket-prize'
 import { RoundSyncRepository } from '../../interfaces/repositories/round-sync.repository'
 import { RoundRepository } from '../../interfaces/repositories/round.repository'
@@ -87,7 +88,7 @@ export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
 		if (!this.hasRandoms(round))
 			throw new Error(`Round ${round.id} is missing randoms`)
 
-		const purchasesByAddress = new Map<string, PurchaseAction[]>()
+		const purchasesByAddress = new Map<EvmAddress, PurchaseAction[]>()
 
 		for (const purchase of round.actions.purchases) {
 			const existing = purchasesByAddress.get(purchase.userAddress) ?? []
@@ -116,7 +117,7 @@ export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
 		round: CompletedRound & {
 			randoms: NonNullable<CompletedRound['randoms']>
 		},
-		address: string,
+		address: EvmAddress,
 		purchases: PurchaseAction[],
 	): Promise<TicketPrize[]> {
 		const stakeCardCollections =
