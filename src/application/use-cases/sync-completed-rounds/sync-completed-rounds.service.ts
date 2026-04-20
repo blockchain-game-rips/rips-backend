@@ -11,10 +11,10 @@ import { RoundRepository } from '../../interfaces/repositories/round.repository'
 import { TicketPrizeRepository } from '../../interfaces/repositories/ticket-prize.repository'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
 import { STAKE_TO_TIER_BIASES } from '../../interfaces/tokens'
-import { SyncClaimEventsUseCase } from './sync-claim-events.use-case'
+import { SyncCompletedRoundsUseCase } from './sync-completed-rounds.use-case'
 
 @Injectable()
-export class SyncClaimEventsService extends SyncClaimEventsUseCase {
+export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
 	constructor(
 		private readonly roundRepository: RoundRepository,
 		private readonly userRepository: UserRepository,

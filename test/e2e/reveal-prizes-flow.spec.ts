@@ -14,7 +14,7 @@ import { RoundRepository } from '../../src/application/interfaces/repositories/r
 import { StakeRepository } from '../../src/application/interfaces/repositories/stake.repository'
 import { GetAvailableStakesUseCase } from '../../src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { KeeperUseCase } from '../../src/application/use-cases/keeper/keeper.use-case'
-import { SyncClaimEventsUseCase } from '../../src/application/use-cases/sync-claim-events/sync-claim-events.use-case'
+import { SyncCompletedRoundsUseCase } from '../../src/application/use-cases/sync-completed-rounds/sync-completed-rounds.use-case'
 import { Config } from '../../src/domain/entities/config'
 import {
 	CompletedRound,
@@ -324,7 +324,7 @@ describe('Reveal prizes flow E2E', () => {
 		stakeRepository.setOngoingRounds([])
 
 		roundRepository.setNextCompletedRound(claimedRound)
-		await ctx.app.get(SyncClaimEventsUseCase).execute()
+		await ctx.app.get(SyncCompletedRoundsUseCase).execute()
 		roundRepository.setNextCompletedRound(null)
 
 		const user1OnChainPrize = await getPrizeClaimedByUser(user1Address)

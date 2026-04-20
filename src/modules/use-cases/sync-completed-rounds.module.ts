@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config'
 import { TicketPrizeRepository } from '../../application/interfaces/repositories/ticket-prize.repository'
 import { STAKE_TO_TIER_BIASES } from '../../application/interfaces/tokens'
 import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
-import { SyncClaimEventsService } from '../../application/use-cases/sync-claim-events/sync-claim-events.service'
-import { SyncClaimEventsUseCase } from '../../application/use-cases/sync-claim-events/sync-claim-events.use-case'
+import { SyncCompletedRoundsService } from '../../application/use-cases/sync-completed-rounds/sync-completed-rounds.service'
+import { SyncCompletedRoundsUseCase } from '../../application/use-cases/sync-completed-rounds/sync-completed-rounds.use-case'
 import { CARD_CONFIG_KEY, CardConfig } from '../../configuration/configuration'
 import { IndexerModule } from '../../infrastructure/indexer/indexer.module'
 import { PrismaModule } from '../../infrastructure/prisma/prisma.module'
@@ -50,9 +50,12 @@ const stakeToTierBiasesProvider: Provider = {
 @Module({
 	imports: [IndexerModule, PrismaModule, GetAvailableStakesModule],
 	providers: [
-		{ provide: SyncClaimEventsUseCase, useClass: SyncClaimEventsService },
+		{
+			provide: SyncCompletedRoundsUseCase,
+			useClass: SyncCompletedRoundsService,
+		},
 		stakeToTierBiasesProvider,
 	],
-	exports: [SyncClaimEventsUseCase],
+	exports: [SyncCompletedRoundsUseCase],
 })
-export class SyncClaimEventsModule {}
+export class SyncCompletedRoundsModule {}
