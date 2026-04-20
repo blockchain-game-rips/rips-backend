@@ -1,17 +1,20 @@
-import { PrizeTier } from '../entities/config'
+import { Config, PrizeTier } from '../entities/config'
 import { Round } from '../entities/round'
 import { Card } from '../value-objects/card'
 import { CardCollection } from '../value-objects/card-collection'
-import { TicketPrize } from '../value-objects/ticket-prize'
 
 export function resolvePrize(
 	ticketNumber: number,
-	round: Round & { randoms: NonNullable<Round['randoms']> },
+	randoms: NonNullable<Round['randoms']>,
+	config: Config,
 	stakeCardCollections: CardCollection[],
 	tierBiases: number[],
-): TicketPrize {
-	const { a, b } = round.randoms
-	const { ticketCup, prizeDistribution } = round.config
+): {
+	card: Card
+	prizeAmount: bigint
+} {
+	const { a, b } = randoms
+	const { ticketCup, prizeDistribution } = config
 
 	const n = BigInt(ticketCup)
 	const prizeNumber = ((a * BigInt(ticketNumber) + b) % n) + 1n
@@ -27,10 +30,7 @@ export function resolvePrize(
 	)
 
 	return {
-		roundId: round.id,
-		ticketNumber,
 		prizeAmount,
-		revealed: false,
 		card,
 	}
 }

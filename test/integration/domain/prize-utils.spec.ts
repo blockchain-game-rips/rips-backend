@@ -367,22 +367,13 @@ function sumPrizes(
 	startTicketIndex: bigint,
 	randoms: { a: bigint; b: bigint },
 ): bigint {
-	const round = {
+	const config = {
 		id: 1,
-		stake: {} as never,
-		currency: {} as never,
-		actions: {} as never,
-		status: {} as never,
-		startTime: new Date(),
-		config: {
-			id: 1,
-			ticketCup: 8,
-			feePercent: 0,
-			ticketPrice: { currency: {} as never, amount: TICKET_COST },
-			durationSeconds: 300,
-			prizeDistribution: PRIZE_DISTRIBUTION,
-		},
-		randoms,
+		ticketCup: 8,
+		feePercent: 0,
+		ticketPrice: { currency: {} as never, amount: TICKET_COST },
+		durationSeconds: 300,
+		prizeDistribution: PRIZE_DISTRIBUTION,
 	}
 
 	let total = 0n
@@ -391,7 +382,8 @@ function sumPrizes(
 		const ticketNumber = Number(startTicketIndex + i) + 1
 		total += resolvePrize(
 			ticketNumber,
-			round,
+			randoms,
+			config,
 			STUB_COLLECTIONS,
 			[1, 1, 1],
 		).prizeAmount

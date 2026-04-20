@@ -11,32 +11,9 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 		super()
 	}
 
-	async upsertMany(userId: bigint, prizes: TicketPrize[]): Promise<void> {
-		await this.prisma.$transaction(
-			prizes.map((prize) =>
-				this.prisma.ticketPrize.upsert({
-					where: {
-						roundId_ticketNumber: {
-							roundId: prize.roundId,
-							ticketNumber: prize.ticketNumber,
-						},
-					},
-					create: {
-						userId,
-						roundId: prize.roundId,
-						ticketNumber: prize.ticketNumber,
-						prizeAmount: prize.prizeAmount,
-						cardDefinitionId: BigInt(prize.card.id),
-					},
-					update: { prizeAmount: prize.prizeAmount },
-				}),
-			),
-		)
-	}
-
-	async getUnrevealed(userId: bigint): Promise<TicketPrize[]> {
+	async getUnrevealed(userAddress: string): Promise<TicketPrize[]> {
 		const records = await this.prisma.ticketPrize.findMany({
-			where: { userId, revealed: false },
+			where: { userAddress, revealed: false },
 			orderBy: { ticketNumber: 'asc' },
 			include: { cardDefinition: true },
 		})
@@ -44,10 +21,10 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 		return records.map(toDomainTicketPrize)
 	}
 
-	async revealAndGet(userId: bigint): Promise<TicketPrize | null> {
+	async revealAndGet(userAddress: string): Promise<TicketPrize | null> {
 		return this.prisma.$transaction(async (tx) => {
 			const record = await tx.ticketPrize.findFirst({
-				where: { userId, revealed: false },
+				where: { userAddress, revealed: false },
 				orderBy: { ticketNumber: 'asc' },
 				include: { cardDefinition: true },
 			})
@@ -63,10 +40,10 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 		})
 	}
 
-	async revealAllAndGet(userId: bigint): Promise<TicketPrize[]> {
+	async revealAllAndGet(userAddress: string): Promise<TicketPrize[]> {
 		return this.prisma.$transaction(async (tx) => {
 			const records = await tx.ticketPrize.findMany({
-				where: { userId, revealed: false },
+				where: { userAddress, revealed: false },
 				orderBy: { ticketNumber: 'asc' },
 				include: { cardDefinition: true },
 			})
@@ -74,7 +51,7 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 			if (records.length === 0) return []
 
 			await tx.ticketPrize.updateMany({
-				where: { userId, revealed: false },
+				where: { userAddress, revealed: false },
 				data: { revealed: true },
 			})
 
@@ -83,13 +60,13 @@ export class PrismaTicketPrizeRepository extends TicketPrizeRepository {
 	}
 
 	async getCardCollectionsByStake(
-		userId: bigint,
+		userAddress: string,
 		stakeId: number,
 	): Promise<CardCollection[]> {
 		const cardDefinitions = await this.prisma.cardDefinition.findMany({
 			where: { stakeId },
 			include: {
-				userCards: { where: { userId } },
+				userCards: { where: { userAddress } },
 			},
 			orderBy: { tier: 'asc' },
 		})
@@ -140,6 +117,7 @@ function toCard(def: {
 }
 
 function toDomainTicketPrize(record: {
+	userAddress: string
 	roundId: number
 	ticketNumber: number
 	prizeAmount: bigint
@@ -147,6 +125,7 @@ function toDomainTicketPrize(record: {
 	cardDefinition: { id: bigint; tier: number; name: string; imageUrl: string }
 }): TicketPrize {
 	return {
+		userAddress: record.userAddress,
 		roundId: record.roundId,
 		ticketNumber: record.ticketNumber,
 		prizeAmount: record.prizeAmount,

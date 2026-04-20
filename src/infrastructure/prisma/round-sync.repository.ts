@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import {
-	RoundSyncRepository,
-	UserPrizes,
-} from '../../application/interfaces/repositories/round-sync.repository'
+import { RoundSyncRepository } from '../../application/interfaces/repositories/round-sync.repository'
+import { TicketPrize } from '../../domain/value-objects/ticket-prize'
 import { NotificationType } from '../../generated/prisma'
 import { PrismaService } from './prisma.service'
 
@@ -25,16 +23,25 @@ export class PrismaRoundSyncRepository extends RoundSyncRepository {
 
 	async syncClaimedRound(args: {
 		roundId: number
-		entries: UserPrizes[]
+		prizes: TicketPrize[]
 	}): Promise<void> {
-		const { roundId, entries } = args
+		const { roundId, prizes } = args
 
-		await this.prisma.$transaction([
-			...entries.flatMap(({ userId, prizes }) =>
-				prizes.map((prize) =>
-					this.prisma.ticketPrize.create({
+		const uniqueUserAddresses = [
+			...new Set(prizes.map((prize) => prize.userAddress)),
+		]
+
+		await this.prisma.$transaction(async (tx) => {
+			const wallets = await tx.evmWallet.findMany({
+				where: { address: { in: uniqueUserAddresses } },
+				select: { userId: true },
+			})
+
+			await Promise.all([
+				...prizes.map((prize) =>
+					tx.ticketPrize.create({
 						data: {
-							userId,
+							userAddress: prize.userAddress,
 							roundId: prize.roundId,
 							ticketNumber: prize.ticketNumber,
 							prizeAmount: prize.prizeAmount,
@@ -42,21 +49,25 @@ export class PrismaRoundSyncRepository extends RoundSyncRepository {
 						},
 					}),
 				),
-			),
-			...entries.map(({ userId }) =>
-				this.prisma.notification.create({
-					data: { userId, roundId, type: NotificationType.CLAIMED },
+				...wallets.map((wallet) =>
+					tx.notification.create({
+						data: {
+							userId: wallet.userId,
+							roundId,
+							type: NotificationType.CLAIMED,
+						},
+					}),
+				),
+				tx.notification.create({
+					data: {
+						userId: GROUP_USER_ID,
+						roundId,
+						type: NotificationType.CLAIMED,
+					},
 				}),
-			),
-			this.prisma.notification.create({
-				data: {
-					userId: GROUP_USER_ID,
-					roundId,
-					type: NotificationType.CLAIMED,
-				},
-			}),
-			this.prisma.syncedRound.create({ data: { roundId } }),
-		])
+				tx.syncedRound.create({ data: { roundId } }),
+			])
+		})
 	}
 
 	async syncRefundedRound(args: {

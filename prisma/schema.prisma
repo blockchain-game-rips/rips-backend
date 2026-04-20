@@ -8,13 +8,11 @@ datasource db {
 }
 
 model User {
-    id              BigInt        @id @default(autoincrement())
-    telegramId      BigInt        @unique @map("telegram_id")
-    referrerAddress String?       @map("referrer_address")
-    createdAt       DateTime      @default(now()) @map("created_at")
+    id              BigInt     @id @default(autoincrement())
+    telegramId      BigInt     @unique @map("telegram_id")
+    referrerAddress String?    @map("referrer_address")
+    createdAt       DateTime   @default(now()) @map("created_at")
     evmWallet       EvmWallet?
-    ticketPrizes    TicketPrize[]
-    userCards       UserCard[]
 
     @@map("users")
 }
@@ -65,14 +63,13 @@ model CardDefinition {
 
 model UserCard {
     id               BigInt         @id @default(autoincrement())
-    userId           BigInt         @map("user_id")
+    userAddress      String         @map("user_address")
     cardDefinitionId BigInt         @map("card_definition_id")
     quantity         Int            @default(1)
     firstObtainedAt  DateTime       @default(now()) @map("first_obtained_at")
-    user             User           @relation(fields: [userId], references: [id])
     cardDefinition   CardDefinition @relation(fields: [cardDefinitionId], references: [id])
 
-    @@unique([userId, cardDefinitionId])
+    @@unique([userAddress, cardDefinitionId])
     @@map("user_cards")
 }
 
@@ -103,14 +100,13 @@ model SyncedRound {
 
 model TicketPrize {
     id               BigInt         @id @default(autoincrement())
-    userId           BigInt         @map("user_id")
+    userAddress      String         @map("user_address")
     roundId          Int            @map("round_id")
     ticketNumber     Int            @map("ticket_number")
     prizeAmount      BigInt         @map("prize_amount")
     cardDefinitionId BigInt         @map("card_definition_id")
     revealed         Boolean        @default(false)
     createdAt        DateTime       @default(now()) @map("created_at")
-    user             User           @relation(fields: [userId], references: [id])
     cardDefinition   CardDefinition @relation(fields: [cardDefinitionId], references: [id])
 
     @@unique([roundId, ticketNumber])

@@ -3,19 +3,17 @@ import { CardCollection } from '../../../domain/value-objects/card-collection'
 import { TicketPrize } from '../../../domain/value-objects/ticket-prize'
 
 export abstract class TicketPrizeRepository {
-	abstract upsertMany(userId: bigint, prizes: TicketPrize[]): Promise<void>
-
-	abstract getUnrevealed(userId: bigint): Promise<TicketPrize[]>
+	abstract getUnrevealed(userAddress: string): Promise<TicketPrize[]>
 
 	/**
 	 * @returns return null when there is no prize to reveal
 	 */
-	abstract revealAndGet(userId: bigint): Promise<TicketPrize | null>
+	abstract revealAndGet(userAddress: string): Promise<TicketPrize | null>
 
-	abstract revealAllAndGet(userId: bigint): Promise<TicketPrize[]>
+	abstract revealAllAndGet(userAddress: string): Promise<TicketPrize[]>
 
 	abstract getCardCollectionsByStake(
-		userId: bigint,
+		userAddres: string,
 		stakeId: number,
 	): Promise<CardCollection[]>
 

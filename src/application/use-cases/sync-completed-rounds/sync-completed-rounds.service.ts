@@ -3,10 +3,7 @@ import { CompletedRound, RoundStatus } from '../../../domain/entities/round'
 import { resolvePrize } from '../../../domain/services/prize-utils'
 import { PurchaseAction } from '../../../domain/value-objects/actions'
 import { TicketPrize } from '../../../domain/value-objects/ticket-prize'
-import {
-	RoundSyncRepository,
-	UserPrizes,
-} from '../../interfaces/repositories/round-sync.repository'
+import { RoundSyncRepository } from '../../interfaces/repositories/round-sync.repository'
 import { RoundRepository } from '../../interfaces/repositories/round.repository'
 import { TicketPrizeRepository } from '../../interfaces/repositories/ticket-prize.repository'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
@@ -44,11 +41,11 @@ export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
 	}
 
 	private async syncClaimedRound(round: CompletedRound): Promise<void> {
-		const entries = await this.resolveRoundPrizes(round)
+		const prizes = await this.resolveRoundPrizes(round)
 
 		await this.roundSyncRepository.syncClaimedRound({
 			roundId: round.id,
-			entries,
+			prizes,
 		})
 	}
 
@@ -86,7 +83,7 @@ export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
 
 	private async resolveRoundPrizes(
 		round: CompletedRound,
-	): Promise<UserPrizes[]> {
+	): Promise<TicketPrize[]> {
 		if (!this.hasRandoms(round))
 			throw new Error(`Round ${round.id} is missing randoms`)
 
@@ -100,18 +97,19 @@ export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
 			])
 		}
 
-		const entries: UserPrizes[] = []
+		const prizes: TicketPrize[] = []
 
 		for (const [address, purchases] of purchasesByAddress) {
-			const entry = await this.resolveUserPrizes(
+			const userPrizes = await this.resolveUserPrizes(
 				round,
 				address,
 				purchases,
 			)
-			if (entry) entries.push(entry)
+
+			prizes.push(...userPrizes)
 		}
 
-		return entries
+		return prizes
 	}
 
 	private async resolveUserPrizes(
@@ -120,13 +118,10 @@ export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
 		},
 		address: string,
 		purchases: PurchaseAction[],
-	): Promise<UserPrizes | null> {
-		const user = await this.userRepository.findByEvmAddress(address)
-		if (!user) return null
-
+	): Promise<TicketPrize[]> {
 		const stakeCardCollections =
 			await this.ticketPrizeRepository.getCardCollectionsByStake(
-				user.id,
+				address,
 				round.stake.id,
 			)
 
@@ -139,7 +134,8 @@ export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
 
 				const prize = resolvePrize(
 					ticketNumber,
-					round,
+					round.randoms,
+					round.config,
 					stakeCardCollections,
 					tierBiases,
 				)
@@ -150,10 +146,17 @@ export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
 				)
 				tierCollection[cardIndex].count += 1
 
-				prizes.push(prize)
+				prizes.push({
+					card: prize.card,
+					prizeAmount: prize.prizeAmount,
+					revealed: false,
+					roundId: round.id,
+					ticketNumber,
+					userAddress: address,
+				})
 			}
 		}
 
-		return { userId: user.id, prizes }
+		return prizes
 	}
 }
