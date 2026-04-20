@@ -1,8 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { Currency } from '../../../domain/entities/currency'
+import { Injectable } from '@nestjs/common'
 import { InsufficientBalanceError } from '../../../domain/errors/insufficient-balance.error'
 import { Transaction } from '../../../domain/value-objects/transaction'
-import { MAIN_CURRENCY } from '../../interfaces/tokens'
+import { CurrencyService } from '../../interfaces/currency.service'
 import { WalletService } from '../../interfaces/wallet.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import { WithdrawInput, WithdrawUseCase } from './withdraw.use-case'
@@ -12,17 +11,25 @@ export class WithdrawService implements WithdrawUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly walletService: WalletService,
-		@Inject(MAIN_CURRENCY) private readonly mainCurrency: Currency,
+		private readonly currencyService: CurrencyService,
 	) {}
 
 	async execute(input: WithdrawInput): Promise<Transaction> {
-		const { amount, recipientChainAddress, telegramId } = input
+		const {
+			amount,
+			recipientChainAddress,
+			currencyChainAddress,
+			telegramId,
+		} = input
 
 		const user = await this.getUserUseCase.execute({ telegramId })
 
+		const currency =
+			await this.currencyService.fromAccount(currencyChainAddress)
+
 		const userBalance = await this.walletService.balanceOf(
 			user.wallet,
-			this.mainCurrency,
+			currency,
 		)
 
 		if (userBalance < amount)
@@ -32,7 +39,7 @@ export class WithdrawService implements WithdrawUseCase {
 
 		const tx = await this.walletService.transfer(user.wallet, {
 			to: recipientChainAddress,
-			currency: this.mainCurrency,
+			currency,
 			amount,
 		})
 

@@ -1,21 +1,27 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { getAddress } from 'viem'
 import {
 	GetCompletedRoundsArgs,
 	RoundRepository,
 } from '../../application/interfaces/repositories/round.repository'
-import { MAIN_CURRENCY } from '../../application/interfaces/tokens'
-import { Currency } from '../../domain/entities/currency'
 import { CompletedRound } from '../../domain/entities/round'
+import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { EvmCurrencyService } from '../evm/evm-currency.service'
+import { RIPS_CONTRACT } from '../rips/rips.constants'
 import { IndexerService } from './indexer.service'
 import { fromRoundRaw } from './utils'
 
 @Injectable()
 export class IndexerRoundRepository extends RoundRepository {
+	private readonly chainId: number
+
 	constructor(
 		private readonly indexer: IndexerService,
-		@Inject(MAIN_CURRENCY) private readonly mainCurrency: Currency,
+		private readonly evmCurrencyService: EvmCurrencyService,
+		@Inject(RIPS_CONTRACT) contract: ChainAddress,
 	) {
 		super()
+		this.chainId = Number(contract.chain.reference)
 	}
 
 	async getCompletedRounds({
@@ -27,10 +33,16 @@ export class IndexerRoundRepository extends RoundRepository {
 			cursor: cursor?.toString(),
 		})
 
-		return rounds.map(
-			(r) =>
+		return Promise.all(
+			rounds.map(async (r) => {
+				const currency = await this.evmCurrencyService.fromAddress(
+					getAddress(r.config.currency),
+					this.chainId,
+				)
+
 				//TODO: get rid of as unknown as
-				fromRoundRaw(r, this.mainCurrency) as unknown as CompletedRound,
+				return fromRoundRaw(r, currency) as unknown as CompletedRound
+			}),
 		)
 	}
 

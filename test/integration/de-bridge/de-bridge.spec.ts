@@ -31,7 +31,7 @@ import { EVM_CLIENT_CONFIG } from '../../../src/infrastructure/evm/evm-client/ty
 import { NativeCurrency } from '../../../src/infrastructure/evm/primitives/currencies/native-currency'
 import { Token } from '../../../src/infrastructure/evm/primitives/currencies/token'
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
-import { RIPS_SC_ADDRESS } from '../../../src/infrastructure/rips/rips.constants'
+import { RIPS_CONTRACT } from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
 import { ANVIL_ACCOUNT_1_PRIVATE_KEY } from '../../fixtures/anvil-accounts'
 import { ANVIL_STATE_PATH, deployments } from '../../fixtures/state'
@@ -156,8 +156,14 @@ describe('DeBridge integration', () => {
 			const moduleRef = await Test.createTestingModule({
 				imports: [DeBridgeModule],
 			})
-				.overrideProvider(RIPS_SC_ADDRESS)
-				.useValue(ripsContractAddress)
+				.overrideProvider(RIPS_CONTRACT)
+				.useValue({
+					chain: {
+						namespace: EIP155,
+						reference: String(BASE_CHAIN_ID),
+					},
+					address: ripsContractAddress,
+				})
 				.overrideProvider(EVM_CLIENT_CONFIG)
 				.useValue({
 					rpcSettings: {

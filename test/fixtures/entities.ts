@@ -28,12 +28,14 @@ export const MOCK_USER: User = {
 	createdAt: new Date('2026-01-01'),
 }
 
+export const MOCK_CURRENCY_CHAIN_ADDRESS = {
+	chain: { namespace: EIP155, reference: '8453' },
+	address: NATIVE_ADDRESS,
+}
+
 export const MOCK_CURRENCY: Currency = {
 	id: composeCurrencyId(composeChainId(EIP155, '8453'), NATIVE_ADDRESS),
-	chainAddress: {
-		chain: { namespace: EIP155, reference: '8453' },
-		address: NATIVE_ADDRESS,
-	},
+	chainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
 	symbol: 'ETH',
 	name: 'ETH',
 	decimals: 18,

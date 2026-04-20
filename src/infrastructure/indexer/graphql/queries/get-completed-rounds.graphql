@@ -15,6 +15,7 @@ query GetCompletedRounds($limit: Int!, $cursor: String) {
         randomB
         config {
             id
+            currency
             ticketCap
             ticketCost
             feePercent

@@ -1,5 +1,6 @@
 import request from 'supertest'
 import { parseEther } from 'viem'
+import { MOCK_CURRENCY_CHAIN_ADDRESS } from '../fixtures/entities'
 import { setNativeBalance } from '../utils/anvil'
 import { useRipsApp } from '../utils/rips-app'
 
@@ -30,8 +31,9 @@ describe('Wallet flow E2E', () => {
 		await setNativeBalance(ctx.publicClient, walletAddress, DEPOSIT_AMOUNT)
 
 		const balanceRes = await request(ctx.app.getHttpServer())
-			.get(`/users/${USER_TG_ID}/wallet/balance`)
-			.expect(200)
+			.post(`/users/${USER_TG_ID}/wallet/balance`)
+			.send({ currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS })
+			.expect(201)
 
 		expect(BigInt(balanceRes.body.amount)).toBe(DEPOSIT_AMOUNT)
 	})
@@ -45,6 +47,7 @@ describe('Wallet flow E2E', () => {
 			.post(`/users/${USER_TG_ID}/wallet/balance/withdraw`)
 			.send({
 				amount: WITHDRAW_AMOUNT.toString(),
+				currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
 				recipientAddress: RECIPIENT_ADDRESS,
 			})
 			.expect(201)

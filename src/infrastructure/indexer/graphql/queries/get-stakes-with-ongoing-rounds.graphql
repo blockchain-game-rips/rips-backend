@@ -4,6 +4,7 @@ query GetStakesWithOngoingRounds {
         deleted
         configs(orderBy: id_DESC, limit: 1) {
             id
+            currency
             ticketCap
             ticketCost
             feePercent
@@ -23,6 +24,7 @@ query GetStakesWithOngoingRounds {
             randomB
             config {
                 id
+                currency
                 ticketCap
                 ticketCost
                 feePercent

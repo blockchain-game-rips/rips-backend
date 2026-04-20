@@ -1,23 +1,30 @@
 import { Module } from '@nestjs/common'
 import { RipsService } from '../../application/interfaces/rips.service'
-import { MainCurrencyModule } from '../../modules/main-currency/main-currency.module'
+import { EIP155 } from '../../constants'
+import { toEvmAddress } from '../../domain/value-objects/evm-address'
 import { getEnvSafe } from '../../utils/common'
 import { EvmModule } from '../evm/evm.module'
-import { RIPS_SC_ADDRESS } from './rips.constants'
+import { RIPS_CONTRACT } from './rips.constants'
 import { RipsServiceIpml } from './rips.service'
 
 @Module({
-	imports: [EvmModule, MainCurrencyModule],
+	imports: [EvmModule],
 	providers: [
 		{
-			provide: RIPS_SC_ADDRESS,
-			useFactory: () => getEnvSafe('RIPS_CONTRACT_ADDRESS'),
+			provide: RIPS_CONTRACT,
+			useFactory: () => ({
+				chain: {
+					namespace: EIP155,
+					reference: getEnvSafe('RIPS_CHAIN_ID'),
+				},
+				address: toEvmAddress(getEnvSafe('RIPS_CONTRACT_ADDRESS')),
+			}),
 		},
 		{
 			provide: RipsService,
 			useClass: RipsServiceIpml,
 		},
 	],
-	exports: [RipsService],
+	exports: [RipsService, RIPS_CONTRACT],
 })
 export class RipsModule {}

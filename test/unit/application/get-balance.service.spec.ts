@@ -1,8 +1,10 @@
+import { CurrencyService } from '../../../src/application/interfaces/currency.service'
 import { GetBalanceService } from '../../../src/application/use-cases/get-balance/get-balance.service'
 import { UserNotFoundError } from '../../../src/application/use-cases/get-user/get-user.use-case'
 import { CurrencyAmount } from '../../../src/domain/value-objects/currency-amount'
 import {
 	MOCK_CURRENCY,
+	MOCK_CURRENCY_CHAIN_ADDRESS,
 	MOCK_USER,
 	MOCK_WALLET,
 	TELEGRAM_ID,
@@ -15,10 +17,13 @@ import {
 describe('GetBalanceService', () => {
 	const getUserUseCase = makeMockGetUserUseCase()
 	const walletService = makeMockWalletService()
+	const currencyService: jest.Mocked<CurrencyService> = {
+		fromAccount: jest.fn(),
+	}
 	const service = new GetBalanceService(
 		getUserUseCase,
 		walletService,
-		MOCK_CURRENCY,
+		currencyService,
 	)
 
 	beforeEach(() => {
@@ -30,9 +35,11 @@ describe('GetBalanceService', () => {
 
 		getUserUseCase.execute.mockResolvedValue(MOCK_USER)
 		walletService.balanceOf.mockResolvedValue(balance)
+		currencyService.fromAccount.mockResolvedValue(MOCK_CURRENCY)
 
 		const result: CurrencyAmount = await service.execute({
 			telegramId: TELEGRAM_ID,
+			currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
 		})
 
 		expect(result).toEqual({ currency: MOCK_CURRENCY, amount: balance })
@@ -48,7 +55,10 @@ describe('GetBalanceService', () => {
 		)
 
 		await expect(
-			service.execute({ telegramId: TELEGRAM_ID }),
+			service.execute({
+				telegramId: TELEGRAM_ID,
+				currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+			}),
 		).rejects.toThrow(UserNotFoundError)
 	})
 })

@@ -26,20 +26,25 @@ export const createUserBodySchema = z.object({
 		.default(null),
 })
 
-export const withdrawBodySchema = z.object({
-	amount: z
-		.string()
-		.regex(/^\d+$/)
-		.transform((v) => BigInt(v)),
-	recipientAddress: z.string().regex(EVM_ADDRESS_REGEX),
-})
-
 const chainAddressSchema = z.object({
 	address: z.string().min(1),
 	chain: z.object({
 		namespace: z.string().transform(toChainNamespace),
 		reference: z.string().min(1),
 	}),
+})
+
+export const getBalanceBodySchema = z.object({
+	currencyChainAddress: chainAddressSchema,
+})
+
+export const withdrawBodySchema = z.object({
+	amount: z
+		.string()
+		.regex(/^\d+$/)
+		.transform((v) => BigInt(v)),
+	currencyChainAddress: chainAddressSchema,
+	recipientAddress: z.string().regex(EVM_ADDRESS_REGEX),
 })
 
 export const buyTicketsBodySchema = z.object({

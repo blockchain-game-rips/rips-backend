@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common'
 import { RoundRepository } from '../../application/interfaces/repositories/round.repository'
 import { StakeRepository } from '../../application/interfaces/repositories/stake.repository'
-import { MainCurrencyModule } from '../../modules/main-currency/main-currency.module'
+import { EvmModule } from '../evm/evm.module'
+import { RipsModule } from '../rips/rips.module'
 import { IndexerService } from './indexer.service'
 import { IndexerRoundRepository } from './rounds.repository'
 import { IndexerStakeRepository } from './stake.repository'
 
 @Module({
-	imports: [MainCurrencyModule],
+	imports: [EvmModule, RipsModule],
 	providers: [
 		IndexerService,
 		{ provide: StakeRepository, useClass: IndexerStakeRepository },

@@ -4,6 +4,7 @@ import { CurrencyAmount } from '../../../src/domain/value-objects/currency-amoun
 import { WalletsController } from '../../../src/presentation/wallets/wallets.controller'
 import {
 	MOCK_CURRENCY,
+	MOCK_CURRENCY_CHAIN_ADDRESS,
 	NATIVE_ADDRESS,
 	TELEGRAM_ID,
 } from '../../fixtures/entities'
@@ -28,11 +29,13 @@ describe('WalletsController', () => {
 		jest.clearAllMocks()
 	})
 
-	describe('GET /users/:telegramId/wallet/balance', () => {
+	describe('POST /users/:telegramId/wallet/balance', () => {
 		it('should return balance response dto', async () => {
 			getBalance.execute.mockResolvedValue(MOCK_BALANCE)
 
-			const result = await controller.getBalance(TELEGRAM_ID)
+			const result = await controller.getBalance(TELEGRAM_ID, {
+				currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+			})
 
 			expect(result).toEqual({
 				currency: {
@@ -48,6 +51,7 @@ describe('WalletsController', () => {
 			})
 			expect(getBalance.execute).toHaveBeenCalledWith({
 				telegramId: TELEGRAM_ID,
+				currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
 			})
 		})
 
@@ -56,9 +60,11 @@ describe('WalletsController', () => {
 				new UserNotFoundError('not found'),
 			)
 
-			await expect(controller.getBalance(TELEGRAM_ID)).rejects.toThrow(
-				UserNotFoundError,
-			)
+			await expect(
+				controller.getBalance(TELEGRAM_ID, {
+					currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+				}),
+			).rejects.toThrow(UserNotFoundError)
 		})
 	})
 })

@@ -5,7 +5,6 @@ import { AppConfigModule } from './configuration/app-config.module'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
 import { ProvisionModule } from './infrastructure/provision/provision.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
-import { PriceModule } from './modules/price/price.module'
 import { RipsApiModule } from './modules/rips-api/rips-api.module'
 import { SyncCompletedRoundsModule } from './modules/sync-completed-rounds/sync-completed-rounds.module'
 import { UsersModule } from './modules/users/users.module'
@@ -28,10 +27,6 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 				path: 'rips',
 				module: RipsApiModule,
 			},
-			{
-				path: 'price',
-				module: PriceModule,
-			},
 		]),
 		AppConfigModule,
 		ScheduleModule.forRoot(),
@@ -40,7 +35,6 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 		UsersModule,
 		WalletsModule,
 		RipsApiModule,
-		PriceModule,
 		KeeperModule,
 		SyncCompletedRoundsModule,
 	],

@@ -14,6 +14,10 @@ import { ZapService } from '../../application/interfaces/zap.service'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
+import {
+	EvmAddress,
+	toEvmAddress,
+} from '../../domain/value-objects/evm-address'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
 	PendingZap,
@@ -31,7 +35,7 @@ import { evmAddressFromWallet, evmChainIdFromCurrency } from '../evm/helpers'
 import { Token } from '../evm/primitives/currencies/token'
 import { parsePurchase } from '../rips/parse-purchase'
 import { ripsAbi } from '../rips/rips-abi'
-import { RIPS_SC_ADDRESS } from '../rips/rips.constants'
+import { RIPS_CONTRACT } from '../rips/rips.constants'
 import { fulfilledOrderAbi } from './abi'
 import { DeBridgeApiService } from './de-bridge-api.service'
 import { CreateTxResponse } from './schemas/create-tx.schema'
@@ -48,15 +52,19 @@ const DEFAULT_GAS_LIMIT = 2_000_000n
 
 @Injectable()
 export class DeBridgeService implements ZapService {
+	private readonly ripsContractAddress: EvmAddress
+
 	constructor(
-		@Inject(RIPS_SC_ADDRESS) private readonly ripsContractAddress: Address,
+		@Inject(RIPS_CONTRACT) ripsContract: ChainAddress,
 		private readonly evmClientService: EvmClientService,
 		private readonly evmCurrencyService: EvmCurrencyService,
 		private readonly evmCurrencyReadService: EvmCurrencyReadService,
 		private readonly evmCurrencyWriteService: EvmCurrencyWriteService,
 		private readonly evmTransactionService: EvmTransactionService,
 		private readonly deBridgeApiService: DeBridgeApiService,
-	) {}
+	) {
+		this.ripsContractAddress = toEvmAddress(ripsContract.address)
+	}
 
 	async getBuyResult(pendingZap: PendingZap): Promise<ZapBuyResult | null> {
 		const orderId = pendingZap.zapId

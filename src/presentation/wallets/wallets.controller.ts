@@ -1,12 +1,14 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common'
+import { Body, Controller, Param, Post } from '@nestjs/common'
 import { z } from 'zod'
 import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
 import { WithdrawUseCase } from '../../application/use-cases/withdraw.ts/withdraw.use-case'
-import { EIP155 } from '../../constants'
 import { TelegramId } from '../../domain/value-objects/telegram-id'
-import { MAIN_CURRENCY_VALUE } from '../../modules/main-currency/main-currency.constants'
 import { ZodValidationPipe } from '../pipes/zod-validation.pipe'
-import { telegramIdParamSchema, withdrawBodySchema } from '../validation'
+import {
+	getBalanceBodySchema,
+	telegramIdParamSchema,
+	withdrawBodySchema,
+} from '../validation'
 import {
 	BalanceResponseDto,
 	toBalanceResponseDto,
@@ -25,12 +27,17 @@ export class WalletsController {
 		private readonly withdrawUseCase: WithdrawUseCase,
 	) {}
 
-	@Get('balance')
+	@Post('balance')
 	async getBalance(
 		@Param(TELEGRAM_ID_PARAM, new ZodValidationPipe(telegramIdParamSchema))
 		telegramId: TelegramId,
+		@Body(new ZodValidationPipe(getBalanceBodySchema))
+		body: z.infer<typeof getBalanceBodySchema>,
 	): Promise<BalanceResponseDto> {
-		const result = await this.getBalanceUseCase.execute({ telegramId })
+		const result = await this.getBalanceUseCase.execute({
+			telegramId,
+			currencyChainAddress: body.currencyChainAddress,
+		})
 
 		return toBalanceResponseDto(result)
 	}
@@ -42,18 +49,14 @@ export class WalletsController {
 		@Body(new ZodValidationPipe(withdrawBodySchema))
 		body: z.infer<typeof withdrawBodySchema>,
 	): Promise<WithdrawResponseDto> {
-		const recipientChainAddress = {
-			chain: {
-				namespace: EIP155,
-				reference: MAIN_CURRENCY_VALUE.chain.reference,
-			},
-			address: body.recipientAddress,
-		}
-
 		const tx = await this.withdrawUseCase.execute({
 			telegramId,
 			amount: body.amount,
-			recipientChainAddress,
+			currencyChainAddress: body.currencyChainAddress,
+			recipientChainAddress: {
+				chain: body.currencyChainAddress.chain,
+				address: body.recipientAddress,
+			},
 		})
 
 		return toWithdrawResponseDto(tx)

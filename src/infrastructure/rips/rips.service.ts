@@ -5,36 +5,42 @@ import {
 	type TransactionRequestEIP1559,
 } from 'viem'
 import { RipsService } from '../../application/interfaces/rips.service'
-import { MAIN_CURRENCY } from '../../application/interfaces/tokens'
 import { Config } from '../../domain/entities/config'
-import { Currency } from '../../domain/entities/currency'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
-import { EvmAddress } from '../../domain/value-objects/evm-address'
+import { ChainAddress } from '../../domain/value-objects/chain-address'
+import {
+	EvmAddress,
+	toEvmAddress,
+} from '../../domain/value-objects/evm-address'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmClientService } from '../evm/evm-client/evm-client.service'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
-import { evmAddressFromWallet, evmChainIdFromCurrency } from '../evm/helpers'
-import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
+import { evmAddressFromWallet } from '../evm/helpers'
 import { parsePurchase } from './parse-purchase'
 import { ripsAbi } from './rips-abi'
-import { RIPS_SC_ADDRESS } from './rips.constants'
+import { RIPS_CONTRACT } from './rips.constants'
 
 const CLAIM_START_INDEX = 0n
 const CLAIM_MAX_RANGES = 100n
 
 @Injectable()
 export class RipsServiceIpml implements RipsService {
+	private readonly contractAddress: EvmAddress
+	private readonly chainId: number
+
 	constructor(
 		private readonly evmTransactionService: EvmTransactionService,
 		private readonly evmClientService: EvmClientService,
 		private readonly evmCurrencyService: EvmCurrencyService,
 
-		@Inject(RIPS_SC_ADDRESS) private readonly contractAddress: EvmAddress,
-		@Inject(MAIN_CURRENCY) private readonly mainCurrency: Currency,
-	) {}
+		@Inject(RIPS_CONTRACT) contract: ChainAddress,
+	) {
+		this.contractAddress = toEvmAddress(contract.address)
+		this.chainId = Number(contract.chain.reference)
+	}
 
 	claim(
 		wallet: Wallet,
@@ -89,9 +95,7 @@ export class RipsServiceIpml implements RipsService {
 		wallet: Wallet,
 		requestFields: Pick<TransactionRequestEIP1559, 'data'>,
 	): Promise<Transaction> {
-		const evmCurrency = this.requireEvmCurrency()
-
-		const chainId = evmChainIdFromCurrency(evmCurrency)
+		const chainId = this.chainId
 
 		const request: TransactionRequestEIP1559 = {
 			...requestFields,
@@ -112,11 +116,9 @@ export class RipsServiceIpml implements RipsService {
 		wallet: Wallet,
 		args: { stakeId: number; config: Config; ticketCount: number },
 	): Promise<PurchaseReceipt> {
-		const evmCurrency = this.requireEvmCurrency()
-
 		const { stakeId, config, ticketCount } = args
 
-		const chainId = evmChainIdFromCurrency(evmCurrency)
+		const chainId = this.chainId
 		const userAddress = evmAddressFromWallet(wallet)
 
 		const totalValue = config.ticketPrice.amount * BigInt(ticketCount)
@@ -149,17 +151,8 @@ export class RipsServiceIpml implements RipsService {
 		return { transaction, purchase }
 	}
 
-	private requireEvmCurrency(): EvmCurrency {
-		if (!(this.mainCurrency instanceof EvmCurrency)) {
-			throw new Error(`Unsupported currency: ${this.mainCurrency.id}`)
-		}
-
-		return this.mainCurrency
-	}
-
 	async getConfigByRoundId(roundId: number): Promise<Config> {
-		const evmCurrency = this.requireEvmCurrency()
-		const chainId = evmChainIdFromCurrency(evmCurrency)
+		const chainId = this.chainId
 		const client = this.evmClientService.getClient(chainId)
 
 		const round = await client.readContract({

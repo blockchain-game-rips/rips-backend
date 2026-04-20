@@ -17,6 +17,7 @@ import { AppModule } from '../../src/app.module'
 import { KmsService } from '../../src/application/interfaces/kms.service'
 import { STAKE_TO_TIER_BIASES } from '../../src/application/interfaces/tokens'
 import { AppConfigModule } from '../../src/configuration/app-config.module'
+import { EIP155 } from '../../src/constants'
 import { Executor } from '../../src/domain/entities/executor'
 import { EVM_CLIENT_CONFIG } from '../../src/infrastructure/evm/evm-client/types'
 import { evmAddressFromWallet } from '../../src/infrastructure/evm/helpers'
@@ -24,7 +25,7 @@ import { IndexerModule } from '../../src/infrastructure/indexer/indexer.module'
 import { MnemonicKmsService } from '../../src/infrastructure/kms/mnemonic-kms.service'
 import { ProvisionService } from '../../src/infrastructure/provision/provision.service'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
-import { RIPS_SC_ADDRESS } from '../../src/infrastructure/rips/rips.constants'
+import { RIPS_CONTRACT } from '../../src/infrastructure/rips/rips.constants'
 import { UseCaseExceptionFilter } from '../../src/presentation/filters/use-case-exception.filter'
 import {
 	ANVIL_ACCOUNT_0_PRIVATE_KEY,
@@ -106,8 +107,11 @@ export function useRipsApp(
 			.useValue(testEvmClientConfig)
 			.overrideModule(IndexerModule)
 			.useModule(MockIndexerModule)
-			.overrideProvider(RIPS_SC_ADDRESS)
-			.useValue(deployments.rips)
+			.overrideProvider(RIPS_CONTRACT)
+			.useValue({
+				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
+				address: deployments.rips,
+			})
 			.overrideProvider(STAKE_TO_TIER_BIASES)
 			.useValue(
 				new Map([

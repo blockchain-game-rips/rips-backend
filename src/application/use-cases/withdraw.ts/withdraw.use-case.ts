@@ -5,6 +5,7 @@ import { Transaction } from '../../../domain/value-objects/transaction'
 export type WithdrawInput = {
 	telegramId: TelegramId
 	amount: bigint
+	currencyChainAddress: ChainAddress
 	recipientChainAddress: ChainAddress
 }
 
