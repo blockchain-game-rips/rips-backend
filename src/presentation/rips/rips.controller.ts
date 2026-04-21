@@ -26,11 +26,13 @@ import {
 } from './buy-tickets-response.dto'
 import {
 	GetCompletedRoundsResponseDto,
-	OngoingRoundResponseDto,
-	toCompletedRoundResponseDto,
-	toOngoingRoundResponseDto,
+	RoundResponseDto,
+	toRoundResponseDto,
 } from './round-response.dto'
-import { StakeResponseDto, toStakeResponseDto } from './stake-response.dto'
+import {
+	AvailableStakeResponseDto,
+	toAvailableStakeResponseDto,
+} from './stake-response.dto'
 
 @Controller()
 export class RipsController {
@@ -42,11 +44,11 @@ export class RipsController {
 	) {}
 
 	@Get('stakes')
-	@ZodResponse({ type: [StakeResponseDto] })
-	async getStakes(): Promise<StakeResponseDto[]> {
+	@ZodResponse({ type: [AvailableStakeResponseDto] })
+	async getAvailableStakes(): Promise<AvailableStakeResponseDto[]> {
 		const stakes = await this.getAvailableStakesUseCase.execute()
 
-		return stakes.map(toStakeResponseDto)
+		return stakes.map(toAvailableStakeResponseDto)
 	}
 
 	@Post(`users/:${TELEGRAM_ID_PARAM}/buy-tickets/purchase`)
@@ -94,11 +96,11 @@ export class RipsController {
 	}
 
 	@Get('rounds/ongoing')
-	@ZodResponse({ type: [OngoingRoundResponseDto] })
-	async getOngoingRounds(): Promise<OngoingRoundResponseDto[]> {
+	@ZodResponse({ type: [RoundResponseDto] })
+	async getOngoingRounds(): Promise<RoundResponseDto[]> {
 		const rounds = await this.getOngoingRoundsUseCase.execute()
 
-		return rounds.map(toOngoingRoundResponseDto)
+		return rounds.map(toRoundResponseDto)
 	}
 
 	@Get('rounds/completed')
@@ -112,7 +114,7 @@ export class RipsController {
 		})
 
 		return {
-			rounds: result.rounds.map(toCompletedRoundResponseDto),
+			rounds: result.rounds.map(toRoundResponseDto),
 			nextCursor: result.nextCursor,
 		}
 	}

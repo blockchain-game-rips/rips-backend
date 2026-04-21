@@ -3,19 +3,22 @@ import { z } from 'zod'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { PendingZap } from '../../domain/value-objects/zap'
 import { toPlainCurrencyAmount, toPlainTransaction } from '../to-plain'
-import { PlainCurrencyAmountZ, PlainTransactionZ } from '../to-plain-schemas'
+import {
+	CurrencyAmountDto,
+	TransactionDto,
+} from '../to-plain-schemas'
 
 const PurchaseResponseZ = z.object({
-	transaction: PlainTransactionZ,
+	transaction: TransactionDto.schema,
 	roundId: z.number(),
 	ticketCount: z.number(),
 })
 
 const ZapResponseZ = z.object({
 	zapId: z.string(),
-	srcTransaction: PlainTransactionZ,
-	amountIn: PlainCurrencyAmountZ,
-	fee: PlainCurrencyAmountZ,
+	srcTransaction: TransactionDto.schema,
+	amountIn: CurrencyAmountDto.schema,
+	fee: CurrencyAmountDto.schema,
 	durationMs: z.number(),
 })
 
