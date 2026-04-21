@@ -1,4 +1,5 @@
 import { Body, Controller, Param, Post } from '@nestjs/common'
+import { ZodResponse } from 'nestjs-zod'
 import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
 import { WithdrawUseCase } from '../../application/use-cases/withdraw.ts/withdraw.use-case'
 import {
@@ -23,6 +24,7 @@ export class WalletsController {
 	) {}
 
 	@Post('balance')
+	@ZodResponse({ type: BalanceResponseDto })
 	async getBalance(
 		@Param() params: TelegramIdParamsDto,
 		@Body() body: GetBalanceBodyDto,
@@ -36,6 +38,7 @@ export class WalletsController {
 	}
 
 	@Post('balance/withdraw')
+	@ZodResponse({ type: WithdrawResponseDto })
 	async withdraw(
 		@Param() params: TelegramIdParamsDto,
 		@Body() body: WithdrawBodyDto,

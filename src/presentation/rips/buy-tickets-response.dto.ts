@@ -1,25 +1,26 @@
+import { createZodDto } from 'nestjs-zod'
+import { z } from 'zod'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { PendingZap } from '../../domain/value-objects/zap'
-import {
-	PlainCurrencyAmount,
-	PlainTransaction,
-	toPlainCurrencyAmount,
-	toPlainTransaction,
-} from '../to-plain'
+import { toPlainCurrencyAmount, toPlainTransaction } from '../to-plain'
+import { PlainCurrencyAmountZ, PlainTransactionZ } from '../to-plain-schemas'
 
-export type PurchaseResponseDto = {
-	transaction: PlainTransaction
-	roundId: number
-	ticketCount: number
-}
+const PurchaseResponseZ = z.object({
+	transaction: PlainTransactionZ,
+	roundId: z.number(),
+	ticketCount: z.number(),
+})
 
-export type ZapResponseDto = {
-	zapId: string
-	srcTransaction: PlainTransaction
-	amountIn: PlainCurrencyAmount
-	fee: PlainCurrencyAmount
-	durationMs: number
-}
+const ZapResponseZ = z.object({
+	zapId: z.string(),
+	srcTransaction: PlainTransactionZ,
+	amountIn: PlainCurrencyAmountZ,
+	fee: PlainCurrencyAmountZ,
+	durationMs: z.number(),
+})
+
+export class PurchaseResponseDto extends createZodDto(PurchaseResponseZ) {}
+export class ZapResponseDto extends createZodDto(ZapResponseZ) {}
 
 export function toPurchaseResponseDto(
 	receipt: PurchaseReceipt,

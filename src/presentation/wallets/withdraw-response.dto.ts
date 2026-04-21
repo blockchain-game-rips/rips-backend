@@ -1,7 +1,9 @@
+import { createZodDto } from 'nestjs-zod'
 import { Transaction } from '../../domain/value-objects/transaction'
-import { PlainTransaction, toPlainTransaction } from '../to-plain'
+import { toPlainTransaction } from '../to-plain'
+import { PlainTransactionZ } from '../to-plain-schemas'
 
-export type WithdrawResponseDto = PlainTransaction
+export class WithdrawResponseDto extends createZodDto(PlainTransactionZ) {}
 
 export function toWithdrawResponseDto(tx: Transaction): WithdrawResponseDto {
 	return toPlainTransaction(tx)

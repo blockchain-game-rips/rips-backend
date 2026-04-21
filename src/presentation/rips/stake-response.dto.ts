@@ -1,28 +1,33 @@
+import { createZodDto } from 'nestjs-zod'
+import { z } from 'zod'
 import { Config } from '../../domain/entities/config'
 import { AvailableStake } from '../../domain/value-objects/available-stake'
-import { PlainCurrencyAmount, toPlainCurrencyAmount } from '../to-plain'
+import { toPlainCurrencyAmount } from '../to-plain'
+import { PlainCurrencyAmountZ } from '../to-plain-schemas'
 
-type PrizeTierDto = {
-	prizeCount: string
-	minPrize: string
-	maxPrize: string
-}
+const PrizeTierZ = z.object({
+	prizeCount: z.string(),
+	minPrize: z.string(),
+	maxPrize: z.string(),
+})
 
-type ConfigDto = {
-	ticketCap: number
-	feePercent: number
-	ticketPrice: PlainCurrencyAmount
-	durationSeconds: number
-	prizeDistribution: PrizeTierDto[]
-}
+const ConfigZ = z.object({
+	ticketCap: z.number(),
+	feePercent: z.number(),
+	ticketPrice: PlainCurrencyAmountZ,
+	durationSeconds: z.number(),
+	prizeDistribution: z.array(PrizeTierZ),
+})
 
-export type StakeResponseDto = {
-	stakeId: number
-	config: ConfigDto
-	fillingRoundId: number | null
-}
+const StakeResponseZ = z.object({
+	stakeId: z.number(),
+	config: ConfigZ,
+	fillingRoundId: z.number().nullable(),
+})
 
-function toConfigDto(config: Config): ConfigDto {
+export class StakeResponseDto extends createZodDto(StakeResponseZ) {}
+
+function toConfigDto(config: Config): z.infer<typeof ConfigZ> {
 	return {
 		ticketCap: config.ticketCup,
 		feePercent: config.feePercent,

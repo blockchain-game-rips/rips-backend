@@ -7,6 +7,7 @@ import {
 	Post,
 	Query,
 } from '@nestjs/common'
+import { ZodResponse } from 'nestjs-zod'
 import { BuyTicketsUseCase } from '../../application/use-cases/buy-tickets/buy-tickets.use-case'
 import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { GetCompletedRoundsUseCase } from '../../application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
@@ -41,6 +42,7 @@ export class RipsController {
 	) {}
 
 	@Get('stakes')
+	@ZodResponse({ type: [StakeResponseDto] })
 	async getStakes(): Promise<StakeResponseDto[]> {
 		const stakes = await this.getAvailableStakesUseCase.execute()
 
@@ -48,6 +50,7 @@ export class RipsController {
 	}
 
 	@Post(`users/:${TELEGRAM_ID_PARAM}/buy-tickets/purchase`)
+	@ZodResponse({ type: PurchaseResponseDto })
 	async buyTicketsPurchase(
 		@Param() params: TelegramIdParamsDto,
 		@Body() body: BuyTicketsBodyDto,
@@ -69,6 +72,7 @@ export class RipsController {
 	}
 
 	@Post(`users/:${TELEGRAM_ID_PARAM}/buy-tickets/zap`)
+	@ZodResponse({ type: ZapResponseDto })
 	async buyTicketsZap(
 		@Param() params: TelegramIdParamsDto,
 		@Body() body: BuyTicketsBodyDto,
@@ -90,6 +94,7 @@ export class RipsController {
 	}
 
 	@Get('rounds/ongoing')
+	@ZodResponse({ type: [OngoingRoundResponseDto] })
 	async getOngoingRounds(): Promise<OngoingRoundResponseDto[]> {
 		const rounds = await this.getOngoingRoundsUseCase.execute()
 
@@ -97,6 +102,7 @@ export class RipsController {
 	}
 
 	@Get('rounds/completed')
+	@ZodResponse({ type: GetCompletedRoundsResponseDto })
 	async getCompletedRounds(
 		@Query() query: CompletedRoundsQueryDto,
 	): Promise<GetCompletedRoundsResponseDto> {

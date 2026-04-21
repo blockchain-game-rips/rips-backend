@@ -1,7 +1,9 @@
+import { createZodDto } from 'nestjs-zod'
 import { CurrencyAmount } from '../../domain/value-objects/currency-amount'
-import { PlainCurrencyAmount, toPlainCurrencyAmount } from '../to-plain'
+import { toPlainCurrencyAmount } from '../to-plain'
+import { PlainCurrencyAmountZ } from '../to-plain-schemas'
 
-export type BalanceResponseDto = PlainCurrencyAmount
+export class BalanceResponseDto extends createZodDto(PlainCurrencyAmountZ) {}
 
 export function toBalanceResponseDto(
 	currencyAmount: CurrencyAmount,

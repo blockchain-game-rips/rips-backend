@@ -1,22 +1,28 @@
+import { createZodDto } from 'nestjs-zod'
+import { z } from 'zod'
 import { Card } from '../../domain/value-objects/card'
 import { TicketPrize } from '../../domain/value-objects/ticket-prize'
 
-type CardDto = {
-	id: number
-	name: string
-	tier: number
-	imageUrl: string
-}
+const CardZ = z.object({
+	id: z.number(),
+	name: z.string(),
+	tier: z.number(),
+	imageUrl: z.string(),
+})
 
-export type TicketPrizeResponseDto = {
-	roundId: number
-	ticketNumber: number
-	prizeAmount: string
-	revealed: boolean
-	card: CardDto
-}
+const TicketPrizeResponseZ = z.object({
+	roundId: z.number(),
+	ticketNumber: z.number(),
+	prizeAmount: z.string(),
+	revealed: z.boolean(),
+	card: CardZ,
+})
 
-function toCardDto(card: Card): CardDto {
+export class TicketPrizeResponseDto extends createZodDto(
+	TicketPrizeResponseZ,
+) {}
+
+function toCardDto(card: Card): z.infer<typeof CardZ> {
 	return {
 		id: card.id,
 		name: card.name,

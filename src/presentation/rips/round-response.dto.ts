@@ -1,70 +1,73 @@
+import { createZodDto } from 'nestjs-zod'
+import { z } from 'zod'
 import {
 	CompletedRound,
 	OngoingRound,
 	RoundStatus,
 } from '../../domain/entities/round'
-import {
-	PlainCurrency,
-	PlainCurrencyAmount,
-	toPlainCurrency,
-	toPlainCurrencyAmount,
-} from '../to-plain'
+import { toPlainCurrency, toPlainCurrencyAmount } from '../to-plain'
+import { PlainCurrencyAmountZ, PlainCurrencyZ } from '../to-plain-schemas'
 
-type PurchaseActionDto = {
-	userAddress: string
-	ticketCount: string
-	startTicketIndex: string
-}
+const PrizeTierZ = z.object({
+	prizeCount: z.string(),
+	minPrize: z.string(),
+	maxPrize: z.string(),
+})
 
-type ClaimActionDto = {
-	userAddress: string
-	amount: string
-}
+const RoundConfigZ = z.object({
+	ticketCap: z.number(),
+	feePercent: z.number(),
+	ticketPrice: PlainCurrencyAmountZ,
+	durationSeconds: z.number(),
+	prizeDistribution: z.array(PrizeTierZ),
+})
 
-type RefundActionDto = {
-	userAddress: string
-	amount: string
-}
+const PurchaseActionZ = z.object({
+	userAddress: z.string(),
+	ticketCount: z.string(),
+	startTicketIndex: z.string(),
+})
 
-type AddressesActionsDto = {
-	purchases: PurchaseActionDto[]
-	claims: ClaimActionDto[]
-	refunds: RefundActionDto[]
-}
+const ClaimActionZ = z.object({
+	userAddress: z.string(),
+	amount: z.string(),
+})
 
-type PrizeTierDto = {
-	prizeCount: string
-	minPrize: string
-	maxPrize: string
-}
+const RefundActionZ = z.object({
+	userAddress: z.string(),
+	amount: z.string(),
+})
 
-type RoundConfigDto = {
-	ticketCap: number
-	feePercent: number
-	ticketPrice: PlainCurrencyAmount
-	durationSeconds: number
-	prizeDistribution: PrizeTierDto[]
-}
+const AddressesActionsZ = z.object({
+	purchases: z.array(PurchaseActionZ),
+	claims: z.array(ClaimActionZ),
+	refunds: z.array(RefundActionZ),
+})
 
-type RoundBaseDto = {
-	id: number
-	stakeId: number
-	currency: PlainCurrency
-	config: RoundConfigDto
-	actions: AddressesActionsDto
-	status: RoundStatus
-	startTime: string
-}
+const RoundBaseZ = z.object({
+	id: z.number(),
+	stakeId: z.number(),
+	currency: PlainCurrencyZ,
+	config: RoundConfigZ,
+	actions: AddressesActionsZ,
+	status: z.nativeEnum(RoundStatus),
+	startTime: z.string(),
+})
 
-export type OngoingRoundResponseDto = RoundBaseDto
-export type CompletedRoundResponseDto = RoundBaseDto
+const GetCompletedRoundsResponseZ = z.object({
+	rounds: z.array(RoundBaseZ),
+	nextCursor: z.number().nullable(),
+})
 
-export type GetCompletedRoundsResponseDto = {
-	rounds: CompletedRoundResponseDto[]
-	nextCursor: number | null
-}
+export class OngoingRoundResponseDto extends createZodDto(RoundBaseZ) {}
+export class CompletedRoundResponseDto extends createZodDto(RoundBaseZ) {}
+export class GetCompletedRoundsResponseDto extends createZodDto(
+	GetCompletedRoundsResponseZ,
+) {}
 
-function toActionsDto(actions: OngoingRound['actions']): AddressesActionsDto {
+function toActionsDto(
+	actions: OngoingRound['actions'],
+): z.infer<typeof AddressesActionsZ> {
 	return {
 		purchases: actions.purchases.map((p) => ({
 			userAddress: p.userAddress,
@@ -82,7 +85,9 @@ function toActionsDto(actions: OngoingRound['actions']): AddressesActionsDto {
 	}
 }
 
-function toRoundConfigDto(config: OngoingRound['config']): RoundConfigDto {
+function toRoundConfigDto(
+	config: OngoingRound['config'],
+): z.infer<typeof RoundConfigZ> {
 	return {
 		ticketCap: config.ticketCup,
 		feePercent: config.feePercent,
@@ -96,7 +101,9 @@ function toRoundConfigDto(config: OngoingRound['config']): RoundConfigDto {
 	}
 }
 
-function toRoundBaseDto(round: OngoingRound | CompletedRound): RoundBaseDto {
+function toRoundBaseDto(
+	round: OngoingRound | CompletedRound,
+): z.infer<typeof RoundBaseZ> {
 	return {
 		id: round.id,
 		stakeId: round.stake.id,

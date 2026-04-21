@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common'
+import { ZodResponse } from 'nestjs-zod'
 import { CreateUserUseCase } from '../../application/use-cases/create-user/create-user.use-case'
 import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import { GetUserUseCase } from '../../application/use-cases/get-user/get-user.use-case'
@@ -25,6 +26,7 @@ export class UsersController {
 	) {}
 
 	@Get(`:${TELEGRAM_ID_PARAM}`)
+	@ZodResponse({ type: UserResponseDto })
 	async getUser(
 		@Param() params: TelegramIdParamsDto,
 	): Promise<UserResponseDto> {
@@ -36,6 +38,7 @@ export class UsersController {
 	}
 
 	@Get(`:${TELEGRAM_ID_PARAM}/unrevealed-prizes`)
+	@ZodResponse({ type: [TicketPrizeResponseDto] })
 	async getUnrevealedPrizes(
 		@Param() params: TelegramIdParamsDto,
 	): Promise<TicketPrizeResponseDto[]> {
@@ -47,6 +50,7 @@ export class UsersController {
 	}
 
 	@Post(`:${TELEGRAM_ID_PARAM}/reveal`)
+	@ZodResponse({ type: [TicketPrizeResponseDto] })
 	async revealTicketPrizes(
 		@Param() params: TelegramIdParamsDto,
 		@Body() body: RevealBodyDto,
@@ -60,6 +64,7 @@ export class UsersController {
 	}
 
 	@Post()
+	@ZodResponse({ type: UserResponseDto })
 	async createUser(
 		@Body() body: CreateUserBodyDto,
 	): Promise<UserResponseDto> {

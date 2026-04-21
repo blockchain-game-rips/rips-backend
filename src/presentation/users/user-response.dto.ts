@@ -1,12 +1,15 @@
+import { createZodDto } from 'nestjs-zod'
+import { z } from 'zod'
 import { User } from '../../domain/entities/user'
-import { ChainNamespace } from '../../domain/value-objects/chain-namespace'
 
-export type UserResponseDto = {
-	id: string
-	telegramId: string
-	wallets: Record<ChainNamespace, string>
-	createdAt: string
-}
+const UserResponseZ = z.object({
+	id: z.string(),
+	telegramId: z.string(),
+	wallets: z.record(z.string(), z.string()),
+	createdAt: z.string(),
+})
+
+export class UserResponseDto extends createZodDto(UserResponseZ) {}
 
 export function toUserResponseDto(user: User): UserResponseDto {
 	return {
