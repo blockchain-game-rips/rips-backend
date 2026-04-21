@@ -1,4 +1,5 @@
-import { PurchaseOutcome } from '../../domain/value-objects/purchase-outcome'
+import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
+import { PendingZap } from '../../domain/value-objects/zap'
 import {
 	PlainCurrencyAmount,
 	PlainTransaction,
@@ -6,15 +7,13 @@ import {
 	toPlainTransaction,
 } from '../to-plain'
 
-type PurchasedDto = {
-	type: 'purchased'
+export type PurchaseResponseDto = {
 	transaction: PlainTransaction
 	roundId: number
 	ticketCount: number
 }
 
-type ZapDto = {
-	type: 'zap'
+export type ZapResponseDto = {
 	zapId: string
 	srcTransaction: PlainTransaction
 	amountIn: PlainCurrencyAmount
@@ -22,26 +21,18 @@ type ZapDto = {
 	durationMs: number
 }
 
-export type BuyTicketsResponseDto = PurchasedDto | ZapDto
-
-export function toBuyTicketsResponseDto(
-	outcome: PurchaseOutcome,
-): BuyTicketsResponseDto {
-	if (outcome.type === 'purchased') {
-		const { purchase, transaction } = outcome.purchaseReceipt
-
-		return {
-			type: 'purchased',
-			transaction: toPlainTransaction(transaction),
-			roundId: purchase.roundId,
-			ticketCount: purchase.ticketCount,
-		}
-	}
-
-	const { pendingZap } = outcome
-
+export function toPurchaseResponseDto(
+	receipt: PurchaseReceipt,
+): PurchaseResponseDto {
 	return {
-		type: 'zap',
+		transaction: toPlainTransaction(receipt.transaction),
+		roundId: receipt.purchase.roundId,
+		ticketCount: receipt.purchase.ticketCount,
+	}
+}
+
+export function toZapResponseDto(pendingZap: PendingZap): ZapResponseDto {
+	return {
 		zapId: pendingZap.zapId,
 		srcTransaction: toPlainTransaction(pendingZap.srcTransaction),
 		amountIn: toPlainCurrencyAmount(pendingZap.amountIn),

@@ -1,19 +1,27 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
-import { z } from 'zod'
+import {
+	Body,
+	Controller,
+	Get,
+	InternalServerErrorException,
+	Param,
+	Post,
+	Query,
+} from '@nestjs/common'
 import { BuyTicketsUseCase } from '../../application/use-cases/buy-tickets/buy-tickets.use-case'
 import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { GetCompletedRoundsUseCase } from '../../application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
 import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
-import { TelegramId } from '../../domain/value-objects/telegram-id'
-import { ZodValidationPipe } from '../pipes/zod-validation.pipe'
 import {
-	buyTicketsBodySchema,
-	completedRoundsQuerySchema,
-	telegramIdParamSchema,
+	BuyTicketsBodyDto,
+	CompletedRoundsQueryDto,
+	TELEGRAM_ID_PARAM,
+	TelegramIdParamsDto,
 } from '../validation'
 import {
-	BuyTicketsResponseDto,
-	toBuyTicketsResponseDto,
+	PurchaseResponseDto,
+	toPurchaseResponseDto,
+	toZapResponseDto,
+	ZapResponseDto,
 } from './buy-tickets-response.dto'
 import {
 	GetCompletedRoundsResponseDto,
@@ -22,8 +30,6 @@ import {
 	toOngoingRoundResponseDto,
 } from './round-response.dto'
 import { StakeResponseDto, toStakeResponseDto } from './stake-response.dto'
-
-const TELEGRAM_ID_PARAM = 'telegramId'
 
 @Controller()
 export class RipsController {
@@ -41,22 +47,46 @@ export class RipsController {
 		return stakes.map(toStakeResponseDto)
 	}
 
-	@Post(`users/:${TELEGRAM_ID_PARAM}/buy-tickets`)
-	async buyTickets(
-		@Param(TELEGRAM_ID_PARAM, new ZodValidationPipe(telegramIdParamSchema))
-		telegramId: TelegramId,
-
-		@Body(new ZodValidationPipe(buyTicketsBodySchema))
-		body: z.infer<typeof buyTicketsBodySchema>,
-	): Promise<BuyTicketsResponseDto> {
-		const purchase = await this.buyTicketsUseCase.execute({
-			telegramId,
+	@Post(`users/:${TELEGRAM_ID_PARAM}/buy-tickets/purchase`)
+	async buyTicketsPurchase(
+		@Param() params: TelegramIdParamsDto,
+		@Body() body: BuyTicketsBodyDto,
+	): Promise<PurchaseResponseDto> {
+		const outcome = await this.buyTicketsUseCase.execute({
+			telegramId: params.telegramId,
 			stakeId: body.stakeId,
 			ticketCount: body.ticketCount,
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		return toBuyTicketsResponseDto(purchase)
+		if (outcome.type !== 'purchased') {
+			throw new InternalServerErrorException(
+				'Expected purchase outcome but got zap',
+			)
+		}
+
+		return toPurchaseResponseDto(outcome.purchaseReceipt)
+	}
+
+	@Post(`users/:${TELEGRAM_ID_PARAM}/buy-tickets/zap`)
+	async buyTicketsZap(
+		@Param() params: TelegramIdParamsDto,
+		@Body() body: BuyTicketsBodyDto,
+	): Promise<ZapResponseDto> {
+		const outcome = await this.buyTicketsUseCase.execute({
+			telegramId: params.telegramId,
+			stakeId: body.stakeId,
+			ticketCount: body.ticketCount,
+			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
+		})
+
+		if (outcome.type !== 'zap') {
+			throw new InternalServerErrorException(
+				'Expected zap outcome but got purchase',
+			)
+		}
+
+		return toZapResponseDto(outcome.pendingZap)
 	}
 
 	@Get('rounds/ongoing')
@@ -68,8 +98,7 @@ export class RipsController {
 
 	@Get('rounds/completed')
 	async getCompletedRounds(
-		@Query(new ZodValidationPipe(completedRoundsQuerySchema))
-		query: z.infer<typeof completedRoundsQuerySchema>,
+		@Query() query: CompletedRoundsQueryDto,
 	): Promise<GetCompletedRoundsResponseDto> {
 		const result = await this.getCompletedRoundsUseCase.execute({
 			limit: query.limit,

@@ -1,23 +1,19 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common'
-import { z } from 'zod'
 import { CreateUserUseCase } from '../../application/use-cases/create-user/create-user.use-case'
 import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import { GetUserUseCase } from '../../application/use-cases/get-user/get-user.use-case'
 import { RevealTicketPrizesUseCase } from '../../application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
-import { TelegramId } from '../../domain/value-objects/telegram-id'
-import { ZodValidationPipe } from '../pipes/zod-validation.pipe'
 import {
-	createUserBodySchema,
-	revealBodySchema,
-	telegramIdParamSchema,
+	CreateUserBodyDto,
+	RevealBodyDto,
+	TELEGRAM_ID_PARAM,
+	TelegramIdParamsDto,
 } from '../validation'
 import {
 	TicketPrizeResponseDto,
 	toTicketPrizeResponseDto,
 } from './ticket-prize-response.dto'
 import { toUserResponseDto, UserResponseDto } from './user-response.dto'
-
-const TELEGRAM_ID_PARAM = 'telegramId'
 
 @Controller()
 export class UsersController {
@@ -30,21 +26,21 @@ export class UsersController {
 
 	@Get(`:${TELEGRAM_ID_PARAM}`)
 	async getUser(
-		@Param(TELEGRAM_ID_PARAM, new ZodValidationPipe(telegramIdParamSchema))
-		telegramId: TelegramId,
+		@Param() params: TelegramIdParamsDto,
 	): Promise<UserResponseDto> {
-		const user = await this.getUserUseCase.execute({ telegramId })
+		const user = await this.getUserUseCase.execute({
+			telegramId: params.telegramId,
+		})
 
 		return toUserResponseDto(user)
 	}
 
 	@Get(`:${TELEGRAM_ID_PARAM}/unrevealed-prizes`)
 	async getUnrevealedPrizes(
-		@Param(TELEGRAM_ID_PARAM, new ZodValidationPipe(telegramIdParamSchema))
-		telegramId: TelegramId,
+		@Param() params: TelegramIdParamsDto,
 	): Promise<TicketPrizeResponseDto[]> {
 		const prizes = await this.getUnrevealedPrizesUseCase.execute({
-			telegramId,
+			telegramId: params.telegramId,
 		})
 
 		return prizes.map(toTicketPrizeResponseDto)
@@ -52,13 +48,11 @@ export class UsersController {
 
 	@Post(`:${TELEGRAM_ID_PARAM}/reveal`)
 	async revealTicketPrizes(
-		@Param(TELEGRAM_ID_PARAM, new ZodValidationPipe(telegramIdParamSchema))
-		telegramId: TelegramId,
-		@Body(new ZodValidationPipe(revealBodySchema))
-		body: z.infer<typeof revealBodySchema>,
+		@Param() params: TelegramIdParamsDto,
+		@Body() body: RevealBodyDto,
 	): Promise<TicketPrizeResponseDto[]> {
 		const prizes = await this.revealTicketPrizesUseCase.execute({
-			telegramId,
+			telegramId: params.telegramId,
 			revealAll: body.revealAll,
 		})
 
@@ -67,8 +61,7 @@ export class UsersController {
 
 	@Post()
 	async createUser(
-		@Body(new ZodValidationPipe(createUserBodySchema))
-		body: z.infer<typeof createUserBodySchema>,
+		@Body() body: CreateUserBodyDto,
 	): Promise<UserResponseDto> {
 		const user = await this.createUserUseCase.execute({
 			telegramId: body.telegramId,

@@ -70,7 +70,7 @@ describe('Buy tickets E2E', () => {
 		await setNativeBalance(ctx.publicClient, walletAddress, requiredBalance)
 
 		const res = await request(ctx.app.getHttpServer())
-			.post(`/rips/users/${USER_TG_ID}/buy-tickets`)
+			.post(`/rips/users/${USER_TG_ID}/buy-tickets/purchase`)
 			.send({
 				stakeId: STAKE_ID,
 				ticketCount: TICKET_COUNT,
@@ -81,7 +81,6 @@ describe('Buy tickets E2E', () => {
 			})
 			.expect(201)
 
-		expect(res.body.type).toBe('purchased')
 		expect(res.body.transaction.id).toMatch(/^0x[0-9a-fA-F]{64}$/)
 		expect(res.body.roundId).toBeGreaterThan(0)
 		expect(res.body.ticketCount).toBe(TICKET_COUNT)

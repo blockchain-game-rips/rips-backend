@@ -33,9 +33,12 @@ describe('WalletsController', () => {
 		it('should return balance response dto', async () => {
 			getBalance.execute.mockResolvedValue(MOCK_BALANCE)
 
-			const result = await controller.getBalance(TELEGRAM_ID, {
-				currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
-			})
+			const result = await controller.getBalance(
+				{ telegramId: TELEGRAM_ID },
+				{
+					currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+				},
+			)
 
 			expect(result).toEqual({
 				currency: {
@@ -61,9 +64,12 @@ describe('WalletsController', () => {
 			)
 
 			await expect(
-				controller.getBalance(TELEGRAM_ID, {
-					currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
-				}),
+				controller.getBalance(
+					{ telegramId: TELEGRAM_ID },
+					{
+						currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+					},
+				),
 			).rejects.toThrow(UserNotFoundError)
 		})
 	})

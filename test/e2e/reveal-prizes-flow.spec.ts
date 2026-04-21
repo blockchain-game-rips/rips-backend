@@ -245,7 +245,7 @@ describe('Reveal prizes flow E2E', () => {
 		})
 
 		const res1 = await request(ctx.app.getHttpServer())
-			.post(`/rips/users/${TELEGRAM_ID_USER_1}/buy-tickets`)
+			.post(`/rips/users/${TELEGRAM_ID_USER_1}/buy-tickets/purchase`)
 			.send(buyTicketsBody(TICKETS_PER_USER))
 			.expect(201)
 
@@ -254,7 +254,7 @@ describe('Reveal prizes flow E2E', () => {
 		expect(res1.body.ticketCount).toBe(TICKETS_PER_USER)
 
 		const res2 = await request(ctx.app.getHttpServer())
-			.post(`/rips/users/${TELEGRAM_ID_USER_2}/buy-tickets`)
+			.post(`/rips/users/${TELEGRAM_ID_USER_2}/buy-tickets/purchase`)
 			.send(buyTicketsBody(TICKETS_PER_USER))
 			.expect(201)
 

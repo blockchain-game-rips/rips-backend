@@ -37,7 +37,7 @@ describe('UsersController', () => {
 		it('should return user response dto', async () => {
 			getUser.execute.mockResolvedValue(MOCK_USER)
 
-			const result = await controller.getUser(TELEGRAM_ID)
+			const result = await controller.getUser({ telegramId: TELEGRAM_ID })
 
 			expect(result).toEqual(EXPECTED_USER_DTO)
 		})
@@ -47,9 +47,9 @@ describe('UsersController', () => {
 				new UserNotFoundError('not found'),
 			)
 
-			await expect(controller.getUser(TELEGRAM_ID)).rejects.toThrow(
-				UserNotFoundError,
-			)
+			await expect(
+				controller.getUser({ telegramId: TELEGRAM_ID }),
+			).rejects.toThrow(UserNotFoundError)
 		})
 	})
 
