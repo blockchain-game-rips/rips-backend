@@ -27,13 +27,18 @@ export type PlainCurrency = {
 	symbol: string
 	name: string
 	decimals: number
+	priceUsd: number
 }
-export function toPlainCurrency(currency: Currency): PlainCurrency {
+export function toPlainCurrency(
+	currency: Currency,
+	priceUsd: number,
+): PlainCurrency {
 	return {
 		chainAddress: toPlainChainAddress(currency.chainAddress),
 		symbol: currency.symbol,
 		name: currency.name,
 		decimals: currency.decimals,
+		priceUsd,
 	}
 }
 
@@ -43,9 +48,10 @@ export type PlainCurrencyAmount = {
 }
 export function toPlainCurrencyAmount(
 	currencyAmount: CurrencyAmount,
+	priceUsd: number,
 ): PlainCurrencyAmount {
 	return {
-		currency: toPlainCurrency(currencyAmount.currency),
+		currency: toPlainCurrency(currencyAmount.currency, priceUsd),
 		amount: currencyAmount.amount.toString(),
 	}
 }
@@ -54,10 +60,15 @@ export type PlainTransaction = {
 	id: string
 	cost?: PlainCurrencyAmount
 }
-export function toPlainTransaction(tx: Transaction): PlainTransaction {
+export function toPlainTransaction(
+	tx: Transaction,
+	costPriceUsd?: number,
+): PlainTransaction {
 	return {
 		id: tx.id,
 		cost:
-			tx.cost !== undefined ? toPlainCurrencyAmount(tx.cost) : undefined,
+			tx.cost !== undefined
+				? toPlainCurrencyAmount(tx.cost, costPriceUsd ?? 0)
+				: undefined,
 	}
 }

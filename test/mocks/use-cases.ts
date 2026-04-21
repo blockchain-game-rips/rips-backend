@@ -3,6 +3,7 @@ import { UserRepository } from '../../src/application/interfaces/repositories/us
 import { WalletService } from '../../src/application/interfaces/wallet.service'
 import { CreateUserUseCase } from '../../src/application/use-cases/create-user/create-user.use-case'
 import { GetBalanceUseCase } from '../../src/application/use-cases/get-balance/get-balance.use-case'
+import { GetPriceUseCase } from '../../src/application/use-cases/get-price/get-price.use-case'
 import { GetUnrevealedPrizesUseCase } from '../../src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import { GetUserUseCase } from '../../src/application/use-cases/get-user/get-user.use-case'
 import { RevealTicketPrizesUseCase } from '../../src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
@@ -44,6 +45,10 @@ export function makeMockCreateUserUseCase(): jest.Mocked<CreateUserUseCase> {
 
 export function makeMockGetBalanceUseCase(): jest.Mocked<GetBalanceUseCase> {
 	return { execute: jest.fn() }
+}
+
+export function makeMockGetPriceUseCase(): jest.Mocked<GetPriceUseCase> {
+	return { execute: jest.fn(), executeMany: jest.fn() }
 }
 
 export function makeMockRevealTicketPrizesUseCase(): jest.Mocked<RevealTicketPrizesUseCase> {

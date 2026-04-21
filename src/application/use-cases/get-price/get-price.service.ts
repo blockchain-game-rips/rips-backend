@@ -1,22 +1,23 @@
 import { Injectable } from '@nestjs/common'
-import { CurrencyService } from '../../interfaces/currency.service'
+import { CurrencyId } from '../../../domain/value-objects/currency-id'
 import { PriceProvider } from '../../interfaces/price-service'
-import { GetPriceInput, GetPriceUseCase } from './get-price.use-case'
+import {
+	GetPriceInput,
+	GetPricesInput,
+	GetPriceUseCase,
+} from './get-price.use-case'
 
 @Injectable()
 export class GetPriceService extends GetPriceUseCase {
-	constructor(
-		private readonly priceProvider: PriceProvider,
-		private readonly currencyService: CurrencyService,
-	) {
+	constructor(private readonly priceProvider: PriceProvider) {
 		super()
 	}
 
 	async execute(input: GetPriceInput): Promise<number> {
-		const currency = await this.currencyService.fromAccount(
-			input.currencyChainAddress,
-		)
+		return await this.priceProvider.getPrice(input.currency)
+	}
 
-		return await this.priceProvider.getPrice(currency)
+	async executeMany(input: GetPricesInput): Promise<Map<CurrencyId, number>> {
+		return await this.priceProvider.getPrices(input.currencies)
 	}
 }

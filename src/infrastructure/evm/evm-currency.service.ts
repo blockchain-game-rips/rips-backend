@@ -7,11 +7,15 @@ import {
 	isAddress,
 	isAddressEqual,
 } from 'viem'
+import { EIP155 } from '../../constants'
 import { CurrencyMetadata } from '../../domain/entities/currency'
+import { composeChainId } from '../../domain/services/chain-id-utils'
+import { composeCurrencyId } from '../../domain/services/currency-id-utils'
 import { CurrencyId } from '../../domain/value-objects/currency-id'
 import { EvmClientService } from './evm-client/evm-client.service'
 import {
 	ETH_METADATA,
+	KNOWN_TOKENS,
 	NATIVE_ADDRESS,
 	NATIVE_CURRENCIES,
 	WRAPPED_TOKENS,
@@ -57,10 +61,16 @@ export class EvmCurrencyService {
 			return this.getNative(chainId)
 		}
 
-		const metadata = await this.getMetadataFromBlockchain(
+		const currencyId = composeCurrencyId(
+			composeChainId(EIP155, String(chainId)),
 			checksumAddress,
-			chainId,
 		)
+
+		const knownMetadata = KNOWN_TOKENS.get(currencyId)
+
+		const metadata =
+			knownMetadata ??
+			(await this.getMetadataFromBlockchain(checksumAddress, chainId))
 
 		const currency = this.isWrappedNative(checksumAddress, chainId)
 			? new WrappedNative(chainId, this.getNative(chainId), metadata)

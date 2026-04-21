@@ -10,6 +10,7 @@ export const PlainChainAddressZ = z.object({
 })
 
 export const PlainCurrencyZ = z.object({
+	priceUsd: z.number(),
 	chainAddress: PlainChainAddressZ,
 	symbol: z.string(),
 	name: z.string(),

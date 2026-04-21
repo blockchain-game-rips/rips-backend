@@ -12,6 +12,7 @@ import { BuyTicketsUseCase } from '../../application/use-cases/buy-tickets/buy-t
 import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { GetCompletedRoundsUseCase } from '../../application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
 import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
+import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
 import {
 	BuyTicketsBodyDto,
 	CompletedRoundsQueryDto,
@@ -41,6 +42,7 @@ export class RipsController {
 		private readonly buyTicketsUseCase: BuyTicketsUseCase,
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly getCompletedRoundsUseCase: GetCompletedRoundsUseCase,
+		private readonly getPriceUseCase: GetPriceUseCase,
 	) {}
 
 	@Get('stakes')
@@ -48,7 +50,17 @@ export class RipsController {
 	async getAvailableStakes(): Promise<AvailableStakeResponseDto[]> {
 		const stakes = await this.getAvailableStakesUseCase.execute()
 
-		return stakes.map(toAvailableStakeResponseDto)
+		const currencies = stakes.map((s) =>
+			s.fillingRound !== null
+				? s.fillingRound.currency
+				: s.stake.currentConfig.ticketPrice.currency,
+		)
+
+		const prices = await this.getPriceUseCase.executeMany({ currencies })
+
+		return stakes.map((s, i) =>
+			toAvailableStakeResponseDto(s, prices.get(currencies[i].id) ?? 0),
+		)
 	}
 
 	@Post(`users/:${TELEGRAM_ID_PARAM}/buy-tickets/purchase`)
@@ -92,7 +104,16 @@ export class RipsController {
 			)
 		}
 
-		return toZapResponseDto(outcome.pendingZap)
+		const { pendingZap } = outcome
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: [pendingZap.amountIn.currency, pendingZap.fee.currency],
+		})
+
+		return toZapResponseDto(
+			pendingZap,
+			prices.get(pendingZap.amountIn.currency.id) ?? 0,
+			prices.get(pendingZap.fee.currency.id) ?? 0,
+		)
 	}
 
 	@Get('rounds/ongoing')
@@ -100,7 +121,13 @@ export class RipsController {
 	async getOngoingRounds(): Promise<RoundResponseDto[]> {
 		const rounds = await this.getOngoingRoundsUseCase.execute()
 
-		return rounds.map(toRoundResponseDto)
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: rounds.map((r) => r.currency),
+		})
+
+		return rounds.map((r) =>
+			toRoundResponseDto(r, prices.get(r.currency.id) ?? 0),
+		)
 	}
 
 	@Get('rounds/completed')
@@ -113,8 +140,14 @@ export class RipsController {
 			cursor: query.cursor,
 		})
 
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: result.rounds.map((r) => r.currency),
+		})
+
 		return {
-			rounds: result.rounds.map(toRoundResponseDto),
+			rounds: result.rounds.map((r) =>
+				toRoundResponseDto(r, prices.get(r.currency.id) ?? 0),
+			),
 			nextCursor: result.nextCursor,
 		}
 	}

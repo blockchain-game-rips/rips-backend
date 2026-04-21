@@ -10,6 +10,7 @@ import {
 } from '../../fixtures/entities'
 import {
 	makeMockGetBalanceUseCase,
+	makeMockGetPriceUseCase,
 	makeMockWithdrawUseCase,
 } from '../../mocks/use-cases'
 
@@ -18,10 +19,14 @@ const MOCK_BALANCE: CurrencyAmount = {
 	currency: MOCK_CURRENCY,
 }
 
+const MOCK_PRICE_USD = 2500
+
 describe('WalletsController', () => {
 	const getBalance = makeMockGetBalanceUseCase()
+	const getPrice = makeMockGetPriceUseCase()
 	const controller = new WalletsController(
 		getBalance,
+		getPrice,
 		makeMockWithdrawUseCase(),
 	)
 
@@ -32,6 +37,7 @@ describe('WalletsController', () => {
 	describe('POST /users/:telegramId/wallet/balance', () => {
 		it('should return balance response dto', async () => {
 			getBalance.execute.mockResolvedValue(MOCK_BALANCE)
+			getPrice.execute.mockResolvedValue(MOCK_PRICE_USD)
 
 			const result = await controller.getBalance(
 				{ telegramId: TELEGRAM_ID },
@@ -49,6 +55,7 @@ describe('WalletsController', () => {
 					symbol: 'ETH',
 					name: 'ETH',
 					decimals: 18,
+					priceUsd: MOCK_PRICE_USD,
 				},
 				amount: '1000000000000000000',
 			})

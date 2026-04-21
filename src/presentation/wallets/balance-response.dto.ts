@@ -7,6 +7,7 @@ export class BalanceResponseDto extends createZodDto(PlainCurrencyAmountZ) {}
 
 export function toBalanceResponseDto(
 	currencyAmount: CurrencyAmount,
+	priceUsd: number,
 ): BalanceResponseDto {
-	return toPlainCurrencyAmount(currencyAmount)
+	return toPlainCurrencyAmount(currencyAmount, priceUsd)
 }

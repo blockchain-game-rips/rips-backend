@@ -1,6 +1,7 @@
 import { Body, Controller, Param, Post } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
+import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
 import { WithdrawUseCase } from '../../application/use-cases/withdraw.ts/withdraw.use-case'
 import {
 	GetBalanceBodyDto,
@@ -20,6 +21,7 @@ import {
 export class WalletsController {
 	constructor(
 		private readonly getBalanceUseCase: GetBalanceUseCase,
+		private readonly getPriceUseCase: GetPriceUseCase,
 		private readonly withdrawUseCase: WithdrawUseCase,
 	) {}
 
@@ -34,7 +36,11 @@ export class WalletsController {
 			currencyChainAddress: body.currencyChainAddress,
 		})
 
-		return toBalanceResponseDto(result)
+		const priceUsd = await this.getPriceUseCase.execute({
+			currency: result.currency,
+		})
+
+		return toBalanceResponseDto(result, priceUsd)
 	}
 
 	@Post('balance/withdraw')

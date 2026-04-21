@@ -20,11 +20,17 @@ export const ConfigZ = z.object({
 
 export class ConfigDto extends createZodDto(ConfigZ) {}
 
-export function toConfigDto(config: Config): ConfigDto {
+export function toConfigDto(
+	config: Config,
+	ticketPriceInUsd: number,
+): ConfigDto {
 	return {
 		ticketCap: config.ticketCup,
 		feePercent: config.feePercent,
-		ticketPrice: toPlainCurrencyAmount(config.ticketPrice),
+		ticketPrice: toPlainCurrencyAmount(
+			config.ticketPrice,
+			ticketPriceInUsd,
+		),
 		durationSeconds: config.durationSeconds,
 		prizeDistribution: config.prizeDistribution.map((tier) => ({
 			prizeCount: tier.prizeCount.toString(),

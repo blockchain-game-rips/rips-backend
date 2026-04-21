@@ -1,6 +1,10 @@
 import { Address, getAddress } from 'viem'
 import * as chains from 'viem/chains'
+import { EIP155 } from '../../../../constants'
 import { CurrencyMetadata } from '../../../../domain/entities/currency'
+import { composeChainId } from '../../../../domain/services/chain-id-utils'
+import { composeCurrencyId } from '../../../../domain/services/currency-id-utils'
+import { CurrencyId } from '../../../../domain/value-objects/currency-id'
 
 export const NATIVE_ADDRESS: Address =
 	'0x0000000000000000000000000000000000000000'
@@ -63,3 +67,13 @@ export const WRAPPED_TOKENS: Record<number, Address | undefined> = (() => {
 
 	return wrappedTokensCheckSum
 })()
+
+export const KNOWN_TOKENS: Map<CurrencyId, CurrencyMetadata> = new Map([
+	[
+		composeCurrencyId(
+			composeChainId(EIP155, chains.base.id.toString()),
+			getAddress('0x4200000000000000000000000000000000000006'),
+		),
+		{ symbol: 'WETH', name: 'Wrapped Ether', decimals: 18 },
+	],
+])

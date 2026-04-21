@@ -20,12 +20,16 @@ export class AvailableStakeResponseDto extends createZodDto(
 
 export function toAvailableStakeResponseDto(
 	availableStake: AvailableStake,
+	priceUsd: number,
 ): AvailableStakeResponseDto {
 	if (availableStake.fillingRound === null) {
 		return {
 			stake: {
 				id: availableStake.stake.id,
-				currentConfig: toConfigDto(availableStake.stake.currentConfig),
+				currentConfig: toConfigDto(
+					availableStake.stake.currentConfig,
+					priceUsd,
+				),
 			},
 			fillingRound: null,
 		}
@@ -36,6 +40,6 @@ export function toAvailableStakeResponseDto(
 			id: availableStake.stake.id,
 			currentConfig: null,
 		},
-		fillingRound: toRoundResponseDto(availableStake.fillingRound),
+		fillingRound: toRoundResponseDto(availableStake.fillingRound, priceUsd),
 	}
 }

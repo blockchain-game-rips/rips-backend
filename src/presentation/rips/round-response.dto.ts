@@ -80,18 +80,22 @@ function toActionsDto(
 
 export function toRoundResponseDto(
 	round: OngoingRound | CompletedRound,
+	priceUsd: number,
 ): RoundResponseDto {
 	return {
 		id: round.id,
 		stakeId: round.stake.id,
-		currency: toPlainCurrency(round.currency),
-		config: toConfigDto(round.config),
+		currency: toPlainCurrency(round.currency, priceUsd),
+		config: toConfigDto(round.config, priceUsd),
 		actions: toActionsDto(round.actions),
 		status: round.status,
 		startTime: round.startTime.toISOString(),
 		randoms:
 			round.randoms !== undefined
-				? { a: round.randoms.a.toString(), b: round.randoms.b.toString() }
+				? {
+						a: round.randoms.a.toString(),
+						b: round.randoms.b.toString(),
+					}
 				: undefined,
 	}
 }
