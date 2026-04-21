@@ -59,7 +59,7 @@ describe('UsersController', () => {
 
 			const result = await controller.createUser({
 				telegramId: TELEGRAM_ID,
-				referrerAddress: null,
+				referrerAddress: undefined,
 			})
 
 			expect(result).toEqual(EXPECTED_USER_DTO)
@@ -73,7 +73,7 @@ describe('UsersController', () => {
 			await expect(
 				controller.createUser({
 					telegramId: TELEGRAM_ID,
-					referrerAddress: null,
+					referrerAddress: undefined,
 				}),
 			).rejects.toThrow(UserAlreadyExistsError)
 		})

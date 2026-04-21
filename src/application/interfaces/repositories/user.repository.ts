@@ -12,7 +12,7 @@ export abstract class UserRepository {
 		telegramId: TelegramId,
 		address: EvmAddress,
 		kmsKeyId: KmsKeyId,
-		referrerAddress: EvmAddress | null,
+		referrerAddress: EvmAddress | undefined,
 	): Promise<User>
 
 	abstract setReferrer(

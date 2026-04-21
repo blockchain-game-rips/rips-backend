@@ -46,7 +46,7 @@ export class PrismaUserRepository extends UserRepository {
 		telegramId: TelegramId,
 		address: EvmAddress,
 		kmsKeyId: KmsKeyId,
-		referrerAddress: EvmAddress | null,
+		referrerAddress: EvmAddress | undefined,
 	): Promise<User> {
 		const record = await this.prisma.user.create({
 			data: {

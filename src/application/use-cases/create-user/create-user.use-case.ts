@@ -7,7 +7,7 @@ export { UserAlreadyExistsError }
 
 export type CreateUserInput = {
 	telegramId: TelegramId
-	referrerAddress: EvmAddress | null
+	referrerAddress?: EvmAddress
 }
 
 export abstract class CreateUserUseCase {

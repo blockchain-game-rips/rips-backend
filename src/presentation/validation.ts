@@ -25,15 +25,12 @@ const revealBodySchema = z.object({
 export class RevealBodyDto extends createZodDto(revealBodySchema) {}
 
 const createUserBodySchema = z.object({
-	telegramId: z
-		.union([z.string(), z.number()])
-		.transform((v) => toTelegramId(BigInt(v))),
+	telegramId: z.string().transform((v) => toTelegramId(BigInt(v))),
 	referrerAddress: z
 		.string()
 		.regex(EVM_ADDRESS_REGEX)
 		.transform(toEvmAddress)
-		.nullable()
-		.default(null),
+		.optional(),
 })
 
 export class CreateUserBodyDto extends createZodDto(createUserBodySchema) {}
@@ -64,16 +61,16 @@ const withdrawBodySchema = z.object({
 export class WithdrawBodyDto extends createZodDto(withdrawBodySchema) {}
 
 const buyTicketsBodySchema = z.object({
-	stakeId: z.number().int().positive(),
-	ticketCount: z.number().int().positive(),
+	stakeId: z.number().int().min(1),
+	ticketCount: z.number().int().min(1),
 	paymentCurrencyChainAddress: chainAddressSchema,
 })
 
 export class BuyTicketsBodyDto extends createZodDto(buyTicketsBodySchema) {}
 
 const completedRoundsQuerySchema = z.object({
-	limit: z.coerce.number().int().positive().optional().default(20),
-	cursor: z.coerce.number().int().positive().optional(),
+	limit: z.coerce.number().int().min(1).optional().default(20),
+	cursor: z.coerce.number().int().min(1).optional(),
 })
 
 export class CompletedRoundsQueryDto extends createZodDto(

@@ -13,6 +13,7 @@ async function bootstrap() {
 	const config = new DocumentBuilder()
 		.setTitle('Rips API')
 		.setVersion('1.0')
+		.setOpenAPIVersion('3.0.0')
 		.build()
 
 	const document = SwaggerModule.createDocument(app, config)
