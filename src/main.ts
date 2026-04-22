@@ -5,6 +5,7 @@ import { AppModule } from './app.module'
 import { UseCaseExceptionFilter } from './presentation/filters/use-case-exception.filter'
 import { AvailableStakeDto } from './presentation/rips/shared/available-stake.dto'
 import { ConfigDto } from './presentation/rips/shared/config.dto'
+import { PrizeDto } from './presentation/rips/shared/prize.dto'
 import { RoundDto } from './presentation/rips/shared/round.dto'
 import { ChainAddressDto } from './presentation/shared/chain-address.dto'
 import { CurrencyAmountDto } from './presentation/shared/currency-amount.dto'
@@ -36,6 +37,7 @@ async function bootstrap() {
 			RoundDto,
 			AvailableStakeDto,
 			UserDto,
+			PrizeDto,
 		],
 	})
 
