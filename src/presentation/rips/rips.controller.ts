@@ -14,6 +14,7 @@ import { GetAvailableStakesUseCase } from '../../application/use-cases/get-avail
 import { GetCompletedRoundsUseCase } from '../../application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
 import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
+import { GetRoundsUseCase } from '../../application/use-cases/get-rounds/get-rounds.use-case'
 import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import { RevealTicketPrizesUseCase } from '../../application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
 import {
@@ -34,6 +35,8 @@ import { GetCompletedRoundsQueryDto } from './get-completed-rounds/get-completed
 import { GetCompletedRoundsResponseDto } from './get-completed-rounds/get-completed-rounds.response'
 import { GetOngoingRoundsResponseDto } from './get-ongoing-rounds/get-ongoing-rounds.response'
 import { GetPrizesResponseDto } from './get-prizes/get-prizes.response'
+import { GetRoundsQueryDto } from './get-rounds/get-rounds.request'
+import { GetRoundsResponseDto } from './get-rounds/get-rounds.response'
 import { GetStakesResponseDto } from './get-stakes/get-stakes.response'
 import { RevealPrizesBodyDto } from './reveal-prizes/reveal-prizes.request'
 import { RevealPrizesResponseDto } from './reveal-prizes/reveal-prizes.response'
@@ -51,6 +54,7 @@ export class RipsController {
 		private readonly getPriceUseCase: GetPriceUseCase,
 		private readonly getUnrevealedPrizesUseCase: GetUnrevealedPrizesUseCase,
 		private readonly revealTicketPrizesUseCase: RevealTicketPrizesUseCase,
+		private readonly getRoundsUseCase: GetRoundsUseCase,
 	) {}
 
 	@Get('stakes')
@@ -167,6 +171,26 @@ export class RipsController {
 
 		return {
 			rounds: rounds.map((r) =>
+				toRoundDto(r, prices.get(r.currency.id) ?? 0),
+			),
+		}
+	}
+
+	@Get('rounds')
+	@ZodResponse({ type: GetRoundsResponseDto })
+	async getRounds(
+		@Query() query: GetRoundsQueryDto,
+	): Promise<GetRoundsResponseDto> {
+		const result = await this.getRoundsUseCase.execute({
+			ids: new Set(query.ids),
+		})
+
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: result.rounds.map((r) => r.currency),
+		})
+
+		return {
+			rounds: result.rounds.map((r) =>
 				toRoundDto(r, prices.get(r.currency.id) ?? 0),
 			),
 		}

@@ -4,7 +4,7 @@ import {
 	GetCompletedRoundsArgs,
 	RoundRepository,
 } from '../../application/interfaces/repositories/round.repository'
-import { CompletedRound } from '../../domain/entities/round'
+import { CompletedRound, Round } from '../../domain/entities/round'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { RIPS_CONTRACT } from '../rips/rips.constants'
@@ -44,6 +44,11 @@ export class IndexerRoundRepository extends RoundRepository {
 				return fromRoundRaw(r, currency) as unknown as CompletedRound
 			}),
 		)
+	}
+
+	async getRoundsByIds(_ids: Set<number>): Promise<Round[]> {
+		// TODO: implement GraphQL query for rounds by ids
+		throw new Error('Not implemented')
 	}
 
 	async getNextCompletedRound(

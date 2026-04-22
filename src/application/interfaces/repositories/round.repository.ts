@@ -1,4 +1,4 @@
-import { CompletedRound } from '../../../domain/entities/round'
+import { CompletedRound, Round } from '../../../domain/entities/round'
 
 export type GetCompletedRoundsArgs = {
 	limit: number
@@ -6,6 +6,8 @@ export type GetCompletedRoundsArgs = {
 }
 
 export abstract class RoundRepository {
+	abstract getRoundsByIds(ids: Set<number>): Promise<Round[]>
+
 	abstract getCompletedRounds(
 		args: GetCompletedRoundsArgs,
 	): Promise<CompletedRound[]>
