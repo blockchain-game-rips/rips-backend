@@ -40,8 +40,7 @@ export class IndexerRoundRepository extends RoundRepository {
 					this.chainId,
 				)
 
-				//TODO: get rid of as unknown as
-				return fromRoundRaw(r, currency) as unknown as CompletedRound
+				return fromRoundRaw(r, currency) as CompletedRound
 			}),
 		)
 	}
