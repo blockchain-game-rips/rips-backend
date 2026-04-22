@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import { ZodValidationPipe } from 'nestjs-zod'
+import { cleanupOpenApiDoc, ZodValidationPipe } from 'nestjs-zod'
 import { AppModule } from './app.module'
 import { UseCaseExceptionFilter } from './presentation/filters/use-case-exception.filter'
 import { ConfigDto } from './presentation/rips/shared/config.dto'
@@ -36,7 +36,8 @@ async function bootstrap() {
 			UserDto,
 		],
 	})
-	SwaggerModule.setup('api', app, document)
+
+	SwaggerModule.setup('api', app, cleanupOpenApiDoc(document))
 
 	await app.listen(process.env.PORT ?? 3000)
 }
