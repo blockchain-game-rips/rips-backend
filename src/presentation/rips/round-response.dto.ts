@@ -43,7 +43,7 @@ const RoundResponseZ = z.object({
 	currency: CurrencyDto.schema,
 	config: ConfigDto.schema,
 	actions: AddressesActionsZ,
-	status: z.nativeEnum(RoundStatus),
+	status: z.enum(RoundStatus),
 	startTime: z.string(),
 	randoms: RandomsZ.optional(),
 })
