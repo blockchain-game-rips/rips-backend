@@ -3,6 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { cleanupOpenApiDoc, ZodValidationPipe } from 'nestjs-zod'
 import { AppModule } from './app.module'
 import { UseCaseExceptionFilter } from './presentation/filters/use-case-exception.filter'
+import { AvailableStakeDto } from './presentation/rips/shared/available-stake.dto'
 import { ConfigDto } from './presentation/rips/shared/config.dto'
 import { RoundDto } from './presentation/rips/shared/round.dto'
 import { ChainAddressDto } from './presentation/shared/chain-address.dto'
@@ -33,6 +34,7 @@ async function bootstrap() {
 			TelegramIdHeaderDto,
 			ConfigDto,
 			RoundDto,
+			AvailableStakeDto,
 			UserDto,
 		],
 	})

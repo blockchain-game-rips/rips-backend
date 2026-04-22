@@ -33,19 +33,12 @@ import {
 import { GetCompletedRoundsQueryDto } from './get-completed-rounds/get-completed-rounds.request'
 import { GetCompletedRoundsResponseDto } from './get-completed-rounds/get-completed-rounds.response'
 import { GetOngoingRoundsResponseDto } from './get-ongoing-rounds/get-ongoing-rounds.response'
-import {
-	GetPrizesResponseDto,
-	toGetPrizesResponseDto,
-} from './get-prizes/get-prizes.response'
-import {
-	GetStakesResponseDto,
-	toGetStakesResponseDto,
-} from './get-stakes/get-stakes.response'
+import { GetPrizesResponseDto } from './get-prizes/get-prizes.response'
+import { GetStakesResponseDto } from './get-stakes/get-stakes.response'
 import { RevealPrizesBodyDto } from './reveal-prizes/reveal-prizes.request'
-import {
-	RevealPrizesResponseDto,
-	toRevealPrizesResponseDto,
-} from './reveal-prizes/reveal-prizes.response'
+import { RevealPrizesResponseDto } from './reveal-prizes/reveal-prizes.response'
+import { toAvailableStakeDto } from './shared/available-stake.dto'
+import { toPrizeDto } from './shared/prize.dto'
 import { toRoundDto } from './shared/round.dto'
 
 @Controller('rips')
@@ -61,8 +54,8 @@ export class RipsController {
 	) {}
 
 	@Get('stakes')
-	@ZodResponse({ type: [GetStakesResponseDto] })
-	async getStakes(): Promise<GetStakesResponseDto[]> {
+	@ZodResponse({ type: GetStakesResponseDto })
+	async getStakes(): Promise<GetStakesResponseDto> {
 		const stakes = await this.getAvailableStakesUseCase.execute()
 
 		const currencies = stakes.map((s) =>
@@ -73,9 +66,11 @@ export class RipsController {
 
 		const prices = await this.getPriceUseCase.executeMany({ currencies })
 
-		return stakes.map((s, i) =>
-			toGetStakesResponseDto(s, prices.get(currencies[i].id) ?? 0),
-		)
+		return {
+			availableStakes: stakes.map((s, i) =>
+				toAvailableStakeDto(s, prices.get(currencies[i].id) ?? 0),
+			),
+		}
 	}
 
 	@Post('tickets/purchase')
@@ -132,29 +127,33 @@ export class RipsController {
 	}
 
 	@Get('prizes')
-	@ZodResponse({ type: [GetPrizesResponseDto] })
+	@ZodResponse({ type: GetPrizesResponseDto })
 	async getPrizes(
 		@Headers() headers: TelegramIdHeaderDto,
-	): Promise<GetPrizesResponseDto[]> {
+	): Promise<GetPrizesResponseDto> {
 		const prizes = await this.getUnrevealedPrizesUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
 		})
 
-		return prizes.map(toGetPrizesResponseDto)
+		return {
+			prizes: prizes.map(toPrizeDto),
+		}
 	}
 
 	@Patch('prizes')
-	@ZodResponse({ type: [RevealPrizesResponseDto] })
+	@ZodResponse({ type: RevealPrizesResponseDto })
 	async revealPrizes(
 		@Headers() headers: TelegramIdHeaderDto,
 		@Body() body: RevealPrizesBodyDto,
-	): Promise<RevealPrizesResponseDto[]> {
+	): Promise<RevealPrizesResponseDto> {
 		const prizes = await this.revealTicketPrizesUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
 			revealAll: body.revealAll,
 		})
 
-		return prizes.map(toRevealPrizesResponseDto)
+		return {
+			prizes: prizes.map(toPrizeDto),
+		}
 	}
 
 	@Get('rounds/ongoing')
