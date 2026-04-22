@@ -5,22 +5,13 @@ import { UsersController } from '../../../src/presentation/users/users.controlle
 import { EVM_ADDRESS, MOCK_USER, TELEGRAM_ID } from '../../fixtures/entities'
 import {
 	makeMockCreateUserUseCase,
-	makeMockGetUnrevealedPrizesUseCase,
 	makeMockGetUserUseCase,
-	makeMockRevealTicketPrizesUseCase,
 } from '../../mocks/use-cases'
 
 describe('UsersController', () => {
 	const getUser = makeMockGetUserUseCase()
 	const createUser = makeMockCreateUserUseCase()
-	const revealTicketPrizes = makeMockRevealTicketPrizesUseCase()
-	const getUnrevealedPrizes = makeMockGetUnrevealedPrizesUseCase()
-	const controller = new UsersController(
-		getUser,
-		createUser,
-		revealTicketPrizes,
-		getUnrevealedPrizes,
-	)
+	const controller = new UsersController(getUser, createUser)
 
 	beforeEach(() => {
 		jest.clearAllMocks()

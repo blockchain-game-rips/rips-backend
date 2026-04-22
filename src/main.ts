@@ -3,13 +3,14 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { ZodValidationPipe } from 'nestjs-zod'
 import { AppModule } from './app.module'
 import { UseCaseExceptionFilter } from './presentation/filters/use-case-exception.filter'
-import { ConfigDto } from './presentation/rips/rips-schemas'
-import {
-	ChainAddressDto,
-	CurrencyAmountDto,
-	CurrencyDto,
-	TransactionDto,
-} from './presentation/to-plain-schemas'
+import { ConfigDto } from './presentation/rips/shared/config.dto'
+import { RoundDto } from './presentation/rips/shared/round.dto'
+import { ChainAddressDto } from './presentation/shared/chain-address.dto'
+import { CurrencyAmountDto } from './presentation/shared/currency-amount.dto'
+import { CurrencyDto } from './presentation/shared/currency.dto'
+import { TelegramIdHeaderDto } from './presentation/shared/telegram-id.header'
+import { TransactionDto } from './presentation/shared/transaction.dto'
+import { UserDto } from './presentation/users/shared/user.dto'
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
@@ -29,7 +30,10 @@ async function bootstrap() {
 			CurrencyDto,
 			CurrencyAmountDto,
 			TransactionDto,
+			TelegramIdHeaderDto,
 			ConfigDto,
+			RoundDto,
+			UserDto,
 		],
 	})
 	SwaggerModule.setup('api', app, document)

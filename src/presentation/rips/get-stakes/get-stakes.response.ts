@@ -1,26 +1,27 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { AvailableStake } from '../../domain/value-objects/available-stake'
-import { ConfigDto, RoundDto, toConfigDto, toRoundDto } from './rips-schemas'
+import { AvailableStake } from '../../../domain/value-objects/available-stake'
+import { configSchema, toConfigDto } from '../shared/config.dto'
+import { roundSchema, toRoundDto } from '../shared/round.dto'
 
-const StakeZ = z.object({
+const stakeSchema = z.object({
 	id: z.number(),
-	currentConfig: ConfigDto.schema.nullable(),
+	currentConfig: configSchema.nullable(),
 })
 
-const AvailableStakeResponseZ = z.object({
-	stake: StakeZ,
-	fillingRound: RoundDto.schema.nullable(),
+const getStakesResponseSchema = z.object({
+	stake: stakeSchema,
+	fillingRound: roundSchema.nullable(),
 })
 
-export class AvailableStakeResponseDto extends createZodDto(
-	AvailableStakeResponseZ,
+export class GetStakesResponseDto extends createZodDto(
+	getStakesResponseSchema,
 ) {}
 
-export function toAvailableStakeResponseDto(
+export function toGetStakesResponseDto(
 	availableStake: AvailableStake,
 	priceUsd: number,
-): AvailableStakeResponseDto {
+): GetStakesResponseDto {
 	if (availableStake.fillingRound === null) {
 		return {
 			stake: {

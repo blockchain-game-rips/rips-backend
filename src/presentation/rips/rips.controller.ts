@@ -2,8 +2,9 @@ import {
 	Body,
 	Controller,
 	Get,
+	Headers,
 	InternalServerErrorException,
-	Param,
+	Patch,
 	Post,
 	Query,
 } from '@nestjs/common'
@@ -13,29 +14,41 @@ import { GetAvailableStakesUseCase } from '../../application/use-cases/get-avail
 import { GetCompletedRoundsUseCase } from '../../application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
 import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
+import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
+import { RevealTicketPrizesUseCase } from '../../application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
 import {
-	BuyTicketsBodyDto,
-	CompletedRoundsQueryDto,
-	TELEGRAM_ID_PARAM,
-	TelegramIdParamsDto,
-} from '../validation'
+	TELEGRAM_ID_HEADER,
+	TelegramIdHeaderDto,
+} from '../shared/telegram-id.header'
+import { BuyTicketsPurchaseBodyDto } from './buy-tickets-purchase/buy-tickets-purchase.request'
 import {
-	PurchaseResponseDto,
-	toPurchaseResponseDto,
-	toZapResponseDto,
-	ZapResponseDto,
-} from './buy-tickets-response.dto'
-import { toRoundDto } from './rips-schemas'
+	BuyTicketsPurchaseResponseDto,
+	toBuyTicketsPurchaseResponseDto,
+} from './buy-tickets-purchase/buy-tickets-purchase.response'
+import { BuyTicketsZapBodyDto } from './buy-tickets-zap/buy-tickets-zap.request'
 import {
-	GetCompletedRoundsResponseDto,
-	GetOngoingRoundsResponseDto,
-} from './round-response.dto'
+	BuyTicketsZapResponseDto,
+	toBuyTicketsZapResponseDto,
+} from './buy-tickets-zap/buy-tickets-zap.response'
+import { GetCompletedRoundsQueryDto } from './get-completed-rounds/get-completed-rounds.request'
+import { GetCompletedRoundsResponseDto } from './get-completed-rounds/get-completed-rounds.response'
+import { GetOngoingRoundsResponseDto } from './get-ongoing-rounds/get-ongoing-rounds.response'
 import {
-	AvailableStakeResponseDto,
-	toAvailableStakeResponseDto,
-} from './stake-response.dto'
+	GetPrizesResponseDto,
+	toGetPrizesResponseDto,
+} from './get-prizes/get-prizes.response'
+import {
+	GetStakesResponseDto,
+	toGetStakesResponseDto,
+} from './get-stakes/get-stakes.response'
+import { RevealPrizesBodyDto } from './reveal-prizes/reveal-prizes.request'
+import {
+	RevealPrizesResponseDto,
+	toRevealPrizesResponseDto,
+} from './reveal-prizes/reveal-prizes.response'
+import { toRoundDto } from './shared/round.dto'
 
-@Controller()
+@Controller('rips')
 export class RipsController {
 	constructor(
 		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
@@ -43,11 +56,13 @@ export class RipsController {
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly getCompletedRoundsUseCase: GetCompletedRoundsUseCase,
 		private readonly getPriceUseCase: GetPriceUseCase,
+		private readonly getUnrevealedPrizesUseCase: GetUnrevealedPrizesUseCase,
+		private readonly revealTicketPrizesUseCase: RevealTicketPrizesUseCase,
 	) {}
 
 	@Get('stakes')
-	@ZodResponse({ type: [AvailableStakeResponseDto] })
-	async getAvailableStakes(): Promise<AvailableStakeResponseDto[]> {
+	@ZodResponse({ type: [GetStakesResponseDto] })
+	async getStakes(): Promise<GetStakesResponseDto[]> {
 		const stakes = await this.getAvailableStakesUseCase.execute()
 
 		const currencies = stakes.map((s) =>
@@ -59,18 +74,18 @@ export class RipsController {
 		const prices = await this.getPriceUseCase.executeMany({ currencies })
 
 		return stakes.map((s, i) =>
-			toAvailableStakeResponseDto(s, prices.get(currencies[i].id) ?? 0),
+			toGetStakesResponseDto(s, prices.get(currencies[i].id) ?? 0),
 		)
 	}
 
-	@Post(`users/:${TELEGRAM_ID_PARAM}/buy-tickets/purchase`)
-	@ZodResponse({ type: PurchaseResponseDto })
+	@Post('tickets/purchase')
+	@ZodResponse({ type: BuyTicketsPurchaseResponseDto })
 	async buyTicketsPurchase(
-		@Param() params: TelegramIdParamsDto,
-		@Body() body: BuyTicketsBodyDto,
-	): Promise<PurchaseResponseDto> {
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: BuyTicketsPurchaseBodyDto,
+	): Promise<BuyTicketsPurchaseResponseDto> {
 		const outcome = await this.buyTicketsUseCase.execute({
-			telegramId: params.telegramId,
+			telegramId: headers[TELEGRAM_ID_HEADER],
 			stakeId: body.stakeId,
 			ticketCount: body.ticketCount,
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
@@ -82,17 +97,17 @@ export class RipsController {
 			)
 		}
 
-		return toPurchaseResponseDto(outcome.purchaseReceipt)
+		return toBuyTicketsPurchaseResponseDto(outcome.purchaseReceipt)
 	}
 
-	@Post(`users/:${TELEGRAM_ID_PARAM}/buy-tickets/zap`)
-	@ZodResponse({ type: ZapResponseDto })
+	@Post('tickets/zap')
+	@ZodResponse({ type: BuyTicketsZapResponseDto })
 	async buyTicketsZap(
-		@Param() params: TelegramIdParamsDto,
-		@Body() body: BuyTicketsBodyDto,
-	): Promise<ZapResponseDto> {
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: BuyTicketsZapBodyDto,
+	): Promise<BuyTicketsZapResponseDto> {
 		const outcome = await this.buyTicketsUseCase.execute({
-			telegramId: params.telegramId,
+			telegramId: headers[TELEGRAM_ID_HEADER],
 			stakeId: body.stakeId,
 			ticketCount: body.ticketCount,
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
@@ -109,11 +124,37 @@ export class RipsController {
 			currencies: [pendingZap.amountIn.currency, pendingZap.fee.currency],
 		})
 
-		return toZapResponseDto(
+		return toBuyTicketsZapResponseDto(
 			pendingZap,
 			prices.get(pendingZap.amountIn.currency.id) ?? 0,
 			prices.get(pendingZap.fee.currency.id) ?? 0,
 		)
+	}
+
+	@Get('prizes')
+	@ZodResponse({ type: [GetPrizesResponseDto] })
+	async getPrizes(
+		@Headers() headers: TelegramIdHeaderDto,
+	): Promise<GetPrizesResponseDto[]> {
+		const prizes = await this.getUnrevealedPrizesUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+		})
+
+		return prizes.map(toGetPrizesResponseDto)
+	}
+
+	@Patch('prizes')
+	@ZodResponse({ type: [RevealPrizesResponseDto] })
+	async revealPrizes(
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: RevealPrizesBodyDto,
+	): Promise<RevealPrizesResponseDto[]> {
+		const prizes = await this.revealTicketPrizesUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+			revealAll: body.revealAll,
+		})
+
+		return prizes.map(toRevealPrizesResponseDto)
 	}
 
 	@Get('rounds/ongoing')
@@ -135,7 +176,7 @@ export class RipsController {
 	@Get('rounds/completed')
 	@ZodResponse({ type: GetCompletedRoundsResponseDto })
 	async getCompletedRounds(
-		@Query() query: CompletedRoundsQueryDto,
+		@Query() query: GetCompletedRoundsQueryDto,
 	): Promise<GetCompletedRoundsResponseDto> {
 		const result = await this.getCompletedRoundsUseCase.execute({
 			limit: query.limit,

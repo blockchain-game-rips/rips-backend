@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-import { RouterModule } from '@nestjs/core'
 import { ScheduleModule } from '@nestjs/schedule'
 import { AppConfigModule } from './configuration/app-config.module'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
@@ -12,22 +11,6 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 
 @Module({
 	imports: [
-		RouterModule.register([
-			{
-				path: 'users',
-				module: UsersModule,
-				children: [
-					{
-						path: ':telegramId/wallet',
-						module: WalletsModule,
-					},
-				],
-			},
-			{
-				path: 'rips',
-				module: RipsApiModule,
-			},
-		]),
 		AppConfigModule,
 		ScheduleModule.forRoot(),
 		PrismaModule,

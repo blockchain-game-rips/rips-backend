@@ -1,6 +1,7 @@
 import { UserNotFoundError } from '../../../src/application/use-cases/get-user/get-user.use-case'
 import { EIP155 } from '../../../src/constants'
 import { CurrencyAmount } from '../../../src/domain/value-objects/currency-amount'
+import { TELEGRAM_ID_HEADER } from '../../../src/presentation/shared/telegram-id.header'
 import { WalletsController } from '../../../src/presentation/wallets/wallets.controller'
 import {
 	MOCK_CURRENCY,
@@ -34,30 +35,34 @@ describe('WalletsController', () => {
 		jest.clearAllMocks()
 	})
 
-	describe('POST /users/:telegramId/wallet/balance', () => {
-		it('should return balance response dto', async () => {
+	describe('GET /wallets/balances', () => {
+		it('should return balances response dto', async () => {
 			getBalance.execute.mockResolvedValue(MOCK_BALANCE)
-			getPrice.execute.mockResolvedValue(MOCK_PRICE_USD)
+			getPrice.executeMany.mockResolvedValue(
+				new Map([[MOCK_CURRENCY.id, MOCK_PRICE_USD]]),
+			)
 
-			const result = await controller.getBalance(
-				{ telegramId: TELEGRAM_ID },
-				{
-					currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
-				},
+			const result = await controller.getBalances(
+				{ [TELEGRAM_ID_HEADER]: TELEGRAM_ID },
+				{ chainAddress: [MOCK_CURRENCY_CHAIN_ADDRESS] },
 			)
 
 			expect(result).toEqual({
-				currency: {
-					chainAddress: {
-						chain: { namespace: EIP155, reference: '8453' },
-						address: NATIVE_ADDRESS,
+				balances: [
+					{
+						currency: {
+							chainAddress: {
+								chain: { namespace: EIP155, reference: '8453' },
+								address: NATIVE_ADDRESS,
+							},
+							symbol: 'ETH',
+							name: 'ETH',
+							decimals: 18,
+							priceUsd: MOCK_PRICE_USD,
+						},
+						amount: '1000000000000000000',
 					},
-					symbol: 'ETH',
-					name: 'ETH',
-					decimals: 18,
-					priceUsd: MOCK_PRICE_USD,
-				},
-				amount: '1000000000000000000',
+				],
 			})
 			expect(getBalance.execute).toHaveBeenCalledWith({
 				telegramId: TELEGRAM_ID,
@@ -71,11 +76,9 @@ describe('WalletsController', () => {
 			)
 
 			await expect(
-				controller.getBalance(
-					{ telegramId: TELEGRAM_ID },
-					{
-						currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
-					},
+				controller.getBalances(
+					{ [TELEGRAM_ID_HEADER]: TELEGRAM_ID },
+					{ chainAddress: [MOCK_CURRENCY_CHAIN_ADDRESS] },
 				),
 			).rejects.toThrow(UserNotFoundError)
 		})

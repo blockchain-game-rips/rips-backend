@@ -1,17 +1,17 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { User } from '../../domain/entities/user'
+import { User } from '../../../domain/entities/user'
 
-const UserResponseZ = z.object({
+const userSchema = z.object({
 	id: z.string(),
 	telegramId: z.string(),
 	wallets: z.record(z.string(), z.string()),
 	createdAt: z.string(),
 })
 
-export class UserResponseDto extends createZodDto(UserResponseZ) {}
+export class UserDto extends createZodDto(userSchema) {}
 
-export function toUserResponseDto(user: User): UserResponseDto {
+export function toUserDto(user: User): UserDto {
 	return {
 		id: user.id.toString(),
 		telegramId: user.telegramProfile.telegramId.toString(),
