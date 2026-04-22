@@ -1,6 +1,6 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { ChainAddressDto } from '../../shared/chain-address.dto'
+import { chainAddressInputSchema } from '../../shared/chain-address.dto'
 
 const EVM_ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/
 
@@ -9,7 +9,7 @@ const createWithdrawalBodySchema = z.object({
 		.string()
 		.regex(/^\d+$/)
 		.transform((v) => BigInt(v)),
-	currencyChainAddress: ChainAddressDto.schema,
+	currencyChainAddress: chainAddressInputSchema,
 	recipientAddress: z.string().regex(EVM_ADDRESS_REGEX),
 })
 

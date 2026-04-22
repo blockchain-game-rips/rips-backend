@@ -7,6 +7,14 @@ const chainAddressSchema = z.object({
 	address: z.string(),
 	chain: z.object({
 		reference: z.string(),
+		namespace: z.string(),
+	}),
+})
+
+export const chainAddressInputSchema = z.object({
+	address: z.string(),
+	chain: z.object({
+		reference: z.string(),
 		namespace: z.string().transform(toChainNamespace),
 	}),
 })
