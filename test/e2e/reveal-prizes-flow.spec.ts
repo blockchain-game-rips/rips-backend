@@ -245,7 +245,8 @@ describe('Reveal prizes flow E2E', () => {
 		})
 
 		const res1 = await request(ctx.app.getHttpServer())
-			.post(`/rips/users/${TELEGRAM_ID_USER_1}/buy-tickets/purchase`)
+			.post('/rips/tickets/purchase')
+			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.send(buyTicketsBody(TICKETS_PER_USER))
 			.expect(201)
 
@@ -254,7 +255,8 @@ describe('Reveal prizes flow E2E', () => {
 		expect(res1.body.ticketCount).toBe(TICKETS_PER_USER)
 
 		const res2 = await request(ctx.app.getHttpServer())
-			.post(`/rips/users/${TELEGRAM_ID_USER_2}/buy-tickets/purchase`)
+			.post('/rips/tickets/purchase')
+			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.send(buyTicketsBody(TICKETS_PER_USER))
 			.expect(201)
 
@@ -349,11 +351,13 @@ describe('Reveal prizes flow E2E', () => {
 
 	it('get-unrevealed-prizes returns 4 tickets for each user', async () => {
 		const res1 = await request(ctx.app.getHttpServer())
-			.get(`/users/${TELEGRAM_ID_USER_1}/unrevealed-prizes`)
+			.get('/rips/prizes')
+			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.expect(200)
 
 		const res2 = await request(ctx.app.getHttpServer())
-			.get(`/users/${TELEGRAM_ID_USER_2}/unrevealed-prizes`)
+			.get('/rips/prizes')
+			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.expect(200)
 
 		expect(res1.body).toHaveLength(TICKETS_PER_USER)
@@ -362,27 +366,31 @@ describe('Reveal prizes flow E2E', () => {
 
 	it('user 1 reveals 1 ticket, user 2 reveals all 4 tickets', async () => {
 		const revealOneRes = await request(ctx.app.getHttpServer())
-			.post(`/users/${TELEGRAM_ID_USER_1}/reveal`)
+			.patch('/rips/prizes')
+			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.send({ revealAll: false })
-			.expect(201)
+			.expect(200)
 
 		expect(revealOneRes.body).toHaveLength(1)
 
 		const revealAllRes = await request(ctx.app.getHttpServer())
-			.post(`/users/${TELEGRAM_ID_USER_2}/reveal`)
+			.patch('/rips/prizes')
+			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.send({ revealAll: true })
-			.expect(201)
+			.expect(200)
 
 		expect(revealAllRes.body).toHaveLength(TICKETS_PER_USER)
 	})
 
 	it('user 1 has 3 unrevealed tickets remaining, user 2 has 0', async () => {
 		const res1 = await request(ctx.app.getHttpServer())
-			.get(`/users/${TELEGRAM_ID_USER_1}/unrevealed-prizes`)
+			.get('/rips/prizes')
+			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.expect(200)
 
 		const res2 = await request(ctx.app.getHttpServer())
-			.get(`/users/${TELEGRAM_ID_USER_2}/unrevealed-prizes`)
+			.get('/rips/prizes')
+			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.expect(200)
 
 		expect(res1.body).toHaveLength(TICKETS_PER_USER - 1)

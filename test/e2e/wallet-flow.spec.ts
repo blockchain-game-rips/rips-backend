@@ -9,6 +9,9 @@ const DEPOSIT_AMOUNT = parseEther('1')
 const WITHDRAW_AMOUNT = parseEther('0.1')
 const RECIPIENT_ADDRESS = '0x000000000000000000000000000000000000dEaD'
 
+const { chain, address } = MOCK_CURRENCY_CHAIN_ADDRESS
+const CHAIN_ADDRESS_QUERY = `${chain.namespace}:${chain.reference}:${address}`
+
 describe('Wallet flow E2E', () => {
 	const ctx = useRipsApp()
 
@@ -31,11 +34,13 @@ describe('Wallet flow E2E', () => {
 		await setNativeBalance(ctx.publicClient, walletAddress, DEPOSIT_AMOUNT)
 
 		const balanceRes = await request(ctx.app.getHttpServer())
-			.post(`/users/${USER_TG_ID}/wallet/balance`)
-			.send({ currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS })
-			.expect(201)
+			.get(
+				`/wallets/balances?chainAddress=${CHAIN_ADDRESS_QUERY}&chainAddress=${CHAIN_ADDRESS_QUERY}`,
+			)
+			.set('x-telegram-id', USER_TG_ID)
+			.expect(200)
 
-		expect(BigInt(balanceRes.body.amount)).toBe(DEPOSIT_AMOUNT)
+		expect(BigInt(balanceRes.body.balances[0].amount)).toBe(DEPOSIT_AMOUNT)
 	})
 
 	it('withdraws funds and sends them on-chain', async () => {
@@ -44,7 +49,8 @@ describe('Wallet flow E2E', () => {
 		})
 
 		const res = await request(ctx.app.getHttpServer())
-			.post(`/users/${USER_TG_ID}/wallet/balance/withdraw`)
+			.post('/wallets/withdrawals')
+			.set('x-telegram-id', USER_TG_ID)
 			.send({
 				amount: WITHDRAW_AMOUNT.toString(),
 				currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,

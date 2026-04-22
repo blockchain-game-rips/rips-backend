@@ -70,7 +70,8 @@ describe('Buy tickets E2E', () => {
 		await setNativeBalance(ctx.publicClient, walletAddress, requiredBalance)
 
 		const res = await request(ctx.app.getHttpServer())
-			.post(`/rips/users/${USER_TG_ID}/buy-tickets/purchase`)
+			.post('/rips/tickets/purchase')
+			.set('x-telegram-id', USER_TG_ID)
 			.send({
 				stakeId: STAKE_ID,
 				ticketCount: TICKET_COUNT,
