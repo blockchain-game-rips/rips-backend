@@ -25,10 +25,10 @@ import {
 	toZapResponseDto,
 	ZapResponseDto,
 } from './buy-tickets-response.dto'
+import { toRoundDto } from './rips-schemas'
 import {
 	GetCompletedRoundsResponseDto,
-	RoundResponseDto,
-	toRoundResponseDto,
+	GetOngoingRoundsResponseDto,
 } from './round-response.dto'
 import {
 	AvailableStakeResponseDto,
@@ -117,17 +117,19 @@ export class RipsController {
 	}
 
 	@Get('rounds/ongoing')
-	@ZodResponse({ type: [RoundResponseDto] })
-	async getOngoingRounds(): Promise<RoundResponseDto[]> {
+	@ZodResponse({ type: GetOngoingRoundsResponseDto })
+	async getOngoingRounds(): Promise<GetOngoingRoundsResponseDto> {
 		const rounds = await this.getOngoingRoundsUseCase.execute()
 
 		const prices = await this.getPriceUseCase.executeMany({
 			currencies: rounds.map((r) => r.currency),
 		})
 
-		return rounds.map((r) =>
-			toRoundResponseDto(r, prices.get(r.currency.id) ?? 0),
-		)
+		return {
+			rounds: rounds.map((r) =>
+				toRoundDto(r, prices.get(r.currency.id) ?? 0),
+			),
+		}
 	}
 
 	@Get('rounds/completed')
@@ -146,7 +148,7 @@ export class RipsController {
 
 		return {
 			rounds: result.rounds.map((r) =>
-				toRoundResponseDto(r, prices.get(r.currency.id) ?? 0),
+				toRoundDto(r, prices.get(r.currency.id) ?? 0),
 			),
 			nextCursor: result.nextCursor,
 		}
