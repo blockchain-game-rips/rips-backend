@@ -45,15 +45,40 @@ export class IndexerRoundRepository extends RoundRepository {
 		)
 	}
 
-	async getRoundsByIds(_ids: Set<number>): Promise<Round[]> {
-		// TODO: implement GraphQL query for rounds by ids
-		throw new Error('Not implemented')
+	async getRoundsByIds(ids: Set<number>): Promise<Round[]> {
+		const { rounds } = await this.indexer.sdk.GetRoundsByIds({
+			ids: [...ids].map(String),
+		})
+
+		return Promise.all(
+			rounds.map(async (r) => {
+				const currency = await this.evmCurrencyService.fromAddress(
+					getAddress(r.config.currency),
+					this.chainId,
+				)
+
+				return fromRoundRaw(r, currency)
+			}),
+		)
 	}
 
 	async getNextCompletedRound(
 		afterRoundId: number,
 	): Promise<CompletedRound | null> {
-		// TODO: implement GraphQL query for next completed round after afterRoundId
-		throw new Error('Not implemented')
+		const { rounds } = await this.indexer.sdk.GetNextCompletedRound({
+			afterRoundId: String(afterRoundId),
+		})
+
+		if (rounds.length === 0) {
+			return null
+		}
+
+		const r = rounds[0]
+		const currency = await this.evmCurrencyService.fromAddress(
+			getAddress(r.config.currency),
+			this.chainId,
+		)
+
+		return fromRoundRaw(r, currency) as CompletedRound
 	}
 }

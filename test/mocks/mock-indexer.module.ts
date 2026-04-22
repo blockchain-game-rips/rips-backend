@@ -14,6 +14,10 @@ export class MockRoundRepository extends RoundRepository {
 		return Promise.resolve([])
 	}
 
+	async getRoundsByIds() {
+		return Promise.resolve([])
+	}
+
 	async getNextCompletedRound() {
 		return Promise.resolve(this.nextCompletedRound)
 	}

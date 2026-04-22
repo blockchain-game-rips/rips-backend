@@ -1,0 +1,43 @@
+query GetNextCompletedRound($afterRoundId: String!) {
+    rounds(
+        where: {
+            status_in: [CLAIMED, REFUNDED]
+            id_gt: $afterRoundId
+        }
+        orderBy: id_ASC
+        limit: 1
+    ) {
+        id
+        stakeId
+        startTime
+        status
+        randomA
+        randomB
+        config {
+            id
+            currency
+            ticketCap
+            ticketCost
+            feePercent
+            durationSeconds
+            prizeDistribution(orderBy: tierIndex_ASC) {
+                prizeCount
+                minPrize
+                maxPrize
+            }
+        }
+        ticketPurchases {
+            user
+            ticketCount
+            startTicketIndex
+        }
+        prizesClaimed {
+            user
+            amount
+        }
+        refunds {
+            user
+            amount
+        }
+    }
+}
