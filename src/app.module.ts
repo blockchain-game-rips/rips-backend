@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { AppConfigModule } from './configuration/app-config.module'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
@@ -8,6 +8,7 @@ import { RipsApiModule } from './modules/rips-api/rips-api.module'
 import { SyncCompletedRoundsModule } from './modules/sync-completed-rounds/sync-completed-rounds.module'
 import { UsersModule } from './modules/users/users.module'
 import { WalletsModule } from './modules/wallets/wallets.module'
+import { LoggingMiddleware } from './presentation/middleware/logging.middleware'
 
 @Module({
 	imports: [
@@ -22,4 +23,8 @@ import { WalletsModule } from './modules/wallets/wallets.module'
 		SyncCompletedRoundsModule,
 	],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+	configure(consumer: MiddlewareConsumer) {
+		consumer.apply(LoggingMiddleware).forRoutes('*')
+	}
+}

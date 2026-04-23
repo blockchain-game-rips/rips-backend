@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Headers, Post, Query } from '@nestjs/common'
-import { ZodResponse, ZodValidationPipe } from 'nestjs-zod'
+import { ZodResponse } from 'nestjs-zod'
 import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
 import { WithdrawUseCase } from '../../application/use-cases/withdraw.ts/withdraw.use-case'
@@ -30,8 +30,7 @@ export class WalletsController {
 	@ZodResponse({ type: GetBalancesResponseDto })
 	async getBalances(
 		@Headers() headers: TelegramIdHeaderDto,
-		//for some reason it doesn't work without implicit pipe
-		@Query(new ZodValidationPipe(GetBalancesQueryDto))
+		@Query()
 		query: GetBalancesQueryDto,
 	): Promise<GetBalancesResponseDto> {
 		const telegramId = headers[TELEGRAM_ID_HEADER]

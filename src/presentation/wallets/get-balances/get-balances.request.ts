@@ -14,7 +14,10 @@ const chainAddressQuerySchema = z.string().transform((v) => {
 })
 
 const getBalancesQuerySchema = z.object({
-	chainAddress: z.array(chainAddressQuerySchema).min(1),
+	chainAddress: z.preprocess(
+		(v) => (Array.isArray(v) ? v : [v]),
+		z.array(chainAddressQuerySchema).min(1),
+	),
 })
 
 export class GetBalancesQueryDto extends createZodDto(getBalancesQuerySchema) {}
