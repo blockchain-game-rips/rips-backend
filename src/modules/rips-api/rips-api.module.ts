@@ -7,6 +7,7 @@ import { GetOngoingRoundsModule } from '../use-cases/get-ongoing-rounds.module'
 import { GetPriceModule } from '../use-cases/get-price.module'
 import { GetRoundsModule } from '../use-cases/get-rounds.module'
 import { GetUnrevealedPrizesModule } from '../use-cases/get-unrevealed-prizes.module'
+import { QuoteZapModule } from '../use-cases/quote-zap.module'
 import { RevealTicketPrizesModule } from '../use-cases/reveal-ticket-prizes.module'
 
 @Module({
@@ -19,6 +20,7 @@ import { RevealTicketPrizesModule } from '../use-cases/reveal-ticket-prizes.modu
 		GetPriceModule,
 		GetUnrevealedPrizesModule,
 		RevealTicketPrizesModule,
+		QuoteZapModule,
 	],
 	controllers: [RipsController],
 })

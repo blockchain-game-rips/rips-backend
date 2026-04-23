@@ -16,6 +16,7 @@ import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
 import { GetRoundsUseCase } from '../../application/use-cases/get-rounds/get-rounds.use-case'
 import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
+import { QuoteZapUseCase } from '../../application/use-cases/quote-zap/quote-zap.use-case'
 import { RevealTicketPrizesUseCase } from '../../application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
 import {
 	TELEGRAM_ID_HEADER,
@@ -38,6 +39,11 @@ import { GetPrizesResponseDto } from './get-prizes/get-prizes.response'
 import { GetRoundsQueryDto } from './get-rounds/get-rounds.request'
 import { GetRoundsResponseDto } from './get-rounds/get-rounds.response'
 import { GetStakesResponseDto } from './get-stakes/get-stakes.response'
+import { QuoteZapBodyDto } from './quote-zap/quote-zap.request'
+import {
+	QuoteZapResponseDto,
+	toQuoteZapResponseDto,
+} from './quote-zap/quote-zap.response'
 import { RevealPrizesBodyDto } from './reveal-prizes/reveal-prizes.request'
 import { RevealPrizesResponseDto } from './reveal-prizes/reveal-prizes.response'
 import { toAvailableStakeDto } from './shared/available-stake.dto'
@@ -49,6 +55,7 @@ export class RipsController {
 	constructor(
 		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
 		private readonly buyTicketsUseCase: BuyTicketsUseCase,
+		private readonly quoteZapUseCase: QuoteZapUseCase,
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly getCompletedRoundsUseCase: GetCompletedRoundsUseCase,
 		private readonly getPriceUseCase: GetPriceUseCase,
@@ -128,6 +135,26 @@ export class RipsController {
 			prices.get(pendingZap.amountIn.currency.id) ?? 0,
 			prices.get(pendingZap.fee.currency.id) ?? 0,
 		)
+	}
+
+	@Post('tickets/quote-zap')
+	@ZodResponse({ type: QuoteZapResponseDto })
+	async quoteZap(
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: QuoteZapBodyDto,
+	): Promise<QuoteZapResponseDto> {
+		const quote = await this.quoteZapUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+			stakeId: body.stakeId,
+			ticketCount: body.ticketCount,
+			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
+		})
+
+		const feePrice = await this.getPriceUseCase.execute({
+			currency: quote.fee.currency,
+		})
+
+		return toQuoteZapResponseDto(quote, feePrice)
 	}
 
 	@Get('prizes')
