@@ -10,4 +10,10 @@ export class IndexerRewardRepository extends RewardRepository {
 			'TODO: implement getAvailableRewards in IndexerRewardRepository',
 		)
 	}
+
+	getAccruedRewards(_userAddress: EvmAddress): Promise<CurrencyAmount[]> {
+		throw new Error(
+			'TODO: implement getAccruedRewards in IndexerRewardRepository',
+		)
+	}
 }

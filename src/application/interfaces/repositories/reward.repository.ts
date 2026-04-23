@@ -5,4 +5,8 @@ export abstract class RewardRepository {
 	abstract getAvailableRewards(
 		userAddress: EvmAddress,
 	): Promise<CurrencyAmount[]>
+
+	abstract getAccruedRewards(
+		userAddress: EvmAddress,
+	): Promise<CurrencyAmount[]>
 }
