@@ -234,8 +234,9 @@ type DefaultReferralFeeUpdated @entity {
 	txHash: String!
 }
 
-type ReferralStatsUpdated @entity {
+type ReferrerStateUpdated @entity {
 	id: ID!
+	referrer: String!
 	activeFeePercent: Int!
 	customFeePercent: Int!
 	monthStartTimestamp: BigInt!

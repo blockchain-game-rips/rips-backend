@@ -10,10 +10,10 @@ import {
 	ReferralFeeAccrued,
 	ReferralTier,
 	ReferralTiersUpdated,
-	ReferralStatsUpdated,
 	ReferrerFeeSeized,
 	ReferrerFeeWithdrawn,
 	ReferrerFreezeUpdated,
+	ReferrerStateUpdated,
 	Refund,
 	Round,
 	Stake,
@@ -44,7 +44,7 @@ export interface Entities {
 	referralTiersUpdates: ReferralTiersUpdated[]
 	referralTiers: ReferralTier[]
 	defaultReferralFeeUpdates: DefaultReferralFeeUpdated[]
-	referralStatsUpdates: ReferralStatsUpdated[]
+	referrerStateUpdates: ReferrerStateUpdated[]
 	referralFeeAccruals: ReferralFeeAccrued[]
 	protocolFeeAccruals: ProtocolFeeAccrued[]
 }

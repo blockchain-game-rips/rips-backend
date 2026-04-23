@@ -10,8 +10,8 @@ import { handleProtocolFeeWithdrawn } from './handlers/handle-protocol-fee-withd
 import { handleRandomnessFulfilled } from './handlers/handle-randomness-fulfilled'
 import { handleRandomnessRequested } from './handlers/handle-randomness-requested'
 import { handleReferralFeeAccrued } from './handlers/handle-referral-fee-accrued'
-import { handleReferralTiersUpdated } from './handlers/handle-referral-tiers-updated'
 import { handleReferralStatsUpdated } from './handlers/handle-referral-stats-updated'
+import { handleReferralTiersUpdated } from './handlers/handle-referral-tiers-updated'
 import { handleReferrerFeeSeized } from './handlers/handle-referrer-fee-seized'
 import { handleReferrerFeeWithdrawn } from './handlers/handle-referrer-fee-withdrawn'
 import { handleReferrerFreezeUpdated } from './handlers/handle-referrer-freeze-updated'
@@ -109,7 +109,7 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 		referralTiersUpdates: [],
 		referralTiers: [],
 		defaultReferralFeeUpdates: [],
-		referralStatsUpdates: [],
+		referrerStateUpdates: [],
 		referralFeeAccruals: [],
 		protocolFeeAccruals: [],
 	}

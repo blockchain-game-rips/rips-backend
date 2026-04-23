@@ -14,7 +14,7 @@ export const events = {
     RandomnessFulfilled: event("0xdc21bacb3b6e5d0ab7b2226e949e874de99019db7967e59ee54cc1e830016cab", "RandomnessFulfilled(uint256,uint256,uint256)", {"roundId": indexed(p.uint256), "randomA": p.uint256, "randomB": p.uint256}),
     RandomnessRequested: event("0x3d94fecedaa4f90b8bd459797adb95f5bb11426025c5541390d9ccc1ad1b60a1", "RandomnessRequested(uint256,uint256)", {"roundId": indexed(p.uint256), "vrfRequestId": p.uint256}),
     ReferralFeeAccrued: event("0xf51b8c95ee5eeea91a2309af8a0da1bcadcee2bcf67057f3e5b51358ff9ab969", "ReferralFeeAccrued(uint256,address,uint256)", {"roundId": indexed(p.uint256), "referrer": indexed(p.address), "amount": p.uint256}),
-    ReferralStatsUpdated: event("0x4959244f8facec65f957fa52a1821c5075543afbc90ebe6cad7fc184e916b1ff", "ReferralStatsUpdated((uint16,uint16,uint40,uint256))", {"referralStats": p.struct({"activeFeePercent": p.uint16, "customFeePercent": p.uint16, "monthStartTimestamp": p.uint40, "currMonthVolume": p.uint256})}),
+    ReferralStatsUpdated: event("0x4b302dacb6caee38496571bd4cb3aff997735fdcb00654153ec3c8d3a8ec095b", "ReferralStatsUpdated(address,(uint16,uint16,uint40,uint256))", {"referrer": indexed(p.address), "referrerState": p.struct({"activeFeePercent": p.uint16, "customFeePercent": p.uint16, "monthStartTimestamp": p.uint40, "currMonthVolume": p.uint256})}),
     ReferralTiersUpdated: event("0x6b62d291a70ab2427227f2cae67265ba70ed523c6eb0bcc0f472c52cae565402", "ReferralTiersUpdated((uint128,uint16)[])", {"tiers": p.array(p.struct({"minVolume": p.uint128, "feePercent": p.uint16}))}),
     ReferrerFeeSeized: event("0xc67df585acf738df3324c58148cccf0e0845dde9c7770a2be7bb3f337a459e19", "ReferrerFeeSeized(address,address,uint256)", {"referrer": indexed(p.address), "currency": indexed(p.address), "amount": p.uint256}),
     ReferrerFeeWithdrawn: event("0x1f1a0569e61e4a8573e34abf057b1d530d895d6e95ed5d28cddb4eff6a32d1d8", "ReferrerFeeWithdrawn(address,address,uint256)", {"referrer": indexed(p.address), "currency": indexed(p.address), "amount": p.uint256}),
@@ -66,7 +66,7 @@ export const functions = {
     rawFulfillRandomWords: fun("0x1fe543e3", "rawFulfillRandomWords(uint256,uint256[])", {"requestId": p.uint256, "randomWords": p.array(p.uint256)}, ),
     referralTiers: viewFun("0x93e2d3b4", "referralTiers(uint256)", {"_0": p.uint256}, {"minVolume": p.uint128, "feePercent": p.uint16}),
     referrerFeeAccrued: viewFun("0x334091ab", "referrerFeeAccrued(address,address)", {"referrer": p.address, "currency": p.address}, p.uint256),
-    referrerToReferrerStats: viewFun("0xe4c0acd6", "referrerToReferrerStats(address)", {"referrer": p.address}, {"activeFeePercent": p.uint16, "customFeePercent": p.uint16, "monthStartTimestamp": p.uint40, "currMonthVolume": p.uint256}),
+    referrerToReferrerState: viewFun("0xe203ad62", "referrerToReferrerState(address)", {"referrer": p.address}, {"activeFeePercent": p.uint16, "customFeePercent": p.uint16, "monthStartTimestamp": p.uint40, "currMonthVolume": p.uint256}),
     refund: fun("0x7ad226dc", "refund(uint256,address)", {"roundId": p.uint256, "recipient": p.address}, ),
     renounceRole: fun("0x36568abe", "renounceRole(bytes32,address)", {"role": p.bytes32, "callerConfirmation": p.address}, ),
     requestRandomness: fun("0x7363ae1f", "requestRandomness(uint256)", {"roundId": p.uint256}, p.uint256),
@@ -195,8 +195,8 @@ export class Contract extends ContractBase {
         return this.eth_call(functions.referrerFeeAccrued, {referrer, currency})
     }
 
-    referrerToReferrerStats(referrer: ReferrerToReferrerStatsParams["referrer"]) {
-        return this.eth_call(functions.referrerToReferrerStats, {referrer})
+    referrerToReferrerState(referrer: ReferrerToReferrerStateParams["referrer"]) {
+        return this.eth_call(functions.referrerToReferrerState, {referrer})
     }
 
     roundIdToRound(roundId: RoundIdToRoundParams["roundId"]) {
@@ -361,8 +361,8 @@ export type ReferralTiersReturn = FunctionReturn<typeof functions.referralTiers>
 export type ReferrerFeeAccruedParams = FunctionArguments<typeof functions.referrerFeeAccrued>
 export type ReferrerFeeAccruedReturn = FunctionReturn<typeof functions.referrerFeeAccrued>
 
-export type ReferrerToReferrerStatsParams = FunctionArguments<typeof functions.referrerToReferrerStats>
-export type ReferrerToReferrerStatsReturn = FunctionReturn<typeof functions.referrerToReferrerStats>
+export type ReferrerToReferrerStateParams = FunctionArguments<typeof functions.referrerToReferrerState>
+export type ReferrerToReferrerStateReturn = FunctionReturn<typeof functions.referrerToReferrerState>
 
 export type RefundParams = FunctionArguments<typeof functions.refund>
 export type RefundReturn = FunctionReturn<typeof functions.refund>

@@ -1,19 +1,21 @@
 import * as rips from '../abi/rips'
-import { ReferralStatsUpdated } from '../model'
+import { ReferrerStateUpdated } from '../model'
 import { HandlerArgs } from '../types'
 
 export function handleReferralStatsUpdated(args: HandlerArgs): void {
 	const { entities, block, log } = args
 
-	const { referralStats } = rips.events.ReferralStatsUpdated.decode(log)
+	const { referrer, referrerState } =
+		rips.events.ReferralStatsUpdated.decode(log)
 
-	entities.referralStatsUpdates.push(
-		new ReferralStatsUpdated({
+	entities.referrerStateUpdates.push(
+		new ReferrerStateUpdated({
 			id: log.id,
-			activeFeePercent: referralStats.activeFeePercent,
-			customFeePercent: referralStats.customFeePercent,
-			monthStartTimestamp: BigInt(referralStats.monthStartTimestamp),
-			currMonthVolume: referralStats.currMonthVolume,
+			referrer: referrer,
+			activeFeePercent: referrerState.activeFeePercent,
+			customFeePercent: referrerState.customFeePercent,
+			monthStartTimestamp: BigInt(referrerState.monthStartTimestamp),
+			currMonthVolume: referrerState.currMonthVolume,
 			blockNumber: BigInt(block.height),
 			time: new Date(block.timestamp),
 			txHash: log.transactionHash,
