@@ -11,7 +11,7 @@ import { handleRandomnessFulfilled } from './handlers/handle-randomness-fulfille
 import { handleRandomnessRequested } from './handlers/handle-randomness-requested'
 import { handleReferralFeeAccrued } from './handlers/handle-referral-fee-accrued'
 import { handleReferralTiersUpdated } from './handlers/handle-referral-tiers-updated'
-import { handleReferrerCustomFeeSet } from './handlers/handle-referrer-custom-fee-set'
+import { handleReferralStatsUpdated } from './handlers/handle-referral-stats-updated'
 import { handleReferrerFeeSeized } from './handlers/handle-referrer-fee-seized'
 import { handleReferrerFeeWithdrawn } from './handlers/handle-referrer-fee-withdrawn'
 import { handleReferrerFreezeUpdated } from './handlers/handle-referrer-freeze-updated'
@@ -54,7 +54,7 @@ const handlers: Record<string, Handler> = {
 	[rips.events.ReferralTiersUpdated.topic]: handleReferralTiersUpdated,
 	[rips.events.DefaultReferralFeeUpdated.topic]:
 		handleDefaultReferralFeeUpdated,
-	[rips.events.ReferrerCustomFeeSet.topic]: handleReferrerCustomFeeSet,
+	[rips.events.ReferralStatsUpdated.topic]: handleReferralStatsUpdated,
 	[rips.events.ReferralFeeAccrued.topic]: handleReferralFeeAccrued,
 	[rips.events.ProtocolFeeAccrued.topic]: handleProtocolFeeAccrued,
 }
@@ -109,7 +109,7 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 		referralTiersUpdates: [],
 		referralTiers: [],
 		defaultReferralFeeUpdates: [],
-		referrerCustomFeeUpdates: [],
+		referralStatsUpdates: [],
 		referralFeeAccruals: [],
 		protocolFeeAccruals: [],
 	}

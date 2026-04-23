@@ -38,7 +38,7 @@ const TRACKED_EVENTS = [
 	rips.events.ReferrerFreezeUpdated.topic,
 	rips.events.ReferralTiersUpdated.topic,
 	rips.events.DefaultReferralFeeUpdated.topic,
-	rips.events.ReferrerCustomFeeSet.topic,
+	rips.events.ReferralStatsUpdated.topic,
 	rips.events.ReferralFeeAccrued.topic,
 	rips.events.ProtocolFeeAccrued.topic,
 ]

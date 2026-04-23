@@ -234,10 +234,12 @@ type DefaultReferralFeeUpdated @entity {
 	txHash: String!
 }
 
-type ReferrerCustomFeeSet @entity {
+type ReferralStatsUpdated @entity {
 	id: ID!
-	referrer: String!
+	activeFeePercent: Int!
 	customFeePercent: Int!
+	monthStartTimestamp: BigInt!
+	currMonthVolume: BigInt!
 	blockNumber: BigInt!
 	time: DateTime!
 	txHash: String!

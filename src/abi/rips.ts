@@ -14,8 +14,8 @@ export const events = {
     RandomnessFulfilled: event("0xdc21bacb3b6e5d0ab7b2226e949e874de99019db7967e59ee54cc1e830016cab", "RandomnessFulfilled(uint256,uint256,uint256)", {"roundId": indexed(p.uint256), "randomA": p.uint256, "randomB": p.uint256}),
     RandomnessRequested: event("0x3d94fecedaa4f90b8bd459797adb95f5bb11426025c5541390d9ccc1ad1b60a1", "RandomnessRequested(uint256,uint256)", {"roundId": indexed(p.uint256), "vrfRequestId": p.uint256}),
     ReferralFeeAccrued: event("0xf51b8c95ee5eeea91a2309af8a0da1bcadcee2bcf67057f3e5b51358ff9ab969", "ReferralFeeAccrued(uint256,address,uint256)", {"roundId": indexed(p.uint256), "referrer": indexed(p.address), "amount": p.uint256}),
+    ReferralStatsUpdated: event("0x4959244f8facec65f957fa52a1821c5075543afbc90ebe6cad7fc184e916b1ff", "ReferralStatsUpdated((uint16,uint16,uint40,uint256))", {"referralStats": p.struct({"activeFeePercent": p.uint16, "customFeePercent": p.uint16, "monthStartTimestamp": p.uint40, "currMonthVolume": p.uint256})}),
     ReferralTiersUpdated: event("0x6b62d291a70ab2427227f2cae67265ba70ed523c6eb0bcc0f472c52cae565402", "ReferralTiersUpdated((uint128,uint16)[])", {"tiers": p.array(p.struct({"minVolume": p.uint128, "feePercent": p.uint16}))}),
-    ReferrerCustomFeeSet: event("0x0296a6ddfb989e97b8f275beac9149b76c0375f8f14596b8e1a67aae129411c1", "ReferrerCustomFeeSet(address,uint16)", {"referrer": indexed(p.address), "customFeePercent": p.uint16}),
     ReferrerFeeSeized: event("0xc67df585acf738df3324c58148cccf0e0845dde9c7770a2be7bb3f337a459e19", "ReferrerFeeSeized(address,address,uint256)", {"referrer": indexed(p.address), "currency": indexed(p.address), "amount": p.uint256}),
     ReferrerFeeWithdrawn: event("0x1f1a0569e61e4a8573e34abf057b1d530d895d6e95ed5d28cddb4eff6a32d1d8", "ReferrerFeeWithdrawn(address,address,uint256)", {"referrer": indexed(p.address), "currency": indexed(p.address), "amount": p.uint256}),
     ReferrerFreezeUpdated: event("0xf130e492f9609fb734eeae4b625128bcd3efa572f68bd370f208b38dd581130d", "ReferrerFreezeUpdated(address,bool)", {"referrer": indexed(p.address), "frozen": p.bool}),
@@ -88,6 +88,7 @@ export const functions = {
     updateVrfKeyHash: fun("0x98264fa6", "updateVrfKeyHash(bytes32)", {"newKeyHash": p.bytes32}, ),
     updateVrfRequestConfirmations: fun("0xe496d045", "updateVrfRequestConfirmations(uint16)", {"newConfirmations": p.uint16}, ),
     updateVrfSubscriptionId: fun("0x4ac925cb", "updateVrfSubscriptionId(uint256)", {"newSubscriptionId": p.uint256}, ),
+    userTicketCount: viewFun("0x2a4f588b", "userTicketCount(uint256,address)", {"roundId": p.uint256, "buyer": p.address}, p.uint64),
     vrfCoordinator: viewFun("0xa3e56fa8", "vrfCoordinator()", {}, p.address),
     vrfKeyHash: viewFun("0x041d443e", "vrfKeyHash()", {}, p.bytes32),
     vrfRequestConfirmations: viewFun("0x598bc486", "vrfRequestConfirmations()", {}, p.uint16),
@@ -214,6 +215,10 @@ export class Contract extends ContractBase {
         return this.eth_call(functions.supportsInterface, {interfaceId})
     }
 
+    userTicketCount(roundId: UserTicketCountParams["roundId"], buyer: UserTicketCountParams["buyer"]) {
+        return this.eth_call(functions.userTicketCount, {roundId, buyer})
+    }
+
     vrfCoordinator() {
         return this.eth_call(functions.vrfCoordinator, {})
     }
@@ -243,8 +248,8 @@ export type ProtocolFeeWithdrawnEventArgs = EParams<typeof events.ProtocolFeeWit
 export type RandomnessFulfilledEventArgs = EParams<typeof events.RandomnessFulfilled>
 export type RandomnessRequestedEventArgs = EParams<typeof events.RandomnessRequested>
 export type ReferralFeeAccruedEventArgs = EParams<typeof events.ReferralFeeAccrued>
+export type ReferralStatsUpdatedEventArgs = EParams<typeof events.ReferralStatsUpdated>
 export type ReferralTiersUpdatedEventArgs = EParams<typeof events.ReferralTiersUpdated>
-export type ReferrerCustomFeeSetEventArgs = EParams<typeof events.ReferrerCustomFeeSet>
 export type ReferrerFeeSeizedEventArgs = EParams<typeof events.ReferrerFeeSeized>
 export type ReferrerFeeWithdrawnEventArgs = EParams<typeof events.ReferrerFeeWithdrawn>
 export type ReferrerFreezeUpdatedEventArgs = EParams<typeof events.ReferrerFreezeUpdated>
@@ -421,6 +426,9 @@ export type UpdateVrfRequestConfirmationsReturn = FunctionReturn<typeof function
 
 export type UpdateVrfSubscriptionIdParams = FunctionArguments<typeof functions.updateVrfSubscriptionId>
 export type UpdateVrfSubscriptionIdReturn = FunctionReturn<typeof functions.updateVrfSubscriptionId>
+
+export type UserTicketCountParams = FunctionArguments<typeof functions.userTicketCount>
+export type UserTicketCountReturn = FunctionReturn<typeof functions.userTicketCount>
 
 export type VrfCoordinatorParams = FunctionArguments<typeof functions.vrfCoordinator>
 export type VrfCoordinatorReturn = FunctionReturn<typeof functions.vrfCoordinator>
