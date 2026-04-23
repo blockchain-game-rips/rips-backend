@@ -360,8 +360,8 @@ describe('Reveal prizes flow E2E', () => {
 			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.expect(200)
 
-		expect(res1.body).toHaveLength(TICKETS_PER_USER)
-		expect(res2.body).toHaveLength(TICKETS_PER_USER)
+		expect(res1.body.prizes).toHaveLength(TICKETS_PER_USER)
+		expect(res2.body.prizes).toHaveLength(TICKETS_PER_USER)
 	})
 
 	it('user 1 reveals 1 ticket, user 2 reveals all 4 tickets', async () => {
@@ -371,7 +371,7 @@ describe('Reveal prizes flow E2E', () => {
 			.send({ revealAll: false })
 			.expect(200)
 
-		expect(revealOneRes.body).toHaveLength(1)
+		expect(revealOneRes.body.prizes).toHaveLength(1)
 
 		const revealAllRes = await request(ctx.app.getHttpServer())
 			.patch('/rips/prizes')
@@ -379,7 +379,7 @@ describe('Reveal prizes flow E2E', () => {
 			.send({ revealAll: true })
 			.expect(200)
 
-		expect(revealAllRes.body).toHaveLength(TICKETS_PER_USER)
+		expect(revealAllRes.body.prizes).toHaveLength(TICKETS_PER_USER)
 	})
 
 	it('user 1 has 3 unrevealed tickets remaining, user 2 has 0', async () => {
@@ -393,8 +393,8 @@ describe('Reveal prizes flow E2E', () => {
 			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.expect(200)
 
-		expect(res1.body).toHaveLength(TICKETS_PER_USER - 1)
-		expect(res2.body).toHaveLength(0)
+		expect(res1.body.prizes).toHaveLength(TICKETS_PER_USER - 1)
+		expect(res2.body.prizes).toHaveLength(0)
 	})
 })
 
