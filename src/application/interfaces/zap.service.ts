@@ -51,9 +51,7 @@ export abstract class ZapService {
 		},
 	): Promise<PendingZap>
 
-	abstract getBuyResult(pendingZap: PendingZap): Promise<ZapBuyResult | null>
+	abstract getBuyResult(zapId: string): Promise<ZapBuyResult | null>
 
-	abstract getSwapResult(
-		pendingZap: PendingZap,
-	): Promise<ZapSwapResult | null>
+	abstract getSwapResult(zapId: string): Promise<ZapSwapResult | null>
 }

@@ -66,8 +66,8 @@ export class DeBridgeService implements ZapService {
 		this.ripsContractAddress = toEvmAddress(ripsContract.address)
 	}
 
-	async getBuyResult(pendingZap: PendingZap): Promise<ZapBuyResult | null> {
-		const orderId = pendingZap.zapId
+	async getBuyResult(zapId: string): Promise<ZapBuyResult | null> {
+		const orderId = zapId
 
 		const order = await this.deBridgeApiService.getOrder(orderId)
 
@@ -96,8 +96,8 @@ export class DeBridgeService implements ZapService {
 		return null
 	}
 
-	async getSwapResult(pendingZap: PendingZap): Promise<ZapSwapResult | null> {
-		const orderId = pendingZap.zapId
+	async getSwapResult(zapId: string): Promise<ZapSwapResult | null> {
+		const orderId = zapId
 
 		const order = await this.deBridgeApiService.getOrder(orderId)
 

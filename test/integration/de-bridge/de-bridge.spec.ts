@@ -201,7 +201,7 @@ describe('DeBridge integration', () => {
 
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
-			const result = await zapService.getBuyResult(pendingZap)
+			const result = await zapService.getBuyResult(pendingZap.zapId)
 
 			if (result === null || result.status !== 'failed')
 				throw new Error(
@@ -246,7 +246,7 @@ describe('DeBridge integration', () => {
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
 			// Step 3: get buy result
-			const result = await zapService.getBuyResult(pendingZap)
+			const result = await zapService.getBuyResult(pendingZap.zapId)
 
 			if (result === null || result.status !== 'success')
 				throw new Error(
@@ -295,7 +295,7 @@ describe('DeBridge integration', () => {
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
 			// Step 3: get buy result
-			const result = await zapService.getBuyResult(pendingZap)
+			const result = await zapService.getBuyResult(pendingZap.zapId)
 
 			if (result === null || result.status !== 'success')
 				throw new Error(
@@ -350,7 +350,7 @@ describe('DeBridge integration', () => {
 
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
-			const result = await zapService.getSwapResult(pendingZap)
+			const result = await zapService.getSwapResult(pendingZap.zapId)
 
 			if (result === null || result.status !== 'success')
 				throw new Error(
