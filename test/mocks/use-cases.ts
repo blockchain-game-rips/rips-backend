@@ -1,3 +1,4 @@
+import { CurrencyService } from '../../src/application/interfaces/currency.service'
 import { KmsService } from '../../src/application/interfaces/kms.service'
 import { UserRepository } from '../../src/application/interfaces/repositories/user.repository'
 import { WalletService } from '../../src/application/interfaces/wallet.service'
@@ -65,4 +66,8 @@ export function makeMockGetUnrevealedPrizesUseCase(): jest.Mocked<GetUnrevealedP
 
 export function makeMockWithdrawUseCase(): jest.Mocked<WithdrawUseCase> {
 	return { execute: jest.fn() }
+}
+
+export function makeMockCurrencyService(): jest.Mocked<CurrencyService> {
+	return { fromAccount: jest.fn() }
 }

@@ -10,6 +10,7 @@ import {
 	TELEGRAM_ID,
 } from '../../fixtures/entities'
 import {
+	makeMockCurrencyService,
 	makeMockGetBalanceUseCase,
 	makeMockGetPriceUseCase,
 	makeMockWithdrawUseCase,
@@ -29,6 +30,7 @@ describe('WalletsController', () => {
 		getBalance,
 		getPrice,
 		makeMockWithdrawUseCase(),
+		makeMockCurrencyService(),
 	)
 
 	beforeEach(() => {
