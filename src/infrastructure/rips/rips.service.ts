@@ -13,6 +13,7 @@ import {
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
+import { Reward } from '../../domain/value-objects/reward'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmClientService } from '../evm/evm-client/evm-client.service'
@@ -149,6 +150,13 @@ export class RipsServiceIpml implements RipsService {
 		}
 
 		return { transaction, purchase }
+	}
+
+	withdrawReward(
+		_wallet: Wallet,
+		_args: { currencyAddress: EvmAddress },
+	): Promise<Reward> {
+		throw new Error('TODO: implement withdrawReward in RipsServiceIpml')
 	}
 
 	async getConfigByRoundId(roundId: number): Promise<Config> {
