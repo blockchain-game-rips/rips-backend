@@ -11,6 +11,8 @@ import {
 import { ZodResponse } from 'nestjs-zod'
 import { BuyTicketsUseCase } from '../../application/use-cases/buy-tickets/buy-tickets.use-case'
 import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
+import { GetCardCollectionUseCase } from '../../application/use-cases/get-card-collection/get-card-collection.use-case'
+import { GetCardDefinitionsUseCase } from '../../application/use-cases/get-card-definitions/get-card-definitions.use-case'
 import { GetCompletedRoundsUseCase } from '../../application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
 import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
@@ -33,6 +35,16 @@ import {
 	BuyTicketsZapResponseDto,
 	toBuyTicketsZapResponseDto,
 } from './buy-tickets-zap/buy-tickets-zap.response'
+import { GetCardCollectionQueryDto } from './get-card-collection/get-card-collection.request'
+import {
+	GetCardCollectionResponseDto,
+	toGetCardCollectionResponseDto,
+} from './get-card-collection/get-card-collection.response'
+import { GetCardDefinitionsQueryDto } from './get-card-definitions/get-card-definitions.request'
+import {
+	GetCardDefinitionsResponseDto,
+	toGetCardDefinitionsResponseDto,
+} from './get-card-definitions/get-card-definitions.response'
 import { GetCompletedRoundsQueryDto } from './get-completed-rounds/get-completed-rounds.request'
 import { GetCompletedRoundsResponseDto } from './get-completed-rounds/get-completed-rounds.response'
 import { GetOngoingRoundsResponseDto } from './get-ongoing-rounds/get-ongoing-rounds.response'
@@ -69,6 +81,8 @@ export class RipsController {
 		private readonly getUnrevealedPrizesUseCase: GetUnrevealedPrizesUseCase,
 		private readonly revealTicketPrizesUseCase: RevealTicketPrizesUseCase,
 		private readonly getRoundsUseCase: GetRoundsUseCase,
+		private readonly getCardCollectionUseCase: GetCardCollectionUseCase,
+		private readonly getCardDefinitionsUseCase: GetCardDefinitionsUseCase,
 	) {}
 
 	@Get('stakes')
@@ -274,5 +288,31 @@ export class RipsController {
 			),
 			nextCursor: result.nextCursor,
 		}
+	}
+
+	@Get('card-collection')
+	@ZodResponse({ type: GetCardCollectionResponseDto })
+	async getCardCollection(
+		@Headers() headers: TelegramIdHeaderDto,
+		@Query() query: GetCardCollectionQueryDto,
+	): Promise<GetCardCollectionResponseDto> {
+		const tiers = await this.getCardCollectionUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+			stakeId: query.stakeId,
+		})
+
+		return toGetCardCollectionResponseDto(tiers)
+	}
+
+	@Get('card-definition')
+	@ZodResponse({ type: GetCardDefinitionsResponseDto })
+	async getCardDefinitions(
+		@Query() query: GetCardDefinitionsQueryDto,
+	): Promise<GetCardDefinitionsResponseDto> {
+		const tiers = await this.getCardDefinitionsUseCase.execute({
+			stakeId: query.stakeId,
+		})
+
+		return toGetCardDefinitionsResponseDto(tiers)
 	}
 }
