@@ -652,7 +652,7 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 'referrerToReferrerStats',
+		name: 'referrerToReferrerState',
 		inputs: [
 			{
 				name: 'referrer',
@@ -1434,10 +1434,16 @@ export const ripsAbi = [
 		name: 'ReferralStatsUpdated',
 		inputs: [
 			{
-				name: 'referralStats',
+				name: 'referrer',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'referrerState',
 				type: 'tuple',
 				indexed: false,
-				internalType: 'struct IRips.ReferrerStats',
+				internalType: 'struct IRips.ReferrerState',
 				components: [
 					{
 						name: 'activeFeePercent',
