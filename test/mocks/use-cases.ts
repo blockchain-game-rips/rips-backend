@@ -43,6 +43,10 @@ export function makeMockCreateUserUseCase(): jest.Mocked<CreateUserUseCase> {
 	return { execute: jest.fn() }
 }
 
+export function makeMockSetReferrerUseCase(): jest.Mocked<GetUserUseCase> {
+	return { execute: jest.fn() }
+}
+
 export function makeMockGetBalanceUseCase(): jest.Mocked<GetBalanceUseCase> {
 	return { execute: jest.fn() }
 }

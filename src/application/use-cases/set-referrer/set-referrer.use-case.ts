@@ -4,7 +4,7 @@ import { TelegramId } from '../../../domain/value-objects/telegram-id'
 
 export type SetReferrerInput = {
 	telegramId: TelegramId
-	referrerAddress: EvmAddress
+	referrerAddress: EvmAddress | null
 }
 
 export abstract class SetReferrerUseCase {

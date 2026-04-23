@@ -6,6 +6,7 @@ const userSchema = z.object({
 	id: z.string(),
 	telegramId: z.string(),
 	wallets: z.record(z.string(), z.string()),
+	referrerAddress: z.string().nullable(),
 	createdAt: z.string(),
 })
 
@@ -16,6 +17,7 @@ export function toUserDto(user: User): UserDto {
 		id: user.id.toString(),
 		telegramId: user.telegramProfile.telegramId.toString(),
 		wallets: user.wallet.namespaceToAddress,
+		referrerAddress: user.referrerAddress ?? null,
 		createdAt: user.createdAt.toISOString(),
 	}
 }

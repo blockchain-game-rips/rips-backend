@@ -6,12 +6,14 @@ import { EVM_ADDRESS, MOCK_USER, TELEGRAM_ID } from '../../fixtures/entities'
 import {
 	makeMockCreateUserUseCase,
 	makeMockGetUserUseCase,
+	makeMockSetReferrerUseCase,
 } from '../../mocks/use-cases'
 
 describe('UsersController', () => {
 	const getUser = makeMockGetUserUseCase()
 	const createUser = makeMockCreateUserUseCase()
-	const controller = new UsersController(getUser, createUser)
+	const setReferrer = makeMockSetReferrerUseCase()
+	const controller = new UsersController(getUser, createUser, setReferrer)
 
 	beforeEach(() => {
 		jest.clearAllMocks()

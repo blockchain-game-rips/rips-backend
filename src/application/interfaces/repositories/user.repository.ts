@@ -17,6 +17,6 @@ export abstract class UserRepository {
 
 	abstract setReferrer(
 		userId: bigint,
-		referrerAddress: EvmAddress,
+		referrerAddress: EvmAddress | null,
 	): Promise<User>
 }

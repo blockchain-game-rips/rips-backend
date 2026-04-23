@@ -62,7 +62,7 @@ export class PrismaUserRepository extends UserRepository {
 
 	async setReferrer(
 		userId: bigint,
-		referrerAddress: EvmAddress,
+		referrerAddress: EvmAddress | null,
 	): Promise<User> {
 		const record = await this.prisma.user.update({
 			where: { id: userId },
