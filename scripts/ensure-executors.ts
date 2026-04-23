@@ -17,4 +17,4 @@ async function main() {
 	await app.close()
 }
 
-main()
+void main()
