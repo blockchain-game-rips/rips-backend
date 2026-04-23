@@ -16,6 +16,7 @@ import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
 import { GetRoundsUseCase } from '../../application/use-cases/get-rounds/get-rounds.use-case'
 import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
+import { GetZapResultUseCase } from '../../application/use-cases/get-zap-result/get-zap-result.use-case'
 import { QuoteZapUseCase } from '../../application/use-cases/quote-zap/quote-zap.use-case'
 import { RevealTicketPrizesUseCase } from '../../application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
 import {
@@ -39,6 +40,11 @@ import { GetPrizesResponseDto } from './get-prizes/get-prizes.response'
 import { GetRoundsQueryDto } from './get-rounds/get-rounds.request'
 import { GetRoundsResponseDto } from './get-rounds/get-rounds.response'
 import { GetStakesResponseDto } from './get-stakes/get-stakes.response'
+import { GetZapResultQueryDto } from './get-zap-result/get-zap-result.request'
+import {
+	GetZapResultResponseDto,
+	toGetZapResultResponseDto,
+} from './get-zap-result/get-zap-result.response'
 import { QuoteZapBodyDto } from './quote-zap/quote-zap.request'
 import {
 	QuoteZapResponseDto,
@@ -56,6 +62,7 @@ export class RipsController {
 		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
 		private readonly buyTicketsUseCase: BuyTicketsUseCase,
 		private readonly quoteZapUseCase: QuoteZapUseCase,
+		private readonly getZapResultUseCase: GetZapResultUseCase,
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly getCompletedRoundsUseCase: GetCompletedRoundsUseCase,
 		private readonly getPriceUseCase: GetPriceUseCase,
@@ -155,6 +162,26 @@ export class RipsController {
 		})
 
 		return toQuoteZapResponseDto(quote, feePrice)
+	}
+
+	@Get('tickets/zap-result')
+	@ZodResponse({ type: GetZapResultResponseDto })
+	async getZapResult(
+		@Query() query: GetZapResultQueryDto,
+	): Promise<GetZapResultResponseDto> {
+		const result = await this.getZapResultUseCase.execute({
+			zapId: query.zapId,
+		})
+
+		if (result === null || result.status !== 'failed') {
+			return toGetZapResultResponseDto(result, 0)
+		}
+
+		const refundPrice = await this.getPriceUseCase.execute({
+			currency: result.refund.currency,
+		})
+
+		return toGetZapResultResponseDto(result, refundPrice)
 	}
 
 	@Get('prizes')

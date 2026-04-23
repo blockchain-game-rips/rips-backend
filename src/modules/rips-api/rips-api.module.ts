@@ -7,6 +7,7 @@ import { GetOngoingRoundsModule } from '../use-cases/get-ongoing-rounds.module'
 import { GetPriceModule } from '../use-cases/get-price.module'
 import { GetRoundsModule } from '../use-cases/get-rounds.module'
 import { GetUnrevealedPrizesModule } from '../use-cases/get-unrevealed-prizes.module'
+import { GetZapResultModule } from '../use-cases/get-zap-result.module'
 import { QuoteZapModule } from '../use-cases/quote-zap.module'
 import { RevealTicketPrizesModule } from '../use-cases/reveal-ticket-prizes.module'
 
@@ -21,6 +22,7 @@ import { RevealTicketPrizesModule } from '../use-cases/reveal-ticket-prizes.modu
 		GetUnrevealedPrizesModule,
 		RevealTicketPrizesModule,
 		QuoteZapModule,
+		GetZapResultModule,
 	],
 	controllers: [RipsController],
 })
