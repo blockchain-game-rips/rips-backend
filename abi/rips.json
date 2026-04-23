@@ -1109,6 +1109,30 @@
     },
     {
         "type": "function",
+        "name": "userTicketCount",
+        "inputs": [
+            {
+                "name": "roundId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "buyer",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "ticketCount",
+                "type": "uint64",
+                "internalType": "uint64"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
         "name": "vrfCoordinator",
         "inputs": [],
         "outputs": [
@@ -1407,6 +1431,41 @@
     },
     {
         "type": "event",
+        "name": "ReferralStatsUpdated",
+        "inputs": [
+            {
+                "name": "referralStats",
+                "type": "tuple",
+                "indexed": false,
+                "internalType": "struct IRips.ReferrerStats",
+                "components": [
+                    {
+                        "name": "activeFeePercent",
+                        "type": "uint16",
+                        "internalType": "uint16"
+                    },
+                    {
+                        "name": "customFeePercent",
+                        "type": "uint16",
+                        "internalType": "uint16"
+                    },
+                    {
+                        "name": "monthStartTimestamp",
+                        "type": "uint40",
+                        "internalType": "uint40"
+                    },
+                    {
+                        "name": "currMonthVolume",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ]
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
         "name": "ReferralTiersUpdated",
         "inputs": [
             {
@@ -1426,25 +1485,6 @@
                         "internalType": "uint16"
                     }
                 ]
-            }
-        ],
-        "anonymous": false
-    },
-    {
-        "type": "event",
-        "name": "ReferrerCustomFeeSet",
-        "inputs": [
-            {
-                "name": "referrer",
-                "type": "address",
-                "indexed": true,
-                "internalType": "address"
-            },
-            {
-                "name": "customFeePercent",
-                "type": "uint16",
-                "indexed": false,
-                "internalType": "uint16"
             }
         ],
         "anonymous": false
