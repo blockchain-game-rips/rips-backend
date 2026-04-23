@@ -381,7 +381,10 @@ describe('DeBridge integration', () => {
 				ticketCount: 5,
 			})
 
-			expect(result.amountIn).toBeGreaterThan(0n)
+			expect(result.amountIn.amount).toBeGreaterThan(0n)
+			expect(result.amountIn.currency.chainAddress.address).toBe(
+				USDC_ARBITRUM.chainAddress.address,
+			)
 			expect(result.durationMs).toBeGreaterThan(0)
 			assertNativeFeeOnChain(result.fee, ARBITRUM_CHAIN_ID)
 		})
@@ -399,7 +402,10 @@ describe('DeBridge integration', () => {
 				recipient,
 			})
 
-			expect(result.amountOut).toBeGreaterThan(0n)
+			expect(result.amountOut.amount).toBeGreaterThan(0n)
+			expect(result.amountOut.currency.chainAddress.address).toBe(
+				ETH_BASE.chainAddress.address,
+			)
 			expect(result.durationMs).toBeGreaterThan(0)
 			assertNativeFeeOnChain(result.fee, ARBITRUM_CHAIN_ID)
 		})

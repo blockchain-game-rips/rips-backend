@@ -157,11 +157,15 @@ export class RipsController {
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		const feePrice = await this.getPriceUseCase.execute({
-			currency: quote.fee.currency,
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: [quote.amountIn.currency, quote.fee.currency],
 		})
 
-		return toQuoteZapResponseDto(quote, feePrice)
+		return toQuoteZapResponseDto(
+			quote,
+			prices.get(quote.amountIn.currency.id) ?? 0,
+			prices.get(quote.fee.currency.id) ?? 0,
+		)
 	}
 
 	@Get('tickets/zap-result')

@@ -203,9 +203,12 @@ export class DeBridgeService implements ZapService {
 		})
 
 		return {
-			amountOut: BigInt(
-				createTxResponse.estimation.dstChainTokenOut.amount,
-			),
+			amountOut: {
+				currency: currencyOut,
+				amount: BigInt(
+					createTxResponse.estimation.dstChainTokenOut.amount,
+				),
+			},
 			...this.durationAndFeeFromCreateTxResponse(createTxResponse),
 		}
 	}
@@ -235,7 +238,10 @@ export class DeBridgeService implements ZapService {
 		)
 
 		return {
-			amountIn,
+			amountIn: {
+				amount: amountIn,
+				currency: paymentCurrency,
+			},
 			...this.durationAndFeeFromCreateTxResponse(createTxResponse),
 		}
 	}
