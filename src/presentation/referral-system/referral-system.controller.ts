@@ -1,61 +1,55 @@
 import { Body, Controller, Get, Headers, Post } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
-import { GetAccruedRewardsUseCase } from '../../application/use-cases/get-accrued-rewards/get-accrued-rewards.use-case'
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
-import { GetRewardsUseCase } from '../../application/use-cases/get-rewards/get-rewards.use-case'
+import { GetReferrerUseCase } from '../../application/use-cases/get-referrer/get-referrer.use-case'
 import { WithdrawRewardUseCase } from '../../application/use-cases/withdraw-reward/withdraw-reward.use-case'
 import {
 	TELEGRAM_ID_HEADER,
 	TelegramIdHeaderDto,
 } from '../shared/telegram-id.header'
 import {
-	GetAccruedRewardsResponseDto,
-	toGetAccruedRewardsResponseDto,
-} from './get-accrued-rewards/get-accrued-rewards.response'
-import {
-	GetRewardsResponseDto,
-	toGetRewardsResponseDto,
-} from './get-rewards/get-rewards.response'
+	GetReferrerResponseDto,
+	toGetReferrerResponseDto,
+} from './get-referrer/get-referrer.response'
 import { WithdrawRewardBodyDto } from './withdraw-reward/withdraw-reward.request'
 import {
 	WithdrawRewardResponseDto,
 	toWithdrawRewardResponseDto,
 } from './withdraw-reward/withdraw-reward.response'
 
-@Controller('reward')
-export class RewardSystemController {
+@Controller('referral-system')
+export class ReferralSystemController {
 	constructor(
-		private readonly getRewardsUseCase: GetRewardsUseCase,
-		private readonly getAccruedRewardsUseCase: GetAccruedRewardsUseCase,
+		private readonly getReferrerUseCase: GetReferrerUseCase,
 		private readonly withdrawRewardUseCase: WithdrawRewardUseCase,
 		private readonly getPriceUseCase: GetPriceUseCase,
 	) {}
 
-	@Get()
-	@ZodResponse({ type: GetRewardsResponseDto })
-	async getRewards(
+	@Get('referrers')
+	@ZodResponse({ type: GetReferrerResponseDto })
+	async getReferrer(
 		@Headers() headers: TelegramIdHeaderDto,
-	): Promise<GetRewardsResponseDto> {
-		const rewards = await this.getRewardsUseCase.execute({
+	): Promise<GetReferrerResponseDto> {
+		const referrer = await this.getReferrerUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
 		})
 
-		return toGetRewardsResponseDto(rewards)
-	}
+		const currencyById = new Map(
+			[
+				...referrer.states.map((s) => s.currMonthVolume.currency),
+				...referrer.rewards.availableToWithdraw.map((a) => a.currency),
+				...referrer.rewards.withdrawnRewards.map((w) => w.currency),
+			].map((c) => [c.id, c]),
+		)
 
-	@Get('accrued')
-	@ZodResponse({ type: GetAccruedRewardsResponseDto })
-	async getAccruedRewards(
-		@Headers() headers: TelegramIdHeaderDto,
-	): Promise<GetAccruedRewardsResponseDto> {
-		const rewards = await this.getAccruedRewardsUseCase.execute({
-			telegramId: headers[TELEGRAM_ID_HEADER],
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: Array.from(currencyById.values()),
 		})
 
-		return toGetAccruedRewardsResponseDto(rewards)
+		return toGetReferrerResponseDto(referrer, prices)
 	}
 
-	@Post()
+	@Post('rewards')
 	@ZodResponse({ type: WithdrawRewardResponseDto })
 	async withdrawReward(
 		@Headers() headers: TelegramIdHeaderDto,
