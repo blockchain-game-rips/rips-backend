@@ -14,7 +14,7 @@ export function handleReferralStatsUpdated(args: HandlerArgs): void {
 			referrer: referrer,
 			activeFeePercent: referrerState.activeFeePercent,
 			customFeePercent: referrerState.customFeePercent,
-			monthStartTimestamp: BigInt(referrerState.monthStartTimestamp),
+			monthStartTime: BigInt(referrerState.monthStartTimestamp),
 			currMonthVolume: referrerState.currMonthVolume,
 			blockNumber: BigInt(block.height),
 			time: new Date(block.timestamp),

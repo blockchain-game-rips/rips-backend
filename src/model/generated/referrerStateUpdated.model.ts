@@ -19,7 +19,7 @@ export class ReferrerStateUpdated {
     customFeePercent!: number
 
     @BigIntColumn_({nullable: false})
-    monthStartTimestamp!: bigint
+    monthStartTime!: bigint
 
     @BigIntColumn_({nullable: false})
     currMonthVolume!: bigint
