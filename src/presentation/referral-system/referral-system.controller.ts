@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Headers, Post } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
+import { GetReferrerTierTablesUseCase } from '../../application/use-cases/get-referrer-tier-tables/get-referrer-tier-tables.use-case'
 import { GetReferrerUseCase } from '../../application/use-cases/get-referrer/get-referrer.use-case'
 import { WithdrawRewardUseCase } from '../../application/use-cases/withdraw-reward/withdraw-reward.use-case'
 import {
@@ -11,6 +12,10 @@ import {
 	GetReferrerResponseDto,
 	toGetReferrerResponseDto,
 } from './get-referrer/get-referrer.response'
+import {
+	GetTierTablesResponseDto,
+	toGetTierTablesResponseDto,
+} from './get-tier-tables/get-tier-tables.response'
 import { WithdrawRewardBodyDto } from './withdraw-reward/withdraw-reward.request'
 import {
 	WithdrawRewardResponseDto,
@@ -21,6 +26,7 @@ import {
 export class ReferralSystemController {
 	constructor(
 		private readonly getReferrerUseCase: GetReferrerUseCase,
+		private readonly getReferrerTierTablesUseCase: GetReferrerTierTablesUseCase,
 		private readonly withdrawRewardUseCase: WithdrawRewardUseCase,
 		private readonly getPriceUseCase: GetPriceUseCase,
 	) {}
@@ -47,6 +53,22 @@ export class ReferralSystemController {
 		})
 
 		return toGetReferrerResponseDto(referrer, prices)
+	}
+
+	@Get('tier-tables')
+	@ZodResponse({ type: GetTierTablesResponseDto })
+	async getTierTables(): Promise<GetTierTablesResponseDto> {
+		const tierTables = await this.getReferrerTierTablesUseCase.execute()
+
+		const currencyById = new Map(
+			tierTables.map((t) => [t.currency.id, t.currency]),
+		)
+
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: Array.from(currencyById.values()),
+		})
+
+		return toGetTierTablesResponseDto(tierTables, prices)
 	}
 
 	@Post('rewards')
