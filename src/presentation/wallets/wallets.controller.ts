@@ -11,6 +11,8 @@ import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
 import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
+import { QuoteSwapUseCase } from '../../application/use-cases/quote-swap/quote-swap.use-case'
+import { SwapUseCase } from '../../application/use-cases/swap/swap.use-case'
 import { WithdrawUseCase } from '../../application/use-cases/withdraw.ts/withdraw.use-case'
 import {
 	TELEGRAM_ID_HEADER,
@@ -31,6 +33,13 @@ import {
 	GetBalancesResponseDto,
 	toGetBalancesResponseDto,
 } from './get-balances/get-balances.response'
+import { QuoteSwapBodyDto } from './quote-swap/quote-swap.request'
+import {
+	QuoteSwapResponseDto,
+	toQuoteSwapResponseDto,
+} from './quote-swap/quote-swap.response'
+import { SwapBodyDto } from './swap/swap.request'
+import { SwapResponseDto, toSwapResponseDto } from './swap/swap.response'
 
 @Controller('wallets')
 export class WalletsController {
@@ -38,6 +47,8 @@ export class WalletsController {
 		private readonly getBalanceUseCase: GetBalanceUseCase,
 		private readonly getPriceUseCase: GetPriceUseCase,
 		private readonly withdrawUseCase: WithdrawUseCase,
+		private readonly quoteSwapUseCase: QuoteSwapUseCase,
+		private readonly swapUseCase: SwapUseCase,
 		private readonly currencyService: CurrencyService,
 	) {}
 
@@ -140,5 +151,65 @@ export class WalletsController {
 			prices.get(pendingZap.amountIn.currency.id) ?? 0,
 			prices.get(pendingZap.fee.currency.id) ?? 0,
 		)
+	}
+
+	@Post('quote-swap')
+	@ZodResponse({ type: QuoteSwapResponseDto })
+	async quoteSwap(
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: QuoteSwapBodyDto,
+	): Promise<QuoteSwapResponseDto> {
+		const [currencyIn, currencyOut] = await Promise.all([
+			this.currencyService.fromAccount(body.tokenInChainAddress),
+			this.currencyService.fromAccount(body.tokenOutChainAddress),
+		])
+
+		const result = await this.quoteSwapUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+			currencyIn,
+			currencyOut,
+			amountIn: body.amountIn,
+		})
+
+		const currencyById = new Map([
+			[result.amountOut.currency.id, result.amountOut.currency],
+			[result.fee.currency.id, result.fee.currency],
+		])
+
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: Array.from(currencyById.values()),
+		})
+
+		return toQuoteSwapResponseDto(result, prices)
+	}
+
+	@Post('swap')
+	@ZodResponse({ type: SwapResponseDto })
+	async swap(
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: SwapBodyDto,
+	): Promise<SwapResponseDto> {
+		const [currencyIn, currencyOut] = await Promise.all([
+			this.currencyService.fromAccount(body.tokenInChainAddress),
+			this.currencyService.fromAccount(body.tokenOutChainAddress),
+		])
+
+		const pendingZap = await this.swapUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+			currencyIn,
+			currencyOut,
+			amountIn: body.amountIn,
+		})
+
+		const currencyById = new Map([
+			[pendingZap.amountIn.currency.id, pendingZap.amountIn.currency],
+			[pendingZap.fee.currency.id, pendingZap.fee.currency],
+		])
+
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: Array.from(currencyById.values()),
+		})
+
+		return toSwapResponseDto(pendingZap, prices)
 	}
 }

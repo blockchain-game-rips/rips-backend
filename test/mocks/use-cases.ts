@@ -7,7 +7,9 @@ import { GetBalanceUseCase } from '../../src/application/use-cases/get-balance/g
 import { GetPriceUseCase } from '../../src/application/use-cases/get-price/get-price.use-case'
 import { GetUnrevealedPrizesUseCase } from '../../src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import { GetUserUseCase } from '../../src/application/use-cases/get-user/get-user.use-case'
+import { QuoteSwapUseCase } from '../../src/application/use-cases/quote-swap/quote-swap.use-case'
 import { RevealTicketPrizesUseCase } from '../../src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
+import { SwapUseCase } from '../../src/application/use-cases/swap/swap.use-case'
 import { WithdrawUseCase } from '../../src/application/use-cases/withdraw.ts/withdraw.use-case'
 import { EVM_ADDRESS } from '../fixtures/entities'
 
@@ -65,6 +67,14 @@ export function makeMockGetUnrevealedPrizesUseCase(): jest.Mocked<GetUnrevealedP
 }
 
 export function makeMockWithdrawUseCase(): jest.Mocked<WithdrawUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockQuoteSwapUseCase(): jest.Mocked<QuoteSwapUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockSwapUseCase(): jest.Mocked<SwapUseCase> {
 	return { execute: jest.fn() }
 }
 
