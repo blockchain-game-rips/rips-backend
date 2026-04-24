@@ -11,7 +11,7 @@ const referrerStateSchema = z.object({
 	defaultFeePercent: z.number(),
 	activeFeePercent: z.number(),
 	customFeePercent: z.number(),
-	monthStartTimestamp: z.date(),
+	monthStartTimestamp: z.string(),
 	currMonthVolume: CurrencyAmountDto.schema,
 })
 
@@ -38,7 +38,7 @@ export function toGetReferrerResponseDto(
 			defaultFeePercent: state.defaultFeePercent,
 			activeFeePercent: state.activeFeePercent,
 			customFeePercent: state.customFeePercent,
-			monthStartTimestamp: state.monthStartTimestamp,
+			monthStartTimestamp: state.monthStartTimestamp.toISOString(),
 			currMonthVolume: toCurrencyAmountDto(
 				state.currMonthVolume,
 				prices.get(state.currMonthVolume.currency.id) ?? 0,
