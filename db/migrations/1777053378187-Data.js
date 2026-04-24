@@ -1,5 +1,5 @@
-module.exports = class Data1777052682496 {
-    name = 'Data1777052682496'
+module.exports = class Data1777053378187 {
+    name = 'Data1777053378187'
 
     async up(db) {
         await db.query(`CREATE TABLE "prize_tier" ("id" character varying NOT NULL, "tier_index" integer NOT NULL, "prize_count" numeric NOT NULL, "min_prize" numeric NOT NULL, "max_prize" numeric NOT NULL, "config_id" character varying, CONSTRAINT "PK_edefaa73bb27e6bf21aa376c178" PRIMARY KEY ("id"))`)
@@ -25,7 +25,7 @@ module.exports = class Data1777052682496 {
         await db.query(`CREATE TABLE "referrer_fee_withdrawn" ("id" character varying NOT NULL, "referrer" text NOT NULL, "currency" text NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_a93740840db5740d8557ebdcd64" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "referrer_fee_seized" ("id" character varying NOT NULL, "referrer" text NOT NULL, "currency" text NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_306a9e065f6148f489675c916a0" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "referrer_freeze_updated" ("id" character varying NOT NULL, "referrer" text NOT NULL, "frozen" boolean NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_1e1a34386ad9fe5753f302d64a8" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE TABLE "referral_tiers_updated" ("id" character varying NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_e53cb3fe0e0e7c38431010d89b9" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "referral_tiers_updated" ("id" character varying NOT NULL, "currency" text NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_e53cb3fe0e0e7c38431010d89b9" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "referral_tier" ("id" character varying NOT NULL, "min_volume" numeric NOT NULL, "fee_percent" integer NOT NULL, "update_id" character varying, CONSTRAINT "PK_9d3816e17a818012d3c620d779d" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_6b61e94b7ef089009a27b561e6" ON "referral_tier" ("update_id") `)
         await db.query(`CREATE TABLE "default_referral_fee_updated" ("id" character varying NOT NULL, "default_referral_fee" integer NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_5ffc9a5b3b9e0722c5c182ac277" PRIMARY KEY ("id"))`)

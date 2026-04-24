@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_, StringColumn as StringColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, OneToMany as OneToMany_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
 import {ReferralTier} from "./referralTier.model"
 
 @Entity_()
@@ -9,6 +9,9 @@ export class ReferralTiersUpdated {
 
     @PrimaryColumn_()
     id!: string
+
+    @StringColumn_({nullable: false})
+    currency!: string
 
     @OneToMany_(() => ReferralTier, e => e.update)
     tiers!: ReferralTier[]

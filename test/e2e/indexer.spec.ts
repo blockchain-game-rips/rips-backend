@@ -38,6 +38,7 @@ const CONFIG_2_ID = '2'
 
 const STAKE_1_ROUND_1_ID = '1'
 const STAKE_1_ROUND_2_ID = '2'
+const STAKE_2_ROUND_1_ID = '3'
 
 const TOTAL_STAKES = 2
 
@@ -84,6 +85,9 @@ const STAKE_2_PRIZE_TIERS = [
 const DEPLOYER_PRIVATE_KEY =
 	'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 
+const REFERRER_PRIVATE_KEY =
+	'0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
+
 const ripsAddress = deployments.rips as `0x${string}`
 const ripsAbiAndAddress = { abi: ripsAbi, address: ripsAddress }
 const vrfAddress = deployments.vrfCoordinator as `0x${string}`
@@ -100,6 +104,7 @@ describe('indexer e2e', () => {
 	let dataSource: DataSource
 
 	const deployer = privateKeyToAccount(DEPLOYER_PRIVATE_KEY)
+	const referrer = privateKeyToAccount(REFERRER_PRIVATE_KEY)
 
 	let walletClient: WalletClient<Transport, Chain, LocalAccount, undefined>
 
@@ -534,12 +539,210 @@ describe('indexer e2e', () => {
 		})
 	})
 
+	describe('setReferralTiers', () => {
+		const REFERRAL_TIERS = [
+			{ minVolume: parseEther('0.1'), feePercent: 1000 },
+			{ minVolume: parseEther('1'), feePercent: 3000 },
+		]
+
+		let txHash: `0x${string}`
+
+		beforeAll(async () => {
+			txHash = await walletClient.writeContract({
+				...ripsAbiAndAddress,
+				functionName: 'setReferralTiers',
+				args: [NATIVE_CURRENCY, REFERRAL_TIERS],
+				gas: DEFAULT_GAS,
+			})
+			await waitForReceipt(publicClient, txHash)
+		})
+
+		it('indexes ReferralTiersUpdated with currency and tiers', async () => {
+			const row = await waitForRow(
+				dataSource,
+				`SELECT * FROM referral_tiers_updated WHERE tx_hash = '${txHash}'`,
+			)
+
+			expect(row).toMatchObject({
+				currency: NATIVE_CURRENCY,
+				tx_hash: txHash,
+			})
+		})
+
+		it('indexes ReferralTier entries', async () => {
+			const row = (await waitForRow(
+				dataSource,
+				`SELECT * FROM referral_tiers_updated WHERE tx_hash = '${txHash}'`,
+			)) as Record<string, unknown>
+
+			const tiers: unknown[] = await dataSource.query(
+				`SELECT * FROM referral_tier WHERE update_id = '${row.id}' ORDER BY min_volume`,
+			)
+
+			expect(tiers).toMatchObject(
+				REFERRAL_TIERS.map((tier) => ({
+					min_volume: tier.minVolume.toString(),
+					fee_percent: tier.feePercent,
+				})),
+			)
+		})
+	})
+
+	describe('setReferrerCustomFee', () => {
+		const CUSTOM_FEE_PERCENT = 5000
+
+		let txHash: `0x${string}`
+
+		beforeAll(async () => {
+			txHash = await walletClient.writeContract({
+				...ripsAbiAndAddress,
+				functionName: 'setReferrerCustomFee',
+				args: [referrer.address, CUSTOM_FEE_PERCENT],
+				gas: DEFAULT_GAS,
+			})
+			await waitForReceipt(publicClient, txHash)
+		})
+
+		it('indexes ReferrerCustomFeeUpdated', async () => {
+			const row = await waitForRow(
+				dataSource,
+				`SELECT * FROM referrer_custom_fee_updated WHERE tx_hash = '${txHash}'`,
+			)
+
+			expect(row).toMatchObject({
+				referrer: referrer.address.toLowerCase(),
+				custom_fee_percent: CUSTOM_FEE_PERCENT,
+				tx_hash: txHash,
+			})
+		})
+	})
+
+	describe('claimWithReferrer', () => {
+		const TICKET_COUNT = STAKE_2_TICKET_CAP
+
+		let claimTxHash: `0x${string}`
+
+		beforeAll(async () => {
+			await buyTicketsStake2(TICKET_COUNT)
+
+			const requestTxHash = await walletClient.writeContract({
+				...ripsAbiAndAddress,
+				functionName: 'requestRandomness',
+				args: [BigInt(STAKE_2_ROUND_1_ID)],
+				gas: DEFAULT_GAS,
+			})
+			await waitForReceipt(publicClient, requestTxHash)
+
+			const round = (await waitForRow(
+				dataSource,
+				`SELECT * FROM round WHERE id = '${STAKE_2_ROUND_1_ID}' AND vrf_request_status = 'REQUESTED'`,
+			)) as Record<string, unknown>
+			const vrfRequestId = round.vrf_request_id as string
+
+			const fulfillTxHash = await walletClient.writeContract({
+				abi: vrfAbi,
+				address: vrfAddress,
+				functionName: 'fulfillRandomWords',
+				args: [BigInt(vrfRequestId), ripsAddress],
+				gas: DEFAULT_GAS,
+			})
+			await waitForReceipt(publicClient, fulfillTxHash)
+
+			await waitForRow(
+				dataSource,
+				`SELECT * FROM round WHERE id = '${STAKE_2_ROUND_1_ID}' AND vrf_request_status = 'FULFILLED'`,
+			)
+
+			claimTxHash = await walletClient.writeContract({
+				...ripsAbiAndAddress,
+				functionName: 'claimPrizes',
+				args: [
+					BigInt(STAKE_2_ROUND_1_ID),
+					0n,
+					10n,
+					deployer.address,
+					referrer.address,
+				],
+				gas: DEFAULT_GAS,
+			})
+			await waitForReceipt(publicClient, claimTxHash)
+		})
+
+		it('indexes ReferralStateUpdated', async () => {
+			const row = await waitForRow(
+				dataSource,
+				`SELECT * FROM referrer_state_updated WHERE tx_hash = '${claimTxHash}'`,
+			)
+
+			expect(row).toMatchObject({
+				referrer: referrer.address.toLowerCase(),
+				currency: NATIVE_CURRENCY,
+				tx_hash: claimTxHash,
+			})
+		})
+
+		it('indexes ReferralFeeAccrued', async () => {
+			const row = (await waitForRow(
+				dataSource,
+				`SELECT * FROM referral_fee_accrued WHERE round_id = '${STAKE_2_ROUND_1_ID}'`,
+			)) as Record<string, unknown>
+
+			expect(row).toMatchObject({
+				round_id: STAKE_2_ROUND_1_ID,
+				referrer: referrer.address.toLowerCase(),
+			})
+			expect(BigInt(row.amount as string)).toBeGreaterThan(0n)
+		})
+	})
+
+	describe('withdrawReferrerFee', () => {
+		let txHash: `0x${string}`
+
+		beforeAll(async () => {
+			txHash = await walletClient.writeContract({
+				...ripsAbiAndAddress,
+				functionName: 'withdrawReferrerFee',
+				args: [referrer.address, NATIVE_CURRENCY],
+				gas: DEFAULT_GAS,
+			})
+			await waitForReceipt(publicClient, txHash)
+		})
+
+		it('indexes ReferrerFeeWithdrawn', async () => {
+			const row = (await waitForRow(
+				dataSource,
+				`SELECT * FROM referrer_fee_withdrawn WHERE tx_hash = '${txHash}'`,
+			)) as Record<string, unknown>
+
+			expect(row).toMatchObject({
+				referrer: referrer.address.toLowerCase(),
+				currency: NATIVE_CURRENCY,
+				tx_hash: txHash,
+			})
+			expect(BigInt(row.amount as string)).toBeGreaterThan(0n)
+		})
+	})
+
 	async function buyTickets(ticketCount: bigint) {
 		const txHash = await walletClient.writeContract({
 			...ripsAbiAndAddress,
 			functionName: 'buyTickets',
 			args: [BigInt(STAKE_1_ID), ticketCount, deployer.address],
 			value: ticketCount * STAKE_1_TICKET_COST,
+			gas: DEFAULT_GAS,
+		})
+
+		await waitForReceipt(publicClient, txHash)
+
+		return txHash
+	}
+
+	async function buyTicketsStake2(ticketCount: bigint) {
+		const txHash = await walletClient.writeContract({
+			...ripsAbiAndAddress,
+			functionName: 'buyTickets',
+			args: [BigInt(STAKE_2_ID), ticketCount, deployer.address],
+			value: ticketCount * STAKE_2_TICKET_COST,
 			gas: DEFAULT_GAS,
 		})
 

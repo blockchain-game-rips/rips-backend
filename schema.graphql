@@ -220,6 +220,7 @@ type ReferralTier @entity {
 
 type ReferralTiersUpdated @entity {
 	id: ID!
+	currency: String!
 	tiers: [ReferralTier!]! @derivedFrom(field: "update")
 	blockNumber: BigInt!
 	time: DateTime!
