@@ -14,8 +14,9 @@ export const events = {
     RandomnessFulfilled: event("0xdc21bacb3b6e5d0ab7b2226e949e874de99019db7967e59ee54cc1e830016cab", "RandomnessFulfilled(uint256,uint256,uint256)", {"roundId": indexed(p.uint256), "randomA": p.uint256, "randomB": p.uint256}),
     RandomnessRequested: event("0x3d94fecedaa4f90b8bd459797adb95f5bb11426025c5541390d9ccc1ad1b60a1", "RandomnessRequested(uint256,uint256)", {"roundId": indexed(p.uint256), "vrfRequestId": p.uint256}),
     ReferralFeeAccrued: event("0xf51b8c95ee5eeea91a2309af8a0da1bcadcee2bcf67057f3e5b51358ff9ab969", "ReferralFeeAccrued(uint256,address,uint256)", {"roundId": indexed(p.uint256), "referrer": indexed(p.address), "amount": p.uint256}),
-    ReferralStatsUpdated: event("0x4b302dacb6caee38496571bd4cb3aff997735fdcb00654153ec3c8d3a8ec095b", "ReferralStatsUpdated(address,(uint16,uint16,uint40,uint256))", {"referrer": indexed(p.address), "referrerState": p.struct({"activeFeePercent": p.uint16, "customFeePercent": p.uint16, "monthStartTimestamp": p.uint40, "currMonthVolume": p.uint256})}),
-    ReferralTiersUpdated: event("0x6b62d291a70ab2427227f2cae67265ba70ed523c6eb0bcc0f472c52cae565402", "ReferralTiersUpdated((uint128,uint16)[])", {"tiers": p.array(p.struct({"minVolume": p.uint128, "feePercent": p.uint16}))}),
+    ReferralStateUpdated: event("0x34e99ac9d35feaad233071dab6f28dcd4b0f1f24154dc61cf47448ca02eb5b82", "ReferralStateUpdated(address,address,(uint16,uint40,uint256))", {"referrer": indexed(p.address), "currency": indexed(p.address), "referrerState": p.struct({"activeFeePercent": p.uint16, "monthStartTimestamp": p.uint40, "currMonthVolume": p.uint256})}),
+    ReferralTiersUpdated: event("0x9b96ddfcd49de588ad7127607f1f4315f622a90286e3de2d88f75120bfb1fef4", "ReferralTiersUpdated(address,(uint128,uint16)[])", {"currency": indexed(p.address), "tiers": p.array(p.struct({"minVolume": p.uint128, "feePercent": p.uint16}))}),
+    ReferrerCustomFeeUpdated: event("0x5f07c1ff478deb50de9201ce244d1e19586e055862d0588b8b8a07288cf16248", "ReferrerCustomFeeUpdated(address,uint16)", {"referrer": indexed(p.address), "customFeePercent": p.uint16}),
     ReferrerFeeSeized: event("0xc67df585acf738df3324c58148cccf0e0845dde9c7770a2be7bb3f337a459e19", "ReferrerFeeSeized(address,address,uint256)", {"referrer": indexed(p.address), "currency": indexed(p.address), "amount": p.uint256}),
     ReferrerFeeWithdrawn: event("0x1f1a0569e61e4a8573e34abf057b1d530d895d6e95ed5d28cddb4eff6a32d1d8", "ReferrerFeeWithdrawn(address,address,uint256)", {"referrer": indexed(p.address), "currency": indexed(p.address), "amount": p.uint256}),
     ReferrerFreezeUpdated: event("0xf130e492f9609fb734eeae4b625128bcd3efa572f68bd370f208b38dd581130d", "ReferrerFreezeUpdated(address,bool)", {"referrer": indexed(p.address), "frozen": p.bool}),
@@ -53,6 +54,7 @@ export const functions = {
     defaultReferralFee: viewFun("0x80eaf094", "defaultReferralFee()", {}, p.uint16),
     deleteStake: fun("0x975433a3", "deleteStake(uint64)", {"stakeId": p.uint64}, ),
     feeRecipient: viewFun("0x46904840", "feeRecipient()", {}, p.address),
+    getReferralTiers: viewFun("0x10cbb6b5", "getReferralTiers(address)", {"currency": p.address}, p.array(p.struct({"minVolume": p.uint128, "feePercent": p.uint16}))),
     getRoleAdmin: viewFun("0x248a9ca3", "getRoleAdmin(bytes32)", {"role": p.bytes32}, p.bytes32),
     getUserTickets: viewFun("0xe7a7f65c", "getUserTickets(uint256,address)", {"roundId": p.uint256, "user": p.address}, p.array(p.struct({"start": p.uint64, "count": p.uint64, "claimed": p.bool}))),
     grantRole: fun("0x2f2ff15d", "grantRole(bytes32,address)", {"role": p.bytes32, "account": p.address}, ),
@@ -64,9 +66,9 @@ export const functions = {
     paused: viewFun("0x5c975abb", "paused()", {}, p.bool),
     protocolFeeAccrued: viewFun("0xd0d55129", "protocolFeeAccrued(address)", {"currency": p.address}, p.uint256),
     rawFulfillRandomWords: fun("0x1fe543e3", "rawFulfillRandomWords(uint256,uint256[])", {"requestId": p.uint256, "randomWords": p.array(p.uint256)}, ),
-    referralTiers: viewFun("0x93e2d3b4", "referralTiers(uint256)", {"_0": p.uint256}, {"minVolume": p.uint128, "feePercent": p.uint16}),
+    referrerCustomFee: viewFun("0x36de5bf0", "referrerCustomFee(address)", {"referrer": p.address}, p.uint16),
     referrerFeeAccrued: viewFun("0x334091ab", "referrerFeeAccrued(address,address)", {"referrer": p.address, "currency": p.address}, p.uint256),
-    referrerToReferrerState: viewFun("0xe203ad62", "referrerToReferrerState(address)", {"referrer": p.address}, {"activeFeePercent": p.uint16, "customFeePercent": p.uint16, "monthStartTimestamp": p.uint40, "currMonthVolume": p.uint256}),
+    referrerToReferrerState: viewFun("0x87431db1", "referrerToReferrerState(address,address)", {"referrer": p.address, "currency": p.address}, {"activeFeePercent": p.uint16, "monthStartTimestamp": p.uint40, "currMonthVolume": p.uint256}),
     refund: fun("0x7ad226dc", "refund(uint256,address)", {"roundId": p.uint256, "recipient": p.address}, ),
     renounceRole: fun("0x36568abe", "renounceRole(bytes32,address)", {"role": p.bytes32, "callerConfirmation": p.address}, ),
     requestRandomness: fun("0x7363ae1f", "requestRandomness(uint256)", {"roundId": p.uint256}, p.uint256),
@@ -76,7 +78,7 @@ export const functions = {
     setCoordinator: fun("0x8ea98117", "setCoordinator(address)", {"newVrfCoordinator": p.address}, ),
     setDefaultReferralFee: fun("0xe4b35fcf", "setDefaultReferralFee(uint16)", {"newDefaultReferralFee": p.uint16}, ),
     setFeeRecipient: fun("0xe74b981b", "setFeeRecipient(address)", {"newRecipient": p.address}, ),
-    setReferralTiers: fun("0xb8ea9c67", "setReferralTiers((uint128,uint16)[])", {"tiers": p.array(p.struct({"minVolume": p.uint128, "feePercent": p.uint16}))}, ),
+    setReferralTiers: fun("0x2b64e56e", "setReferralTiers(address,(uint128,uint16)[])", {"currency": p.address, "tiers": p.array(p.struct({"minVolume": p.uint128, "feePercent": p.uint16}))}, ),
     setReferrerCustomFee: fun("0x0cd15fc0", "setReferrerCustomFee(address,uint16)", {"referrer": p.address, "customFeePercent": p.uint16}, ),
     setReferrerFrozen: fun("0x53372947", "setReferrerFrozen(address,bool)", {"referrer": p.address, "frozen": p.bool}, ),
     stakeIdToCurrentConfigId: viewFun("0x237373ce", "stakeIdToCurrentConfigId(uint64)", {"stakeId": p.uint64}, p.uint64),
@@ -155,6 +157,10 @@ export class Contract extends ContractBase {
         return this.eth_call(functions.feeRecipient, {})
     }
 
+    getReferralTiers(currency: GetReferralTiersParams["currency"]) {
+        return this.eth_call(functions.getReferralTiers, {currency})
+    }
+
     getRoleAdmin(role: GetRoleAdminParams["role"]) {
         return this.eth_call(functions.getRoleAdmin, {role})
     }
@@ -187,16 +193,16 @@ export class Contract extends ContractBase {
         return this.eth_call(functions.protocolFeeAccrued, {currency})
     }
 
-    referralTiers(_0: ReferralTiersParams["_0"]) {
-        return this.eth_call(functions.referralTiers, {_0})
+    referrerCustomFee(referrer: ReferrerCustomFeeParams["referrer"]) {
+        return this.eth_call(functions.referrerCustomFee, {referrer})
     }
 
     referrerFeeAccrued(referrer: ReferrerFeeAccruedParams["referrer"], currency: ReferrerFeeAccruedParams["currency"]) {
         return this.eth_call(functions.referrerFeeAccrued, {referrer, currency})
     }
 
-    referrerToReferrerState(referrer: ReferrerToReferrerStateParams["referrer"]) {
-        return this.eth_call(functions.referrerToReferrerState, {referrer})
+    referrerToReferrerState(referrer: ReferrerToReferrerStateParams["referrer"], currency: ReferrerToReferrerStateParams["currency"]) {
+        return this.eth_call(functions.referrerToReferrerState, {referrer, currency})
     }
 
     roundIdToRound(roundId: RoundIdToRoundParams["roundId"]) {
@@ -248,8 +254,9 @@ export type ProtocolFeeWithdrawnEventArgs = EParams<typeof events.ProtocolFeeWit
 export type RandomnessFulfilledEventArgs = EParams<typeof events.RandomnessFulfilled>
 export type RandomnessRequestedEventArgs = EParams<typeof events.RandomnessRequested>
 export type ReferralFeeAccruedEventArgs = EParams<typeof events.ReferralFeeAccrued>
-export type ReferralStatsUpdatedEventArgs = EParams<typeof events.ReferralStatsUpdated>
+export type ReferralStateUpdatedEventArgs = EParams<typeof events.ReferralStateUpdated>
 export type ReferralTiersUpdatedEventArgs = EParams<typeof events.ReferralTiersUpdated>
+export type ReferrerCustomFeeUpdatedEventArgs = EParams<typeof events.ReferrerCustomFeeUpdated>
 export type ReferrerFeeSeizedEventArgs = EParams<typeof events.ReferrerFeeSeized>
 export type ReferrerFeeWithdrawnEventArgs = EParams<typeof events.ReferrerFeeWithdrawn>
 export type ReferrerFreezeUpdatedEventArgs = EParams<typeof events.ReferrerFreezeUpdated>
@@ -322,6 +329,9 @@ export type DeleteStakeReturn = FunctionReturn<typeof functions.deleteStake>
 export type FeeRecipientParams = FunctionArguments<typeof functions.feeRecipient>
 export type FeeRecipientReturn = FunctionReturn<typeof functions.feeRecipient>
 
+export type GetReferralTiersParams = FunctionArguments<typeof functions.getReferralTiers>
+export type GetReferralTiersReturn = FunctionReturn<typeof functions.getReferralTiers>
+
 export type GetRoleAdminParams = FunctionArguments<typeof functions.getRoleAdmin>
 export type GetRoleAdminReturn = FunctionReturn<typeof functions.getRoleAdmin>
 
@@ -355,8 +365,8 @@ export type ProtocolFeeAccruedReturn = FunctionReturn<typeof functions.protocolF
 export type RawFulfillRandomWordsParams = FunctionArguments<typeof functions.rawFulfillRandomWords>
 export type RawFulfillRandomWordsReturn = FunctionReturn<typeof functions.rawFulfillRandomWords>
 
-export type ReferralTiersParams = FunctionArguments<typeof functions.referralTiers>
-export type ReferralTiersReturn = FunctionReturn<typeof functions.referralTiers>
+export type ReferrerCustomFeeParams = FunctionArguments<typeof functions.referrerCustomFee>
+export type ReferrerCustomFeeReturn = FunctionReturn<typeof functions.referrerCustomFee>
 
 export type ReferrerFeeAccruedParams = FunctionArguments<typeof functions.referrerFeeAccrued>
 export type ReferrerFeeAccruedReturn = FunctionReturn<typeof functions.referrerFeeAccrued>

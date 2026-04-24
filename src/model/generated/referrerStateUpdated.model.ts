@@ -12,11 +12,11 @@ export class ReferrerStateUpdated {
     @StringColumn_({nullable: false})
     referrer!: string
 
-    @IntColumn_({nullable: false})
-    activeFeePercent!: number
+    @StringColumn_({nullable: false})
+    currency!: string
 
     @IntColumn_({nullable: false})
-    customFeePercent!: number
+    activeFeePercent!: number
 
     @BigIntColumn_({nullable: false})
     monthStartTime!: bigint
