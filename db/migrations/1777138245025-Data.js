@@ -1,5 +1,5 @@
-module.exports = class Data1777125919397 {
-    name = 'Data1777125919397'
+module.exports = class Data1777138245025 {
+    name = 'Data1777138245025'
 
     async up(db) {
         await db.query(`CREATE TABLE "prize_tier" ("id" character varying NOT NULL, "tier_index" integer NOT NULL, "prize_count" numeric NOT NULL, "min_prize" numeric NOT NULL, "max_prize" numeric NOT NULL, "config_id" character varying, CONSTRAINT "PK_edefaa73bb27e6bf21aa376c178" PRIMARY KEY ("id"))`)
@@ -29,9 +29,9 @@ module.exports = class Data1777125919397 {
         await db.query(`CREATE TABLE "referral_tier" ("id" character varying NOT NULL, "min_volume" numeric NOT NULL, "fee_percent" integer NOT NULL, "update_id" character varying, CONSTRAINT "PK_9d3816e17a818012d3c620d779d" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_6b61e94b7ef089009a27b561e6" ON "referral_tier" ("update_id") `)
         await db.query(`CREATE TABLE "default_referral_fee_updated" ("id" character varying NOT NULL, "default_referral_fee" integer NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_5ffc9a5b3b9e0722c5c182ac277" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE TABLE "referrer_state_updated" ("id" character varying NOT NULL, "referrer" text NOT NULL, "currency" text NOT NULL, "active_fee_percent" integer NOT NULL, "month_start_time" numeric NOT NULL, "curr_month_volume" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_7b1e67952d6b61a65f5da7cb656" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "referrer_state_updated" ("id" character varying NOT NULL, "referrer" text NOT NULL, "currency" text NOT NULL, "active_fee_percent" integer NOT NULL, "period_start_time" TIMESTAMP WITH TIME ZONE NOT NULL, "period_volume" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_7b1e67952d6b61a65f5da7cb656" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "referrer_custom_fee_updated" ("id" character varying NOT NULL, "referrer" text NOT NULL, "custom_fee_percent" integer NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_ff5880fec7f44ed1db4121f6453" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE TABLE "referrer_reward_state" ("id" character varying NOT NULL, "referrer" text NOT NULL, "currency" text NOT NULL, "accrued" numeric NOT NULL, "withdrawn" numeric NOT NULL, "seized" numeric NOT NULL, CONSTRAINT "PK_7eafc9362c407427305af3b6f6d" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "referrer_reward" ("id" character varying NOT NULL, "referrer" text NOT NULL, "currency" text NOT NULL, "accrued" numeric NOT NULL, "withdrawn" numeric NOT NULL, "seized" numeric NOT NULL, CONSTRAINT "PK_fc0ba2d8794694461303fd0c084" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "referral_fee_accrued" ("id" character varying NOT NULL, "referrer" text NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "round_id" character varying, CONSTRAINT "PK_0230ef91e15340fe6d839682b3e" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_d4fa6360b30bf54b10d3941f3b" ON "referral_fee_accrued" ("round_id") `)
         await db.query(`CREATE TABLE "protocol_fee_accrued" ("id" character varying NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "round_id" character varying, CONSTRAINT "PK_42662fc17eaec85c861b57854ee" PRIMARY KEY ("id"))`)
@@ -78,7 +78,7 @@ module.exports = class Data1777125919397 {
         await db.query(`DROP TABLE "default_referral_fee_updated"`)
         await db.query(`DROP TABLE "referrer_state_updated"`)
         await db.query(`DROP TABLE "referrer_custom_fee_updated"`)
-        await db.query(`DROP TABLE "referrer_reward_state"`)
+        await db.query(`DROP TABLE "referrer_reward"`)
         await db.query(`DROP TABLE "referral_fee_accrued"`)
         await db.query(`DROP INDEX "public"."IDX_d4fa6360b30bf54b10d3941f3b"`)
         await db.query(`DROP TABLE "protocol_fee_accrued"`)
