@@ -240,8 +240,8 @@ type ReferrerStateUpdated @entity {
 	referrer: String!
 	currency: String!
 	activeFeePercent: Int!
-	monthStartTime: BigInt!
-	currMonthVolume: BigInt!
+	periodStartTime: BigInt!
+	periodVolume: BigInt!
 	blockNumber: BigInt!
 	time: DateTime!
 	txHash: String!
@@ -256,7 +256,7 @@ type ReferrerCustomFeeUpdated @entity {
 	txHash: String!
 }
 
-type ReferrerRewardState @entity {
+type ReferrerReward @entity {
 	id: ID!
 	referrer: String!
 	currency: String!
