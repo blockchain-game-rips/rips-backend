@@ -698,12 +698,12 @@ export const ripsAbi = [
 				internalType: 'uint16',
 			},
 			{
-				name: 'monthStartTimestamp',
+				name: 'periodStartTimestamp',
 				type: 'uint40',
 				internalType: 'uint40',
 			},
 			{
-				name: 'currMonthVolume',
+				name: 'periodVolume',
 				type: 'uint256',
 				internalType: 'uint256',
 			},
@@ -1488,12 +1488,12 @@ export const ripsAbi = [
 						internalType: 'uint16',
 					},
 					{
-						name: 'monthStartTimestamp',
+						name: 'periodStartTimestamp',
 						type: 'uint40',
 						internalType: 'uint40',
 					},
 					{
-						name: 'currMonthVolume',
+						name: 'periodVolume',
 						type: 'uint256',
 						internalType: 'uint256',
 					},
