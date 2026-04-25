@@ -383,6 +383,37 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
+		name: 'getReferralTiers',
+		inputs: [
+			{
+				name: 'currency',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [
+			{
+				name: '',
+				type: 'tuple[]',
+				internalType: 'struct IRips.ReferralTier[]',
+				components: [
+					{
+						name: 'minVolume',
+						type: 'uint128',
+						internalType: 'uint128',
+					},
+					{
+						name: 'feePercent',
+						type: 'uint16',
+						internalType: 'uint16',
+					},
+				],
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
 		name: 'getRoleAdmin',
 		inputs: [
 			{
@@ -604,22 +635,17 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 'referralTiers',
+		name: 'referrerCustomFee',
 		inputs: [
 			{
-				name: '',
-				type: 'uint256',
-				internalType: 'uint256',
+				name: 'referrer',
+				type: 'address',
+				internalType: 'address',
 			},
 		],
 		outputs: [
 			{
-				name: 'minVolume',
-				type: 'uint128',
-				internalType: 'uint128',
-			},
-			{
-				name: 'feePercent',
+				name: 'customFeePercent',
 				type: 'uint16',
 				internalType: 'uint16',
 			},
@@ -652,10 +678,15 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 'referrerToReferrerStats',
+		name: 'referrerToReferrerState',
 		inputs: [
 			{
 				name: 'referrer',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'currency',
 				type: 'address',
 				internalType: 'address',
 			},
@@ -663,11 +694,6 @@ export const ripsAbi = [
 		outputs: [
 			{
 				name: 'activeFeePercent',
-				type: 'uint16',
-				internalType: 'uint16',
-			},
-			{
-				name: 'customFeePercent',
 				type: 'uint16',
 				internalType: 'uint16',
 			},
@@ -867,6 +893,11 @@ export const ripsAbi = [
 		type: 'function',
 		name: 'setReferralTiers',
 		inputs: [
+			{
+				name: 'currency',
+				type: 'address',
+				internalType: 'address',
+			},
 			{
 				name: 'tiers',
 				type: 'tuple[]',
@@ -1431,8 +1462,56 @@ export const ripsAbi = [
 	},
 	{
 		type: 'event',
+		name: 'ReferralStateUpdated',
+		inputs: [
+			{
+				name: 'referrer',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'currency',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'referrerState',
+				type: 'tuple',
+				indexed: false,
+				internalType: 'struct IRips.ReferrerState',
+				components: [
+					{
+						name: 'activeFeePercent',
+						type: 'uint16',
+						internalType: 'uint16',
+					},
+					{
+						name: 'monthStartTimestamp',
+						type: 'uint40',
+						internalType: 'uint40',
+					},
+					{
+						name: 'currMonthVolume',
+						type: 'uint256',
+						internalType: 'uint256',
+					},
+				],
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
 		name: 'ReferralTiersUpdated',
 		inputs: [
+			{
+				name: 'currency',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
 			{
 				name: 'tiers',
 				type: 'tuple[]',
@@ -1456,7 +1535,7 @@ export const ripsAbi = [
 	},
 	{
 		type: 'event',
-		name: 'ReferrerCustomFeeSet',
+		name: 'ReferrerCustomFeeUpdated',
 		inputs: [
 			{
 				name: 'referrer',

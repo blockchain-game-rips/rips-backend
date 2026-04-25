@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
 import {
+	decodeEventLog,
 	encodeFunctionData,
+	getAddress,
 	zeroAddress,
 	type TransactionRequestEIP1559,
 } from 'viem'
@@ -152,11 +154,60 @@ export class RipsServiceIpml implements RipsService {
 		return { transaction, purchase }
 	}
 
-	withdrawReward(
-		_wallet: Wallet,
-		_args: { currencyAddress: EvmAddress },
+	async withdrawReward(
+		wallet: Wallet,
+		args: { currencyAddress: EvmAddress },
 	): Promise<Reward> {
-		throw new Error('TODO: implement withdrawReward in RipsServiceIpml')
+		const { currencyAddress } = args
+
+		const chainId = this.chainId
+		const referrerAddress = evmAddressFromWallet(wallet)
+
+		const request: TransactionRequestEIP1559 = {
+			to: this.contractAddress,
+			data: encodeFunctionData({
+				abi: ripsAbi,
+				functionName: 'withdrawReferrerFee',
+				args: [referrerAddress, currencyAddress],
+			}),
+		}
+
+		const { transaction, receipt } =
+			await this.evmTransactionService.sendTransaction(
+				wallet,
+				request,
+				chainId,
+			)
+
+		const log = receipt.logs
+			.filter((l) => getAddress(l.address) === this.contractAddress)
+			.map((l) => {
+				try {
+					return decodeEventLog({ abi: ripsAbi, ...l, strict: true })
+				} catch {
+					return null
+				}
+			})
+			.find((event) => event?.eventName === 'ReferrerFeeWithdrawn')
+
+		if (!log || log.eventName !== 'ReferrerFeeWithdrawn') {
+			throw new TransactionFailedError(
+				`ReferrerFeeWithdrawn event not found in transaction: ${transaction.id}`,
+			)
+		}
+
+		const currency = await this.evmCurrencyService.fromAddress(
+			currencyAddress,
+			chainId,
+		)
+
+		return {
+			transaction,
+			amount: {
+				currency,
+				amount: log.args.amount,
+			},
+		}
 	}
 
 	async getConfigByRoundId(roundId: number): Promise<Config> {
