@@ -34,7 +34,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			referrerStateUpdateds,
 			referralTiersUpdateds,
 			defaultReferralFeeUpdateds,
-			referrerRewardStates,
+			referrerRewards,
 		} = await this.indexer.sdk.GetReferrerData({
 			currencyAddress: zeroAddress,
 			referrer: lowerCaseReferrer,
@@ -50,7 +50,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 				referralTiersUpdateds,
 			)
 
-		const rewards = this.resolveRewards(referrerRewardStates)
+		const rewards = this.resolveRewards(referrerRewards)
 		const currency = await this.evmCurrencyService.fromAddress(
 			zeroAddress,
 			this.chainId,
@@ -64,9 +64,9 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 					currency,
 					fee,
 					rewards,
-					volume: {
-						currentMonth: currMonthVolume,
-						monthStart: monthStartTime,
+					period: {
+						volume: currMonthVolume,
+						startTime: monthStartTime,
 					},
 				},
 			],
@@ -74,15 +74,15 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 	}
 
 	private resolveRewards(
-		referrerRewardStates: GetReferrerDataQuery['referrerRewardStates'],
+		referrerRewards: GetReferrerDataQuery['referrerRewards'],
 	): {
 		available: bigint
 		withdrawn: bigint
 	} {
-		if (referrerRewardStates.length === 0)
+		if (referrerRewards.length === 0)
 			return { available: 0n, withdrawn: 0n }
 
-		const rewardState = referrerRewardStates[0]
+		const rewardState = referrerRewards[0]
 		const accrued = BigInt(rewardState.accrued)
 		const seized = BigInt(rewardState.seized)
 		const withdrawn = BigInt(rewardState.withdrawn)
@@ -155,7 +155,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			}
 
 		const lastStateUpdate = stateUpdates[0]
-		const storedMonthStart = new Date(lastStateUpdate.monthStartTime)
+		const storedMonthStart = new Date(lastStateUpdate.periodStartTime)
 		const now = Date.now()
 
 		const elapsedPeriods = Math.floor(
@@ -166,7 +166,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			return {
 				activeFee: lastStateUpdate.activeFeePercent,
 				monthStartTime: storedMonthStart,
-				currMonthVolume: BigInt(lastStateUpdate.currMonthVolume),
+				currMonthVolume: BigInt(lastStateUpdate.periodVolume),
 			}
 		}
 

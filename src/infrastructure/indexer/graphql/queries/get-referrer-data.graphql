@@ -1,5 +1,5 @@
 query GetReferrerData($referrer: String!, $currencyAddress: String!) {
-	referrerRewardStates(
+	referrerRewards(
 		where: { referrer_eq: $referrer, currency_eq: $currencyAddress }
 		limit: 1
 	) {
@@ -15,8 +15,8 @@ query GetReferrerData($referrer: String!, $currencyAddress: String!) {
 	) {
 		currency
 		activeFeePercent
-		monthStartTime
-		currMonthVolume
+		periodStartTime
+		periodVolume
 	}
 	referrerCustomFeeUpdateds(
 		where: { referrer_eq: $referrer }

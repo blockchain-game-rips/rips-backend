@@ -4,9 +4,9 @@ import { Currency } from './currency'
 export type ReferrerState = {
 	currency: Currency
 	fee: number
-	volume: {
-		monthStart: Date | null
-		currentMonth: bigint
+	period: {
+		startTime: Date | null
+		volume: bigint
 	}
 	rewards: {
 		available: bigint
