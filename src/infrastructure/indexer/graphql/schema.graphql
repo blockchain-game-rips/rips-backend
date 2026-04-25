@@ -62,9 +62,9 @@ type Query {
   referrerCustomFeeUpdateds(where: ReferrerCustomFeeUpdatedWhereInput, orderBy: [ReferrerCustomFeeUpdatedOrderByInput!], offset: Int, limit: Int): [ReferrerCustomFeeUpdated!]!
   referrerCustomFeeUpdatedById(id: String!): ReferrerCustomFeeUpdated
   referrerCustomFeeUpdatedsConnection(orderBy: [ReferrerCustomFeeUpdatedOrderByInput!]!, after: String, first: Int, where: ReferrerCustomFeeUpdatedWhereInput): ReferrerCustomFeeUpdatedsConnection!
-  referrerRewardStates(where: ReferrerRewardStateWhereInput, orderBy: [ReferrerRewardStateOrderByInput!], offset: Int, limit: Int): [ReferrerRewardState!]!
-  referrerRewardStateById(id: String!): ReferrerRewardState
-  referrerRewardStatesConnection(orderBy: [ReferrerRewardStateOrderByInput!]!, after: String, first: Int, where: ReferrerRewardStateWhereInput): ReferrerRewardStatesConnection!
+  referrerRewards(where: ReferrerRewardWhereInput, orderBy: [ReferrerRewardOrderByInput!], offset: Int, limit: Int): [ReferrerReward!]!
+  referrerRewardById(id: String!): ReferrerReward
+  referrerRewardsConnection(orderBy: [ReferrerRewardOrderByInput!]!, after: String, first: Int, where: ReferrerRewardWhereInput): ReferrerRewardsConnection!
   referralFeeAccrueds(where: ReferralFeeAccruedWhereInput, orderBy: [ReferralFeeAccruedOrderByInput!], offset: Int, limit: Int): [ReferralFeeAccrued!]!
   referralFeeAccruedById(id: String!): ReferralFeeAccrued
   referralFeeAccruedsConnection(orderBy: [ReferralFeeAccruedOrderByInput!]!, after: String, first: Int, where: ReferralFeeAccruedWhereInput): ReferralFeeAccruedsConnection!
@@ -3157,8 +3157,8 @@ type ReferrerStateUpdated {
   referrer: String!
   currency: String!
   activeFeePercent: Int!
-  monthStartTime: BigInt!
-  currMonthVolume: BigInt!
+  periodStartTime: DateTime!
+  periodVolume: BigInt!
   blockNumber: BigInt!
   time: DateTime!
   txHash: String!
@@ -3225,24 +3225,24 @@ input ReferrerStateUpdatedWhereInput {
   activeFeePercent_lte: Int
   activeFeePercent_in: [Int!]
   activeFeePercent_not_in: [Int!]
-  monthStartTime_isNull: Boolean
-  monthStartTime_eq: BigInt
-  monthStartTime_not_eq: BigInt
-  monthStartTime_gt: BigInt
-  monthStartTime_gte: BigInt
-  monthStartTime_lt: BigInt
-  monthStartTime_lte: BigInt
-  monthStartTime_in: [BigInt!]
-  monthStartTime_not_in: [BigInt!]
-  currMonthVolume_isNull: Boolean
-  currMonthVolume_eq: BigInt
-  currMonthVolume_not_eq: BigInt
-  currMonthVolume_gt: BigInt
-  currMonthVolume_gte: BigInt
-  currMonthVolume_lt: BigInt
-  currMonthVolume_lte: BigInt
-  currMonthVolume_in: [BigInt!]
-  currMonthVolume_not_in: [BigInt!]
+  periodStartTime_isNull: Boolean
+  periodStartTime_eq: DateTime
+  periodStartTime_not_eq: DateTime
+  periodStartTime_gt: DateTime
+  periodStartTime_gte: DateTime
+  periodStartTime_lt: DateTime
+  periodStartTime_lte: DateTime
+  periodStartTime_in: [DateTime!]
+  periodStartTime_not_in: [DateTime!]
+  periodVolume_isNull: Boolean
+  periodVolume_eq: BigInt
+  periodVolume_not_eq: BigInt
+  periodVolume_gt: BigInt
+  periodVolume_gte: BigInt
+  periodVolume_lt: BigInt
+  periodVolume_lte: BigInt
+  periodVolume_in: [BigInt!]
+  periodVolume_not_in: [BigInt!]
   blockNumber_isNull: Boolean
   blockNumber_eq: BigInt
   blockNumber_not_eq: BigInt
@@ -3307,18 +3307,18 @@ enum ReferrerStateUpdatedOrderByInput {
   activeFeePercent_ASC_NULLS_LAST
   activeFeePercent_DESC_NULLS_FIRST
   activeFeePercent_DESC_NULLS_LAST
-  monthStartTime_ASC
-  monthStartTime_DESC
-  monthStartTime_ASC_NULLS_FIRST
-  monthStartTime_ASC_NULLS_LAST
-  monthStartTime_DESC_NULLS_FIRST
-  monthStartTime_DESC_NULLS_LAST
-  currMonthVolume_ASC
-  currMonthVolume_DESC
-  currMonthVolume_ASC_NULLS_FIRST
-  currMonthVolume_ASC_NULLS_LAST
-  currMonthVolume_DESC_NULLS_FIRST
-  currMonthVolume_DESC_NULLS_LAST
+  periodStartTime_ASC
+  periodStartTime_DESC
+  periodStartTime_ASC_NULLS_FIRST
+  periodStartTime_ASC_NULLS_LAST
+  periodStartTime_DESC_NULLS_FIRST
+  periodStartTime_DESC_NULLS_LAST
+  periodVolume_ASC
+  periodVolume_DESC
+  periodVolume_ASC_NULLS_FIRST
+  periodVolume_ASC_NULLS_LAST
+  periodVolume_DESC_NULLS_FIRST
+  periodVolume_DESC_NULLS_LAST
   blockNumber_ASC
   blockNumber_DESC
   blockNumber_ASC_NULLS_FIRST
@@ -3492,7 +3492,7 @@ type ReferrerCustomFeeUpdatedEdge {
   cursor: String!
 }
 
-type ReferrerRewardState {
+type ReferrerReward {
   id: String!
   referrer: String!
   currency: String!
@@ -3501,7 +3501,7 @@ type ReferrerRewardState {
   seized: BigInt!
 }
 
-input ReferrerRewardStateWhereInput {
+input ReferrerRewardWhereInput {
   id_isNull: Boolean
   id_eq: String
   id_not_eq: String
@@ -3580,11 +3580,11 @@ input ReferrerRewardStateWhereInput {
   seized_lte: BigInt
   seized_in: [BigInt!]
   seized_not_in: [BigInt!]
-  AND: [ReferrerRewardStateWhereInput!]
-  OR: [ReferrerRewardStateWhereInput!]
+  AND: [ReferrerRewardWhereInput!]
+  OR: [ReferrerRewardWhereInput!]
 }
 
-enum ReferrerRewardStateOrderByInput {
+enum ReferrerRewardOrderByInput {
   id_ASC
   id_DESC
   id_ASC_NULLS_FIRST
@@ -3623,14 +3623,14 @@ enum ReferrerRewardStateOrderByInput {
   seized_DESC_NULLS_LAST
 }
 
-type ReferrerRewardStatesConnection {
-  edges: [ReferrerRewardStateEdge!]!
+type ReferrerRewardsConnection {
+  edges: [ReferrerRewardEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
-type ReferrerRewardStateEdge {
-  node: ReferrerRewardState!
+type ReferrerRewardEdge {
+  node: ReferrerReward!
   cursor: String!
 }
 
