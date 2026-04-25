@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, IntColumn as IntColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, IntColumn as IntColumn_, DateTimeColumn as DateTimeColumn_, BigIntColumn as BigIntColumn_} from "@subsquid/typeorm-store"
 
 @Entity_()
 export class ReferrerStateUpdated {
@@ -18,8 +18,8 @@ export class ReferrerStateUpdated {
     @IntColumn_({nullable: false})
     activeFeePercent!: number
 
-    @BigIntColumn_({nullable: false})
-    periodStartTime!: bigint
+    @DateTimeColumn_({nullable: false})
+    periodStartTime!: Date
 
     @BigIntColumn_({nullable: false})
     periodVolume!: bigint

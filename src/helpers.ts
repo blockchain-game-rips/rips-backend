@@ -1,9 +1,13 @@
-import { Config, PrizeTier, Round, ReferrerRewardState, Stake } from './model'
+import { Config, PrizeTier, ReferrerReward, Round, Stake } from './model'
 import { Context } from './processor'
 
 export function buildPrizeTiers(
 	config: Config,
-	prizeDistribution: { prizeCount: bigint; minPrize: bigint; maxPrize: bigint }[],
+	prizeDistribution: {
+		prizeCount: bigint
+		minPrize: bigint
+		maxPrize: bigint
+	}[],
 ): PrizeTier[] {
 	return prizeDistribution.map(
 		(tier, i) =>
@@ -41,20 +45,27 @@ export async function resolveRoundOrThrow(
 
 export async function resolveReferrerRewardState(
 	ctx: Context,
-	states: Map<string, ReferrerRewardState>,
+	states: Map<string, ReferrerReward>,
 	referrer: string,
 	currency: string,
-): Promise<ReferrerRewardState> {
+): Promise<ReferrerReward> {
 	const id = `${referrer}:${currency}`
 
 	let state = states.get(id)
 
 	if (state !== undefined) return state
 
-	state = await ctx.store.findOne(ReferrerRewardState, { where: { id } })
+	state = await ctx.store.findOne(ReferrerReward, { where: { id } })
 
 	if (state === undefined) {
-		state = new ReferrerRewardState({ id, referrer, currency, accrued: 0n, withdrawn: 0n, seized: 0n })
+		state = new ReferrerReward({
+			id,
+			referrer,
+			currency,
+			accrued: 0n,
+			withdrawn: 0n,
+			seized: 0n,
+		})
 	}
 
 	states.set(id, state)

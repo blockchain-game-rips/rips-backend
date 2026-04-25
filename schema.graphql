@@ -240,7 +240,7 @@ type ReferrerStateUpdated @entity {
 	referrer: String!
 	currency: String!
 	activeFeePercent: Int!
-	periodStartTime: BigInt!
+	periodStartTime: DateTime!
 	periodVolume: BigInt!
 	blockNumber: BigInt!
 	time: DateTime!

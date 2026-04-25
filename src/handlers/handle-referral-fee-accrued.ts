@@ -3,17 +3,28 @@ import { resolveReferrerRewardState, resolveRoundOrThrow } from '../helpers'
 import { ReferralFeeAccrued } from '../model'
 import { HandlerArgs } from '../types'
 
-export async function handleReferralFeeAccrued(args: HandlerArgs): Promise<void> {
+export async function handleReferralFeeAccrued(
+	args: HandlerArgs,
+): Promise<void> {
 	const { ctx, entities, block, log } = args
 
 	const { roundId, referrer, amount } =
 		rips.events.ReferralFeeAccrued.decode(log)
 
 	const referrerLower = referrer.toLowerCase()
-	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundId.toString())
+	const round = await resolveRoundOrThrow(
+		ctx,
+		entities.rounds,
+		roundId.toString(),
+	)
 	const currency = round.config.currency
 
-	const rewardState = await resolveReferrerRewardState(ctx, entities.referrerRewardStates, referrerLower, currency)
+	const rewardState = await resolveReferrerRewardState(
+		ctx,
+		entities.referrerRewards,
+		referrerLower,
+		currency,
+	)
 	rewardState.accrued += amount
 
 	entities.referralFeeAccruals.push(

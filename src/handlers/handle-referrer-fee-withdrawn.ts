@@ -3,7 +3,9 @@ import { resolveReferrerRewardState } from '../helpers'
 import { ReferrerFeeWithdrawn } from '../model'
 import { HandlerArgs } from '../types'
 
-export async function handleReferrerFeeWithdrawn(args: HandlerArgs): Promise<void> {
+export async function handleReferrerFeeWithdrawn(
+	args: HandlerArgs,
+): Promise<void> {
 	const { ctx, entities, block, log } = args
 
 	const { referrer, currency, amount } =
@@ -12,7 +14,12 @@ export async function handleReferrerFeeWithdrawn(args: HandlerArgs): Promise<voi
 	const referrerLower = referrer.toLowerCase()
 	const currencyLower = currency.toLowerCase()
 
-	const rewardState = await resolveReferrerRewardState(ctx, entities.referrerRewardStates, referrerLower, currencyLower)
+	const rewardState = await resolveReferrerRewardState(
+		ctx,
+		entities.referrerRewards,
+		referrerLower,
+		currencyLower,
+	)
 	rewardState.withdrawn += amount
 
 	entities.referrerFeeWithdrawals.push(

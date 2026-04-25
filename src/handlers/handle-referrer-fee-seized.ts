@@ -3,7 +3,9 @@ import { resolveReferrerRewardState } from '../helpers'
 import { ReferrerFeeSeized } from '../model'
 import { HandlerArgs } from '../types'
 
-export async function handleReferrerFeeSeized(args: HandlerArgs): Promise<void> {
+export async function handleReferrerFeeSeized(
+	args: HandlerArgs,
+): Promise<void> {
 	const { ctx, entities, block, log } = args
 
 	const { referrer, currency, amount } =
@@ -12,7 +14,12 @@ export async function handleReferrerFeeSeized(args: HandlerArgs): Promise<void> 
 	const referrerLower = referrer.toLowerCase()
 	const currencyLower = currency.toLowerCase()
 
-	const rewardState = await resolveReferrerRewardState(ctx, entities.referrerRewardStates, referrerLower, currencyLower)
+	const rewardState = await resolveReferrerRewardState(
+		ctx,
+		entities.referrerRewards,
+		referrerLower,
+		currencyLower,
+	)
 	rewardState.seized += amount
 
 	entities.referrerFeeSeizures.push(
