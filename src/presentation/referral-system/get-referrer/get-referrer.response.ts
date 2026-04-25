@@ -1,27 +1,27 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { ReferrerWithStates } from '../../../domain/entities/referrer'
-import { CurrencyId } from '../../../domain/value-objects/currency-id'
-import {
-	CurrencyAmountDto,
-	toCurrencyAmountDto,
-} from '../../shared/currency-amount.dto'
+import { Referrer } from '../../../domain/entities/referrer'
 
 const referrerStateSchema = z.object({
-	defaultFeePercent: z.number(),
-	activeFeePercent: z.number(),
-	customFeePercent: z.number(),
-	monthStartTime: z.string(),
-	currMonthVolume: CurrencyAmountDto.schema,
+	currency: z.string(),
+	fees: z.object({
+		default: z.number(),
+		active: z.number(),
+		custom: z.number(),
+	}),
+	volume: z.object({
+		monthStart: z.string(),
+		currentMonth: z.string(),
+	}),
+	rewards: z.object({
+		available: z.string(),
+		withdrawn: z.string(),
+	}),
 })
 
 const getReferrerResponseSchema = z.object({
 	referrer: z.string(),
 	states: z.array(referrerStateSchema),
-	rewards: z.object({
-		availableToWithdraw: z.array(CurrencyAmountDto.schema),
-		withdrawnRewards: z.array(CurrencyAmountDto.schema),
-	}),
 })
 
 export class GetReferrerResponseDto extends createZodDto(
@@ -29,28 +29,21 @@ export class GetReferrerResponseDto extends createZodDto(
 ) {}
 
 export function toGetReferrerResponseDto(
-	data: ReferrerWithStates,
-	prices: Map<CurrencyId, number>,
+	data: Referrer,
 ): GetReferrerResponseDto {
 	return {
-		referrer: data.referrer,
+		referrer: data.address,
 		states: data.states.map((state) => ({
-			defaultFeePercent: state.defaultFeePercent,
-			activeFeePercent: state.activeFeePercent,
-			customFeePercent: state.customFeePercent,
-			monthStartTime: state.monthStartTime.toISOString(),
-			currMonthVolume: toCurrencyAmountDto(
-				state.currMonthVolume,
-				prices.get(state.currMonthVolume.currency.id) ?? 0,
-			),
+			currency: state.currency.id,
+			fees: state.fees,
+			volume: {
+				monthStart: state.volume.monthStart.toISOString(),
+				currentMonth: state.volume.currentMonth.toString(),
+			},
+			rewards: {
+				available: state.rewards.available.toString(),
+				withdrawn: state.rewards.withdrawn.toString(),
+			},
 		})),
-		rewards: {
-			availableToWithdraw: data.rewards.availableToWithdraw.map((a) =>
-				toCurrencyAmountDto(a, prices.get(a.currency.id) ?? 0),
-			),
-			withdrawnRewards: data.rewards.withdrawnRewards.map((w) =>
-				toCurrencyAmountDto(w, prices.get(w.currency.id) ?? 0),
-			),
-		},
 	}
 }
