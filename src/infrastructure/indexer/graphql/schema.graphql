@@ -62,6 +62,9 @@ type Query {
   referrerCustomFeeUpdateds(where: ReferrerCustomFeeUpdatedWhereInput, orderBy: [ReferrerCustomFeeUpdatedOrderByInput!], offset: Int, limit: Int): [ReferrerCustomFeeUpdated!]!
   referrerCustomFeeUpdatedById(id: String!): ReferrerCustomFeeUpdated
   referrerCustomFeeUpdatedsConnection(orderBy: [ReferrerCustomFeeUpdatedOrderByInput!]!, after: String, first: Int, where: ReferrerCustomFeeUpdatedWhereInput): ReferrerCustomFeeUpdatedsConnection!
+  referrerRewardStates(where: ReferrerRewardStateWhereInput, orderBy: [ReferrerRewardStateOrderByInput!], offset: Int, limit: Int): [ReferrerRewardState!]!
+  referrerRewardStateById(id: String!): ReferrerRewardState
+  referrerRewardStatesConnection(orderBy: [ReferrerRewardStateOrderByInput!]!, after: String, first: Int, where: ReferrerRewardStateWhereInput): ReferrerRewardStatesConnection!
   referralFeeAccrueds(where: ReferralFeeAccruedWhereInput, orderBy: [ReferralFeeAccruedOrderByInput!], offset: Int, limit: Int): [ReferralFeeAccrued!]!
   referralFeeAccruedById(id: String!): ReferralFeeAccrued
   referralFeeAccruedsConnection(orderBy: [ReferralFeeAccruedOrderByInput!]!, after: String, first: Int, where: ReferralFeeAccruedWhereInput): ReferralFeeAccruedsConnection!
@@ -3489,9 +3492,152 @@ type ReferrerCustomFeeUpdatedEdge {
   cursor: String!
 }
 
+type ReferrerRewardState {
+  id: String!
+  referrer: String!
+  currency: String!
+  accrued: BigInt!
+  withdrawn: BigInt!
+  seized: BigInt!
+}
+
+input ReferrerRewardStateWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  referrer_isNull: Boolean
+  referrer_eq: String
+  referrer_not_eq: String
+  referrer_gt: String
+  referrer_gte: String
+  referrer_lt: String
+  referrer_lte: String
+  referrer_in: [String!]
+  referrer_not_in: [String!]
+  referrer_contains: String
+  referrer_not_contains: String
+  referrer_containsInsensitive: String
+  referrer_not_containsInsensitive: String
+  referrer_startsWith: String
+  referrer_not_startsWith: String
+  referrer_endsWith: String
+  referrer_not_endsWith: String
+  currency_isNull: Boolean
+  currency_eq: String
+  currency_not_eq: String
+  currency_gt: String
+  currency_gte: String
+  currency_lt: String
+  currency_lte: String
+  currency_in: [String!]
+  currency_not_in: [String!]
+  currency_contains: String
+  currency_not_contains: String
+  currency_containsInsensitive: String
+  currency_not_containsInsensitive: String
+  currency_startsWith: String
+  currency_not_startsWith: String
+  currency_endsWith: String
+  currency_not_endsWith: String
+  accrued_isNull: Boolean
+  accrued_eq: BigInt
+  accrued_not_eq: BigInt
+  accrued_gt: BigInt
+  accrued_gte: BigInt
+  accrued_lt: BigInt
+  accrued_lte: BigInt
+  accrued_in: [BigInt!]
+  accrued_not_in: [BigInt!]
+  withdrawn_isNull: Boolean
+  withdrawn_eq: BigInt
+  withdrawn_not_eq: BigInt
+  withdrawn_gt: BigInt
+  withdrawn_gte: BigInt
+  withdrawn_lt: BigInt
+  withdrawn_lte: BigInt
+  withdrawn_in: [BigInt!]
+  withdrawn_not_in: [BigInt!]
+  seized_isNull: Boolean
+  seized_eq: BigInt
+  seized_not_eq: BigInt
+  seized_gt: BigInt
+  seized_gte: BigInt
+  seized_lt: BigInt
+  seized_lte: BigInt
+  seized_in: [BigInt!]
+  seized_not_in: [BigInt!]
+  AND: [ReferrerRewardStateWhereInput!]
+  OR: [ReferrerRewardStateWhereInput!]
+}
+
+enum ReferrerRewardStateOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  referrer_ASC
+  referrer_DESC
+  referrer_ASC_NULLS_FIRST
+  referrer_ASC_NULLS_LAST
+  referrer_DESC_NULLS_FIRST
+  referrer_DESC_NULLS_LAST
+  currency_ASC
+  currency_DESC
+  currency_ASC_NULLS_FIRST
+  currency_ASC_NULLS_LAST
+  currency_DESC_NULLS_FIRST
+  currency_DESC_NULLS_LAST
+  accrued_ASC
+  accrued_DESC
+  accrued_ASC_NULLS_FIRST
+  accrued_ASC_NULLS_LAST
+  accrued_DESC_NULLS_FIRST
+  accrued_DESC_NULLS_LAST
+  withdrawn_ASC
+  withdrawn_DESC
+  withdrawn_ASC_NULLS_FIRST
+  withdrawn_ASC_NULLS_LAST
+  withdrawn_DESC_NULLS_FIRST
+  withdrawn_DESC_NULLS_LAST
+  seized_ASC
+  seized_DESC
+  seized_ASC_NULLS_FIRST
+  seized_ASC_NULLS_LAST
+  seized_DESC_NULLS_FIRST
+  seized_DESC_NULLS_LAST
+}
+
+type ReferrerRewardStatesConnection {
+  edges: [ReferrerRewardStateEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ReferrerRewardStateEdge {
+  node: ReferrerRewardState!
+  cursor: String!
+}
+
 type ReferralFeeAccrued {
   id: String!
-  roundId: BigInt!
+  roundId: String!
+  round: Round!
   referrer: String!
   amount: BigInt!
   blockNumber: BigInt!
@@ -3517,15 +3663,25 @@ input ReferralFeeAccruedWhereInput {
   id_not_startsWith: String
   id_endsWith: String
   id_not_endsWith: String
+  round_isNull: Boolean
+  round: RoundWhereInput
   roundId_isNull: Boolean
-  roundId_eq: BigInt
-  roundId_not_eq: BigInt
-  roundId_gt: BigInt
-  roundId_gte: BigInt
-  roundId_lt: BigInt
-  roundId_lte: BigInt
-  roundId_in: [BigInt!]
-  roundId_not_in: [BigInt!]
+  roundId_eq: String
+  roundId_not_eq: String
+  roundId_gt: String
+  roundId_gte: String
+  roundId_lt: String
+  roundId_lte: String
+  roundId_in: [String!]
+  roundId_not_in: [String!]
+  roundId_contains: String
+  roundId_not_contains: String
+  roundId_containsInsensitive: String
+  roundId_not_containsInsensitive: String
+  roundId_startsWith: String
+  roundId_not_startsWith: String
+  roundId_endsWith: String
+  roundId_not_endsWith: String
   referrer_isNull: Boolean
   referrer_eq: String
   referrer_not_eq: String
@@ -3598,12 +3754,66 @@ enum ReferralFeeAccruedOrderByInput {
   id_ASC_NULLS_LAST
   id_DESC_NULLS_FIRST
   id_DESC_NULLS_LAST
-  roundId_ASC
-  roundId_DESC
-  roundId_ASC_NULLS_FIRST
-  roundId_ASC_NULLS_LAST
-  roundId_DESC_NULLS_FIRST
-  roundId_DESC_NULLS_LAST
+  round_id_ASC
+  round_id_DESC
+  round_id_ASC_NULLS_FIRST
+  round_id_ASC_NULLS_LAST
+  round_id_DESC_NULLS_FIRST
+  round_id_DESC_NULLS_LAST
+  round_startTime_ASC
+  round_startTime_DESC
+  round_startTime_ASC_NULLS_FIRST
+  round_startTime_ASC_NULLS_LAST
+  round_startTime_DESC_NULLS_FIRST
+  round_startTime_DESC_NULLS_LAST
+  round_ticketsSold_ASC
+  round_ticketsSold_DESC
+  round_ticketsSold_ASC_NULLS_FIRST
+  round_ticketsSold_ASC_NULLS_LAST
+  round_ticketsSold_DESC_NULLS_FIRST
+  round_ticketsSold_DESC_NULLS_LAST
+  round_ticketsClaimed_ASC
+  round_ticketsClaimed_DESC
+  round_ticketsClaimed_ASC_NULLS_FIRST
+  round_ticketsClaimed_ASC_NULLS_LAST
+  round_ticketsClaimed_DESC_NULLS_FIRST
+  round_ticketsClaimed_DESC_NULLS_LAST
+  round_ticketsRefunded_ASC
+  round_ticketsRefunded_DESC
+  round_ticketsRefunded_ASC_NULLS_FIRST
+  round_ticketsRefunded_ASC_NULLS_LAST
+  round_ticketsRefunded_DESC_NULLS_FIRST
+  round_ticketsRefunded_DESC_NULLS_LAST
+  round_status_ASC
+  round_status_DESC
+  round_status_ASC_NULLS_FIRST
+  round_status_ASC_NULLS_LAST
+  round_status_DESC_NULLS_FIRST
+  round_status_DESC_NULLS_LAST
+  round_vrfRequestStatus_ASC
+  round_vrfRequestStatus_DESC
+  round_vrfRequestStatus_ASC_NULLS_FIRST
+  round_vrfRequestStatus_ASC_NULLS_LAST
+  round_vrfRequestStatus_DESC_NULLS_FIRST
+  round_vrfRequestStatus_DESC_NULLS_LAST
+  round_randomA_ASC
+  round_randomA_DESC
+  round_randomA_ASC_NULLS_FIRST
+  round_randomA_ASC_NULLS_LAST
+  round_randomA_DESC_NULLS_FIRST
+  round_randomA_DESC_NULLS_LAST
+  round_randomB_ASC
+  round_randomB_DESC
+  round_randomB_ASC_NULLS_FIRST
+  round_randomB_ASC_NULLS_LAST
+  round_randomB_DESC_NULLS_FIRST
+  round_randomB_DESC_NULLS_LAST
+  round_vrfRequestId_ASC
+  round_vrfRequestId_DESC
+  round_vrfRequestId_ASC_NULLS_FIRST
+  round_vrfRequestId_ASC_NULLS_LAST
+  round_vrfRequestId_DESC_NULLS_FIRST
+  round_vrfRequestId_DESC_NULLS_LAST
   referrer_ASC
   referrer_DESC
   referrer_ASC_NULLS_FIRST
@@ -3649,7 +3859,8 @@ type ReferralFeeAccruedEdge {
 
 type ProtocolFeeAccrued {
   id: String!
-  roundId: BigInt!
+  roundId: String!
+  round: Round!
   amount: BigInt!
   blockNumber: BigInt!
   time: DateTime!
@@ -3674,15 +3885,25 @@ input ProtocolFeeAccruedWhereInput {
   id_not_startsWith: String
   id_endsWith: String
   id_not_endsWith: String
+  round_isNull: Boolean
+  round: RoundWhereInput
   roundId_isNull: Boolean
-  roundId_eq: BigInt
-  roundId_not_eq: BigInt
-  roundId_gt: BigInt
-  roundId_gte: BigInt
-  roundId_lt: BigInt
-  roundId_lte: BigInt
-  roundId_in: [BigInt!]
-  roundId_not_in: [BigInt!]
+  roundId_eq: String
+  roundId_not_eq: String
+  roundId_gt: String
+  roundId_gte: String
+  roundId_lt: String
+  roundId_lte: String
+  roundId_in: [String!]
+  roundId_not_in: [String!]
+  roundId_contains: String
+  roundId_not_contains: String
+  roundId_containsInsensitive: String
+  roundId_not_containsInsensitive: String
+  roundId_startsWith: String
+  roundId_not_startsWith: String
+  roundId_endsWith: String
+  roundId_not_endsWith: String
   amount_isNull: Boolean
   amount_eq: BigInt
   amount_not_eq: BigInt
@@ -3738,12 +3959,66 @@ enum ProtocolFeeAccruedOrderByInput {
   id_ASC_NULLS_LAST
   id_DESC_NULLS_FIRST
   id_DESC_NULLS_LAST
-  roundId_ASC
-  roundId_DESC
-  roundId_ASC_NULLS_FIRST
-  roundId_ASC_NULLS_LAST
-  roundId_DESC_NULLS_FIRST
-  roundId_DESC_NULLS_LAST
+  round_id_ASC
+  round_id_DESC
+  round_id_ASC_NULLS_FIRST
+  round_id_ASC_NULLS_LAST
+  round_id_DESC_NULLS_FIRST
+  round_id_DESC_NULLS_LAST
+  round_startTime_ASC
+  round_startTime_DESC
+  round_startTime_ASC_NULLS_FIRST
+  round_startTime_ASC_NULLS_LAST
+  round_startTime_DESC_NULLS_FIRST
+  round_startTime_DESC_NULLS_LAST
+  round_ticketsSold_ASC
+  round_ticketsSold_DESC
+  round_ticketsSold_ASC_NULLS_FIRST
+  round_ticketsSold_ASC_NULLS_LAST
+  round_ticketsSold_DESC_NULLS_FIRST
+  round_ticketsSold_DESC_NULLS_LAST
+  round_ticketsClaimed_ASC
+  round_ticketsClaimed_DESC
+  round_ticketsClaimed_ASC_NULLS_FIRST
+  round_ticketsClaimed_ASC_NULLS_LAST
+  round_ticketsClaimed_DESC_NULLS_FIRST
+  round_ticketsClaimed_DESC_NULLS_LAST
+  round_ticketsRefunded_ASC
+  round_ticketsRefunded_DESC
+  round_ticketsRefunded_ASC_NULLS_FIRST
+  round_ticketsRefunded_ASC_NULLS_LAST
+  round_ticketsRefunded_DESC_NULLS_FIRST
+  round_ticketsRefunded_DESC_NULLS_LAST
+  round_status_ASC
+  round_status_DESC
+  round_status_ASC_NULLS_FIRST
+  round_status_ASC_NULLS_LAST
+  round_status_DESC_NULLS_FIRST
+  round_status_DESC_NULLS_LAST
+  round_vrfRequestStatus_ASC
+  round_vrfRequestStatus_DESC
+  round_vrfRequestStatus_ASC_NULLS_FIRST
+  round_vrfRequestStatus_ASC_NULLS_LAST
+  round_vrfRequestStatus_DESC_NULLS_FIRST
+  round_vrfRequestStatus_DESC_NULLS_LAST
+  round_randomA_ASC
+  round_randomA_DESC
+  round_randomA_ASC_NULLS_FIRST
+  round_randomA_ASC_NULLS_LAST
+  round_randomA_DESC_NULLS_FIRST
+  round_randomA_DESC_NULLS_LAST
+  round_randomB_ASC
+  round_randomB_DESC
+  round_randomB_ASC_NULLS_FIRST
+  round_randomB_ASC_NULLS_LAST
+  round_randomB_DESC_NULLS_FIRST
+  round_randomB_DESC_NULLS_LAST
+  round_vrfRequestId_ASC
+  round_vrfRequestId_DESC
+  round_vrfRequestId_ASC_NULLS_FIRST
+  round_vrfRequestId_ASC_NULLS_LAST
+  round_vrfRequestId_DESC_NULLS_FIRST
+  round_vrfRequestId_DESC_NULLS_LAST
   amount_ASC
   amount_DESC
   amount_ASC_NULLS_FIRST
