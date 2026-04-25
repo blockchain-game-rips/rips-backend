@@ -1,4 +1,4 @@
-import { ReferrerWithStates } from '../../../domain/entities/referrer'
+import { Referrer } from '../../../domain/entities/referrer'
 import { TelegramId } from '../../../domain/value-objects/telegram-id'
 
 export type GetReferrerInput = {
@@ -6,5 +6,5 @@ export type GetReferrerInput = {
 }
 
 export abstract class GetReferrerUseCase {
-	abstract execute(input: GetReferrerInput): Promise<ReferrerWithStates>
+	abstract execute(input: GetReferrerInput): Promise<Referrer>
 }

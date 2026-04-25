@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { EIP155 } from '../../../constants'
-import { ReferrerWithStates } from '../../../domain/entities/referrer'
+import { Referrer } from '../../../domain/entities/referrer'
 import { toEvmAddress } from '../../../domain/value-objects/evm-address'
 import { ReferralSystemRepository } from '../../interfaces/repositories/referral-system.repository'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
@@ -15,7 +15,7 @@ export class GetReferrerService extends GetReferrerUseCase {
 		super()
 	}
 
-	async execute(input: GetReferrerInput): Promise<ReferrerWithStates> {
+	async execute(input: GetReferrerInput): Promise<Referrer> {
 		const { telegramId } = input
 
 		const user = await this.getUserUseCase.execute({

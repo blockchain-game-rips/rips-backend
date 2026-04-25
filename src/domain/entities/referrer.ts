@@ -1,19 +1,24 @@
-import { CurrencyAmount } from '../value-objects/currency-amount'
 import { EvmAddress } from '../value-objects/evm-address'
+import { Currency } from './currency'
 
 export type ReferrerState = {
-	defaultFeePercent: number
-	activeFeePercent: number
-	customFeePercent: number
-	monthStartTime: Date
-	currMonthVolume: CurrencyAmount
+	currency: Currency
+	fees: {
+		default: number
+		active: number
+		custom: number
+	}
+	volume: {
+		monthStart: Date
+		currentMonth: bigint
+	}
+	rewards: {
+		available: bigint
+		withdrawn: bigint
+	}
 }
 
-export type ReferrerWithStates = {
-	referrer: EvmAddress
+export type Referrer = {
+	address: EvmAddress
 	states: ReferrerState[]
-	rewards: {
-		availableToWithdraw: CurrencyAmount[]
-		withdrawnRewards: CurrencyAmount[]
-	}
 }
