@@ -1,6 +1,7 @@
 import { INestApplication, Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { Test, TestingModuleBuilder } from '@nestjs/testing'
+import { ZodValidationPipe } from 'nestjs-zod'
 import {
 	createPublicClient,
 	createWalletClient,
@@ -127,6 +128,7 @@ export function useRipsApp(
 		const moduleRef = await builder.compile()
 
 		result.app = moduleRef.createNestApplication()
+		result.app.useGlobalPipes(new ZodValidationPipe())
 		result.app.useGlobalFilters(new UseCaseExceptionFilter())
 		await result.app.init()
 

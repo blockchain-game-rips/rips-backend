@@ -52,8 +52,11 @@ describe('Wallet flow E2E', () => {
 			.post('/wallets/withdrawals')
 			.set('x-telegram-id', USER_TG_ID)
 			.send({
-				amount: WITHDRAW_AMOUNT.toString(),
-				currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+				amountIn: {
+					amount: WITHDRAW_AMOUNT.toString(),
+					currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+				},
+				currencyOutChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
 				recipientAddress: RECIPIENT_ADDRESS,
 			})
 			.expect(201)
