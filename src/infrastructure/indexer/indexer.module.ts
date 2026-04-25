@@ -5,7 +5,6 @@ import { StakeRepository } from '../../application/interfaces/repositories/stake
 import { EvmModule } from '../evm/evm.module'
 import { RipsModule } from '../rips/rips.module'
 import { IndexerService } from './indexer.service'
-import { IndexerRewardRepository } from './reward.repository'
 import { IndexerRoundRepository } from './rounds.repository'
 import { IndexerStakeRepository } from './stake.repository'
 
@@ -15,7 +14,6 @@ import { IndexerStakeRepository } from './stake.repository'
 		IndexerService,
 		{ provide: StakeRepository, useClass: IndexerStakeRepository },
 		{ provide: RoundRepository, useClass: IndexerRoundRepository },
-		{ provide: RewardRepository, useClass: IndexerRewardRepository },
 	],
 	exports: [StakeRepository, RoundRepository, RewardRepository],
 })
