@@ -4,13 +4,9 @@ import { Referrer } from '../../../domain/entities/referrer'
 
 const referrerStateSchema = z.object({
 	currency: z.string(),
-	fees: z.object({
-		default: z.number(),
-		active: z.number(),
-		custom: z.number(),
-	}),
+	fee: z.number(),
 	volume: z.object({
-		monthStart: z.string(),
+		monthStart: z.string().nullable(),
 		currentMonth: z.string(),
 	}),
 	rewards: z.object({
@@ -35,9 +31,12 @@ export function toGetReferrerResponseDto(
 		referrer: data.address,
 		states: data.states.map((state) => ({
 			currency: state.currency.id,
-			fees: state.fees,
+			fee: state.fee,
 			volume: {
-				monthStart: state.volume.monthStart.toISOString(),
+				monthStart:
+					state.volume.monthStart === null
+						? null
+						: state.volume.monthStart.toISOString(),
 				currentMonth: state.volume.currentMonth.toString(),
 			},
 			rewards: {

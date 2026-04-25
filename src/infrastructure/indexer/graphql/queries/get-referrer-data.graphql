@@ -1,0 +1,42 @@
+query GetReferrerData($referrer: String!, $currencyAddress: String!) {
+	referrerRewardStates(
+		where: { referrer_eq: $referrer, currency_eq: $currencyAddress }
+		limit: 1
+	) {
+		currency
+		accrued
+		withdrawn
+		seized
+	}
+	referrerStateUpdateds(
+		where: { referrer_eq: $referrer, currency_eq: $currencyAddress }
+		orderBy: blockNumber_DESC
+		limit: 1
+	) {
+		currency
+		activeFeePercent
+		monthStartTime
+		currMonthVolume
+	}
+	referrerCustomFeeUpdateds(
+		where: { referrer_eq: $referrer }
+		orderBy: blockNumber_DESC
+		limit: 1
+	) {
+		customFeePercent
+	}
+	defaultReferralFeeUpdateds(orderBy: blockNumber_DESC, limit: 1) {
+		defaultReferralFee
+	}
+	referralTiersUpdateds(
+		where: { currency_eq: $currencyAddress }
+		orderBy: blockNumber_DESC
+		limit: 1
+	) {
+		tiers {
+			minVolume
+			feePercent
+		}
+		currency
+	}
+}
