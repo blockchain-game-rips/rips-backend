@@ -5,7 +5,7 @@ export type ReferrerState = {
 	defaultFeePercent: number
 	activeFeePercent: number
 	customFeePercent: number
-	monthStartTimestamp: Date
+	monthStartTime: Date
 	currMonthVolume: CurrencyAmount
 }
 

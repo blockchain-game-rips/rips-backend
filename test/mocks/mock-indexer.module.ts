@@ -33,11 +33,15 @@ class MockStakeRepository extends StakeRepository {
 }
 
 class MockRewardRepository extends RewardRepository {
-	async getAvailableRewards(_userAddress: EvmAddress): Promise<CurrencyAmount[]> {
+	async getAvailableRewards(
+		_userAddress: EvmAddress,
+	): Promise<CurrencyAmount[]> {
 		return Promise.resolve([])
 	}
 
-	async getAccruedRewards(_userAddress: EvmAddress): Promise<CurrencyAmount[]> {
+	async getAccruedRewards(
+		_userAddress: EvmAddress,
+	): Promise<CurrencyAmount[]> {
 		return Promise.resolve([])
 	}
 }
