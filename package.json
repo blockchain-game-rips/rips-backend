@@ -9,9 +9,6 @@
         "build": "nest build",
         "fmt": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "nest start",
-        "start:dev": "nest start --watch",
-        "start:debug": "nest start --debug --watch",
-        "start:prod": "node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
         "test": "jest",
         "test:integration": "jest --selectProjects=integration --runInBand",
@@ -19,7 +16,8 @@
         "test:unit": "jest --selectProjects=unit",
         "executor:ensure": "ts-node -r tsconfig-paths/register scripts/ensure-executors.ts",
         "cards:seed": "ts-node -r tsconfig-paths/register scripts/seed-card-definitions.ts",
-        "gen-config-schema": "ts-node -r tsconfig-paths/register utils/generate-configuration-schema.ts"
+        "gen-config-schema": "ts-node -r tsconfig-paths/register utils/generate-configuration-schema.ts",
+        "graphql": "graphql-codegen"
     },
     "dependencies": {
         "@aws-sdk/client-kms": "^3.1010.0",

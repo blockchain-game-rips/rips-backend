@@ -56,9 +56,12 @@ type Query {
   defaultReferralFeeUpdateds(where: DefaultReferralFeeUpdatedWhereInput, orderBy: [DefaultReferralFeeUpdatedOrderByInput!], offset: Int, limit: Int): [DefaultReferralFeeUpdated!]!
   defaultReferralFeeUpdatedById(id: String!): DefaultReferralFeeUpdated
   defaultReferralFeeUpdatedsConnection(orderBy: [DefaultReferralFeeUpdatedOrderByInput!]!, after: String, first: Int, where: DefaultReferralFeeUpdatedWhereInput): DefaultReferralFeeUpdatedsConnection!
-  referralStatsUpdateds(where: ReferralStatsUpdatedWhereInput, orderBy: [ReferralStatsUpdatedOrderByInput!], offset: Int, limit: Int): [ReferralStatsUpdated!]!
-  referralStatsUpdatedById(id: String!): ReferralStatsUpdated
-  referralStatsUpdatedsConnection(orderBy: [ReferralStatsUpdatedOrderByInput!]!, after: String, first: Int, where: ReferralStatsUpdatedWhereInput): ReferralStatsUpdatedsConnection!
+  referrerStateUpdateds(where: ReferrerStateUpdatedWhereInput, orderBy: [ReferrerStateUpdatedOrderByInput!], offset: Int, limit: Int): [ReferrerStateUpdated!]!
+  referrerStateUpdatedById(id: String!): ReferrerStateUpdated
+  referrerStateUpdatedsConnection(orderBy: [ReferrerStateUpdatedOrderByInput!]!, after: String, first: Int, where: ReferrerStateUpdatedWhereInput): ReferrerStateUpdatedsConnection!
+  referrerCustomFeeUpdateds(where: ReferrerCustomFeeUpdatedWhereInput, orderBy: [ReferrerCustomFeeUpdatedOrderByInput!], offset: Int, limit: Int): [ReferrerCustomFeeUpdated!]!
+  referrerCustomFeeUpdatedById(id: String!): ReferrerCustomFeeUpdated
+  referrerCustomFeeUpdatedsConnection(orderBy: [ReferrerCustomFeeUpdatedOrderByInput!]!, after: String, first: Int, where: ReferrerCustomFeeUpdatedWhereInput): ReferrerCustomFeeUpdatedsConnection!
   referralFeeAccrueds(where: ReferralFeeAccruedWhereInput, orderBy: [ReferralFeeAccruedOrderByInput!], offset: Int, limit: Int): [ReferralFeeAccrued!]!
   referralFeeAccruedById(id: String!): ReferralFeeAccrued
   referralFeeAccruedsConnection(orderBy: [ReferralFeeAccruedOrderByInput!]!, after: String, first: Int, where: ReferralFeeAccruedWhereInput): ReferralFeeAccruedsConnection!
@@ -2779,6 +2782,7 @@ type ReferralTier {
 
 type ReferralTiersUpdated {
   id: String!
+  currency: String!
   tiers(where: ReferralTierWhereInput, orderBy: [ReferralTierOrderByInput!], offset: Int, limit: Int): [ReferralTier!]!
   blockNumber: BigInt!
   time: DateTime!
@@ -2862,6 +2866,23 @@ input ReferralTiersUpdatedWhereInput {
   id_not_startsWith: String
   id_endsWith: String
   id_not_endsWith: String
+  currency_isNull: Boolean
+  currency_eq: String
+  currency_not_eq: String
+  currency_gt: String
+  currency_gte: String
+  currency_lt: String
+  currency_lte: String
+  currency_in: [String!]
+  currency_not_in: [String!]
+  currency_contains: String
+  currency_not_contains: String
+  currency_containsInsensitive: String
+  currency_not_containsInsensitive: String
+  currency_startsWith: String
+  currency_not_startsWith: String
+  currency_endsWith: String
+  currency_not_endsWith: String
   tiers_every: ReferralTierWhereInput
   tiers_some: ReferralTierWhereInput
   tiers_none: ReferralTierWhereInput
@@ -2917,6 +2938,12 @@ enum ReferralTierOrderByInput {
   update_id_ASC_NULLS_LAST
   update_id_DESC_NULLS_FIRST
   update_id_DESC_NULLS_LAST
+  update_currency_ASC
+  update_currency_DESC
+  update_currency_ASC_NULLS_FIRST
+  update_currency_ASC_NULLS_LAST
+  update_currency_DESC_NULLS_FIRST
+  update_currency_DESC_NULLS_LAST
   update_blockNumber_ASC
   update_blockNumber_DESC
   update_blockNumber_ASC_NULLS_FIRST
@@ -2967,6 +2994,12 @@ enum ReferralTiersUpdatedOrderByInput {
   id_ASC_NULLS_LAST
   id_DESC_NULLS_FIRST
   id_DESC_NULLS_LAST
+  currency_ASC
+  currency_DESC
+  currency_ASC_NULLS_FIRST
+  currency_ASC_NULLS_LAST
+  currency_DESC_NULLS_FIRST
+  currency_DESC_NULLS_LAST
   blockNumber_ASC
   blockNumber_DESC
   blockNumber_ASC_NULLS_FIRST
@@ -3116,18 +3149,19 @@ type DefaultReferralFeeUpdatedEdge {
   cursor: String!
 }
 
-type ReferralStatsUpdated {
+type ReferrerStateUpdated {
   id: String!
+  referrer: String!
+  currency: String!
   activeFeePercent: Int!
-  customFeePercent: Int!
-  monthStartTimestamp: BigInt!
+  monthStartTime: BigInt!
   currMonthVolume: BigInt!
   blockNumber: BigInt!
   time: DateTime!
   txHash: String!
 }
 
-input ReferralStatsUpdatedWhereInput {
+input ReferrerStateUpdatedWhereInput {
   id_isNull: Boolean
   id_eq: String
   id_not_eq: String
@@ -3145,6 +3179,40 @@ input ReferralStatsUpdatedWhereInput {
   id_not_startsWith: String
   id_endsWith: String
   id_not_endsWith: String
+  referrer_isNull: Boolean
+  referrer_eq: String
+  referrer_not_eq: String
+  referrer_gt: String
+  referrer_gte: String
+  referrer_lt: String
+  referrer_lte: String
+  referrer_in: [String!]
+  referrer_not_in: [String!]
+  referrer_contains: String
+  referrer_not_contains: String
+  referrer_containsInsensitive: String
+  referrer_not_containsInsensitive: String
+  referrer_startsWith: String
+  referrer_not_startsWith: String
+  referrer_endsWith: String
+  referrer_not_endsWith: String
+  currency_isNull: Boolean
+  currency_eq: String
+  currency_not_eq: String
+  currency_gt: String
+  currency_gte: String
+  currency_lt: String
+  currency_lte: String
+  currency_in: [String!]
+  currency_not_in: [String!]
+  currency_contains: String
+  currency_not_contains: String
+  currency_containsInsensitive: String
+  currency_not_containsInsensitive: String
+  currency_startsWith: String
+  currency_not_startsWith: String
+  currency_endsWith: String
+  currency_not_endsWith: String
   activeFeePercent_isNull: Boolean
   activeFeePercent_eq: Int
   activeFeePercent_not_eq: Int
@@ -3154,24 +3222,15 @@ input ReferralStatsUpdatedWhereInput {
   activeFeePercent_lte: Int
   activeFeePercent_in: [Int!]
   activeFeePercent_not_in: [Int!]
-  customFeePercent_isNull: Boolean
-  customFeePercent_eq: Int
-  customFeePercent_not_eq: Int
-  customFeePercent_gt: Int
-  customFeePercent_gte: Int
-  customFeePercent_lt: Int
-  customFeePercent_lte: Int
-  customFeePercent_in: [Int!]
-  customFeePercent_not_in: [Int!]
-  monthStartTimestamp_isNull: Boolean
-  monthStartTimestamp_eq: BigInt
-  monthStartTimestamp_not_eq: BigInt
-  monthStartTimestamp_gt: BigInt
-  monthStartTimestamp_gte: BigInt
-  monthStartTimestamp_lt: BigInt
-  monthStartTimestamp_lte: BigInt
-  monthStartTimestamp_in: [BigInt!]
-  monthStartTimestamp_not_in: [BigInt!]
+  monthStartTime_isNull: Boolean
+  monthStartTime_eq: BigInt
+  monthStartTime_not_eq: BigInt
+  monthStartTime_gt: BigInt
+  monthStartTime_gte: BigInt
+  monthStartTime_lt: BigInt
+  monthStartTime_lte: BigInt
+  monthStartTime_in: [BigInt!]
+  monthStartTime_not_in: [BigInt!]
   currMonthVolume_isNull: Boolean
   currMonthVolume_eq: BigInt
   currMonthVolume_not_eq: BigInt
@@ -3216,35 +3275,41 @@ input ReferralStatsUpdatedWhereInput {
   txHash_not_startsWith: String
   txHash_endsWith: String
   txHash_not_endsWith: String
-  AND: [ReferralStatsUpdatedWhereInput!]
-  OR: [ReferralStatsUpdatedWhereInput!]
+  AND: [ReferrerStateUpdatedWhereInput!]
+  OR: [ReferrerStateUpdatedWhereInput!]
 }
 
-enum ReferralStatsUpdatedOrderByInput {
+enum ReferrerStateUpdatedOrderByInput {
   id_ASC
   id_DESC
   id_ASC_NULLS_FIRST
   id_ASC_NULLS_LAST
   id_DESC_NULLS_FIRST
   id_DESC_NULLS_LAST
+  referrer_ASC
+  referrer_DESC
+  referrer_ASC_NULLS_FIRST
+  referrer_ASC_NULLS_LAST
+  referrer_DESC_NULLS_FIRST
+  referrer_DESC_NULLS_LAST
+  currency_ASC
+  currency_DESC
+  currency_ASC_NULLS_FIRST
+  currency_ASC_NULLS_LAST
+  currency_DESC_NULLS_FIRST
+  currency_DESC_NULLS_LAST
   activeFeePercent_ASC
   activeFeePercent_DESC
   activeFeePercent_ASC_NULLS_FIRST
   activeFeePercent_ASC_NULLS_LAST
   activeFeePercent_DESC_NULLS_FIRST
   activeFeePercent_DESC_NULLS_LAST
-  customFeePercent_ASC
-  customFeePercent_DESC
-  customFeePercent_ASC_NULLS_FIRST
-  customFeePercent_ASC_NULLS_LAST
-  customFeePercent_DESC_NULLS_FIRST
-  customFeePercent_DESC_NULLS_LAST
-  monthStartTimestamp_ASC
-  monthStartTimestamp_DESC
-  monthStartTimestamp_ASC_NULLS_FIRST
-  monthStartTimestamp_ASC_NULLS_LAST
-  monthStartTimestamp_DESC_NULLS_FIRST
-  monthStartTimestamp_DESC_NULLS_LAST
+  monthStartTime_ASC
+  monthStartTime_DESC
+  monthStartTime_ASC_NULLS_FIRST
+  monthStartTime_ASC_NULLS_LAST
+  monthStartTime_DESC_NULLS_FIRST
+  monthStartTime_DESC_NULLS_LAST
   currMonthVolume_ASC
   currMonthVolume_DESC
   currMonthVolume_ASC_NULLS_FIRST
@@ -3271,14 +3336,156 @@ enum ReferralStatsUpdatedOrderByInput {
   txHash_DESC_NULLS_LAST
 }
 
-type ReferralStatsUpdatedsConnection {
-  edges: [ReferralStatsUpdatedEdge!]!
+type ReferrerStateUpdatedsConnection {
+  edges: [ReferrerStateUpdatedEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
-type ReferralStatsUpdatedEdge {
-  node: ReferralStatsUpdated!
+type ReferrerStateUpdatedEdge {
+  node: ReferrerStateUpdated!
+  cursor: String!
+}
+
+type ReferrerCustomFeeUpdated {
+  id: String!
+  referrer: String!
+  customFeePercent: Int!
+  blockNumber: BigInt!
+  time: DateTime!
+  txHash: String!
+}
+
+input ReferrerCustomFeeUpdatedWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  referrer_isNull: Boolean
+  referrer_eq: String
+  referrer_not_eq: String
+  referrer_gt: String
+  referrer_gte: String
+  referrer_lt: String
+  referrer_lte: String
+  referrer_in: [String!]
+  referrer_not_in: [String!]
+  referrer_contains: String
+  referrer_not_contains: String
+  referrer_containsInsensitive: String
+  referrer_not_containsInsensitive: String
+  referrer_startsWith: String
+  referrer_not_startsWith: String
+  referrer_endsWith: String
+  referrer_not_endsWith: String
+  customFeePercent_isNull: Boolean
+  customFeePercent_eq: Int
+  customFeePercent_not_eq: Int
+  customFeePercent_gt: Int
+  customFeePercent_gte: Int
+  customFeePercent_lt: Int
+  customFeePercent_lte: Int
+  customFeePercent_in: [Int!]
+  customFeePercent_not_in: [Int!]
+  blockNumber_isNull: Boolean
+  blockNumber_eq: BigInt
+  blockNumber_not_eq: BigInt
+  blockNumber_gt: BigInt
+  blockNumber_gte: BigInt
+  blockNumber_lt: BigInt
+  blockNumber_lte: BigInt
+  blockNumber_in: [BigInt!]
+  blockNumber_not_in: [BigInt!]
+  time_isNull: Boolean
+  time_eq: DateTime
+  time_not_eq: DateTime
+  time_gt: DateTime
+  time_gte: DateTime
+  time_lt: DateTime
+  time_lte: DateTime
+  time_in: [DateTime!]
+  time_not_in: [DateTime!]
+  txHash_isNull: Boolean
+  txHash_eq: String
+  txHash_not_eq: String
+  txHash_gt: String
+  txHash_gte: String
+  txHash_lt: String
+  txHash_lte: String
+  txHash_in: [String!]
+  txHash_not_in: [String!]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_containsInsensitive: String
+  txHash_not_containsInsensitive: String
+  txHash_startsWith: String
+  txHash_not_startsWith: String
+  txHash_endsWith: String
+  txHash_not_endsWith: String
+  AND: [ReferrerCustomFeeUpdatedWhereInput!]
+  OR: [ReferrerCustomFeeUpdatedWhereInput!]
+}
+
+enum ReferrerCustomFeeUpdatedOrderByInput {
+  id_ASC
+  id_DESC
+  id_ASC_NULLS_FIRST
+  id_ASC_NULLS_LAST
+  id_DESC_NULLS_FIRST
+  id_DESC_NULLS_LAST
+  referrer_ASC
+  referrer_DESC
+  referrer_ASC_NULLS_FIRST
+  referrer_ASC_NULLS_LAST
+  referrer_DESC_NULLS_FIRST
+  referrer_DESC_NULLS_LAST
+  customFeePercent_ASC
+  customFeePercent_DESC
+  customFeePercent_ASC_NULLS_FIRST
+  customFeePercent_ASC_NULLS_LAST
+  customFeePercent_DESC_NULLS_FIRST
+  customFeePercent_DESC_NULLS_LAST
+  blockNumber_ASC
+  blockNumber_DESC
+  blockNumber_ASC_NULLS_FIRST
+  blockNumber_ASC_NULLS_LAST
+  blockNumber_DESC_NULLS_FIRST
+  blockNumber_DESC_NULLS_LAST
+  time_ASC
+  time_DESC
+  time_ASC_NULLS_FIRST
+  time_ASC_NULLS_LAST
+  time_DESC_NULLS_FIRST
+  time_DESC_NULLS_LAST
+  txHash_ASC
+  txHash_DESC
+  txHash_ASC_NULLS_FIRST
+  txHash_ASC_NULLS_LAST
+  txHash_DESC_NULLS_FIRST
+  txHash_DESC_NULLS_LAST
+}
+
+type ReferrerCustomFeeUpdatedsConnection {
+  edges: [ReferrerCustomFeeUpdatedEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ReferrerCustomFeeUpdatedEdge {
+  node: ReferrerCustomFeeUpdated!
   cursor: String!
 }
 
