@@ -11,6 +11,7 @@ const referrerTierSchema = z.object({
 
 const referrerTierTableSchema = z.object({
 	currency: CurrencyDto.schema,
+	defaultFeePercent: z.number(),
 	tiers: z.array(referrerTierSchema),
 })
 
@@ -32,6 +33,7 @@ export function toGetTierTablesResponseDto(
 				table.currency,
 				prices.get(table.currency.id) ?? 0,
 			),
+			defaultFeePercent: table.defaultFeePercent,
 			tiers: table.tiers.map((tier) => ({
 				minVolume: tier.minVolume.toString(),
 				feePercent: tier.feePercent,
