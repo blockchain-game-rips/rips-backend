@@ -1,5 +1,5 @@
-module.exports = class Data1777053378187 {
-    name = 'Data1777053378187'
+module.exports = class Data1777125919397 {
+    name = 'Data1777125919397'
 
     async up(db) {
         await db.query(`CREATE TABLE "prize_tier" ("id" character varying NOT NULL, "tier_index" integer NOT NULL, "prize_count" numeric NOT NULL, "min_prize" numeric NOT NULL, "max_prize" numeric NOT NULL, "config_id" character varying, CONSTRAINT "PK_edefaa73bb27e6bf21aa376c178" PRIMARY KEY ("id"))`)
@@ -31,8 +31,11 @@ module.exports = class Data1777053378187 {
         await db.query(`CREATE TABLE "default_referral_fee_updated" ("id" character varying NOT NULL, "default_referral_fee" integer NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_5ffc9a5b3b9e0722c5c182ac277" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "referrer_state_updated" ("id" character varying NOT NULL, "referrer" text NOT NULL, "currency" text NOT NULL, "active_fee_percent" integer NOT NULL, "month_start_time" numeric NOT NULL, "curr_month_volume" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_7b1e67952d6b61a65f5da7cb656" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "referrer_custom_fee_updated" ("id" character varying NOT NULL, "referrer" text NOT NULL, "custom_fee_percent" integer NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_ff5880fec7f44ed1db4121f6453" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE TABLE "referral_fee_accrued" ("id" character varying NOT NULL, "round_id" numeric NOT NULL, "referrer" text NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_0230ef91e15340fe6d839682b3e" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE TABLE "protocol_fee_accrued" ("id" character varying NOT NULL, "round_id" numeric NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, CONSTRAINT "PK_42662fc17eaec85c861b57854ee" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "referrer_reward_state" ("id" character varying NOT NULL, "referrer" text NOT NULL, "currency" text NOT NULL, "accrued" numeric NOT NULL, "withdrawn" numeric NOT NULL, "seized" numeric NOT NULL, CONSTRAINT "PK_7eafc9362c407427305af3b6f6d" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "referral_fee_accrued" ("id" character varying NOT NULL, "referrer" text NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "round_id" character varying, CONSTRAINT "PK_0230ef91e15340fe6d839682b3e" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_d4fa6360b30bf54b10d3941f3b" ON "referral_fee_accrued" ("round_id") `)
+        await db.query(`CREATE TABLE "protocol_fee_accrued" ("id" character varying NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "round_id" character varying, CONSTRAINT "PK_42662fc17eaec85c861b57854ee" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_a0ab05b38b67e8b14fc22f75e2" ON "protocol_fee_accrued" ("round_id") `)
         await db.query(`ALTER TABLE "prize_tier" ADD CONSTRAINT "FK_6ef34565c2750e5acf50a2080cf" FOREIGN KEY ("config_id") REFERENCES "config"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "ticket_purchase" ADD CONSTRAINT "FK_7dfa2c8f4213a3b48a49a0efa76" FOREIGN KEY ("round_id") REFERENCES "round"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "prize_claim" ADD CONSTRAINT "FK_5716fcc128026f9424ec88d50fd" FOREIGN KEY ("round_id") REFERENCES "round"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -41,6 +44,8 @@ module.exports = class Data1777053378187 {
         await db.query(`ALTER TABLE "round" ADD CONSTRAINT "FK_161464c4fefeec1f2ece18e7124" FOREIGN KEY ("stake_id") REFERENCES "stake"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "config" ADD CONSTRAINT "FK_054f4e80d93bcff93a9f4520ffa" FOREIGN KEY ("stake_id") REFERENCES "stake"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "referral_tier" ADD CONSTRAINT "FK_6b61e94b7ef089009a27b561e68" FOREIGN KEY ("update_id") REFERENCES "referral_tiers_updated"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+        await db.query(`ALTER TABLE "referral_fee_accrued" ADD CONSTRAINT "FK_d4fa6360b30bf54b10d3941f3b9" FOREIGN KEY ("round_id") REFERENCES "round"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+        await db.query(`ALTER TABLE "protocol_fee_accrued" ADD CONSTRAINT "FK_a0ab05b38b67e8b14fc22f75e27" FOREIGN KEY ("round_id") REFERENCES "round"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     }
 
     async down(db) {
@@ -73,8 +78,11 @@ module.exports = class Data1777053378187 {
         await db.query(`DROP TABLE "default_referral_fee_updated"`)
         await db.query(`DROP TABLE "referrer_state_updated"`)
         await db.query(`DROP TABLE "referrer_custom_fee_updated"`)
+        await db.query(`DROP TABLE "referrer_reward_state"`)
         await db.query(`DROP TABLE "referral_fee_accrued"`)
+        await db.query(`DROP INDEX "public"."IDX_d4fa6360b30bf54b10d3941f3b"`)
         await db.query(`DROP TABLE "protocol_fee_accrued"`)
+        await db.query(`DROP INDEX "public"."IDX_a0ab05b38b67e8b14fc22f75e2"`)
         await db.query(`ALTER TABLE "prize_tier" DROP CONSTRAINT "FK_6ef34565c2750e5acf50a2080cf"`)
         await db.query(`ALTER TABLE "ticket_purchase" DROP CONSTRAINT "FK_7dfa2c8f4213a3b48a49a0efa76"`)
         await db.query(`ALTER TABLE "prize_claim" DROP CONSTRAINT "FK_5716fcc128026f9424ec88d50fd"`)
@@ -83,5 +91,7 @@ module.exports = class Data1777053378187 {
         await db.query(`ALTER TABLE "round" DROP CONSTRAINT "FK_161464c4fefeec1f2ece18e7124"`)
         await db.query(`ALTER TABLE "config" DROP CONSTRAINT "FK_054f4e80d93bcff93a9f4520ffa"`)
         await db.query(`ALTER TABLE "referral_tier" DROP CONSTRAINT "FK_6b61e94b7ef089009a27b561e68"`)
+        await db.query(`ALTER TABLE "referral_fee_accrued" DROP CONSTRAINT "FK_d4fa6360b30bf54b10d3941f3b9"`)
+        await db.query(`ALTER TABLE "protocol_fee_accrued" DROP CONSTRAINT "FK_a0ab05b38b67e8b14fc22f75e27"`)
     }
 }

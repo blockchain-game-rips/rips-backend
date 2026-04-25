@@ -1,4 +1,5 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_, StringColumn as StringColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_, StringColumn as StringColumn_} from "@subsquid/typeorm-store"
+import {Round} from "./round.model"
 
 @Entity_()
 export class ProtocolFeeAccrued {
@@ -9,8 +10,9 @@ export class ProtocolFeeAccrued {
     @PrimaryColumn_()
     id!: string
 
-    @BigIntColumn_({nullable: false})
-    roundId!: bigint
+    @Index_()
+    @ManyToOne_(() => Round, {nullable: true})
+    round!: Round
 
     @BigIntColumn_({nullable: false})
     amount!: bigint

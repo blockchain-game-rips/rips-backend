@@ -693,6 +693,21 @@ describe('indexer e2e', () => {
 			})
 			expect(BigInt(row.amount as string)).toBeGreaterThan(0n)
 		})
+
+		it('creates ReferrerRewardState with accrued amount', async () => {
+			const row = (await waitForRow(
+				dataSource,
+				`SELECT * FROM referrer_reward_state WHERE referrer = '${referrer.address.toLowerCase()}' AND currency = '${NATIVE_CURRENCY}'`,
+			)) as Record<string, unknown>
+
+			expect(row).toMatchObject({
+				referrer: referrer.address.toLowerCase(),
+				currency: NATIVE_CURRENCY,
+				withdrawn: '0',
+				seized: '0',
+			})
+			expect(BigInt(row.accrued as string)).toBeGreaterThan(0n)
+		})
 	})
 
 	describe('withdrawReferrerFee', () => {
@@ -720,6 +735,21 @@ describe('indexer e2e', () => {
 				tx_hash: txHash,
 			})
 			expect(BigInt(row.amount as string)).toBeGreaterThan(0n)
+		})
+
+		it('updates ReferrerRewardState withdrawn amount', async () => {
+			const row = (await waitForRow(
+				dataSource,
+				`SELECT * FROM referrer_reward_state WHERE referrer = '${referrer.address.toLowerCase()}' AND currency = '${NATIVE_CURRENCY}' AND withdrawn > 0`,
+			)) as Record<string, unknown>
+
+			expect(row).toMatchObject({
+				referrer: referrer.address.toLowerCase(),
+				currency: NATIVE_CURRENCY,
+				seized: '0',
+			})
+			expect(BigInt(row.accrued as string)).toBeGreaterThan(0n)
+			expect(BigInt(row.withdrawn as string)).toBeGreaterThan(0n)
 		})
 	})
 

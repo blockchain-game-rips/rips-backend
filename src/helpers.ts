@@ -1,4 +1,4 @@
-import { Config, PrizeTier, Round, Stake } from './model'
+import { Config, PrizeTier, Round, ReferrerRewardState, Stake } from './model'
 import { Context } from './processor'
 
 export function buildPrizeTiers(
@@ -37,6 +37,29 @@ export async function resolveRoundOrThrow(
 	}
 
 	return round
+}
+
+export async function resolveReferrerRewardState(
+	ctx: Context,
+	states: Map<string, ReferrerRewardState>,
+	referrer: string,
+	currency: string,
+): Promise<ReferrerRewardState> {
+	const id = `${referrer}:${currency}`
+
+	let state = states.get(id)
+
+	if (state !== undefined) return state
+
+	state = await ctx.store.findOne(ReferrerRewardState, { where: { id } })
+
+	if (state === undefined) {
+		state = new ReferrerRewardState({ id, referrer, currency, accrued: 0n, withdrawn: 0n, seized: 0n })
+	}
+
+	states.set(id, state)
+
+	return state
 }
 
 export async function resolveStakeOrThrow(

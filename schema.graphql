@@ -256,9 +256,18 @@ type ReferrerCustomFeeUpdated @entity {
 	txHash: String!
 }
 
+type ReferrerRewardState @entity {
+	id: ID!
+	referrer: String!
+	currency: String!
+	accrued: BigInt!
+	withdrawn: BigInt!
+	seized: BigInt!
+}
+
 type ReferralFeeAccrued @entity {
 	id: ID!
-	roundId: BigInt!
+	round: Round!
 	referrer: String!
 	amount: BigInt!
 	blockNumber: BigInt!
@@ -268,7 +277,7 @@ type ReferralFeeAccrued @entity {
 
 type ProtocolFeeAccrued @entity {
 	id: ID!
-	roundId: BigInt!
+	round: Round!
 	amount: BigInt!
 	blockNumber: BigInt!
 	time: DateTime!

@@ -14,6 +14,7 @@ import {
 	ReferrerFeeSeized,
 	ReferrerFeeWithdrawn,
 	ReferrerFreezeUpdated,
+	ReferrerRewardState,
 	ReferrerStateUpdated,
 	Refund,
 	Round,
@@ -49,6 +50,7 @@ export interface Entities {
 	referrerCustomFeeUpdates: ReferrerCustomFeeUpdated[]
 	referralFeeAccruals: ReferralFeeAccrued[]
 	protocolFeeAccruals: ProtocolFeeAccrued[]
+	referrerRewardStates: Map<string, ReferrerRewardState>
 }
 
 export interface HandlerArgs {

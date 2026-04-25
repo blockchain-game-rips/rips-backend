@@ -1,4 +1,5 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BigIntColumn as BigIntColumn_, StringColumn as StringColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
+import {Round} from "./round.model"
 
 @Entity_()
 export class ReferralFeeAccrued {
@@ -9,8 +10,9 @@ export class ReferralFeeAccrued {
     @PrimaryColumn_()
     id!: string
 
-    @BigIntColumn_({nullable: false})
-    roundId!: bigint
+    @Index_()
+    @ManyToOne_(() => Round, {nullable: true})
+    round!: Round
 
     @StringColumn_({nullable: false})
     referrer!: string

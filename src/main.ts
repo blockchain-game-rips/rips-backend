@@ -115,6 +115,7 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 		referrerCustomFeeUpdates: [],
 		referralFeeAccruals: [],
 		protocolFeeAccruals: [],
+		referrerRewardStates: new Map(),
 	}
 
 	for (const block of ctx.blocks) {
