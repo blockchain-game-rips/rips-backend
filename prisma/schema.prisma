@@ -85,7 +85,7 @@ model Notification {
     roundId    Int              @map("round_id")
     type       NotificationType
     createdAt  DateTime         @default(now()) @map("created_at")
-    isNotified Boolean          @map("is_notified")
+    isNotified Boolean          @default(false) @map("is_notified")
 
     @@unique([userId, roundId, type])
     @@map("notifications")

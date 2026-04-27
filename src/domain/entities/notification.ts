@@ -1,4 +1,4 @@
-enum NotificationType {
+export enum NotificationType {
 	CLAIMED = 'CLAIMED',
 	REFUNDED = 'REFUNDED',
 }
