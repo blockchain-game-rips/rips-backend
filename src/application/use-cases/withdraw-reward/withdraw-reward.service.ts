@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { EIP155 } from '../../../constants'
 import { toEvmAddress } from '../../../domain/value-objects/evm-address'
 import { Reward } from '../../../domain/value-objects/reward'
-import { RewardRepository } from '../../interfaces/repositories/reward.repository'
+import { ReferralSystemRepository } from '../../interfaces/repositories/referral-system.repository'
 import { RipsService } from '../../interfaces/rips.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import {
@@ -14,7 +14,7 @@ import {
 export class WithdrawRewardService extends WithdrawRewardUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
-		private readonly rewardRepository: RewardRepository,
+		private readonly referralSystemRepository: ReferralSystemRepository,
 		private readonly ripsService: RipsService,
 	) {
 		super()
@@ -27,16 +27,18 @@ export class WithdrawRewardService extends WithdrawRewardUseCase {
 
 		const userAddress = toEvmAddress(user.wallet.namespaceToAddress[EIP155])
 
-		const availableRewards =
-			await this.rewardRepository.getAvailableRewards(userAddress)
+		const referrer =
+			await this.referralSystemRepository.getReferrerByAddress(
+				userAddress,
+			)
 
-		const rewardAmount = availableRewards.find(
+		const state = referrer.states.find(
 			(r) => r.currency.chainAddress.address === currencyAddress,
 		)
 
-		if (!rewardAmount) {
+		if (!state || state.rewards.available === 0n) {
 			throw new Error(
-				`No available reward for currency at ${currencyAddress}`,
+				`No reward to withdraw for address ${userAddress} and currency ${currencyAddress}`,
 			)
 		}
 
