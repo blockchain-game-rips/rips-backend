@@ -14,9 +14,8 @@ export function handleReferralStatsUpdated(args: HandlerArgs): void {
 			referrer: referrer,
 			currency: currency,
 			activeFeePercent: referrerState.activeFeePercent,
-			//TODO: do I need to multiply
 			periodStartTime: new Date(
-				referrerState.periodStartTimestamp.toString(),
+				Number(referrerState.periodStartTimestamp) * 1000,
 			),
 			periodVolume: referrerState.periodVolume,
 			blockNumber: BigInt(block.height),

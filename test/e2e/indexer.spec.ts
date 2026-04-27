@@ -669,16 +669,17 @@ describe('indexer e2e', () => {
 		})
 
 		it('indexes ReferralStateUpdated', async () => {
-			const row = await waitForRow(
+			const row = (await waitForRow(
 				dataSource,
 				`SELECT * FROM referrer_state_updated WHERE tx_hash = '${claimTxHash}'`,
-			)
+			)) as Record<string, unknown>
 
 			expect(row).toMatchObject({
 				referrer: referrer.address.toLowerCase(),
 				currency: NATIVE_CURRENCY,
 				tx_hash: claimTxHash,
 			})
+			expect(row.period_start_time).toEqual(row.time)
 		})
 
 		it('indexes ReferralFeeAccrued', async () => {
@@ -694,10 +695,10 @@ describe('indexer e2e', () => {
 			expect(BigInt(row.amount as string)).toBeGreaterThan(0n)
 		})
 
-		it('creates ReferrerRewardState with accrued amount', async () => {
+		it('creates ReferrerReward with accrued amount', async () => {
 			const row = (await waitForRow(
 				dataSource,
-				`SELECT * FROM referrer_reward_state WHERE referrer = '${referrer.address.toLowerCase()}' AND currency = '${NATIVE_CURRENCY}'`,
+				`SELECT * FROM referrer_reward WHERE referrer = '${referrer.address.toLowerCase()}' AND currency = '${NATIVE_CURRENCY}'`,
 			)) as Record<string, unknown>
 
 			expect(row).toMatchObject({
@@ -737,10 +738,10 @@ describe('indexer e2e', () => {
 			expect(BigInt(row.amount as string)).toBeGreaterThan(0n)
 		})
 
-		it('updates ReferrerRewardState withdrawn amount', async () => {
+		it('updates ReferrerReward withdrawn amount', async () => {
 			const row = (await waitForRow(
 				dataSource,
-				`SELECT * FROM referrer_reward_state WHERE referrer = '${referrer.address.toLowerCase()}' AND currency = '${NATIVE_CURRENCY}' AND withdrawn > 0`,
+				`SELECT * FROM referrer_reward WHERE referrer = '${referrer.address.toLowerCase()}' AND currency = '${NATIVE_CURRENCY}' AND withdrawn > 0`,
 			)) as Record<string, unknown>
 
 			expect(row).toMatchObject({
