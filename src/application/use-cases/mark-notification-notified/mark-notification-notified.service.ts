@@ -7,7 +7,9 @@ import {
 
 @Injectable()
 export class MarkNotificationNotifiedService extends MarkNotificationNotifiedUseCase {
-	constructor(private readonly notificationRepository: NotificationRepository) {
+	constructor(
+		private readonly notificationRepository: NotificationRepository,
+	) {
 		super()
 	}
 

@@ -4,7 +4,9 @@ import { GetNotificationsUseCase } from './get-notifications.use-case'
 
 @Injectable()
 export class GetNotificationsService extends GetNotificationsUseCase {
-	constructor(private readonly notificationRepository: NotificationRepository) {
+	constructor(
+		private readonly notificationRepository: NotificationRepository,
+	) {
 		super()
 	}
 

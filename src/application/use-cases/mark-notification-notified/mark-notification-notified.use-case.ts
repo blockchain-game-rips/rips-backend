@@ -5,5 +5,7 @@ export type MarkNotificationNotifiedInput = {
 }
 
 export abstract class MarkNotificationNotifiedUseCase {
-	abstract execute(input: MarkNotificationNotifiedInput): Promise<Notification>
+	abstract execute(
+		input: MarkNotificationNotifiedInput,
+	): Promise<Notification>
 }
