@@ -196,15 +196,20 @@ export class RipsController {
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
+		const currencyById = new Map([
+			[quote.amountIn.currency.id, quote.amountIn.currency],
+			[quote.fee.currency.id, quote.fee.currency],
+			[
+				quote.transactionQuote.blockchainFee.currency.id,
+				quote.transactionQuote.blockchainFee.currency,
+			],
+		])
+
 		const prices = await this.getPriceUseCase.executeMany({
-			currencies: [quote.amountIn.currency, quote.fee.currency],
+			currencies: Array.from(currencyById.values()),
 		})
 
-		return toQuoteZapResponseDto(
-			quote,
-			prices.get(quote.amountIn.currency.id) ?? 0,
-			prices.get(quote.fee.currency.id) ?? 0,
-		)
+		return toQuoteZapResponseDto(quote, prices)
 	}
 
 	@Get('tickets/zap-result')

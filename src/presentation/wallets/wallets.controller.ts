@@ -181,6 +181,10 @@ export class WalletsController {
 		const currencyById = new Map([
 			[result.amountOut.currency.id, result.amountOut.currency],
 			[result.fee.currency.id, result.fee.currency],
+			[
+				result.transactionQuote.blockchainFee.currency.id,
+				result.transactionQuote.blockchainFee.currency,
+			],
 		])
 
 		const prices = await this.getPriceUseCase.executeMany({

@@ -31,6 +31,7 @@ import { EvmCurrencyReadService } from '../evm/evm-currency-read.service'
 import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
+import { GasPriceService } from '../evm/gas-price.service'
 import { evmAddressFromWallet, evmChainIdFromCurrency } from '../evm/helpers'
 import { Token } from '../evm/primitives/currencies/token'
 import { parsePurchase } from '../rips/parse-purchase'
@@ -62,6 +63,7 @@ export class DeBridgeService implements ZapService {
 		private readonly evmCurrencyWriteService: EvmCurrencyWriteService,
 		private readonly evmTransactionService: EvmTransactionService,
 		private readonly deBridgeApiService: DeBridgeApiService,
+		private readonly gasPriceService: GasPriceService,
 	) {
 		this.ripsContractAddress = toEvmAddress(ripsContract.address)
 	}
@@ -210,6 +212,8 @@ export class DeBridgeService implements ZapService {
 				),
 			},
 			...this.durationAndFeeFromCreateTxResponse(createTxResponse),
+			transactionQuote:
+				await this.blockchainFeeFromCreateTxResponse(createTxResponse),
 		}
 	}
 
@@ -243,6 +247,8 @@ export class DeBridgeService implements ZapService {
 				currency: paymentCurrency,
 			},
 			...this.durationAndFeeFromCreateTxResponse(createTxResponse),
+			transactionQuote:
+				await this.blockchainFeeFromCreateTxResponse(createTxResponse),
 		}
 	}
 
@@ -366,6 +372,29 @@ export class DeBridgeService implements ZapService {
 			},
 		}
 	}
+
+	private async blockchainFeeFromCreateTxResponse(
+		createTxResponse: CreateTxResponse,
+	) {
+		const srcChainId = createTxResponse.estimation.srcChainTokenIn.chainId
+
+		const [gasPrice, nativeCurrency] = await Promise.all([
+			this.gasPriceService.getGasPrice(srcChainId),
+			Promise.resolve(this.evmCurrencyService.getNative(srcChainId)),
+		])
+
+		const gasLimit = BigInt(
+			createTxResponse.estimatedTransactionFee.details.gasLimit,
+		)
+
+		return {
+			blockchainFee: {
+				currency: nativeCurrency,
+				amount: gasLimit * gasPrice,
+			},
+		}
+	}
+
 	private txRequestFromCreateTxResponse(
 		createTxResponse: CreateTxResponse,
 	): TransactionRequestEIP1559 {

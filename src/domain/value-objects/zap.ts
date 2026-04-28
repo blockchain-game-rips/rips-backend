@@ -1,6 +1,6 @@
 import { CurrencyAmount } from './currency-amount'
 import { Purchase } from './purchase'
-import { Transaction } from './transaction'
+import { Transaction, TransactionQuote } from './transaction'
 
 export type PendingZap = {
 	zapId: string
@@ -40,10 +40,12 @@ export type ZapQuoteBuyResult = {
 	amountIn: CurrencyAmount
 	durationMs: number
 	fee: CurrencyAmount
+	transactionQuote: TransactionQuote
 }
 
 export type ZapQuoteSwapResult = {
 	amountOut: CurrencyAmount
 	durationMs: number
 	fee: CurrencyAmount
+	transactionQuote: TransactionQuote
 }

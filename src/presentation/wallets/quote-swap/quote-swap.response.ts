@@ -11,6 +11,7 @@ const quoteSwapResponseSchema = z.object({
 	amountOut: CurrencyAmountDto.schema,
 	fee: CurrencyAmountDto.schema,
 	durationMs: z.number(),
+	blockchainFee: CurrencyAmountDto.schema,
 })
 
 export class QuoteSwapResponseDto extends createZodDto(
@@ -31,5 +32,9 @@ export function toQuoteSwapResponseDto(
 			prices.get(result.fee.currency.id) ?? 0,
 		),
 		durationMs: result.durationMs,
+		blockchainFee: toCurrencyAmountDto(
+			result.transactionQuote.blockchainFee,
+			prices.get(result.transactionQuote.blockchainFee.currency.id) ?? 0,
+		),
 	}
 }
