@@ -10,6 +10,7 @@ import { GetPriceModule } from '../use-cases/get-price.module'
 import { GetRoundsModule } from '../use-cases/get-rounds.module'
 import { GetUnrevealedPrizesModule } from '../use-cases/get-unrevealed-prizes.module'
 import { GetZapResultModule } from '../use-cases/get-zap-result.module'
+import { QuotePurchaseModule } from '../use-cases/quote-purchase.module'
 import { QuoteZapModule } from '../use-cases/quote-zap.module'
 import { RevealTicketPrizesModule } from '../use-cases/reveal-ticket-prizes.module'
 
@@ -23,6 +24,7 @@ import { RevealTicketPrizesModule } from '../use-cases/reveal-ticket-prizes.modu
 		GetPriceModule,
 		GetUnrevealedPrizesModule,
 		RevealTicketPrizesModule,
+		QuotePurchaseModule,
 		QuoteZapModule,
 		GetZapResultModule,
 		GetCardCollectionModule,

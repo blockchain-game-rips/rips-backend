@@ -2,7 +2,10 @@ import { Config } from '../../domain/entities/config'
 import { EvmAddress } from '../../domain/value-objects/evm-address'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { Reward } from '../../domain/value-objects/reward'
-import { Transaction } from '../../domain/value-objects/transaction'
+import {
+	Transaction,
+	TransactionQuote,
+} from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 
 export abstract class RipsService {
@@ -24,6 +27,8 @@ export abstract class RipsService {
 		wallet: Wallet,
 		args: { roundId: number },
 	): Promise<Transaction>
+
+	abstract quoteBuyTickets(): Promise<TransactionQuote>
 
 	abstract buyTickets(
 		wallet: Wallet,

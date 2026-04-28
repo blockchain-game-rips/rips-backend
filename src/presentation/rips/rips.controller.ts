@@ -19,6 +19,7 @@ import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price
 import { GetRoundsUseCase } from '../../application/use-cases/get-rounds/get-rounds.use-case'
 import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import { GetZapResultUseCase } from '../../application/use-cases/get-zap-result/get-zap-result.use-case'
+import { QuotePurchaseUseCase } from '../../application/use-cases/quote-purchase/quote-purchase.use-case'
 import { QuoteZapUseCase } from '../../application/use-cases/quote-zap/quote-zap.use-case'
 import { RevealTicketPrizesUseCase } from '../../application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
 import {
@@ -57,6 +58,11 @@ import {
 	GetZapResultResponseDto,
 	toGetZapResultResponseDto,
 } from './get-zap-result/get-zap-result.response'
+import { QuotePurchaseBodyDto } from './quote-purchase/quote-purchase.request'
+import {
+	QuotePurchaseResponseDto,
+	toQuotePurchaseResponseDto,
+} from './quote-purchase/quote-purchase.response'
 import { QuoteZapBodyDto } from './quote-zap/quote-zap.request'
 import {
 	QuoteZapResponseDto,
@@ -73,6 +79,7 @@ export class RipsController {
 	constructor(
 		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
 		private readonly buyTicketsUseCase: BuyTicketsUseCase,
+		private readonly quotePurchaseUseCase: QuotePurchaseUseCase,
 		private readonly quoteZapUseCase: QuoteZapUseCase,
 		private readonly getZapResultUseCase: GetZapResultUseCase,
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
@@ -125,6 +132,24 @@ export class RipsController {
 		}
 
 		return toBuyTicketsPurchaseResponseDto(outcome.purchaseReceipt)
+	}
+
+	@Post('tickets/quote-purchase')
+	@ZodResponse({ type: QuotePurchaseResponseDto })
+	async quotePurchase(
+		@Body() body: QuotePurchaseBodyDto,
+	): Promise<QuotePurchaseResponseDto> {
+		const quote = await this.quotePurchaseUseCase.execute({
+			stakeId: body.stakeId,
+			ticketCount: body.ticketCount,
+			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
+		})
+
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: [quote.blockchainFee.currency],
+		})
+
+		return toQuotePurchaseResponseDto(quote, prices)
 	}
 
 	@Post('tickets/zap')

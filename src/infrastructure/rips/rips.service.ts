@@ -16,11 +16,15 @@ import {
 } from '../../domain/value-objects/evm-address'
 import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
 import { Reward } from '../../domain/value-objects/reward'
-import { Transaction } from '../../domain/value-objects/transaction'
+import {
+	Transaction,
+	TransactionQuote,
+} from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmClientService } from '../evm/evm-client/evm-client.service'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
+import { GasPriceService } from '../evm/gas-price.service'
 import { evmAddressFromWallet } from '../evm/helpers'
 import { parsePurchase } from './parse-purchase'
 import { ripsAbi } from './rips-abi'
@@ -28,6 +32,7 @@ import { RIPS_CONTRACT } from './rips.constants'
 
 const CLAIM_START_INDEX = 0n
 const CLAIM_MAX_RANGES = 100n
+const BUY_TICKETS_GAS = 800_000n
 
 @Injectable()
 export class RipsServiceIpml implements RipsService {
@@ -38,6 +43,7 @@ export class RipsServiceIpml implements RipsService {
 		private readonly evmTransactionService: EvmTransactionService,
 		private readonly evmClientService: EvmClientService,
 		private readonly evmCurrencyService: EvmCurrencyService,
+		private readonly gasPriceService: GasPriceService,
 
 		@Inject(RIPS_CONTRACT) contract: ChainAddress,
 	) {
@@ -113,6 +119,18 @@ export class RipsServiceIpml implements RipsService {
 			)
 
 		return transaction
+	}
+
+	async quoteBuyTickets(): Promise<TransactionQuote> {
+		const gasPrice = await this.gasPriceService.getGasPrice(this.chainId)
+		const nativeCurrency = this.evmCurrencyService.getNative(this.chainId)
+
+		return {
+			blockchainFee: {
+				currency: nativeCurrency,
+				amount: BUY_TICKETS_GAS * gasPrice,
+			},
+		}
 	}
 
 	async buyTickets(
