@@ -2,6 +2,8 @@ import { CurrencyService } from '../../src/application/interfaces/currency.servi
 import { KmsService } from '../../src/application/interfaces/kms.service'
 import { UserRepository } from '../../src/application/interfaces/repositories/user.repository'
 import { WalletService } from '../../src/application/interfaces/wallet.service'
+import { BuyTicketsPurchaseUseCase } from '../../src/application/use-cases/buy-tickets-purchase/buy-tickets-purchase.use-case'
+import { BuyTicketsZapUseCase } from '../../src/application/use-cases/buy-tickets-zap/buy-tickets-zap.use-case'
 import { CreateUserUseCase } from '../../src/application/use-cases/create-user/create-user.use-case'
 import { GetBalanceUseCase } from '../../src/application/use-cases/get-balance/get-balance.use-case'
 import { GetPriceUseCase } from '../../src/application/use-cases/get-price/get-price.use-case'
@@ -72,6 +74,14 @@ export function makeMockGetUnrevealedPrizesUseCase(): jest.Mocked<GetUnrevealedP
 }
 
 export function makeMockWithdrawUseCase(): jest.Mocked<WithdrawUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockBuyTicketsPurchaseUseCase(): jest.Mocked<BuyTicketsPurchaseUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockBuyTicketsZapUseCase(): jest.Mocked<BuyTicketsZapUseCase> {
 	return { execute: jest.fn() }
 }
 

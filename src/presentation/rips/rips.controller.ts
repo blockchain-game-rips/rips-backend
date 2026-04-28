@@ -3,13 +3,13 @@ import {
 	Controller,
 	Get,
 	Headers,
-	InternalServerErrorException,
 	Patch,
 	Post,
 	Query,
 } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
-import { BuyTicketsUseCase } from '../../application/use-cases/buy-tickets/buy-tickets.use-case'
+import { BuyTicketsPurchaseUseCase } from '../../application/use-cases/buy-tickets-purchase/buy-tickets-purchase.use-case'
+import { BuyTicketsZapUseCase } from '../../application/use-cases/buy-tickets-zap/buy-tickets-zap.use-case'
 import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { GetCardCollectionUseCase } from '../../application/use-cases/get-card-collection/get-card-collection.use-case'
 import { GetCardDefinitionsUseCase } from '../../application/use-cases/get-card-definitions/get-card-definitions.use-case'
@@ -78,7 +78,8 @@ import { toRoundDto } from './shared/round.dto'
 export class RipsController {
 	constructor(
 		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
-		private readonly buyTicketsUseCase: BuyTicketsUseCase,
+		private readonly buyTicketsPurchaseUseCase: BuyTicketsPurchaseUseCase,
+		private readonly buyTicketsZapUseCase: BuyTicketsZapUseCase,
 		private readonly quotePurchaseUseCase: QuotePurchaseUseCase,
 		private readonly quoteZapUseCase: QuoteZapUseCase,
 		private readonly getZapResultUseCase: GetZapResultUseCase,
@@ -118,20 +119,14 @@ export class RipsController {
 		@Headers() headers: TelegramIdHeaderDto,
 		@Body() body: BuyTicketsPurchaseBodyDto,
 	): Promise<BuyTicketsPurchaseResponseDto> {
-		const outcome = await this.buyTicketsUseCase.execute({
+		const purchaseReceipt = await this.buyTicketsPurchaseUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
 			stakeId: body.stakeId,
 			ticketCount: body.ticketCount,
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		if (outcome.type !== 'purchased') {
-			throw new InternalServerErrorException(
-				'Expected purchase outcome but got zap',
-			)
-		}
-
-		return toBuyTicketsPurchaseResponseDto(outcome.purchaseReceipt)
+		return toBuyTicketsPurchaseResponseDto(purchaseReceipt)
 	}
 
 	@Post('tickets/quote-purchase')
@@ -158,20 +153,13 @@ export class RipsController {
 		@Headers() headers: TelegramIdHeaderDto,
 		@Body() body: BuyTicketsZapBodyDto,
 	): Promise<BuyTicketsZapResponseDto> {
-		const outcome = await this.buyTicketsUseCase.execute({
+		const pendingZap = await this.buyTicketsZapUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
 			stakeId: body.stakeId,
 			ticketCount: body.ticketCount,
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		if (outcome.type !== 'zap') {
-			throw new InternalServerErrorException(
-				'Expected zap outcome but got purchase',
-			)
-		}
-
-		const { pendingZap } = outcome
 		const prices = await this.getPriceUseCase.executeMany({
 			currencies: [pendingZap.amountIn.currency, pendingZap.fee.currency],
 		})

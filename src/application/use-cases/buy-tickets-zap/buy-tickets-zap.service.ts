@@ -1,26 +1,28 @@
 import { Injectable } from '@nestjs/common'
+import { CurrenciesMismatchError } from '../../../domain/errors/currencies-mismatch.error'
 import { AvailableStakeNotFoundError } from '../../../domain/errors/stake-not-found.error'
-import { PurchaseOutcome } from '../../../domain/value-objects/purchase-outcome'
+import { PendingZap } from '../../../domain/value-objects/zap'
 import { CurrencyService } from '../../interfaces/currency.service'
-import { RipsService } from '../../interfaces/rips.service'
 import { ZapService } from '../../interfaces/zap.service'
 import { GetAvailableStakesUseCase } from '../get-available-stakes/get-available-stakes.use-case'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
-import { BuyTicketsInput, BuyTicketsUseCase } from './buy-tickets.use-case'
+import {
+	BuyTicketsZapInput,
+	BuyTicketsZapUseCase,
+} from './buy-tickets-zap.use-case'
 
 @Injectable()
-export class BuyTicketsService extends BuyTicketsUseCase {
+export class BuyTicketsZapService extends BuyTicketsZapUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
-		private readonly ripsService: RipsService,
 		private readonly zapService: ZapService,
 		private readonly currencyService: CurrencyService,
 	) {
 		super()
 	}
 
-	async execute(input: BuyTicketsInput): Promise<PurchaseOutcome> {
+	async execute(input: BuyTicketsZapInput): Promise<PendingZap> {
 		const {
 			telegramId,
 			stakeId,
@@ -50,25 +52,16 @@ export class BuyTicketsService extends BuyTicketsUseCase {
 				: availableStake.stake.currentConfig
 
 		if (config.ticketPrice.currency.id === paymentCurrency.id) {
-			const res = await this.ripsService.buyTickets(user.wallet, {
-				stakeId: availableStake.stake.id,
-				config,
-				ticketCount,
-			})
-
-			return { type: 'purchased', purchaseReceipt: res }
+			throw new CurrenciesMismatchError(
+				`Payment currency ${paymentCurrency.id} matches ticket price currency — use direct purchase instead of zap`,
+			)
 		}
 
-		const res = await this.zapService.buyTickets(user.wallet, {
+		return this.zapService.buyTickets(user.wallet, {
 			paymentCurrency,
 			stakeId: availableStake.stake.id,
 			config,
 			ticketCount,
 		})
-
-		return {
-			type: 'zap',
-			pendingZap: res,
-		}
 	}
 }

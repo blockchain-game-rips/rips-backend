@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { RipsController } from '../../presentation/rips/rips.controller'
-import { BuyTicketsModule } from '../use-cases/buy-tickets.module'
+import { BuyTicketsPurchaseModule } from '../use-cases/buy-tickets-purchase.module'
+import { BuyTicketsZapModule } from '../use-cases/buy-tickets-zap.module'
 import { GetAvailableStakesModule } from '../use-cases/get-available-stakes.module'
 import { GetCardCollectionModule } from '../use-cases/get-card-collection.module'
 import { GetCardDefinitionsModule } from '../use-cases/get-card-definitions.module'
@@ -20,7 +21,8 @@ import { RevealTicketPrizesModule } from '../use-cases/reveal-ticket-prizes.modu
 		GetAvailableStakesModule,
 		GetOngoingRoundsModule,
 		GetCompletedRoundsModule,
-		BuyTicketsModule,
+		BuyTicketsPurchaseModule,
+		BuyTicketsZapModule,
 		GetPriceModule,
 		GetUnrevealedPrizesModule,
 		RevealTicketPrizesModule,

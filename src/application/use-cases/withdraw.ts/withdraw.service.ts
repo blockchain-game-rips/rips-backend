@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common'
+import { CurrenciesMismatchError } from '../../../domain/errors/currencies-mismatch.error'
 import { InsufficientBalanceError } from '../../../domain/errors/insufficient-balance.error'
-import { WithdrawOutcome } from '../../../domain/value-objects/withdraw-outcome'
-import { CurrencyService } from '../../interfaces/currency.service'
+import { Transaction } from '../../../domain/value-objects/transaction'
 import { WalletService } from '../../interfaces/wallet.service'
-import { ZapService } from '../../interfaces/zap.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import { WithdrawInput, WithdrawUseCase } from './withdraw.use-case'
 
@@ -12,12 +11,16 @@ export class WithdrawService implements WithdrawUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly walletService: WalletService,
-		private readonly currencyService: CurrencyService,
-		private readonly zapService: ZapService,
 	) {}
 
-	async execute(input: WithdrawInput): Promise<WithdrawOutcome> {
+	async execute(input: WithdrawInput): Promise<Transaction> {
 		const { telegramId, amountIn, currencyOut, recipientAddress } = input
+
+		if (amountIn.currency.id !== currencyOut.id) {
+			throw new CurrenciesMismatchError(
+				`Currency in ${amountIn.currency.id} does not match currency out ${currencyOut.id} — use swap withdrawal instead`,
+			)
+		}
 
 		const user = await this.getUserUseCase.execute({ telegramId })
 
@@ -26,38 +29,21 @@ export class WithdrawService implements WithdrawUseCase {
 			amountIn.currency,
 		)
 
-		if (userBalance < amountIn.amount)
+		if (userBalance < amountIn.amount) {
 			throw new InsufficientBalanceError(
 				`Insufficient balance, need ${amountIn.amount}, has ${userBalance}`,
 			)
-
-		if (amountIn.currency.id === currencyOut.id) {
-			const recipient = {
-				chain: amountIn.currency.chainAddress.chain,
-				address: recipientAddress,
-			}
-
-			const transaction = await this.walletService.transfer(user.wallet, {
-				currency: amountIn.currency,
-				to: recipient,
-				amount: amountIn.amount,
-			})
-
-			return { type: 'transferred', transaction }
 		}
 
 		const recipient = {
-			chain: currencyOut.chainAddress.chain,
+			chain: amountIn.currency.chainAddress.chain,
 			address: recipientAddress,
 		}
 
-		const pendingZap = await this.zapService.swap(user.wallet, {
-			currencyIn: amountIn.currency,
-			currencyOut,
-			amountIn: amountIn.amount,
-			recipient,
+		return this.walletService.transfer(user.wallet, {
+			currency: amountIn.currency,
+			to: recipient,
+			amount: amountIn.amount,
 		})
-
-		return { type: 'zap', pendingZap }
 	}
 }

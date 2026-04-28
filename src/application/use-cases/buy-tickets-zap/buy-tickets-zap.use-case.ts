@@ -1,14 +1,14 @@
 import { ChainAddress } from '../../../domain/value-objects/chain-address'
-import { PurchaseOutcome } from '../../../domain/value-objects/purchase-outcome'
 import { TelegramId } from '../../../domain/value-objects/telegram-id'
+import { PendingZap } from '../../../domain/value-objects/zap'
 
-export type BuyTicketsInput = {
+export type BuyTicketsZapInput = {
 	telegramId: TelegramId
 	stakeId: number
 	ticketCount: number
 	paymentCurrencyChainAddress: ChainAddress
 }
 
-export abstract class BuyTicketsUseCase {
-	abstract execute(input: BuyTicketsInput): Promise<PurchaseOutcome>
+export abstract class BuyTicketsZapUseCase {
+	abstract execute(input: BuyTicketsZapInput): Promise<PendingZap>
 }
