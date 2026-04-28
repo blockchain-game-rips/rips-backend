@@ -6,6 +6,7 @@ import {
 	HttpStatus,
 } from '@nestjs/common'
 import { Response } from 'express'
+import { CurrenciesMismatchError } from '../../domain/errors/currencies-mismatch.error'
 import { InsufficientBalanceError } from '../../domain/errors/insufficient-balance.error'
 import { AvailableStakeNotFoundError } from '../../domain/errors/stake-not-found.error'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
@@ -20,6 +21,7 @@ const ERROR_STATUS_MAP: Map<ErrorConstructor, HttpStatus> = new Map([
 	[AvailableStakeNotFoundError, HttpStatus.NOT_FOUND],
 	[UserAlreadyExistsError, HttpStatus.CONFLICT],
 	[InsufficientBalanceError, HttpStatus.UNPROCESSABLE_ENTITY],
+	[CurrenciesMismatchError, HttpStatus.BAD_REQUEST],
 	[TransactionFailedError, HttpStatus.BAD_GATEWAY],
 ])
 

@@ -14,6 +14,7 @@ import {
 	makeMockGetBalanceUseCase,
 	makeMockGetPriceUseCase,
 	makeMockQuoteSwapUseCase,
+	makeMockQuoteWithdrawUseCase,
 	makeMockSwapUseCase,
 	makeMockWithdrawUseCase,
 } from '../../mocks/use-cases'
@@ -32,6 +33,7 @@ describe('WalletsController', () => {
 		getBalance,
 		getPrice,
 		makeMockWithdrawUseCase(),
+		makeMockQuoteWithdrawUseCase(),
 		makeMockQuoteSwapUseCase(),
 		makeMockSwapUseCase(),
 		makeMockCurrencyService(),

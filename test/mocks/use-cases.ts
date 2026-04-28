@@ -8,6 +8,7 @@ import { GetPriceUseCase } from '../../src/application/use-cases/get-price/get-p
 import { GetUnrevealedPrizesUseCase } from '../../src/application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import { GetUserUseCase } from '../../src/application/use-cases/get-user/get-user.use-case'
 import { QuoteSwapUseCase } from '../../src/application/use-cases/quote-swap/quote-swap.use-case'
+import { QuoteWithdrawUseCase } from '../../src/application/use-cases/quote-withdraw/quote-withdraw.use-case'
 import { RevealTicketPrizesUseCase } from '../../src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
 import { SwapUseCase } from '../../src/application/use-cases/swap/swap.use-case'
 import { WithdrawUseCase } from '../../src/application/use-cases/withdraw.ts/withdraw.use-case'
@@ -25,7 +26,11 @@ export function makeMockUserRepository(): jest.Mocked<UserRepository> {
 }
 
 export function makeMockWalletService(): jest.Mocked<WalletService> {
-	return { balanceOf: jest.fn(), transfer: jest.fn() }
+	return {
+		balanceOf: jest.fn(),
+		transfer: jest.fn(),
+		quoteTransfer: jest.fn(),
+	}
 }
 
 export function makeMockKmsService(): jest.Mocked<KmsService> {
@@ -71,6 +76,10 @@ export function makeMockWithdrawUseCase(): jest.Mocked<WithdrawUseCase> {
 }
 
 export function makeMockQuoteSwapUseCase(): jest.Mocked<QuoteSwapUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockQuoteWithdrawUseCase(): jest.Mocked<QuoteWithdrawUseCase> {
 	return { execute: jest.fn() }
 }
 

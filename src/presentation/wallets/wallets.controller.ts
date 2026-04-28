@@ -12,6 +12,7 @@ import { CurrencyService } from '../../application/interfaces/currency.service'
 import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
 import { QuoteSwapUseCase } from '../../application/use-cases/quote-swap/quote-swap.use-case'
+import { QuoteWithdrawUseCase } from '../../application/use-cases/quote-withdraw/quote-withdraw.use-case'
 import { SwapUseCase } from '../../application/use-cases/swap/swap.use-case'
 import { WithdrawUseCase } from '../../application/use-cases/withdraw.ts/withdraw.use-case'
 import {
@@ -38,6 +39,11 @@ import {
 	QuoteSwapResponseDto,
 	toQuoteSwapResponseDto,
 } from './quote-swap/quote-swap.response'
+import { QuoteWithdrawBodyDto } from './quote-withdraw/quote-withdraw.request'
+import {
+	QuoteWithdrawResponseDto,
+	toQuoteWithdrawResponseDto,
+} from './quote-withdraw/quote-withdraw.response'
 import { SwapBodyDto } from './swap/swap.request'
 import { SwapResponseDto, toSwapResponseDto } from './swap/swap.response'
 
@@ -47,6 +53,7 @@ export class WalletsController {
 		private readonly getBalanceUseCase: GetBalanceUseCase,
 		private readonly getPriceUseCase: GetPriceUseCase,
 		private readonly withdrawUseCase: WithdrawUseCase,
+		private readonly quoteWithdrawUseCase: QuoteWithdrawUseCase,
 		private readonly quoteSwapUseCase: QuoteSwapUseCase,
 		private readonly swapUseCase: SwapUseCase,
 		private readonly currencyService: CurrencyService,
@@ -211,5 +218,32 @@ export class WalletsController {
 		})
 
 		return toSwapResponseDto(pendingZap, prices)
+	}
+
+	@Post('quote-withdraw')
+	@ZodResponse({ type: QuoteWithdrawResponseDto })
+	async quoteWithdraw(
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: QuoteWithdrawBodyDto,
+	): Promise<QuoteWithdrawResponseDto> {
+		const [currencyIn, currencyOut] = await Promise.all([
+			this.currencyService.fromAccount(
+				body.amountIn.currencyChainAddress,
+			),
+			this.currencyService.fromAccount(body.currencyOutChainAddress),
+		])
+
+		const quote = await this.quoteWithdrawUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+			amountIn: { currency: currencyIn, amount: body.amountIn.amount },
+			currencyOut,
+			recipientAddress: body.recipientAddress,
+		})
+
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: [quote.blockchainFee.currency],
+		})
+
+		return toQuoteWithdrawResponseDto(quote, prices)
 	}
 }
