@@ -3,6 +3,7 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { AppConfigModule } from './configuration/app-config.module'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
 import { ProvisionModule } from './infrastructure/provision/provision.module'
+import { CurrencyApiModule } from './modules/currency/currency-api.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
 import { NotificationsModule } from './modules/notifications/notifications.module'
 import { ReferralSystemModule } from './modules/referral-system/referral-system.module'
@@ -18,6 +19,7 @@ import { LoggingMiddleware } from './presentation/middleware/logging.middleware'
 		ScheduleModule.forRoot(),
 		PrismaModule,
 		ProvisionModule,
+		CurrencyApiModule,
 		UsersModule,
 		WalletsModule,
 		RipsApiModule,
