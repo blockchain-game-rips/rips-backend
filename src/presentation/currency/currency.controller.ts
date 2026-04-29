@@ -1,25 +1,38 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
-import { GetCurrencyIdQueryDto } from './get-currency-id/get-currency-id.request'
+import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
+import { GetCurrenciesQueryDto } from './get-currencies/get-currencies.request'
 import {
-	GetCurrencyIdResponseDto,
-	toGetCurrencyIdResponseDto,
-} from './get-currency-id/get-currency-id.response'
+	GetCurrenciesResponseDto,
+	toGetCurrenciesResponseDto,
+} from './get-currencies/get-currencies.response'
 
-@Controller('currency')
+@Controller('currencies')
 export class CurrencyController {
-	constructor(private readonly currencyService: CurrencyService) {}
+	constructor(
+		private readonly currencyService: CurrencyService,
+		private readonly getPriceUseCase: GetPriceUseCase,
+	) {}
 
-	@Get('id')
-	@ZodResponse({ type: GetCurrencyIdResponseDto })
-	async getCurrencyId(
-		@Query() query: GetCurrencyIdQueryDto,
-	): Promise<GetCurrencyIdResponseDto> {
-		const currency = await this.currencyService.fromAccount(
-			query.chainAddress,
+	@Get()
+	@ZodResponse({ type: GetCurrenciesResponseDto })
+	async getCurrencies(
+		@Query() query: GetCurrenciesQueryDto,
+	): Promise<GetCurrenciesResponseDto> {
+		const currencies = await Promise.all(
+			query.chainAddress.map((chainAddress) =>
+				this.currencyService.fromAccount(chainAddress),
+			),
 		)
 
-		return toGetCurrencyIdResponseDto(currency.id)
+		const prices = await this.getPriceUseCase.executeMany({ currencies })
+
+		return toGetCurrenciesResponseDto(
+			currencies.map((currency) => ({
+				currency,
+				priceUsd: prices.get(currency.id) ?? 0,
+			})),
+		)
 	}
 }
