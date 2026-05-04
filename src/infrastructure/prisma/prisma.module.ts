@@ -5,6 +5,7 @@ import { RoundSyncRepository } from '../../application/interfaces/repositories/r
 import { TicketPrizeRepository } from '../../application/interfaces/repositories/ticket-prize.repository'
 import { UserRepository } from '../../application/interfaces/repositories/user.repository'
 import { WalletRepository } from '../../application/interfaces/repositories/wallet.repository'
+import { MetricsModule } from '../metrics/metrics.module'
 import { PrismaExecutorRepository } from './executor.repository'
 import { PrismaNotificationRepository } from './notification.repository'
 import { PrismaService } from './prisma.service'
@@ -14,6 +15,7 @@ import { PrismaUserRepository } from './user.repository'
 import { PrismaWalletRepository } from './wallet.repository'
 
 @Module({
+	imports: [MetricsModule],
 	providers: [
 		PrismaService,
 
