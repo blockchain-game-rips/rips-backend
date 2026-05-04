@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Optional } from '@nestjs/common'
 import {
 	Chain,
 	createPublicClient,
@@ -12,6 +12,7 @@ import {
 import * as chains from 'viem/chains'
 import { HttpRpcClientOptions } from 'viem/utils'
 import { createCustomError } from '../../../utils/common'
+import { EvmRpcMetricsService } from '../../metrics/evm-rpc-metrics.service'
 import { EVM_CLIENT_CONFIG, ResolvedEvmClientConfig } from './types'
 
 const DEFAULT_BATCH_SIZE = 1_000
@@ -21,6 +22,9 @@ export class EvmClientService {
 	constructor(
 		@Inject(EVM_CLIENT_CONFIG)
 		private readonly config?: ResolvedEvmClientConfig,
+
+		@Optional()
+		private readonly evmRpcMetrics?: EvmRpcMetricsService,
 	) {}
 
 	public customError = createCustomError('ChainClientService')
@@ -99,6 +103,13 @@ export class EvmClientService {
 			fetchFn: this.fetchFn,
 		}
 
+		const chainName = this.getChainNameById(chainId)
+
+		const wrap = (t: Transport): Transport =>
+			this.evmRpcMetrics
+				? this.evmRpcMetrics.wrapTransport(t, chainName)
+				: t
+
 		/* ======== Insert Default Transport ======== */
 
 		const disableDefaultRpcUrl =
@@ -107,7 +118,7 @@ export class EvmClientService {
 		const defaultRpcUrl = chain.rpcUrls.default.http[0]
 
 		if (defaultRpcUrl && !disableDefaultRpcUrl) {
-			transports.push(http(defaultRpcUrl, defaultTransportConfig))
+			transports.push(wrap(http(defaultRpcUrl, defaultTransportConfig)))
 		}
 
 		/* ======== Insert Additional Transports ======== */
@@ -116,7 +127,7 @@ export class EvmClientService {
 
 		if (additionalRpcUrls) {
 			additionalRpcUrls.forEach((rpcUrl) => {
-				transports.push(http(rpcUrl, defaultTransportConfig))
+				transports.push(wrap(http(rpcUrl, defaultTransportConfig)))
 			})
 		}
 
