@@ -3,31 +3,30 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { type Hex } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
-import {
-	KmsService,
-	type KmsKeyResult,
-} from '../../application/interfaces/kms.service'
+import { type KmsKeyResult } from '../../application/interfaces/kms.service'
 import {
 	EvmAddress,
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
 import { KmsKeyId, toKmsKeyId } from '../../domain/value-objects/kms-key-id'
 import { getEnvSafe } from '../../utils/common'
+import { KmsMetricsService } from '../metrics/kms-metrics.service'
+import { KmsWithMetrics } from './kms-with-metrics.service'
 
 const CONFIG_DIR = join(process.cwd(), 'config')
 const LAST_KEY_FILE = join(CONFIG_DIR, 'last-key.txt')
 const INITIAL_KEY_INDEX = 1
 
 @Injectable()
-export class MnemonicKmsService extends KmsService {
+export class MnemonicKmsService extends KmsWithMetrics {
 	private readonly mnemonic: string
 
-	constructor() {
-		super()
+	constructor(metrics?: KmsMetricsService) {
+		super(metrics)
 		this.mnemonic = getEnvSafe('KMS_MNEMONIC')
 	}
 
-	async createEvmKey(): Promise<KmsKeyResult> {
+	protected async doCreateEvmKey(): Promise<KmsKeyResult> {
 		const keyIndex = this.getNextKeyIndex()
 
 		const account = mnemonicToAccount(this.mnemonic, {
@@ -42,7 +41,7 @@ export class MnemonicKmsService extends KmsService {
 		})
 	}
 
-	async signTransaction(
+	protected async doSignTransaction(
 		kmsKeyId: KmsKeyId,
 		hash: Hex,
 		_expectedAddress: EvmAddress,
@@ -53,9 +52,7 @@ export class MnemonicKmsService extends KmsService {
 			addressIndex: keyIndex,
 		})
 
-		const signature = await account.sign({ hash })
-
-		return signature
+		return account.sign({ hash })
 	}
 
 	private getNextKeyIndex(): number {
