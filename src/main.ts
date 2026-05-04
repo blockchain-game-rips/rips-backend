@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { Logger } from 'nestjs-pino'
 import { cleanupOpenApiDoc, ZodValidationPipe } from 'nestjs-zod'
 import { AppModule } from './app.module'
 import { UseCaseExceptionFilter } from './presentation/filters/use-case-exception.filter'
@@ -15,7 +16,9 @@ import { TransactionDto } from './presentation/shared/transaction.dto'
 import { UserDto } from './presentation/users/shared/user.dto'
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule)
+	const app = await NestFactory.create(AppModule, { bufferLogs: true })
+
+	app.useLogger(app.get(Logger))
 
 	app.useGlobalFilters(new UseCaseExceptionFilter())
 	app.useGlobalPipes(new ZodValidationPipe())
