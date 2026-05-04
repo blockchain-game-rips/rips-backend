@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { Executor } from '../../../domain/entities/executor'
 import {
 	OngoingRound,
@@ -19,6 +19,8 @@ type KeeperAction =
 
 @Injectable()
 export class KeeperService extends KeeperUseCase {
+	private readonly logger = new Logger(KeeperService.name)
+
 	constructor(
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly executorRepository: ExecutorRepository,
@@ -133,11 +135,21 @@ export class KeeperService extends KeeperUseCase {
 					action.userAddress,
 				)
 
-				await this.ripsService.claim(executor.wallet, {
+				const claimTx = await this.ripsService.claim(executor.wallet, {
 					roundId: action.round.id,
 					userAddress: action.userAddress,
 					referrerAddress: user?.referrerAddress ?? null,
 				})
+
+				this.logger.log(
+					{
+						userId: user?.id.toString(),
+						roundId: action.round.id,
+						userAddress: action.userAddress,
+						txHash: claimTx.id,
+					},
+					'Prize claimed',
+				)
 				break
 			}
 

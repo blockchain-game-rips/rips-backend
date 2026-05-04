@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { EIP155 } from '../../../constants'
 import { toEvmAddress } from '../../../domain/value-objects/evm-address'
 import { TicketPrize } from '../../../domain/value-objects/ticket-prize'
@@ -11,6 +11,8 @@ import {
 
 @Injectable()
 export class RevealTicketPrizesService extends RevealTicketPrizesUseCase {
+	private readonly logger = new Logger(RevealTicketPrizesService.name)
+
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly ticketPrizeRepository: TicketPrizeRepository,
@@ -26,10 +28,39 @@ export class RevealTicketPrizesService extends RevealTicketPrizesUseCase {
 		const userAddress = toEvmAddress(user.wallet.namespaceToAddress[EIP155])
 
 		if (revealAll) {
-			return this.ticketPrizeRepository.revealAllAndGet(userAddress)
+			const prizes =
+				await this.ticketPrizeRepository.revealAllAndGet(userAddress)
+
+			for (const prize of prizes) {
+				this.logger.log(
+					{
+						userId: user.id.toString(),
+						ticketId: prize.ticketNumber,
+						prizeAmount: prize.prizeAmount.toString(),
+						cardId: prize.card.id,
+						cardTier: prize.card.tier,
+					},
+					'Prize revealed',
+				)
+			}
+
+			return prizes
 		}
 
 		const prize = await this.ticketPrizeRepository.revealAndGet(userAddress)
+
+		if (prize) {
+			this.logger.log(
+				{
+					userId: user.id.toString(),
+					ticketId: prize.ticketNumber,
+					prizeAmount: prize.prizeAmount.toString(),
+					cardId: prize.card.id,
+					cardTier: prize.card.tier,
+				},
+				'Prize revealed',
+			)
+		}
 
 		return prize ? [prize] : []
 	}

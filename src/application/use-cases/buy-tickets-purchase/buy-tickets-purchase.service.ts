@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { CurrenciesMismatchError } from '../../../domain/errors/currencies-mismatch.error'
 import { AvailableStakeNotFoundError } from '../../../domain/errors/stake-not-found.error'
 import { PurchaseReceipt } from '../../../domain/value-objects/purchase-receipt'
@@ -13,6 +13,8 @@ import {
 
 @Injectable()
 export class BuyTicketsPurchaseService extends BuyTicketsPurchaseUseCase {
+	private readonly logger = new Logger(BuyTicketsPurchaseService.name)
+
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
@@ -57,10 +59,25 @@ export class BuyTicketsPurchaseService extends BuyTicketsPurchaseUseCase {
 			)
 		}
 
-		return this.ripsService.buyTickets(user.wallet, {
+		const receipt = await this.ripsService.buyTickets(user.wallet, {
 			stakeId: availableStake.stake.id,
 			config,
 			ticketCount,
 		})
+
+		const totalCost = config.ticketPrice.amount * BigInt(ticketCount)
+
+		this.logger.log(
+			{
+				userId: user.id.toString(),
+				stakeId: availableStake.stake.id,
+				ticketCount,
+				totalCost: totalCost.toString(),
+				currency: paymentCurrency.chainAddress.address,
+			},
+			'Ticket purchased',
+		)
+
+		return receipt
 	}
 }

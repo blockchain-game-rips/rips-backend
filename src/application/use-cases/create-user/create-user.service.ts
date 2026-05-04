@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { User } from '../../../domain/entities/user'
 import { KmsService } from '../../interfaces/kms.service'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
@@ -10,6 +10,8 @@ import {
 
 @Injectable()
 export class CreateUserService extends CreateUserUseCase {
+	private readonly logger = new Logger(CreateUserService.name)
+
 	constructor(
 		private readonly userRepository: UserRepository,
 		private readonly kmsService: KmsService,
@@ -28,13 +30,37 @@ export class CreateUserService extends CreateUserUseCase {
 			)
 		}
 
+		const walletStart = Date.now()
 		const { kmsKeyId, evmAddress } = await this.kmsService.createEvmKey()
+		const walletDurationMs = Date.now() - walletStart
 
-		return this.userRepository.create(
+		const user = await this.userRepository.create(
 			input.telegramId,
 			evmAddress,
 			kmsKeyId,
 			input.referrerAddress,
 		)
+
+		this.logger.log(
+			{
+				userId: user.id.toString(),
+				walletAddress: evmAddress,
+				kmsProvider: kmsKeyId,
+				durationMs: walletDurationMs,
+			},
+			'Wallet provisioned',
+		)
+
+		this.logger.log(
+			{
+				userId: user.id.toString(),
+				...(input.referrerAddress !== undefined && {
+					referrerId: input.referrerAddress,
+				}),
+			},
+			'User created',
+		)
+
+		return user
 	}
 }

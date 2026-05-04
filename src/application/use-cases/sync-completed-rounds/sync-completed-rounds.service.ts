@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { CompletedRound, RoundStatus } from '../../../domain/entities/round'
 import { resolvePrize } from '../../../domain/services/prize-utils'
 import { PurchaseAction } from '../../../domain/value-objects/actions'
@@ -13,6 +13,8 @@ import { SyncCompletedRoundsUseCase } from './sync-completed-rounds.use-case'
 
 @Injectable()
 export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
+	private readonly logger = new Logger(SyncCompletedRoundsService.name)
+
 	constructor(
 		private readonly roundRepository: RoundRepository,
 		private readonly userRepository: UserRepository,
@@ -48,6 +50,32 @@ export class SyncCompletedRoundsService extends SyncCompletedRoundsUseCase {
 			roundId: round.id,
 			prizes,
 		})
+
+		for (const prize of prizes) {
+			this.logger.log(
+				{
+					userId: prize.userAddress,
+					cardDefinitionId: prize.card.id,
+					tier: prize.card.tier,
+					stakeId: round.stake.id,
+				},
+				'Card assigned',
+			)
+		}
+
+		const totalTickets = round.actions.purchases.reduce(
+			(sum, p) => sum + p.ticketCount,
+			0n,
+		)
+
+		this.logger.log(
+			{
+				roundId: round.id,
+				totalTickets: totalTickets.toString(),
+				winnersCount: prizes.filter((p) => p.prizeAmount > 0n).length,
+			},
+			'Round completed',
+		)
 	}
 
 	private async syncRefundedRound(round: CompletedRound): Promise<void> {
