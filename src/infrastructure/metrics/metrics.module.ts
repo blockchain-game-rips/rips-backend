@@ -37,6 +37,11 @@ import { WORKER_LAST_SUCCESS, WORKER_RUN_DURATION } from './worker.metrics'
 		KMS_OPERATIONS_TOTAL,
 		KmsMetricsService,
 	],
-	exports: [WorkerMetricsService, EvmRpcMetricsService, KmsMetricsService],
+	exports: [
+		WorkerMetricsService,
+		EvmRpcMetricsService,
+		KmsMetricsService,
+		PRISMA_QUERY_DURATION,
+	],
 })
 export class MetricsModule {}
