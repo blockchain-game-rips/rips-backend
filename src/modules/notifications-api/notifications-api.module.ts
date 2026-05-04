@@ -7,4 +7,4 @@ import { MarkNotificationNotifiedModule } from '../use-cases/mark-notification-n
 	imports: [GetNotificationsModule, MarkNotificationNotifiedModule],
 	controllers: [NotificationsController],
 })
-export class NotificationsModule {}
+export class NotificationsApiModule {}

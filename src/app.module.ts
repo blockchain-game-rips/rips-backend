@@ -5,12 +5,12 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module'
 import { ProvisionModule } from './infrastructure/provision/provision.module'
 import { CurrencyApiModule } from './modules/currency/currency-api.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
-import { NotificationsModule } from './modules/notifications/notifications.module'
-import { ReferralSystemModule } from './modules/referral-system/referral-system.module'
+import { NotificationsApiModule } from './modules/notifications-api/notifications-api.module'
+import { ReferralSystemApiModule } from './modules/referral-system-api/referral-system-api.module'
 import { RipsApiModule } from './modules/rips-api/rips-api.module'
 import { SyncCompletedRoundsModule } from './modules/sync-completed-rounds/sync-completed-rounds.module'
-import { UsersModule } from './modules/users/users.module'
-import { WalletsModule } from './modules/wallets/wallets.module'
+import { UsersApiModule } from './modules/users-api/users-api.module'
+import { WalletsApiModule } from './modules/wallets-api/wallets-api.module'
 import { LoggingMiddleware } from './presentation/middleware/logging.middleware'
 
 @Module({
@@ -20,13 +20,13 @@ import { LoggingMiddleware } from './presentation/middleware/logging.middleware'
 		PrismaModule,
 		ProvisionModule,
 		CurrencyApiModule,
-		UsersModule,
-		WalletsModule,
+		UsersApiModule,
+		WalletsApiModule,
 		RipsApiModule,
-		ReferralSystemModule,
+		ReferralSystemApiModule,
 		KeeperModule,
 		SyncCompletedRoundsModule,
-		NotificationsModule,
+		NotificationsApiModule,
 	],
 })
 export class AppModule implements NestModule {

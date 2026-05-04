@@ -20,4 +20,4 @@ import { WithdrawModule } from '../use-cases/withdraw.module'
 	],
 	controllers: [WalletsController],
 })
-export class WalletsModule {}
+export class WalletsApiModule {}

@@ -8,4 +8,4 @@ import { SetReferrerModule } from '../use-cases/set-referrer.module'
 	imports: [GetUserModule, CreateUserModule, SetReferrerModule],
 	controllers: [UsersController],
 })
-export class UsersModule {}
+export class UsersApiModule {}

@@ -14,4 +14,4 @@ import { WithdrawRewardModule } from '../use-cases/withdraw-reward.module'
 	],
 	controllers: [ReferralSystemController],
 })
-export class ReferralSystemModule {}
+export class ReferralSystemApiModule {}
