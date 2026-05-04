@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
+import { CurrencyModule } from '../../infrastructure/currency/currency.module'
 import { WalletsController } from '../../presentation/wallets/wallets.controller'
-import { CurrencyModule } from '../currency/currency.module'
 import { GetBalanceModule } from '../use-cases/get-balance.module'
 import { GetPriceModule } from '../use-cases/get-price.module'
 import { QuoteSwapModule } from '../use-cases/quote-swap.module'
