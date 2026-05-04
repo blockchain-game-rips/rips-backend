@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { CurrenciesMismatchError } from '../../../domain/errors/currencies-mismatch.error'
 import { AvailableStakeNotFoundError } from '../../../domain/errors/stake-not-found.error'
 import { PendingZap } from '../../../domain/value-objects/zap'
@@ -13,6 +13,8 @@ import {
 
 @Injectable()
 export class BuyTicketsZapService extends BuyTicketsZapUseCase {
+	private readonly logger = new Logger(BuyTicketsZapService.name)
+
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
 		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
@@ -57,11 +59,28 @@ export class BuyTicketsZapService extends BuyTicketsZapUseCase {
 			)
 		}
 
-		return this.zapService.buyTickets(user.wallet, {
+		const ticketCurrency = config.ticketPrice.currency
+
+		const pendingZap = await this.zapService.buyTickets(user.wallet, {
 			paymentCurrency,
 			stakeId: availableStake.stake.id,
 			config,
 			ticketCount,
 		})
+
+		this.logger.log(
+			{
+				userId: user.id.toString(),
+				txHash: pendingZap.srcTransaction.id,
+				fromChain: paymentCurrency.chainAddress.chain.reference,
+				toChain: ticketCurrency.chainAddress.chain.reference,
+				fromAmount: pendingZap.amountIn.amount.toString(),
+				fromToken: paymentCurrency.chainAddress.address,
+				toToken: ticketCurrency.chainAddress.address,
+			},
+			'Buy tickets zap initiated',
+		)
+
+		return pendingZap
 	}
 }

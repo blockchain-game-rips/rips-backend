@@ -13,12 +13,9 @@ export type MockOrderParams = {
 }
 
 export function createMockDeBridgeApiService(): DeBridgeApiService {
-	const real = new DeBridgeApiService()
-
-	return {
-		fetchCreateTx: real.fetchCreateTx.bind(real),
-		getOrder: jest.fn(),
-	}
+	const service = new DeBridgeApiService()
+	jest.spyOn(service, 'getOrder').mockImplementation(jest.fn())
+	return service
 }
 
 export function mockGetOrder(
