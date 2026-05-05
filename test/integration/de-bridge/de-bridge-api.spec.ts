@@ -1,3 +1,4 @@
+import { CacheModule } from '@nestjs/cache-manager'
 import { Test } from '@nestjs/testing'
 import { DeBridgeApiService } from '../../../src/infrastructure/de-bridge/de-bridge-api.service'
 
@@ -13,6 +14,7 @@ describe('DeBridgeApiService', () => {
 
 	beforeAll(async () => {
 		const moduleRef = await Test.createTestingModule({
+			imports: [CacheModule.register()],
 			providers: [DeBridgeApiService],
 		}).compile()
 
