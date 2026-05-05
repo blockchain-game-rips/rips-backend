@@ -16,5 +16,6 @@ export type ReferrerState = {
 
 export type Referrer = {
 	address: EvmAddress
+	isFrozen: boolean
 	states: ReferrerState[]
 }

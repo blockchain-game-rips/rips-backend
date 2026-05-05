@@ -39,4 +39,11 @@ query GetReferrerData($referrer: String!, $currencyAddress: String!) {
 		}
 		currency
 	}
+	referrerFreezeUpdateds(
+		where: { referrer_eq: $referrer }
+		orderBy: blockNumber_DESC
+		limit: 1
+	) {
+		frozen
+	}
 }

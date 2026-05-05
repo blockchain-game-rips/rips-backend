@@ -39,6 +39,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			referralTiersUpdateds,
 			defaultReferralFeeUpdateds,
 			referrerRewards,
+			referrerFreezeUpdateds,
 		} = await withCache(
 			this.cacheManager,
 			`indexer-referrer-${lowerCaseReferrer}`,
@@ -67,8 +68,11 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 		)
 		const fee = customFee ?? Math.max(defaultFee, activeFee)
 
+		const isFrozen = referrerFreezeUpdateds[0]?.frozen ?? false
+
 		return {
 			address: referrer,
+			isFrozen,
 			states: [
 				{
 					currency,
