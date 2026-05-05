@@ -118,6 +118,19 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 		})
 	}
 
+	setReferrerCustomFee(
+		wallet: Wallet,
+		args: { referrer: EvmAddress; feePercent: number },
+	): Promise<Transaction> {
+		return this.sendAdminTransaction(wallet, {
+			data: encodeFunctionData({
+				abi: ripsAbi,
+				functionName: 'setReferrerCustomFee',
+				args: [args.referrer, args.feePercent],
+			}),
+		})
+	}
+
 	private async sendAdminTransaction(
 		wallet: Wallet,
 		requestFields: Pick<TransactionRequestEIP1559, 'data'>,

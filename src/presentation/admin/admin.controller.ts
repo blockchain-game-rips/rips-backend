@@ -6,6 +6,7 @@ import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price
 import { SetDefaultReferralFeeUseCase } from '../../application/use-cases/set-default-referral-fee/set-default-referral-fee.use-case'
 import { SetPausedUseCase } from '../../application/use-cases/set-paused/set-paused.use-case'
 import { SetReferralTiersUseCase } from '../../application/use-cases/set-referral-tiers/set-referral-tiers.use-case'
+import { SetReferrerCustomFeeUseCase } from '../../application/use-cases/set-referrer-custom-fee/set-referrer-custom-fee.use-case'
 import { SetReferrerFrozenUseCase } from '../../application/use-cases/set-referrer-frozen/set-referrer-frozen.use-case'
 import { UpdateStakeConfigUseCase } from '../../application/use-cases/update-stake-config/update-stake-config.use-case'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
@@ -17,6 +18,10 @@ import {
 	SetReferralTiersBodyDto,
 	SetReferralTiersParamsDto,
 } from './set-referral-tiers/set-referral-tiers.request'
+import {
+	SetReferrerCustomFeeBodyDto,
+	SetReferrerCustomFeeParamsDto,
+} from './set-referrer-custom-fee/set-referrer-custom-fee.request'
 import {
 	SetReferrerFrozenBodyDto,
 	SetReferrerFrozenParamsDto,
@@ -39,6 +44,7 @@ export class AdminController {
 		private readonly setDefaultReferralFeeUseCase: SetDefaultReferralFeeUseCase,
 		private readonly setReferralTiersUseCase: SetReferralTiersUseCase,
 		private readonly updateStakeConfigUseCase: UpdateStakeConfigUseCase,
+		private readonly setReferrerCustomFeeUseCase: SetReferrerCustomFeeUseCase,
 		private readonly currencyService: CurrencyService,
 	) {}
 
@@ -136,6 +142,20 @@ export class AdminController {
 		const transaction = await this.setReferrerFrozenUseCase.execute({
 			referrer: params.address,
 			frozen: body.frozen,
+		})
+
+		return { transaction: toTransactionDto(transaction) }
+	}
+
+	@Put('referrers/:address/custom-fee')
+	@ZodResponse({ type: AdminTransactionResponseDto })
+	async setReferrerCustomFee(
+		@Param() params: SetReferrerCustomFeeParamsDto,
+		@Body() body: SetReferrerCustomFeeBodyDto,
+	): Promise<AdminTransactionResponseDto> {
+		const transaction = await this.setReferrerCustomFeeUseCase.execute({
+			referrer: params.address,
+			feePercent: body.feePercent,
 		})
 
 		return { transaction: toTransactionDto(transaction) }

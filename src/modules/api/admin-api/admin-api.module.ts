@@ -6,6 +6,7 @@ import { GetPriceModule } from '../../use-cases/get-price.module'
 import { SetDefaultReferralFeeModule } from '../../use-cases/set-default-referral-fee.module'
 import { SetPausedModule } from '../../use-cases/set-paused.module'
 import { SetReferralTiersModule } from '../../use-cases/set-referral-tiers.module'
+import { SetReferrerCustomFeeModule } from '../../use-cases/set-referrer-custom-fee.module'
 import { SetReferrerFrozenModule } from '../../use-cases/set-referrer-frozen.module'
 import { UpdateStakeConfigModule } from '../../use-cases/update-stake-config.module'
 
@@ -15,6 +16,7 @@ import { UpdateStakeConfigModule } from '../../use-cases/update-stake-config.mod
 		GetPriceModule,
 		SetPausedModule,
 		SetReferrerFrozenModule,
+		SetReferrerCustomFeeModule,
 		SetDefaultReferralFeeModule,
 		SetReferralTiersModule,
 		UpdateStakeConfigModule,

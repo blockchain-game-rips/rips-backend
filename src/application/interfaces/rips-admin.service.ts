@@ -28,4 +28,9 @@ export abstract class RipsAdminService {
 		wallet: Wallet,
 		args: { currencyAddress: EvmAddress; tiers: ReferrerTier[] },
 	): Promise<Transaction>
+
+	abstract setReferrerCustomFee(
+		wallet: Wallet,
+		args: { referrer: EvmAddress; feePercent: number },
+	): Promise<Transaction>
 }
