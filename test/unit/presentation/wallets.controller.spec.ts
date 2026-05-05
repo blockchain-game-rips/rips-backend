@@ -59,6 +59,7 @@ describe('WalletsController', () => {
 				balances: [
 					{
 						currency: {
+							id: 'eip155:8453:0x0000000000000000000000000000000000000000',
 							chainAddress: {
 								chain: { namespace: EIP155, reference: '8453' },
 								address: NATIVE_ADDRESS,
