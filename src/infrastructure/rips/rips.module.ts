@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common'
+import { RipsAdminService } from '../../application/interfaces/rips-admin.service'
 import { RipsReadService } from '../../application/interfaces/rips-read.service'
 import { RipsService } from '../../application/interfaces/rips.service'
 import { EIP155 } from '../../constants'
 import { toEvmAddress } from '../../domain/value-objects/evm-address'
 import { getEnvSafe } from '../../utils/common'
 import { EvmModule } from '../evm/evm.module'
+import { RipsAdminServiceImpl } from './rips-admin.service'
 import { RipsReadServiceImpl } from './rips-read.service'
 import { RIPS_CONTRACT } from './rips.constants'
 import { RipsServiceIpml } from './rips.service'
@@ -24,7 +26,8 @@ import { RipsServiceIpml } from './rips.service'
 		},
 		{ provide: RipsService, useClass: RipsServiceIpml },
 		{ provide: RipsReadService, useClass: RipsReadServiceImpl },
+		{ provide: RipsAdminService, useClass: RipsAdminServiceImpl },
 	],
-	exports: [RipsService, RipsReadService, RIPS_CONTRACT],
+	exports: [RipsService, RipsReadService, RipsAdminService, RIPS_CONTRACT],
 })
 export class RipsModule {}
