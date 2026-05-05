@@ -1,3 +1,4 @@
+import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ZapService } from '../../application/interfaces/zap.service'
 import { EvmModule } from '../evm/evm.module'
@@ -6,7 +7,7 @@ import { DeBridgeApiService } from './de-bridge-api.service'
 import { DeBridgeService } from './de-bridge.service'
 
 @Module({
-	imports: [EvmModule, RipsModule],
+	imports: [CacheModule.register(), EvmModule, RipsModule],
 	providers: [
 		{
 			provide: ZapService,

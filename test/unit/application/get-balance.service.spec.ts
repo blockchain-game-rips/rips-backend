@@ -20,10 +20,15 @@ describe('GetBalanceService', () => {
 	const currencyService: jest.Mocked<CurrencyService> = {
 		fromAccount: jest.fn(),
 	}
+	const cacheManager = {
+		get: jest.fn().mockResolvedValue(undefined),
+		set: jest.fn(),
+	} as never
 	const service = new GetBalanceService(
 		getUserUseCase,
 		walletService,
 		currencyService,
+		cacheManager,
 	)
 
 	beforeEach(() => {

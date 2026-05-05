@@ -1,3 +1,4 @@
+import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ReferralSystemRepository } from '../../application/interfaces/repositories/referral-system.repository'
 import { RoundRepository } from '../../application/interfaces/repositories/round.repository'
@@ -10,7 +11,7 @@ import { IndexerRoundRepository } from './rounds.repository'
 import { IndexerStakeRepository } from './stake.repository'
 
 @Module({
-	imports: [EvmModule, RipsModule],
+	imports: [CacheModule.register(), EvmModule, RipsModule],
 	providers: [
 		IndexerService,
 		{ provide: StakeRepository, useClass: IndexerStakeRepository },

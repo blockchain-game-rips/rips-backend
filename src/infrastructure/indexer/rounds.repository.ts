@@ -1,3 +1,4 @@
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
 import { getAddress } from 'viem'
 import {
@@ -6,10 +7,13 @@ import {
 } from '../../application/interfaces/repositories/round.repository'
 import { CompletedRound, Round } from '../../domain/entities/round'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { withCache } from '../cache/with-cache'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { RIPS_CONTRACT } from '../rips/rips.constants'
 import { IndexerService } from './indexer.service'
 import { fromRoundRaw } from './utils'
+
+const INDEXER_TTL_MS = 5000
 
 @Injectable()
 export class IndexerRoundRepository extends RoundRepository {
@@ -19,6 +23,7 @@ export class IndexerRoundRepository extends RoundRepository {
 		private readonly indexer: IndexerService,
 		private readonly evmCurrencyService: EvmCurrencyService,
 		@Inject(RIPS_CONTRACT) contract: ChainAddress,
+		@Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
 	) {
 		super()
 		this.chainId = Number(contract.chain.reference)
@@ -28,10 +33,16 @@ export class IndexerRoundRepository extends RoundRepository {
 		limit,
 		cursor,
 	}: GetCompletedRoundsArgs): Promise<CompletedRound[]> {
-		const { rounds } = await this.indexer.sdk.GetCompletedRounds({
-			limit,
-			cursor: cursor?.toString(),
-		})
+		const { rounds } = await withCache(
+			this.cacheManager,
+			`indexer-completed-rounds-${limit}-${cursor ?? ''}`,
+			INDEXER_TTL_MS,
+			() =>
+				this.indexer.sdk.GetCompletedRounds({
+					limit,
+					cursor: cursor?.toString(),
+				}),
+		)
 
 		return Promise.all(
 			rounds.map(async (r) => {
@@ -46,9 +57,15 @@ export class IndexerRoundRepository extends RoundRepository {
 	}
 
 	async getRoundsByIds(ids: Set<number>): Promise<Round[]> {
-		const { rounds } = await this.indexer.sdk.GetRoundsByIds({
-			ids: [...ids].map(String),
-		})
+		const sortedIds = [...ids].sort((a, b) => a - b)
+
+		const { rounds } = await withCache(
+			this.cacheManager,
+			`indexer-rounds-by-ids-${sortedIds.join(',')}`,
+			INDEXER_TTL_MS,
+			() =>
+				this.indexer.sdk.GetRoundsByIds({ ids: sortedIds.map(String) }),
+		)
 
 		return Promise.all(
 			rounds.map(async (r) => {
@@ -65,9 +82,15 @@ export class IndexerRoundRepository extends RoundRepository {
 	async getNextCompletedRound(
 		afterRoundId: number,
 	): Promise<CompletedRound | null> {
-		const { rounds } = await this.indexer.sdk.GetNextCompletedRound({
-			afterRoundId: String(afterRoundId),
-		})
+		const { rounds } = await withCache(
+			this.cacheManager,
+			`indexer-next-completed-round-${afterRoundId}`,
+			INDEXER_TTL_MS,
+			() =>
+				this.indexer.sdk.GetNextCompletedRound({
+					afterRoundId: String(afterRoundId),
+				}),
+		)
 
 		if (rounds.length === 0) {
 			return null

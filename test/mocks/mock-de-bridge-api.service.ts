@@ -13,7 +13,10 @@ export type MockOrderParams = {
 }
 
 export function createMockDeBridgeApiService(): DeBridgeApiService {
-	const service = new DeBridgeApiService()
+	const service = new DeBridgeApiService({
+		get: jest.fn(),
+		set: jest.fn(),
+	} as never)
 	jest.spyOn(service, 'getOrder').mockImplementation(jest.fn())
 	return service
 }

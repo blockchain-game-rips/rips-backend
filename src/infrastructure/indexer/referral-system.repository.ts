@@ -1,3 +1,4 @@
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
 import { zeroAddress } from 'viem'
 import { ReferralSystemRepository } from '../../application/interfaces/repositories/referral-system.repository'
@@ -6,11 +7,13 @@ import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { EvmAddress } from '../../domain/value-objects/evm-address'
 import { ReferrerTierTable } from '../../domain/value-objects/referral-system'
 import { GetReferrerDataQuery } from '../../generated/graphql/generated'
+import { withCache } from '../cache/with-cache'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { RIPS_CONTRACT } from '../rips/rips.constants'
 import { IndexerService } from './indexer.service'
 
 const REFERRAL_PERIOD_MS = 30 * 24 * 60 * 60 * 1000
+const INDEXER_TTL_MS = 5000
 
 @Injectable()
 export class IndexerReferralSystemRepository extends ReferralSystemRepository {
@@ -20,6 +23,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 		private readonly indexer: IndexerService,
 		private readonly evmCurrencyService: EvmCurrencyService,
 		@Inject(RIPS_CONTRACT) contract: ChainAddress,
+		@Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
 	) {
 		super()
 		this.chainId = Number(contract.chain.reference)
@@ -35,10 +39,16 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			referralTiersUpdateds,
 			defaultReferralFeeUpdateds,
 			referrerRewards,
-		} = await this.indexer.sdk.GetReferrerData({
-			currencyAddress: zeroAddress,
-			referrer: lowerCaseReferrer,
-		})
+		} = await withCache(
+			this.cacheManager,
+			`indexer-referrer-${lowerCaseReferrer}`,
+			INDEXER_TTL_MS,
+			() =>
+				this.indexer.sdk.GetReferrerData({
+					currencyAddress: zeroAddress,
+					referrer: lowerCaseReferrer,
+				}),
+		)
 
 		const customFee = this.resolveCustomFee(referrerCustomFeeUpdateds)
 
@@ -183,9 +193,15 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 
 	async getReferrerTierTables(): Promise<ReferrerTierTable[]> {
 		const { referralTiersUpdateds, defaultReferralFeeUpdateds } =
-			await this.indexer.sdk.GetReferrerTierTables({
-				currencyAddress: zeroAddress,
-			})
+			await withCache(
+				this.cacheManager,
+				'indexer-referrer-tier-tables',
+				INDEXER_TTL_MS,
+				() =>
+					this.indexer.sdk.GetReferrerTierTables({
+						currencyAddress: zeroAddress,
+					}),
+			)
 
 		if (referralTiersUpdateds.length === 0) return []
 

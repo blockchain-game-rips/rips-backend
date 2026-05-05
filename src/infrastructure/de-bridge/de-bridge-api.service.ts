@@ -1,15 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import ky from 'ky'
 import { Address } from 'viem'
 import { Currency } from '../../domain/entities/currency'
+import { withCache } from '../cache/with-cache'
 import { CreateTxSchema } from './schemas/create-tx.schema'
 import { OrderSchema } from './schemas/order-status.schema'
 
 const DEBRIDGE_API_URL = 'https://api.dln.trade/v1.0'
+const CREATE_TX_TTL_MS = 10000
 
 @Injectable()
 export class DeBridgeApiService {
 	private readonly logger = new Logger(DeBridgeApiService.name)
+
+	constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
 	async getOrder(orderId: string) {
 		const start = Date.now()
@@ -39,6 +44,43 @@ export class DeBridgeApiService {
 	}
 
 	async fetchCreateTx(
+		args: {
+			userAddress: Address
+			recipient: Address
+			srcCurrency: Currency
+			dstCurrency: Currency
+			dlnHook?: unknown
+		} & (
+			| { exactIn: bigint; exactOut?: never }
+			| { exactOut: bigint; exactIn?: never }
+		),
+	) {
+		const { userAddress, srcCurrency, dstCurrency, dlnHook } = args
+
+		const amountKey =
+			args.exactOut !== undefined
+				? `out-${args.exactOut}`
+				: `in-${args.exactIn}`
+
+		const hookKey = dlnHook !== undefined ? JSON.stringify(dlnHook) : ''
+
+		const cacheKey = [
+			'debridge-create-tx',
+			userAddress,
+			srcCurrency.chainAddress.chain.reference,
+			srcCurrency.chainAddress.address,
+			dstCurrency.chainAddress.chain.reference,
+			dstCurrency.chainAddress.address,
+			amountKey,
+			hookKey,
+		].join('-')
+
+		return withCache(this.cacheManager, cacheKey, CREATE_TX_TTL_MS, () =>
+			this.doFetchCreateTx(args),
+		)
+	}
+
+	private async doFetchCreateTx(
 		args: {
 			userAddress: Address
 			recipient: Address
