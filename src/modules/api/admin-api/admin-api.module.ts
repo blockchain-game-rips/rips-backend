@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { CurrencyModule } from '../../../infrastructure/currency/currency.module'
 import { AdminController } from '../../../presentation/admin/admin.controller'
 import { GetAdminWalletModule } from '../../use-cases/get-admin-wallet.module'
+import { GetPriceModule } from '../../use-cases/get-price.module'
 import { SetDefaultReferralFeeModule } from '../../use-cases/set-default-referral-fee.module'
 import { SetPausedModule } from '../../use-cases/set-paused.module'
 import { SetReferralTiersModule } from '../../use-cases/set-referral-tiers.module'
@@ -11,6 +12,7 @@ import { UpdateStakeConfigModule } from '../../use-cases/update-stake-config.mod
 @Module({
 	imports: [
 		GetAdminWalletModule,
+		GetPriceModule,
 		SetPausedModule,
 		SetReferrerFrozenModule,
 		SetDefaultReferralFeeModule,
