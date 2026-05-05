@@ -6,6 +6,7 @@ import {
 	EvmAddress,
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
+import { ReferrerTier } from '../../domain/value-objects/referral-system'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
@@ -55,6 +56,19 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 				abi: ripsAbi,
 				functionName: 'setReferrerFrozen',
 				args: [args.referrer, args.frozen],
+			}),
+		})
+	}
+
+	setReferralTiers(
+		wallet: Wallet,
+		args: { currencyAddress: EvmAddress; tiers: ReferrerTier[] },
+	): Promise<Transaction> {
+		return this.sendAdminTransaction(wallet, {
+			data: encodeFunctionData({
+				abi: ripsAbi,
+				functionName: 'setReferralTiers',
+				args: [args.currencyAddress, args.tiers],
 			}),
 		})
 	}

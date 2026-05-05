@@ -1,4 +1,5 @@
 import { EvmAddress } from '../../domain/value-objects/evm-address'
+import { ReferrerTier } from '../../domain/value-objects/referral-system'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 
@@ -15,5 +16,10 @@ export abstract class RipsAdminService {
 	abstract setDefaultReferralFee(
 		wallet: Wallet,
 		args: { feePercent: number },
+	): Promise<Transaction>
+
+	abstract setReferralTiers(
+		wallet: Wallet,
+		args: { currencyAddress: EvmAddress; tiers: ReferrerTier[] },
 	): Promise<Transaction>
 }
