@@ -16,6 +16,7 @@ import { GetCardDefinitionsUseCase } from '../../application/use-cases/get-card-
 import { GetCompletedRoundsUseCase } from '../../application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
 import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
+import { GetRipsStateUseCase } from '../../application/use-cases/get-rips-state/get-rips-state.use-case'
 import { GetRoundsUseCase } from '../../application/use-cases/get-rounds/get-rounds.use-case'
 import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
 import { GetZapResultUseCase } from '../../application/use-cases/get-zap-result/get-zap-result.use-case'
@@ -50,6 +51,7 @@ import { GetCompletedRoundsQueryDto } from './get-completed-rounds/get-completed
 import { GetCompletedRoundsResponseDto } from './get-completed-rounds/get-completed-rounds.response'
 import { GetOngoingRoundsResponseDto } from './get-ongoing-rounds/get-ongoing-rounds.response'
 import { GetPrizesResponseDto } from './get-prizes/get-prizes.response'
+import { GetRipsStateResponseDto } from './get-rips-state/get-rips-state.response'
 import { GetRoundsQueryDto } from './get-rounds/get-rounds.request'
 import { GetRoundsResponseDto } from './get-rounds/get-rounds.response'
 import { GetStakesResponseDto } from './get-stakes/get-stakes.response'
@@ -77,6 +79,7 @@ import { toRoundDto } from './shared/round.dto'
 @Controller('rips')
 export class RipsController {
 	constructor(
+		private readonly getRipsStateUseCase: GetRipsStateUseCase,
 		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
 		private readonly buyTicketsPurchaseUseCase: BuyTicketsPurchaseUseCase,
 		private readonly buyTicketsZapUseCase: BuyTicketsZapUseCase,
@@ -92,6 +95,27 @@ export class RipsController {
 		private readonly getCardCollectionUseCase: GetCardCollectionUseCase,
 		private readonly getCardDefinitionsUseCase: GetCardDefinitionsUseCase,
 	) {}
+
+	@Get('state')
+	@ZodResponse({ type: GetRipsStateResponseDto })
+	async getRipsState(): Promise<GetRipsStateResponseDto> {
+		const state = await this.getRipsStateUseCase.execute()
+
+		const currencies = state.availableStakes.map((s) =>
+			s.fillingRound !== null
+				? s.fillingRound.currency
+				: s.stake.currentConfig.ticketPrice.currency,
+		)
+
+		const prices = await this.getPriceUseCase.executeMany({ currencies })
+
+		return {
+			availableStakes: state.availableStakes.map((s, i) =>
+				toAvailableStakeDto(s, prices.get(currencies[i].id) ?? 0),
+			),
+			isPaused: state.isPaused,
+		}
+	}
 
 	@Get('stakes')
 	@ZodResponse({ type: GetStakesResponseDto })

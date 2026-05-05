@@ -8,6 +8,7 @@ import { GetCardDefinitionsModule } from '../../use-cases/get-card-definitions.m
 import { GetCompletedRoundsModule } from '../../use-cases/get-completed-rounds.module'
 import { GetOngoingRoundsModule } from '../../use-cases/get-ongoing-rounds.module'
 import { GetPriceModule } from '../../use-cases/get-price.module'
+import { GetRipsStateModule } from '../../use-cases/get-rips-state.module'
 import { GetRoundsModule } from '../../use-cases/get-rounds.module'
 import { GetUnrevealedPrizesModule } from '../../use-cases/get-unrevealed-prizes.module'
 import { GetZapResultModule } from '../../use-cases/get-zap-result.module'
@@ -19,6 +20,7 @@ import { RevealTicketPrizesModule } from '../../use-cases/reveal-ticket-prizes.m
 	imports: [
 		GetRoundsModule,
 		GetAvailableStakesModule,
+		GetRipsStateModule,
 		GetOngoingRoundsModule,
 		GetCompletedRoundsModule,
 		BuyTicketsPurchaseModule,
