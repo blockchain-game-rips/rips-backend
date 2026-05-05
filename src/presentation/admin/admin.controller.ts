@@ -1,6 +1,7 @@
-import { Body, Controller, Param, Put, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
+import { GetAdminWalletUseCase } from '../../application/use-cases/get-admin-wallet/get-admin-wallet.use-case'
 import { SetDefaultReferralFeeUseCase } from '../../application/use-cases/set-default-referral-fee/set-default-referral-fee.use-case'
 import { SetPausedUseCase } from '../../application/use-cases/set-paused/set-paused.use-case'
 import { SetReferralTiersUseCase } from '../../application/use-cases/set-referral-tiers/set-referral-tiers.use-case'
@@ -20,12 +21,17 @@ import {
 	SetReferrerFrozenParamsDto,
 } from './set-referrer-frozen/set-referrer-frozen.request'
 import { AdminTransactionResponseDto } from './shared/admin-transaction.response'
+import {
+	AdminWalletResponseDto,
+	toAdminWalletResponseDto,
+} from './shared/admin-wallet.response'
 import { UpdateStakeConfigBodyDto } from './update-stake-config/update-stake-config.request'
 
 @Controller('admin')
 @UseGuards(AdminApiKeyGuard)
 export class AdminController {
 	constructor(
+		private readonly getAdminWalletUseCase: GetAdminWalletUseCase,
 		private readonly setPausedUseCase: SetPausedUseCase,
 		private readonly setReferrerFrozenUseCase: SetReferrerFrozenUseCase,
 		private readonly setDefaultReferralFeeUseCase: SetDefaultReferralFeeUseCase,
@@ -33,6 +39,14 @@ export class AdminController {
 		private readonly updateStakeConfigUseCase: UpdateStakeConfigUseCase,
 		private readonly currencyService: CurrencyService,
 	) {}
+
+	@Get()
+	@ZodResponse({ type: AdminWalletResponseDto })
+	async getAdminWallet(): Promise<AdminWalletResponseDto> {
+		const wallet = await this.getAdminWalletUseCase.execute()
+
+		return toAdminWalletResponseDto(wallet)
+	}
 
 	@Put('contract/paused')
 	@ZodResponse({ type: AdminTransactionResponseDto })
