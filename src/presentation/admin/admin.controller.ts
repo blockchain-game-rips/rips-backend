@@ -89,26 +89,17 @@ export class AdminController {
 		const currency = await this.currencyService.fromAccount(
 			ticketPrice.currencyChainAddress as ChainAddress,
 		)
-		const amount = BigInt(ticketPrice.amount)
 
 		const transaction = await this.updateStakeConfigUseCase.execute({
 			stakeId: Number(stakeId),
 			config: {
-				//TODO: think about types, I don't neet id here
-				id: 0,
 				durationSeconds: durationSeconds,
 				feePercent: feePercent,
-				prizeDistribution: prizeDistribution.map((prize) => {
-					return {
-						maxPrize: BigInt(prize.maxPrize),
-						minPrize: BigInt(prize.minPrize),
-						prizeCount: BigInt(prize.prizeCount),
-					}
-				}),
+				prizeDistribution: prizeDistribution,
 				ticketCup: ticketCap,
 				ticketPrice: {
 					currency,
-					amount,
+					amount: ticketPrice.amount,
 				},
 			},
 		})

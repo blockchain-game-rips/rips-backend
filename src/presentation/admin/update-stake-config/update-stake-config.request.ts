@@ -8,11 +8,18 @@ const configSchema = z.object({
 	feePercent: z.number(),
 	ticketPrice: z.object({
 		currencyChainAddress: ChainAddressDto.schema,
-
-		amount: z.string(),
+		amount: z.string().transform((value) => BigInt(value)),
 	}),
 	durationSeconds: z.number(),
-	prizeDistribution: z.array(prizeTierSchema),
+	prizeDistribution: z.array(prizeTierSchema).transform((value) => {
+		return value.map((prize) => {
+			return {
+				maxPrize: BigInt(prize.maxPrize),
+				minPrize: BigInt(prize.minPrize),
+				prizeCount: BigInt(prize.prizeCount),
+			}
+		})
+	}),
 })
 
 const updateStakeConfigBodySchema = z.object({

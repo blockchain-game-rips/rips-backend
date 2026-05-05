@@ -21,7 +21,7 @@ export abstract class RipsAdminService {
 
 	abstract updateStake(
 		wallet: Wallet,
-		args: { stakeId: number; config: Config },
+		args: { stakeId: number; config: Omit<Config, 'id'> },
 	): Promise<Transaction>
 
 	abstract setReferralTiers(

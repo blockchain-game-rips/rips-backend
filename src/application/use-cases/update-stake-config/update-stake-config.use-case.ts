@@ -4,6 +4,6 @@ import { Transaction } from '../../../domain/value-objects/transaction'
 export abstract class UpdateStakeConfigUseCase {
 	abstract execute(input: {
 		stakeId: number
-		config: Config
+		config: Omit<Config, 'id'>
 	}): Promise<Transaction>
 }

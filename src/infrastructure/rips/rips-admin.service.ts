@@ -63,7 +63,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 
 	updateStake(
 		wallet: Wallet,
-		args: { stakeId: number; config: Config },
+		args: { stakeId: number; config: Omit<Config, 'id'> },
 	): Promise<Transaction> {
 		const { stakeId, config } = args
 

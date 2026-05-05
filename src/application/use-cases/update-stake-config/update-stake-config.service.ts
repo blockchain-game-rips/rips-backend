@@ -20,7 +20,7 @@ export class UpdateStakeConfigService extends UpdateStakeConfigUseCase {
 
 	async execute(input: {
 		stakeId: number
-		config: Config
+		config: Omit<Config, 'id'>
 	}): Promise<Transaction> {
 		const [adminWallet, stakesWithRounds] = await Promise.all([
 			this.adminWalletRepository.get(),
