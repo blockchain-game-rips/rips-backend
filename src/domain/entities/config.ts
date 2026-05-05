@@ -8,8 +8,7 @@ export type PrizeTier = {
 
 export type Config = {
 	id: number
-	//TODO: rename
-	ticketCup: number
+	ticketCap: number
 	feePercent: number
 	ticketPrice: CurrencyAmount
 	durationSeconds: number

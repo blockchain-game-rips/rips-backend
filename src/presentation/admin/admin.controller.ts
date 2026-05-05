@@ -96,7 +96,7 @@ export class AdminController {
 				durationSeconds: durationSeconds,
 				feePercent: feePercent,
 				prizeDistribution: prizeDistribution,
-				ticketCup: ticketCap,
+				ticketCap: ticketCap,
 				ticketPrice: {
 					currency,
 					amount: ticketPrice.amount,

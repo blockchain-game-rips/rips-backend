@@ -21,7 +21,7 @@ const REFUNDED_ROUND_ID = 43
 
 const STAKE_CONFIG: Config = {
 	id: 1,
-	ticketCup: 8,
+	ticketCap: 8,
 	feePercent: 0,
 	ticketPrice: { currency: MOCK_CURRENCY, amount: parseEther('0.005') },
 	durationSeconds: 300,

@@ -259,7 +259,7 @@ export class RipsServiceIpml implements RipsService {
 		// TODO: fetch actual prize tiers from contract
 		return {
 			id: Number(configId),
-			ticketCup: Number(ticketCap),
+			ticketCap: Number(ticketCap),
 			feePercent: Number(feePercent),
 			ticketPrice: {
 				currency,

@@ -27,7 +27,7 @@ export function toConfigDto(
 	ticketPriceInUsd: number,
 ): ConfigDto {
 	return {
-		ticketCap: config.ticketCup,
+		ticketCap: config.ticketCap,
 		feePercent: config.feePercent,
 		ticketPrice: toCurrencyAmountDto(config.ticketPrice, ticketPriceInUsd),
 		durationSeconds: config.durationSeconds,

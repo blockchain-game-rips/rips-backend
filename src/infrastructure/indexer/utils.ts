@@ -16,7 +16,7 @@ export function fromConfigRaw(
 ): Config {
 	return {
 		id: Number(configRaw.id),
-		ticketCup: Number(configRaw.ticketCap),
+		ticketCap: Number(configRaw.ticketCap),
 		feePercent: Number(configRaw.feePercent),
 		ticketPrice: {
 			currency,

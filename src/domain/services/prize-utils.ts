@@ -14,9 +14,9 @@ export function resolvePrize(
 	prizeAmount: bigint
 } {
 	const { a, b } = randoms
-	const { ticketCup, prizeDistribution } = config
+	const { ticketCap, prizeDistribution } = config
 
-	const n = BigInt(ticketCup)
+	const n = BigInt(ticketCap)
 	const prizeNumber = ((a * BigInt(ticketNumber) + b) % n) + 1n
 
 	const { tierIndex, prizeAmount } = resolveOnchainPrize(

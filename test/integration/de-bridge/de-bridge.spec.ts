@@ -75,7 +75,7 @@ const USDC_ARBITRUM = new Token(USDC_ARBITRUM_ADDRESS, ARBITRUM_CHAIN_ID, {
 
 const MOCK_CONFIG: Config = {
 	id: 1,
-	ticketCup: 8,
+	ticketCap: 8,
 	feePercent: 1,
 	ticketPrice: {
 		currency: ETH_BASE,
@@ -218,7 +218,7 @@ describe('DeBridge integration', () => {
 		})
 
 		it('places order on Arbitrum and fulfills it on Base, buying over ticket cap refunds excess to user', async () => {
-			const ticketCap = MOCK_CONFIG.ticketCup
+			const ticketCap = MOCK_CONFIG.ticketCap
 			const overCapTicketCount = ticketCap + 2
 
 			const basBalanceBefore = await baseClient.getBalance({

@@ -82,7 +82,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 					{
 						tiers: config.prizeDistribution,
 						currency: currencyAddress,
-						ticketCap: BigInt(config.ticketCup),
+						ticketCap: BigInt(config.ticketCap),
 						duration: config.durationSeconds,
 						ticketCost: ticketCost,
 						feePercent: config.feePercent,

@@ -400,7 +400,7 @@ describe('Reveal prizes flow E2E', () => {
 
 const STAKE_CONFIG: Config = {
 	id: 1,
-	ticketCup: TICKET_CAP,
+	ticketCap: TICKET_CAP,
 	feePercent: 0,
 	ticketPrice: {
 		currency: ANVIL_NATIVE_CURRENCY,
@@ -428,7 +428,7 @@ const STAKE_CONFIG: Config = {
 
 const STAKE_2_CONFIG: Config = {
 	id: 2,
-	ticketCup: TICKET_CAP,
+	ticketCap: TICKET_CAP,
 	feePercent: 0,
 	ticketPrice: {
 		currency: ANVIL_NATIVE_CURRENCY,

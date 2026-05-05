@@ -25,7 +25,7 @@ const mockGetAvailableStakesUseCase: Pick<
 					stake: { id: STAKE_ID, currentConfig: null },
 					config: {
 						id: 1,
-						ticketCup: 8,
+						ticketCap: 8,
 						feePercent: 0,
 						ticketPrice: {
 							currency: ANVIL_NATIVE_CURRENCY,
