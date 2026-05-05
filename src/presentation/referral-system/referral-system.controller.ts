@@ -40,7 +40,18 @@ export class ReferralSystemController {
 			telegramId: headers[TELEGRAM_ID_HEADER],
 		})
 
-		return toGetReferrerResponseDto(referrer)
+		const currencyById = new Map(
+			referrer.states.map((referrerState) => [
+				referrerState.currency.id,
+				referrerState.currency,
+			]),
+		)
+
+		const prices = await this.getPriceUseCase.executeMany({
+			currencies: Array.from(currencyById.values()),
+		})
+
+		return toGetReferrerResponseDto(referrer, prices)
 	}
 
 	@Get('tier-tables')
