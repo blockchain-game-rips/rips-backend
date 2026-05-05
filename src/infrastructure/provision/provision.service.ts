@@ -3,6 +3,8 @@ import { KmsService } from '../../application/interfaces/kms.service'
 import { AdminWalletRepository } from '../../application/interfaces/repositories/admin-wallet.repository'
 import { ExecutorRepository } from '../../application/interfaces/repositories/executor.repository'
 import { Executor } from '../../domain/entities/executor'
+import { EvmAddress } from '../../domain/value-objects/evm-address'
+import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
 import { AdminWallet } from '../../domain/value-objects/wallet'
 
 @Injectable()
@@ -15,21 +17,16 @@ export class ProvisionService {
 		private readonly adminWalletRepository: AdminWalletRepository,
 	) {}
 
-	async ensureAdminWallet(): Promise<AdminWallet> {
-		const existing = await this.adminWalletRepository.get()
-
-		if (existing) {
-			this.logger.log(`Admin wallet already provisioned`)
-			return existing
-		}
-
-		const { kmsKeyId, evmAddress } = await this.kmsService.createEvmKey()
+	async seedAdminWallet(
+		address: EvmAddress,
+		kmsKeyId: KmsKeyId,
+	): Promise<AdminWallet> {
 		const adminWallet = await this.adminWalletRepository.upsert(
-			evmAddress,
+			address,
 			kmsKeyId,
 		)
 
-		this.logger.log(`Created admin wallet with address ${evmAddress}`)
+		this.logger.log(`Admin wallet seeded with address ${address}`)
 
 		return adminWallet
 	}
