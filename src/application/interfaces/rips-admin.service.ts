@@ -11,4 +11,9 @@ export abstract class RipsAdminService {
 		wallet: Wallet,
 		args: { referrer: EvmAddress; frozen: boolean },
 	): Promise<Transaction>
+
+	abstract setDefaultReferralFee(
+		wallet: Wallet,
+		args: { feePercent: number },
+	): Promise<Transaction>
 }
