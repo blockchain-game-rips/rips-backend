@@ -5,6 +5,7 @@ import { LoggingModule } from './infrastructure/logging/logging.module'
 import { MetricsModule } from './infrastructure/metrics/metrics.module'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
 import { ProvisionModule } from './infrastructure/provision/provision.module'
+import { AdminApiModule } from './modules/api/admin-api/admin-api.module'
 import { CurrencyApiModule } from './modules/api/currency-api/currency-api.module'
 import { NotificationsApiModule } from './modules/api/notifications-api/notifications-api.module'
 import { ReferralSystemApiModule } from './modules/api/referral-system-api/referral-system-api.module'
@@ -22,6 +23,7 @@ import { SyncCompletedRoundsModule } from './modules/sync-completed-rounds/sync-
 		ScheduleModule.forRoot(),
 		PrismaModule,
 		ProvisionModule,
+		AdminApiModule,
 		CurrencyApiModule,
 		UsersApiModule,
 		WalletsApiModule,

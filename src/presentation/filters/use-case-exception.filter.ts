@@ -6,6 +6,7 @@ import {
 	HttpStatus,
 } from '@nestjs/common'
 import { Response } from 'express'
+import { AdminWalletNotFoundError } from '../../domain/errors/admin-wallet-not-found.error'
 import { CurrenciesMismatchError } from '../../domain/errors/currencies-mismatch.error'
 import { InsufficientBalanceError } from '../../domain/errors/insufficient-balance.error'
 import { AvailableStakeNotFoundError } from '../../domain/errors/stake-not-found.error'
@@ -23,6 +24,7 @@ const ERROR_STATUS_MAP: Map<ErrorConstructor, HttpStatus> = new Map([
 	[InsufficientBalanceError, HttpStatus.UNPROCESSABLE_ENTITY],
 	[CurrenciesMismatchError, HttpStatus.BAD_REQUEST],
 	[TransactionFailedError, HttpStatus.BAD_GATEWAY],
+	[AdminWalletNotFoundError, HttpStatus.INTERNAL_SERVER_ERROR],
 ])
 
 @Catch()

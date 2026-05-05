@@ -23,6 +23,8 @@ export class PrismaWalletRepository extends WalletRepository {
 				return this.getUserKmsKeyId(address)
 			case 'executor':
 				return this.getExecutorKmsKeyId(address)
+			case 'admin':
+				return this.getAdminKmsKeyId(address)
 		}
 	}
 
@@ -45,6 +47,18 @@ export class PrismaWalletRepository extends WalletRepository {
 
 		if (!record) {
 			throw new Error(`Executor wallet not found for address ${address}`)
+		}
+
+		return toKmsKeyId(record.kmsKeyId)
+	}
+
+	private async getAdminKmsKeyId(address: string): Promise<KmsKeyId> {
+		const record = await this.prisma.adminWallet.findUnique({
+			where: { address },
+		})
+
+		if (!record) {
+			throw new Error(`Admin wallet not found for address ${address}`)
 		}
 
 		return toKmsKeyId(record.kmsKeyId)

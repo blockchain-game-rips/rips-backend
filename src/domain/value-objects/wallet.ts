@@ -13,4 +13,8 @@ export type ExecutorWallet = {
 	kind: 'executor'
 } & WalletBase
 
-export type Wallet = UserWallet | ExecutorWallet
+export type AdminWallet = {
+	kind: 'admin'
+} & WalletBase
+
+export type Wallet = UserWallet | ExecutorWallet | AdminWallet
