@@ -1,3 +1,4 @@
+import { Config } from '../../domain/entities/config'
 import { EvmAddress } from '../../domain/value-objects/evm-address'
 import { ReferrerTier } from '../../domain/value-objects/referral-system'
 import { Transaction } from '../../domain/value-objects/transaction'
@@ -16,6 +17,11 @@ export abstract class RipsAdminService {
 	abstract setDefaultReferralFee(
 		wallet: Wallet,
 		args: { feePercent: number },
+	): Promise<Transaction>
+
+	abstract updateStake(
+		wallet: Wallet,
+		args: { stakeId: number; config: Config },
 	): Promise<Transaction>
 
 	abstract setReferralTiers(

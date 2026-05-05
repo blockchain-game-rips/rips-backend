@@ -10,6 +10,7 @@ import { AdminWalletNotFoundError } from '../../domain/errors/admin-wallet-not-f
 import { CurrenciesMismatchError } from '../../domain/errors/currencies-mismatch.error'
 import { InsufficientBalanceError } from '../../domain/errors/insufficient-balance.error'
 import { AvailableStakeNotFoundError } from '../../domain/errors/stake-not-found.error'
+import { StakeTierCountMismatchError } from '../../domain/errors/stake-tier-count-mismatch.error'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
 import { UserAlreadyExistsError } from '../../domain/errors/user-already-exists.error'
 import { UserNotFoundError } from '../../domain/errors/user-not-found.error'
@@ -25,6 +26,7 @@ const ERROR_STATUS_MAP: Map<ErrorConstructor, HttpStatus> = new Map([
 	[CurrenciesMismatchError, HttpStatus.BAD_REQUEST],
 	[TransactionFailedError, HttpStatus.BAD_GATEWAY],
 	[AdminWalletNotFoundError, HttpStatus.INTERNAL_SERVER_ERROR],
+	[StakeTierCountMismatchError, HttpStatus.BAD_REQUEST],
 ])
 
 @Catch()

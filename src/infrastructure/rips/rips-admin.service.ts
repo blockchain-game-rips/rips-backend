@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { encodeFunctionData, type TransactionRequestEIP1559 } from 'viem'
 import { RipsAdminService } from '../../application/interfaces/rips-admin.service'
+import { Config } from '../../domain/entities/config'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import {
 	EvmAddress,
@@ -56,6 +57,37 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 				abi: ripsAbi,
 				functionName: 'setReferrerFrozen',
 				args: [args.referrer, args.frozen],
+			}),
+		})
+	}
+
+	updateStake(
+		wallet: Wallet,
+		args: { stakeId: number; config: Config },
+	): Promise<Transaction> {
+		const { stakeId, config } = args
+
+		const currencyAddress = toEvmAddress(
+			config.ticketPrice.currency.chainAddress.address,
+		)
+
+		const ticketCost = BigInt(config.ticketPrice.amount)
+
+		return this.sendAdminTransaction(wallet, {
+			data: encodeFunctionData({
+				abi: ripsAbi,
+				functionName: 'updateStake',
+				args: [
+					BigInt(stakeId),
+					{
+						tiers: config.prizeDistribution,
+						currency: currencyAddress,
+						ticketCap: BigInt(config.ticketCup),
+						duration: config.durationSeconds,
+						ticketCost: ticketCost,
+						feePercent: config.feePercent,
+					},
+				],
 			}),
 		})
 	}

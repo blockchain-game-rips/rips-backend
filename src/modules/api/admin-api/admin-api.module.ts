@@ -4,6 +4,7 @@ import { SetDefaultReferralFeeModule } from '../../use-cases/set-default-referra
 import { SetPausedModule } from '../../use-cases/set-paused.module'
 import { SetReferralTiersModule } from '../../use-cases/set-referral-tiers.module'
 import { SetReferrerFrozenModule } from '../../use-cases/set-referrer-frozen.module'
+import { UpdateStakeConfigModule } from '../../use-cases/update-stake-config.module'
 
 @Module({
 	imports: [
@@ -11,6 +12,7 @@ import { SetReferrerFrozenModule } from '../../use-cases/set-referrer-frozen.mod
 		SetReferrerFrozenModule,
 		SetDefaultReferralFeeModule,
 		SetReferralTiersModule,
+		UpdateStakeConfigModule,
 	],
 	controllers: [AdminController],
 })
