@@ -2,9 +2,9 @@ import * as z from 'zod'
 
 export const DetailsSchema = z.object({
 	gasLimit: z.string(),
-	baseFee: z.string(),
-	maxFeePerGas: z.string(),
-	maxPriorityFeePerGas: z.string(),
+	baseFee: z.string().optional(),
+	maxFeePerGas: z.string().optional(),
+	maxPriorityFeePerGas: z.string().optional(),
 })
 export type Details = z.infer<typeof DetailsSchema>
 
@@ -75,7 +75,7 @@ export const CostsDetailSchema = z.object({
 	amountIn: z.string(),
 	amountOut: z.string(),
 	type: z.string(),
-	payload: PayloadSchema,
+	payload: PayloadSchema.optional(),
 })
 export type CostsDetail = z.infer<typeof CostsDetailSchema>
 
