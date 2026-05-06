@@ -77,6 +77,7 @@ export class PrismaRoundSyncRepository extends RoundSyncRepository {
 		const { roundId, userIds } = args
 
 		await this.prisma.$transaction([
+			//TODO: add global notification or delete global refund from tg bot
 			...userIds.map((userId) =>
 				this.prisma.notification.create({
 					data: { userId, roundId, type: NotificationType.REFUNDED },
