@@ -18,29 +18,29 @@ const stakeToTierBiasesProvider: Provider = {
 		ticketPrizeRepository: TicketPrizeRepository,
 	) => {
 		const cardConfig = configService.getOrThrow<CardConfig>(CARD_CONFIG_KEY)
-		const availableStakes = await getAvailableStakesUseCase.execute()
-
-		await Promise.all(
-			availableStakes.map(async (stake) => {
-				const tierBiases =
-					cardConfig.stakesBiases[stake.stake.id.toString()]
-
-				if (tierBiases === undefined)
-					throw new Error(
-						`tier bieases are not found in config for stake id ${stake.stake.id}`,
-					)
-
-				const cardDefinitions =
-					await ticketPrizeRepository.getCardDefinitionsByStake(
-						stake.stake.id,
-					)
-
-				if (tierBiases.length !== cardDefinitions.length)
-					throw new Error(
-						`tier biases count (${tierBiases.length}) mismatch with card definitions count (${cardDefinitions.length}) for stake id ${stake.stake.id}`,
-					)
-			}),
-		)
+		// const availableStakes = await getAvailableStakesUseCase.execute()
+		//
+		// await Promise.all(
+		// 	availableStakes.map(async (stake) => {
+		// 		const tierBiases =
+		// 			cardConfig.stakesBiases[stake.stake.id.toString()]
+		//
+		// 		if (tierBiases === undefined)
+		// 			throw new Error(
+		// 				`tier bieases are not found in config for stake id ${stake.stake.id}`,
+		// 			)
+		//
+		// 		const cardDefinitions =
+		// 			await ticketPrizeRepository.getCardDefinitionsByStake(
+		// 				stake.stake.id,
+		// 			)
+		//
+		// 		if (tierBiases.length !== cardDefinitions.length)
+		// 			throw new Error(
+		// 				`tier biases count (${tierBiases.length}) mismatch with card definitions count (${cardDefinitions.length}) for stake id ${stake.stake.id}`,
+		// 			)
+		// 	}),
+		// )
 
 		return new Map(Object.entries(cardConfig.stakesBiases))
 	},
