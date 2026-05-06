@@ -13,7 +13,9 @@ export class PrismaNotificationRepository extends NotificationRepository {
 	}
 
 	async findAll(): Promise<Notification[]> {
-		const records = await this.prisma.notification.findMany()
+		const records = await this.prisma.notification.findMany({
+			where: { isNotified: false },
+		})
 
 		return Promise.all(records.map((r) => this.resolveNotification(r)))
 	}
