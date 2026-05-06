@@ -12,7 +12,9 @@ COPY src ./src
 COPY prisma ./prisma
 COPY prisma.config.ts ./
 
-RUN npx prisma generate && npx graphql-codegen && yarn build
+RUN npx prisma generate
+RUN npx graphql-codegen
+RUN yarn build
 
 ENV NODE_ENV=production
 
