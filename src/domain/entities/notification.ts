@@ -6,7 +6,7 @@ export enum NotificationType {
 // userId = 0 represents a group broadcast (no specific user)
 export type Notification = {
 	id: bigint
-	userId: bigint
+	userTelegramId: bigint
 	roundId: bigint
 	type: NotificationType
 	createdAt: Date

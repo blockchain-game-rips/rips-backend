@@ -4,7 +4,7 @@ import { Notification } from '../../../domain/entities/notification'
 
 const markNotificationNotifiedResponseSchema = z.object({
 	id: z.string(),
-	userId: z.string(),
+	userTelegramId: z.string(),
 	roundId: z.string(),
 	type: z.string(),
 	createdAt: z.string(),
@@ -20,7 +20,7 @@ export function toMarkNotificationNotifiedResponseDto(
 ): MarkNotificationNotifiedResponseDto {
 	return {
 		id: notification.id.toString(),
-		userId: notification.userId.toString(),
+		userTelegramId: notification.userTelegramId.toString(),
 		roundId: notification.roundId.toString(),
 		type: notification.type,
 		createdAt: notification.createdAt.toISOString(),

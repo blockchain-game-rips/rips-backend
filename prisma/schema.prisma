@@ -8,11 +8,12 @@ datasource db {
 }
 
 model User {
-    id              BigInt     @id @default(autoincrement())
-    telegramId      BigInt     @unique @map("telegram_id")
-    referrerAddress String?    @map("referrer_address")
-    createdAt       DateTime   @default(now()) @map("created_at")
+    id              BigInt         @id @default(autoincrement())
+    telegramId      BigInt         @unique @map("telegram_id")
+    referrerAddress String?        @map("referrer_address")
+    createdAt       DateTime       @default(now()) @map("created_at")
     evmWallet       EvmWallet?
+    notifications   Notification[]
 
     @@map("users")
 }
@@ -86,6 +87,7 @@ model Notification {
     type       NotificationType
     createdAt  DateTime         @default(now()) @map("created_at")
     isNotified Boolean          @default(false) @map("is_notified")
+    user       User             @relation(fields: [userId], references: [id])
 
     @@unique([userId, roundId, type])
     @@map("notifications")

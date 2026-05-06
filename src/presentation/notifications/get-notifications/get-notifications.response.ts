@@ -4,7 +4,7 @@ import { Notification } from '../../../domain/entities/notification'
 
 const notificationSchema = z.object({
 	id: z.string(),
-	userId: z.string(),
+	userTelegramId: z.string(),
 	roundId: z.string(),
 	type: z.string(),
 	createdAt: z.string(),
@@ -25,7 +25,7 @@ export function toGetNotificationsResponseDto(
 	return {
 		notifications: notifications.map((n) => ({
 			id: n.id.toString(),
-			userId: n.userId.toString(),
+			userTelegramId: n.userTelegramId.toString(),
 			roundId: n.roundId.toString(),
 			type: n.type,
 			createdAt: n.createdAt.toISOString(),

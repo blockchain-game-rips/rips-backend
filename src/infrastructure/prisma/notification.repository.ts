@@ -13,7 +13,9 @@ export class PrismaNotificationRepository extends NotificationRepository {
 	}
 
 	async findAll(): Promise<Notification[]> {
-		const records = await this.prisma.notification.findMany()
+		const records = await this.prisma.notification.findMany({
+			include: { user: true },
+		})
 
 		return records.map(toNotification)
 	}
@@ -22,6 +24,7 @@ export class PrismaNotificationRepository extends NotificationRepository {
 		const record = await this.prisma.notification.update({
 			where: { id },
 			data: { isNotified: true },
+			include: { user: true },
 		})
 
 		return toNotification(record)
@@ -30,17 +33,17 @@ export class PrismaNotificationRepository extends NotificationRepository {
 
 type NotificationRecord = {
 	id: bigint
-	userId: bigint
 	roundId: number
 	type: string
 	createdAt: Date
 	isNotified: boolean
+	user: { telegramId: bigint }
 }
 
 function toNotification(record: NotificationRecord): Notification {
 	return {
 		id: record.id,
-		userId: record.userId,
+		userTelegramId: record.user.telegramId,
 		roundId: BigInt(record.roundId),
 		type: NotificationType[record.type as keyof typeof NotificationType],
 		createdAt: record.createdAt,
