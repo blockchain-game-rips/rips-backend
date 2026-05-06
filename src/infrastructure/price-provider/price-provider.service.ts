@@ -1,20 +1,27 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { PriceProvider } from '../../application/interfaces/price-service'
 import { Currency } from '../../domain/entities/currency'
 import { parseCurrencyId } from '../../domain/services/currency-id-utils'
 import { CurrencyId } from '../../domain/value-objects/currency-id'
 import { createCustomError } from '../../utils/common'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
-import { NATIVE_ADDRESS } from '../evm/primitives/currencies/constants'
+import {
+	KNOWN_TOKENS,
+	NATIVE_ADDRESS,
+} from '../evm/primitives/currencies/constants'
 import { chainIdToGeckoChainId } from './constants'
 import { GeckoTerminalService } from './gecko-terminal.service'
 
 const PriceProviderError = createCustomError('PriceProviderError')
 
-const UPDATE_INTERVAL_MS = 1000 * 60 * 5
+const REFRESH_INTERVAL_MS = 1000 * 60
+const PREFETCH_NETWORK_DELAY_MS = 1000 * 10
 
 @Injectable()
-export class PriceProviderService extends PriceProvider {
+export class PriceProviderService
+	extends PriceProvider
+	implements OnModuleInit
+{
 	private priceCache: Map<CurrencyId, number> = new Map()
 	private trackedCurrencies: Map<CurrencyId, Currency> = new Map()
 	private logger = new Logger(PriceProviderService.name)
@@ -24,12 +31,51 @@ export class PriceProviderService extends PriceProvider {
 		readonly geckoTerminalService: GeckoTerminalService,
 	) {
 		super()
+	}
 
-		setInterval(() => {
-			this.refreshTracked().catch((error) =>
-				this.logger.error('Error updating prices:', error),
+	onModuleInit() {
+		this.prefetchKnownTokens().catch((error) =>
+			this.logger.error('Error prefetching known token prices:', error),
+		)
+	}
+
+	private scheduleRefresh() {
+		setTimeout(() => {
+			this.refreshTracked()
+				.catch((error) =>
+					this.logger.error('Error updating prices:', error),
+				)
+				.finally(() => this.scheduleRefresh())
+		}, REFRESH_INTERVAL_MS).unref()
+	}
+
+	private async prefetchKnownTokens(): Promise<void> {
+		const currencies = await Promise.all(
+			Array.from(KNOWN_TOKENS.keys()).map((id) =>
+				this.currencyService.fromId(id),
+			),
+		)
+
+		const byChain = await this.groupByGeckoChain(currencies)
+		const chains = Array.from(byChain.entries())
+
+		for (let i = 0; i < chains.length; i++) {
+			if (i > 0)
+				await new Promise((resolve) =>
+					setTimeout(resolve, PREFETCH_NETWORK_DELAY_MS),
+				)
+
+			const [geckoChainId, chainCurrencies] = chains[i]
+
+			await this.fetchAndCache(chainCurrencies).catch((error) =>
+				this.logger.error(
+					`Error prefetching prices for ${geckoChainId}:`,
+					error,
+				),
 			)
-		}, UPDATE_INTERVAL_MS).unref()
+		}
+
+		this.scheduleRefresh()
 	}
 
 	async getPrice(currency: Currency): Promise<number> {

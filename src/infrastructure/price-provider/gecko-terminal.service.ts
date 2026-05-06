@@ -34,7 +34,6 @@ interface GeckoTerminalChain {
 // docs say that you can retrieve up to 30 addresses in one request
 const BATCH_SIZE = 30
 
-//TODO: handle 429 (maybe prefetch all currencies) and move from axios to ky
 @Injectable()
 export class GeckoTerminalService {
 	private readonly baseUrl: string = 'https://api.geckoterminal.com/api/v2'
