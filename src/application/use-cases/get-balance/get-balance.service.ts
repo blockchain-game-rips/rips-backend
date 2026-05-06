@@ -23,7 +23,7 @@ export class GetBalanceService extends GetBalanceUseCase {
 	execute(input: GetBalanceInput): Promise<CurrencyAmount> {
 		return withCache(
 			this.cacheManager,
-			`balance-${input.telegramId}-${input.currencyChainAddress}`,
+			`balance-${input.telegramId}-${input.currencyChainAddress.chain.namespace}:${input.currencyChainAddress.chain.reference}:${input.currencyChainAddress.address}`,
 			BALANCE_TTL_MS,
 			() => this.fetchBalance(input),
 		)
