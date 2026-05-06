@@ -17,5 +17,5 @@ export function composeCurrencyId(
 	chainId: ChainId,
 	address: string,
 ): CurrencyId {
-	return `${chainId}:${address}`.toLowerCase() as CurrencyId
+	return `${chainId}:${address}`
 }

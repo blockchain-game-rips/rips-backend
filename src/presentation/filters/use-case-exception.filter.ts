@@ -4,6 +4,7 @@ import {
 	ExceptionFilter,
 	HttpException,
 	HttpStatus,
+	Logger,
 } from '@nestjs/common'
 import { Response } from 'express'
 import { AdminWalletNotFoundError } from '../../domain/errors/admin-wallet-not-found.error'
@@ -31,6 +32,8 @@ const ERROR_STATUS_MAP: Map<ErrorConstructor, HttpStatus> = new Map([
 
 @Catch()
 export class UseCaseExceptionFilter implements ExceptionFilter {
+	private readonly logger = new Logger(UseCaseExceptionFilter.name)
+
 	catch(error: unknown, host: ArgumentsHost): void {
 		const ctx = host.switchToHttp()
 		const response = ctx.getResponse<Response>()
@@ -49,6 +52,8 @@ export class UseCaseExceptionFilter implements ExceptionFilter {
 				return
 			}
 		}
+
+		this.logger.error({ err: error }, 'Unhandled exception')
 
 		response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
 			statusCode: HttpStatus.INTERNAL_SERVER_ERROR,

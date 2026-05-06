@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core'
-import { ProvisionModule } from '../src/infrastructure/provision/provision.module'
-import { ProvisionService } from '../src/infrastructure/provision/provision.service'
 import { toEvmAddress } from '../src/domain/value-objects/evm-address'
 import { toKmsKeyId } from '../src/domain/value-objects/kms-key-id'
+import { ProvisionModule } from '../src/infrastructure/provision/provision.module'
+import { ProvisionService } from '../src/infrastructure/provision/provision.service'
 import { getEnvSafe } from '../src/utils/common'
 
 async function main() {
