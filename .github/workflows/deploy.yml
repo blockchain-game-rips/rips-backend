@@ -65,7 +65,7 @@ jobs:
             docker compose pull rips-backend
 
             # Restart containers with the new image, remove orphan containers
-            docker compose up -d --no-deps ripsbackend
+            docker compose up -d --no-deps rips-backend
 
             # Delete old unused images to free up disk space
             docker image prune -f
