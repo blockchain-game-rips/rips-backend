@@ -1,0 +1,71 @@
+name: Deploy
+
+# Trigger on every push to main branch
+on:
+  push:
+    branches: [main]
+
+# Only one deployment runs at a time; a newer push cancels the previous run
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  # Job 1: Build the Docker image and push it to GitHub Container Registry
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # needed to checkout the repo
+      packages: write # needed to push to GHCR
+
+    steps:
+      # Download the repo code into the runner
+      - uses: actions/checkout@v4
+
+      # Log in to GHCR using the auto-provided GitHub token (no extra secrets needed)
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Lowercase the repo path — Docker requires all-lowercase image names
+      - name: Set lowercase image name
+        run: echo "IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      # Build the Docker image from the Dockerfile and push it to GHCR
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
+
+  # Job 2: SSH into the VPS and restart the container with the new image
+  deploy:
+    needs: build-and-push # only runs after the image is successfully pushed
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+
+            # Navigate to the folder where docker-compose.yml lives on the VPS
+            cd /opt/rips
+
+            # Pull the latest image from GHCR
+            docker compose pull rips-backend
+
+            # Restart containers with the new image, remove orphan containers
+            docker compose up -d --no-deps ripsbackend
+
+            # Delete old unused images to free up disk space
+            docker image prune -f
