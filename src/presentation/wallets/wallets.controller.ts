@@ -3,6 +3,7 @@ import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
 import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
 import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
+import { GetSwapResultUseCase } from '../../application/use-cases/get-swap-result/get-swap-result.use-case'
 import { QuoteSwapUseCase } from '../../application/use-cases/quote-swap/quote-swap.use-case'
 import { QuoteWithdrawUseCase } from '../../application/use-cases/quote-withdraw/quote-withdraw.use-case'
 import { SwapUseCase } from '../../application/use-cases/swap/swap.use-case'
@@ -21,6 +22,14 @@ import {
 	GetBalancesResponseDto,
 	toGetBalancesResponseDto,
 } from './get-balances/get-balances.response'
+import { GetSwapResultQueryDto } from './get-swap-result/get-swap-result.request'
+import {
+	cancelledSwapResultDto,
+	GetSwapResultResponseDto,
+	pendingSwapResultDto,
+	toFailedSwapResultDto,
+	toSuccessSwapResultDto,
+} from './get-swap-result/get-swap-result.response'
 import { QuoteSwapBodyDto } from './quote-swap/quote-swap.request'
 import {
 	QuoteSwapResponseDto,
@@ -43,6 +52,7 @@ export class WalletsController {
 		private readonly quoteWithdrawUseCase: QuoteWithdrawUseCase,
 		private readonly quoteSwapUseCase: QuoteSwapUseCase,
 		private readonly swapUseCase: SwapUseCase,
+		private readonly getSwapResultUseCase: GetSwapResultUseCase,
 		private readonly currencyService: CurrencyService,
 	) {}
 
@@ -163,6 +173,34 @@ export class WalletsController {
 		})
 
 		return toSwapResponseDto(pendingZap, prices)
+	}
+
+	@Get('swap-result')
+	@ZodResponse({ type: GetSwapResultResponseDto })
+	async getSwapResult(
+		@Query() query: GetSwapResultQueryDto,
+	): Promise<GetSwapResultResponseDto> {
+		const result = await this.getSwapResultUseCase.execute({
+			zapId: query.zapId,
+		})
+
+		if (result === null) return pendingSwapResultDto
+
+		if (result.status === 'cancelled') return cancelledSwapResultDto
+
+		if (result.status === 'failed') {
+			const refundPrice = await this.getPriceUseCase.execute({
+				currency: result.refund.currency,
+			})
+
+			return toFailedSwapResultDto(refundPrice, result)
+		}
+
+		const amountOutPrice = await this.getPriceUseCase.execute({
+			currency: result.result.amountOut.currency,
+		})
+
+		return toSuccessSwapResultDto(amountOutPrice, result)
 	}
 
 	@Post('quote-withdraw')
