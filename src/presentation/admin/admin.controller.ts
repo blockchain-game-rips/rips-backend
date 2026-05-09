@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common'
+import { ApiHeader } from '@nestjs/swagger'
 import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
 import { GetAdminWalletUseCase } from '../../application/use-cases/get-admin-wallet/get-admin-wallet.use-case'
@@ -12,6 +13,7 @@ import { UpdateStakeConfigUseCase } from '../../application/use-cases/update-sta
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { toTransactionDto } from '../shared/transaction.dto'
 import { AdminApiKeyGuard } from './admin-api-key.guard'
+import { ADMIN_API_KEY_HEADER } from './admin-api-key.header'
 import { SetDefaultReferralFeeBodyDto } from './set-default-referral-fee/set-default-referral-fee.request'
 import { SetPausedBodyDto } from './set-paused/set-paused.request'
 import {
@@ -35,6 +37,7 @@ import { UpdateStakeConfigBodyDto } from './update-stake-config/update-stake-con
 
 @Controller('admin')
 @UseGuards(AdminApiKeyGuard)
+@ApiHeader({ name: ADMIN_API_KEY_HEADER, required: true })
 export class AdminController {
 	constructor(
 		private readonly getAdminWalletUseCase: GetAdminWalletUseCase,

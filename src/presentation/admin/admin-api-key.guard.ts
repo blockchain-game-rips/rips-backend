@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common'
 import { Request } from 'express'
 import { getEnvSafe } from '../../utils/common'
+import { ADMIN_API_KEY_HEADER } from './admin-api-key.header'
 
 @Injectable()
 export class AdminApiKeyGuard implements CanActivate {
@@ -13,7 +14,7 @@ export class AdminApiKeyGuard implements CanActivate {
 
 	canActivate(ctx: ExecutionContext): boolean {
 		const request = ctx.switchToHttp().getRequest<Request>()
-		const key = request.headers['x-admin-api-key']
+		const key = request.headers[ADMIN_API_KEY_HEADER]
 
 		if (key !== this.adminApiKey) {
 			throw new ForbiddenException()
