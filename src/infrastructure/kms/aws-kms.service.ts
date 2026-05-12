@@ -47,7 +47,7 @@ export class AwsKmsService extends KmsService {
 		return { kmsKeyId, evmAddress }
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	 
 	async signTransaction(
 		_kmsKeyId: KmsKeyId,
 		_hash: Hex,

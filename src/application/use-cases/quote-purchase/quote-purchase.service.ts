@@ -21,7 +21,7 @@ export class QuotePurchaseService extends QuotePurchaseUseCase {
 	}
 
 	async execute(input: QuotePurchaseInput): Promise<TransactionQuote> {
-		const { stakeId, ticketCount, paymentCurrencyChainAddress } = input
+		const { stakeId, paymentCurrencyChainAddress } = input
 
 		const [availableStakes, paymentCurrency] = await Promise.all([
 			this.getAvailableStakesUseCase.execute(),
