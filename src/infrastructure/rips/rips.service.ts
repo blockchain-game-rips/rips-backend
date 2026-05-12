@@ -227,46 +227,4 @@ export class RipsServiceIpml implements RipsService {
 			},
 		}
 	}
-
-	async getConfigByRoundId(roundId: number): Promise<Config> {
-		const chainId = this.chainId
-		const client = this.evmClientService.getClient(chainId)
-
-		const round = await client.readContract({
-			address: this.contractAddress,
-			abi: ripsAbi,
-			functionName: 'roundIdToRound',
-			args: [BigInt(roundId)],
-		})
-
-		const [, configId] = round
-
-		const config = await client.readContract({
-			address: this.contractAddress,
-			abi: ripsAbi,
-			functionName: 'configIdToConfig',
-			args: [configId],
-		})
-
-		const [currencyAddress, ticketCap, duration, ticketCost, feePercent] =
-			config
-
-		const currency = await this.evmCurrencyService.fromAddress(
-			currencyAddress,
-			chainId,
-		)
-
-		// TODO: fetch actual prize tiers from contract
-		return {
-			id: Number(configId),
-			ticketCap: Number(ticketCap),
-			feePercent: Number(feePercent),
-			ticketPrice: {
-				currency,
-				amount: ticketCost,
-			},
-			durationSeconds: Number(duration),
-			prizeDistribution: [],
-		}
-	}
 }
