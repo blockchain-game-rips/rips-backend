@@ -9,9 +9,9 @@ import {
 } from 'viem'
 import { EIP155 } from '../../constants'
 import { CurrencyMetadata } from '../../domain/entities/currency'
-import { composeChainId } from '../../domain/services/chain-id-utils'
-import { composeCurrencyId } from '../../domain/services/currency-id-utils'
-import { CurrencyId } from '../../domain/value-objects/currency-id'
+import { composeChainId, parseChainId } from '../../domain/services/chain-id-utils'
+import { composeCurrencyId, parseCurrencyId } from '../../domain/services/currency-id-utils'
+import { CurrencyId, tokenIdSchema } from '../../domain/value-objects/currency-id'
 import { EvmClientService } from './evm-client/evm-client.service'
 import {
 	ETH_METADATA,
@@ -88,25 +88,13 @@ export class EvmCurrencyService {
 	}
 
 	isValidTokenId(id: string): boolean {
-		try {
-			const [chainId, addr] = id.split(':')
-
-			if (!chainId || !addr) {
-				return false
-			}
-
-			if (!isAddress(addr)) {
-				return false
-			}
-
-			if (Number(chainId) <= 0) {
-				return false
-			}
-
-			return true
-		} catch {
+		const result = tokenIdSchema.safeParse(id)
+		if (!result.success) {
 			return false
 		}
+
+		const { address } = parseCurrencyId(result.data)
+		return isAddress(address)
 	}
 
 	async fromId(
@@ -116,9 +104,10 @@ export class EvmCurrencyService {
 			throw new Error('Invalid token id')
 		}
 
-		const [chainId, addr] = id.split(':')
+		const { chainId, address } = parseCurrencyId(id)
+		const { reference } = parseChainId(chainId)
 
-		return this.fromAddress(getAddress(addr), Number(chainId))
+		return this.fromAddress(getAddress(address), Number(reference))
 	}
 
 	/* ======== CHECKERS ======== */
