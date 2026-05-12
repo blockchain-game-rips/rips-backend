@@ -11,7 +11,7 @@ import {
 	TelegramId,
 	toTelegramId,
 } from '../../domain/value-objects/telegram-id'
-import { Prisma } from '../../generated/prisma'
+import { Prisma } from '../../../generated/prisma'
 import { PrismaService } from './prisma.service'
 
 @Injectable()

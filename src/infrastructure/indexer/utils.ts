@@ -6,7 +6,7 @@ import { toEvmAddress } from '../../domain/value-objects/evm-address'
 import {
 	GetCompletedRoundsQuery,
 	RoundStatus as RoundStatusRaw,
-} from '../../generated/graphql/generated'
+} from '../../../generated/graphql/generated'
 
 export type RoundRaw = GetCompletedRoundsQuery['rounds'][number]
 

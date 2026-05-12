@@ -7,7 +7,7 @@ import {
 import { PrismaPg } from '@prisma/adapter-pg'
 import { InjectMetric } from '@willsoto/nestjs-prometheus'
 import { Histogram } from 'prom-client'
-import { PrismaClient } from '../../generated/prisma'
+import { PrismaClient } from '../../../generated/prisma'
 import { getEnvSafe } from '../../utils/common'
 
 type PrismaServiceOptions = {

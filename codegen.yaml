@@ -1,7 +1,7 @@
 schema: ./src/infrastructure/indexer/graphql/schema.graphql
 documents: ./src/infrastructure/indexer/graphql/queries/**/*.graphql
 generates:
-  ./src/generated/graphql/generated.ts:
+  ./generated/graphql/generated.ts:
     config:
       scalars:
         BigInt: string

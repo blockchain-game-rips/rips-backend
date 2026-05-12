@@ -7,7 +7,7 @@ import {
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
 import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
-import { Prisma } from '../../generated/prisma'
+import { Prisma } from '../../../generated/prisma'
 import { PrismaService } from './prisma.service'
 
 @Injectable()
