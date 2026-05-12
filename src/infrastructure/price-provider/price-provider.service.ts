@@ -14,8 +14,8 @@ import { GeckoTerminalService } from './gecko-terminal.service'
 
 const PriceProviderError = createCustomError('PriceProviderError')
 
-const REFRESH_INTERVAL_MS = 1000 * 60
-const PREFETCH_NETWORK_DELAY_MS = 1000 * 10
+const REFRESH_INTERVAL_MS = 1000 * 120
+const PREFETCH_NETWORK_DELAY_MS = 1000 * 12
 
 @Injectable()
 export class PriceProviderService
