@@ -1,6 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectMetric } from '@willsoto/nestjs-prometheus'
 import { Counter, Histogram } from 'prom-client'
+import { KmsKeyResult } from '../../application/interfaces/kms.service'
+import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
+
+export const KmsOperation = {
+	CreateEvmKey: 'createEvmKey',
+	SignTransaction: 'signTransaction',
+} as const
+
+export type KmsOperation = (typeof KmsOperation)[keyof typeof KmsOperation]
 
 @Injectable()
 export class KmsMetricsService {
@@ -14,11 +23,36 @@ export class KmsMetricsService {
 		private readonly operationsTotal: Counter<string>,
 	) {}
 
-	async track<T>(
+	async trackCreate(
 		provider: string,
-		operation: string,
-		keyId: string,
+		fn: () => Promise<KmsKeyResult>,
+	): Promise<KmsKeyResult> {
+		return this.trackOperation(
+			provider,
+			KmsOperation.CreateEvmKey,
+			fn,
+			(result) => result.kmsKeyId,
+		)
+	}
+
+	async trackSign(
+		provider: string,
+		keyId: KmsKeyId,
+		fn: () => Promise<string>,
+	): Promise<string> {
+		return this.trackOperation(
+			provider,
+			KmsOperation.SignTransaction,
+			fn,
+			() => keyId,
+		)
+	}
+
+	private async trackOperation<T>(
+		provider: string,
+		operation: KmsOperation,
 		fn: () => Promise<T>,
+		getKeyId: (result: T) => KmsKeyId,
 	): Promise<T> {
 		const end = this.operationDuration.startTimer({ provider, operation })
 
@@ -34,7 +68,7 @@ export class KmsMetricsService {
 			})
 
 			this.logger.log(
-				{ provider, keyId, operation, durationMs },
+				{ provider, keyId: getKeyId(result), operation, durationMs },
 				'KMS operation succeeded',
 			)
 
@@ -48,10 +82,7 @@ export class KmsMetricsService {
 				outcome: 'failure',
 			})
 
-			this.logger.error(
-				{ provider, keyId, operation },
-				'KMS operation failed',
-			)
+			this.logger.error({ provider, operation }, 'KMS operation failed')
 
 			throw error
 		}
