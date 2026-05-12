@@ -35,7 +35,7 @@ export class PriceProviderService
 
 	onModuleInit() {
 		this.prefetchKnownTokens().catch((error) =>
-			this.logger.error('Error prefetching known token prices:', error),
+			this.logger.error(error, 'Error prefetching known token prices:'),
 		)
 	}
 
@@ -43,7 +43,7 @@ export class PriceProviderService
 		setTimeout(() => {
 			this.refreshTracked()
 				.catch((error) =>
-					this.logger.error('Error updating prices:', error),
+					this.logger.error(error, 'Error updating prices:'),
 				)
 				.finally(() => this.scheduleRefresh())
 		}, REFRESH_INTERVAL_MS).unref()

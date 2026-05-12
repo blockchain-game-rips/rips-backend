@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { LoggerModule } from 'nestjs-pino'
+import { isProd } from '../../constants'
 
 @Module({
 	imports: [
@@ -11,6 +12,7 @@ import { LoggerModule } from 'nestjs-pino'
 					},
 				},
 				timestamp: () => `,"time":"${new Date().toISOString()}"`,
+				transport: isProd ? undefined : { target: 'pino-pretty' },
 			},
 		}),
 	],
