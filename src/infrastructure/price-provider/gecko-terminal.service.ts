@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import axios, { isAxiosError } from 'axios'
+import ky, { HTTPError } from 'ky'
 import { Address } from 'viem'
 import { geckoTerminalChains } from './constants'
 
@@ -31,12 +31,15 @@ interface GeckoTerminalChain {
 		name: string
 	}
 }
+
 // docs say that you can retrieve up to 30 addresses in one request
 const BATCH_SIZE = 30
 
 @Injectable()
 export class GeckoTerminalService {
-	private readonly baseUrl: string = 'https://api.geckoterminal.com/api/v2'
+	private readonly client = ky.create({
+		prefixUrl: 'https://api.geckoterminal.com/api/v2',
+	})
 
 	async getTokenData(
 		address: string,
@@ -44,12 +47,11 @@ export class GeckoTerminalService {
 	): Promise<GeckoTerminalTokenData> {
 		this.validateChain(network)
 
-		const tokenDataUrl = `${this.baseUrl}/networks/${network}/tokens/${address}`
-		const { data } = await axios.get<{ data: GeckoTerminalTokenData }>(
-			tokenDataUrl,
-		)
+		const { data } = await this.client
+			.get(`networks/${network}/tokens/${address}`)
+			.json<{ data: GeckoTerminalTokenData }>()
 
-		return data.data
+		return data
 	}
 
 	async getTokenPrice(address: string, network: string): Promise<number> {
@@ -67,18 +69,15 @@ export class GeckoTerminalService {
 
 		const allTokens: GeckoTerminalTokenData[] = []
 
-		// Process addresses in batches of 30
 		for (let i = 0; i < addresses.length; i += BATCH_SIZE) {
 			const batch = addresses.slice(i, i + BATCH_SIZE)
 			const addressesString = batch.join(',')
 
-			const tokensDataUrl = `${this.baseUrl}/networks/${network}/tokens/multi/${addressesString}`
+			const { data } = await this.client
+				.get(`networks/${network}/tokens/multi/${addressesString}`)
+				.json<{ data: GeckoTerminalTokenData[] }>()
 
-			const { data } = await axios.get<{
-				data: GeckoTerminalTokenData[]
-			}>(tokensDataUrl)
-
-			allTokens.push(...data.data)
+			allTokens.push(...data)
 		}
 
 		return allTokens.map((token) => ({
@@ -99,20 +98,16 @@ export class GeckoTerminalService {
 
 		while (true) {
 			try {
-				const { data } = await axios.get<{
-					data: GeckoTerminalChain[]
-				}>(`/networks`, {
-					baseURL: this.baseUrl,
-					params: {
-						page,
-					},
-				})
-				networks.push(...data.data)
+				const { data } = await this.client
+					.get('networks', { searchParams: { page } })
+					.json<{ data: GeckoTerminalChain[] }>()
+
+				networks.push(...data)
 				page++
 			} catch (error) {
 				if (
-					isAxiosError(error) &&
-					error.response?.status === 404 &&
+					error instanceof HTTPError &&
+					error.response.status === 404 &&
 					page !== 1
 				)
 					break
