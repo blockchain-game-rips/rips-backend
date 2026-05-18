@@ -3,7 +3,7 @@ import { PriceProvider } from '../../application/interfaces/price-service'
 import { Currency } from '../../domain/entities/currency'
 import { parseCurrencyId } from '../../domain/services/currency-id-utils'
 import { CurrencyId } from '../../domain/value-objects/currency-id'
-import { createCustomError } from '../../utils/common'
+import { createCustomError, wait } from '../../utils/common'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import {
 	KNOWN_TOKENS,
@@ -15,7 +15,7 @@ import { GeckoTerminalService } from './gecko-terminal.service'
 const PriceProviderError = createCustomError('PriceProviderError')
 
 const REFRESH_INTERVAL_MS = 1000 * 120
-const PREFETCH_NETWORK_DELAY_MS = 1000 * 12
+const INTER_CHAIN_REQUEST_DELAY_MS = 1000 * 12
 
 @Injectable()
 export class PriceProviderService
@@ -56,24 +56,7 @@ export class PriceProviderService
 			),
 		)
 
-		const byChain = await this.groupByGeckoChain(currencies)
-		const chains = Array.from(byChain.entries())
-
-		for (let i = 0; i < chains.length; i++) {
-			if (i > 0)
-				await new Promise((resolve) =>
-					setTimeout(resolve, PREFETCH_NETWORK_DELAY_MS),
-				)
-
-			const [geckoChainId, chainCurrencies] = chains[i]
-
-			await this.fetchAndCache(chainCurrencies).catch((error) =>
-				this.logger.error(
-					`Error prefetching prices for ${geckoChainId}:`,
-					error,
-				),
-			)
-		}
+		await this.fetchAndCache(currencies)
 
 		this.scheduleRefresh()
 	}
@@ -99,8 +82,12 @@ export class PriceProviderService
 
 	private async fetchAndCache(currencies: Currency[]): Promise<void> {
 		const byChain = await this.groupByGeckoChain(currencies)
+		const chains = Array.from(byChain.entries())
 
-		for (const [geckoChainId, chainCurrencies] of byChain.entries()) {
+		for (let i = 0; i < chains.length; i++) {
+			if (i > 0) await wait(INTER_CHAIN_REQUEST_DELAY_MS)
+
+			const [geckoChainId, chainCurrencies] = chains[i]
 			const lookupIds = await Promise.all(
 				chainCurrencies.map((c) => this.getLookupId(c)),
 			)
@@ -114,9 +101,9 @@ export class PriceProviderService
 					geckoChainId,
 				)
 
-			for (let i = 0; i < chainCurrencies.length; i++) {
-				const currency = chainCurrencies[i]
-				const address = addresses[i]
+			for (let j = 0; j < chainCurrencies.length; j++) {
+				const currency = chainCurrencies[j]
+				const address = addresses[j]
 
 				const found = addressesAndPrices.find(
 					(ap) => ap.address.toLowerCase() === address.toLowerCase(),
