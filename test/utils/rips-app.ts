@@ -25,6 +25,7 @@ import { EVM_CLIENT_CONFIG } from '../../src/infrastructure/evm/evm-client/types
 import { evmAddressFromWallet } from '../../src/infrastructure/evm/helpers'
 import { IndexerModule } from '../../src/infrastructure/indexer/indexer.module'
 import { MnemonicKmsService } from '../../src/infrastructure/kms/mnemonic-kms.service'
+import { WARMUP_CURRENCY_IDS } from '../../src/infrastructure/price-provider/price-provider-warmup.service'
 import { ProvisionService } from '../../src/infrastructure/provision/provision.service'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { RIPS_CONTRACT } from '../../src/infrastructure/rips/rips.constants'
@@ -118,6 +119,8 @@ export function useRipsApp(
 					['2', [1, 1, 1]],
 				]),
 			)
+			.overrideProvider(WARMUP_CURRENCY_IDS)
+			.useValue([])
 
 		if (applyOverrides) {
 			builder = applyOverrides(builder)
