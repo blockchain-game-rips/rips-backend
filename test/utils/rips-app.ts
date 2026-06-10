@@ -42,9 +42,6 @@ import { TestConfigModule } from './test-config.module'
 @Module({})
 class NoopScheduleModule {}
 
-@Module({})
-class NoopConfigModule {}
-
 const KMS_MNEMONIC = ANVIL_MNEMONIC
 const DEPLOYER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
 
