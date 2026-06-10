@@ -1,7 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
-import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
+import { PriceProvider } from '../../application/interfaces/price-service'
 import { GetCurrenciesQueryDto } from './get-currencies/get-currencies.request'
 import {
 	GetCurrenciesResponseDto,
@@ -12,7 +12,7 @@ import {
 export class CurrencyController {
 	constructor(
 		private readonly currencyService: CurrencyService,
-		private readonly getPriceUseCase: GetPriceUseCase,
+		private readonly priceProvider: PriceProvider,
 	) {}
 
 	@Get()
@@ -26,7 +26,7 @@ export class CurrencyController {
 			),
 		)
 
-		const prices = await this.getPriceUseCase.executeMany({ currencies })
+		const prices = await this.priceProvider.getPrices(currencies)
 
 		return toGetCurrenciesResponseDto(
 			currencies.map((currency) => ({

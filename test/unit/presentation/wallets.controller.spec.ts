@@ -12,8 +12,8 @@ import {
 import {
 	makeMockCurrencyService,
 	makeMockGetBalanceUseCase,
-	makeMockGetPriceUseCase,
 	makeMockGetSwapResultUseCase,
+	makeMockPriceProvider,
 	makeMockQuoteSwapUseCase,
 	makeMockQuoteWithdrawUseCase,
 	makeMockSwapUseCase,
@@ -29,10 +29,10 @@ const MOCK_PRICE_USD = 2500
 
 describe('WalletsController', () => {
 	const getBalance = makeMockGetBalanceUseCase()
-	const getPrice = makeMockGetPriceUseCase()
+	const priceProvider = makeMockPriceProvider()
 	const controller = new WalletsController(
 		getBalance,
-		getPrice,
+		priceProvider,
 		makeMockWithdrawUseCase(),
 		makeMockQuoteWithdrawUseCase(),
 		makeMockQuoteSwapUseCase(),
@@ -48,7 +48,7 @@ describe('WalletsController', () => {
 	describe('GET /wallets/balances', () => {
 		it('should return balances response dto', async () => {
 			getBalance.execute.mockResolvedValue(MOCK_BALANCE)
-			getPrice.executeMany.mockResolvedValue(
+			priceProvider.getPrices.mockResolvedValue(
 				new Map([[MOCK_CURRENCY.id, MOCK_PRICE_USD]]),
 			)
 

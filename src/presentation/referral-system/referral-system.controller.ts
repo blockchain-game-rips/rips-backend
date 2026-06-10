@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Headers, Post } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
-import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
+import { PriceProvider } from '../../application/interfaces/price-service'
 import { GetReferrerTierTablesUseCase } from '../../application/use-cases/get-referrer-tier-tables/get-referrer-tier-tables.use-case'
 import { GetReferrerUseCase } from '../../application/use-cases/get-referrer/get-referrer.use-case'
 import { WithdrawRewardUseCase } from '../../application/use-cases/withdraw-reward/withdraw-reward.use-case'
@@ -28,7 +28,7 @@ export class ReferralSystemController {
 		private readonly getReferrerUseCase: GetReferrerUseCase,
 		private readonly getReferrerTierTablesUseCase: GetReferrerTierTablesUseCase,
 		private readonly withdrawRewardUseCase: WithdrawRewardUseCase,
-		private readonly getPriceUseCase: GetPriceUseCase,
+		private readonly priceProvider: PriceProvider,
 	) {}
 
 	@Get('referrers')
@@ -47,9 +47,9 @@ export class ReferralSystemController {
 			]),
 		)
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: Array.from(currencyById.values()),
-		})
+		const prices = await this.priceProvider.getPrices(
+			Array.from(currencyById.values()),
+		)
 
 		return toGetReferrerResponseDto(referrer, prices)
 	}
@@ -63,9 +63,9 @@ export class ReferralSystemController {
 			tierTables.map((t) => [t.currency.id, t.currency]),
 		)
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: Array.from(currencyById.values()),
-		})
+		const prices = await this.priceProvider.getPrices(
+			Array.from(currencyById.values()),
+		)
 
 		return toGetTierTablesResponseDto(tierTables, prices)
 	}
@@ -81,9 +81,9 @@ export class ReferralSystemController {
 			currencyAddress: body.currencyAddress,
 		})
 
-		const priceUsd = await this.getPriceUseCase.execute({
-			currency: reward.amount.currency,
-		})
+		const priceUsd = await this.priceProvider.getPrice(
+			reward.amount.currency,
+		)
 
 		return toWithdrawRewardResponseDto(reward, priceUsd)
 	}

@@ -8,6 +8,7 @@ import {
 	Query,
 } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
+import { PriceProvider } from '../../application/interfaces/price-service'
 import { BuyTicketsPurchaseUseCase } from '../../application/use-cases/buy-tickets-purchase/buy-tickets-purchase.use-case'
 import { BuyTicketsZapUseCase } from '../../application/use-cases/buy-tickets-zap/buy-tickets-zap.use-case'
 import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
@@ -15,7 +16,6 @@ import { GetCardCollectionUseCase } from '../../application/use-cases/get-card-c
 import { GetCardDefinitionsUseCase } from '../../application/use-cases/get-card-definitions/get-card-definitions.use-case'
 import { GetCompletedRoundsUseCase } from '../../application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
 import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
-import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
 import { GetRipsStateUseCase } from '../../application/use-cases/get-rips-state/get-rips-state.use-case'
 import { GetRoundsUseCase } from '../../application/use-cases/get-rounds/get-rounds.use-case'
 import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
@@ -88,7 +88,7 @@ export class RipsController {
 		private readonly getZapResultUseCase: GetZapResultUseCase,
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly getCompletedRoundsUseCase: GetCompletedRoundsUseCase,
-		private readonly getPriceUseCase: GetPriceUseCase,
+		private readonly priceProvider: PriceProvider,
 		private readonly getUnrevealedPrizesUseCase: GetUnrevealedPrizesUseCase,
 		private readonly revealTicketPrizesUseCase: RevealTicketPrizesUseCase,
 		private readonly getRoundsUseCase: GetRoundsUseCase,
@@ -107,7 +107,7 @@ export class RipsController {
 				: s.stake.currentConfig.ticketPrice.currency,
 		)
 
-		const prices = await this.getPriceUseCase.executeMany({ currencies })
+		const prices = await this.priceProvider.getPrices(currencies)
 
 		return {
 			availableStakes: state.availableStakes.map((s, i) =>
@@ -128,7 +128,7 @@ export class RipsController {
 				: s.stake.currentConfig.ticketPrice.currency,
 		)
 
-		const prices = await this.getPriceUseCase.executeMany({ currencies })
+		const prices = await this.priceProvider.getPrices(currencies)
 
 		return {
 			availableStakes: stakes.map((s, i) =>
@@ -164,9 +164,9 @@ export class RipsController {
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: [quote.blockchainFee.currency],
-		})
+		const prices = await this.priceProvider.getPrices([
+			quote.blockchainFee.currency,
+		])
 
 		return toQuotePurchaseResponseDto(quote, prices)
 	}
@@ -184,9 +184,10 @@ export class RipsController {
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: [pendingZap.amountIn.currency, pendingZap.fee.currency],
-		})
+		const prices = await this.priceProvider.getPrices([
+			pendingZap.amountIn.currency,
+			pendingZap.fee.currency,
+		])
 
 		return toBuyTicketsZapResponseDto(
 			pendingZap,
@@ -217,9 +218,9 @@ export class RipsController {
 			],
 		])
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: Array.from(currencyById.values()),
-		})
+		const prices = await this.priceProvider.getPrices(
+			Array.from(currencyById.values()),
+		)
 
 		return toQuoteZapResponseDto(quote, prices)
 	}
@@ -237,9 +238,9 @@ export class RipsController {
 			return toGetZapResultResponseDto(result, 0)
 		}
 
-		const refundPrice = await this.getPriceUseCase.execute({
-			currency: result.refund.currency,
-		})
+		const refundPrice = await this.priceProvider.getPrice(
+			result.refund.currency,
+		)
 
 		return toGetZapResultResponseDto(result, refundPrice)
 	}
@@ -279,9 +280,9 @@ export class RipsController {
 	async getOngoingRounds(): Promise<GetOngoingRoundsResponseDto> {
 		const rounds = await this.getOngoingRoundsUseCase.execute()
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: rounds.map((r) => r.currency),
-		})
+		const prices = await this.priceProvider.getPrices(
+			rounds.map((r) => r.currency),
+		)
 
 		return {
 			rounds: rounds.map((r) =>
@@ -299,9 +300,9 @@ export class RipsController {
 			ids: new Set(query.ids),
 		})
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: result.rounds.map((r) => r.currency),
-		})
+		const prices = await this.priceProvider.getPrices(
+			result.rounds.map((r) => r.currency),
+		)
 
 		return {
 			rounds: result.rounds.map((r) =>
@@ -320,9 +321,9 @@ export class RipsController {
 			cursor: query.cursor,
 		})
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: result.rounds.map((r) => r.currency),
-		})
+		const prices = await this.priceProvider.getPrices(
+			result.rounds.map((r) => r.currency),
+		)
 
 		return {
 			rounds: result.rounds.map((r) =>

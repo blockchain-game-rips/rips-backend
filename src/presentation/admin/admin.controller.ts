@@ -2,8 +2,8 @@ import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common'
 import { ApiHeader } from '@nestjs/swagger'
 import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
+import { PriceProvider } from '../../application/interfaces/price-service'
 import { GetAdminWalletUseCase } from '../../application/use-cases/get-admin-wallet/get-admin-wallet.use-case'
-import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
 import { SetDefaultReferralFeeUseCase } from '../../application/use-cases/set-default-referral-fee/set-default-referral-fee.use-case'
 import { SetPausedUseCase } from '../../application/use-cases/set-paused/set-paused.use-case'
 import { SetReferralTiersUseCase } from '../../application/use-cases/set-referral-tiers/set-referral-tiers.use-case'
@@ -41,7 +41,7 @@ import { UpdateStakeConfigBodyDto } from './update-stake-config/update-stake-con
 export class AdminController {
 	constructor(
 		private readonly getAdminWalletUseCase: GetAdminWalletUseCase,
-		private readonly getPriceUseCase: GetPriceUseCase,
+		private readonly priceProvider: PriceProvider,
 		private readonly setPausedUseCase: SetPausedUseCase,
 		private readonly setReferrerFrozenUseCase: SetReferrerFrozenUseCase,
 		private readonly setDefaultReferralFeeUseCase: SetDefaultReferralFeeUseCase,
@@ -56,9 +56,9 @@ export class AdminController {
 	async getAdminWallet(): Promise<AdminWalletResponseDto> {
 		const result = await this.getAdminWalletUseCase.execute()
 
-		const balancePriceUsd = await this.getPriceUseCase.execute({
-			currency: result.balance.currency,
-		})
+		const balancePriceUsd = await this.priceProvider.getPrice(
+			result.balance.currency,
+		)
 
 		return toAdminWalletResponseDto(result, balancePriceUsd)
 	}

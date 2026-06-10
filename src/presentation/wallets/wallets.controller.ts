@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Headers, Post, Query } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
+import { PriceProvider } from '../../application/interfaces/price-service'
 import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
-import { GetPriceUseCase } from '../../application/use-cases/get-price/get-price.use-case'
 import { GetSwapResultUseCase } from '../../application/use-cases/get-swap-result/get-swap-result.use-case'
 import { QuoteSwapUseCase } from '../../application/use-cases/quote-swap/quote-swap.use-case'
 import { QuoteWithdrawUseCase } from '../../application/use-cases/quote-withdraw/quote-withdraw.use-case'
@@ -47,7 +47,7 @@ import { SwapResponseDto, toSwapResponseDto } from './swap/swap.response'
 export class WalletsController {
 	constructor(
 		private readonly getBalanceUseCase: GetBalanceUseCase,
-		private readonly getPriceUseCase: GetPriceUseCase,
+		private readonly priceProvider: PriceProvider,
 		private readonly withdrawUseCase: WithdrawUseCase,
 		private readonly quoteWithdrawUseCase: QuoteWithdrawUseCase,
 		private readonly quoteSwapUseCase: QuoteSwapUseCase,
@@ -74,9 +74,9 @@ export class WalletsController {
 			),
 		)
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: currencyAmounts.map((ca) => ca.currency),
-		})
+		const prices = await this.priceProvider.getPrices(
+			currencyAmounts.map((ca) => ca.currency),
+		)
 
 		return toGetBalancesResponseDto(
 			currencyAmounts.map((currencyAmount) => ({
@@ -138,9 +138,9 @@ export class WalletsController {
 			],
 		])
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: Array.from(currencyById.values()),
-		})
+		const prices = await this.priceProvider.getPrices(
+			Array.from(currencyById.values()),
+		)
 
 		return toQuoteSwapResponseDto(result, prices)
 	}
@@ -168,9 +168,9 @@ export class WalletsController {
 			[pendingZap.fee.currency.id, pendingZap.fee.currency],
 		])
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: Array.from(currencyById.values()),
-		})
+		const prices = await this.priceProvider.getPrices(
+			Array.from(currencyById.values()),
+		)
 
 		return toSwapResponseDto(pendingZap, prices)
 	}
@@ -189,16 +189,16 @@ export class WalletsController {
 		if (result.status === 'cancelled') return cancelledSwapResultDto
 
 		if (result.status === 'failed') {
-			const refundPrice = await this.getPriceUseCase.execute({
-				currency: result.refund.currency,
-			})
+			const refundPrice = await this.priceProvider.getPrice(
+				result.refund.currency,
+			)
 
 			return toFailedSwapResultDto(refundPrice, result)
 		}
 
-		const amountOutPrice = await this.getPriceUseCase.execute({
-			currency: result.result.amountOut.currency,
-		})
+		const amountOutPrice = await this.priceProvider.getPrice(
+			result.result.amountOut.currency,
+		)
 
 		return toSuccessSwapResultDto(amountOutPrice, result)
 	}
@@ -223,9 +223,9 @@ export class WalletsController {
 			recipientAddress: body.recipientAddress,
 		})
 
-		const prices = await this.getPriceUseCase.executeMany({
-			currencies: [quote.blockchainFee.currency],
-		})
+		const prices = await this.priceProvider.getPrices([
+			quote.blockchainFee.currency,
+		])
 
 		return toQuoteWithdrawResponseDto(quote, prices)
 	}
