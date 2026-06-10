@@ -193,7 +193,7 @@ describe('PriceProviderService', () => {
 
 		expect(currencyService.getWrappedNative).toHaveBeenCalledWith(42161)
 		expect(gecko.getTokenPrices).toHaveBeenCalledWith(
-			['0x82af49447d8a07e3bd95bd0d56f35241523fbab1'],
+			[WETH_ARB.chainAddress.address],
 			'arbitrum',
 		)
 	})
