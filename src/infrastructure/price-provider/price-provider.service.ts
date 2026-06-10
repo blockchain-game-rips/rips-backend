@@ -5,10 +5,7 @@ import { parseCurrencyId } from '../../domain/services/currency-id-utils'
 import { CurrencyId } from '../../domain/value-objects/currency-id'
 import { createCustomError, wait } from '../../utils/common'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
-import {
-	KNOWN_TOKENS,
-	NATIVE_ADDRESS,
-} from '../evm/primitives/currencies/constants'
+import { NATIVE_ADDRESS } from '../evm/primitives/currencies/constants'
 import { chainIdToGeckoChainId } from './constants'
 import { GeckoTerminalService } from './gecko-terminal.service'
 
@@ -34,9 +31,7 @@ export class PriceProviderService
 	}
 
 	onModuleInit() {
-		this.prefetchKnownTokens().catch((error) =>
-			this.logger.error(error, 'Error prefetching known token prices:'),
-		)
+		this.scheduleRefresh()
 	}
 
 	private scheduleRefresh() {
@@ -47,18 +42,6 @@ export class PriceProviderService
 				)
 				.finally(() => this.scheduleRefresh())
 		}, REFRESH_INTERVAL_MS).unref()
-	}
-
-	private async prefetchKnownTokens(): Promise<void> {
-		const currencies = await Promise.all(
-			Array.from(KNOWN_TOKENS.keys()).map((id) =>
-				this.currencyService.fromId(id),
-			),
-		)
-
-		await this.fetchAndCache(currencies)
-
-		this.scheduleRefresh()
 	}
 
 	async getPrice(currency: Currency): Promise<number> {
