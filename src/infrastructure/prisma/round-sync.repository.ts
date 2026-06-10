@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
+import { NotificationType } from '../../../generated/prisma'
 import { RoundSyncRepository } from '../../application/interfaces/repositories/round-sync.repository'
 import { TicketPrize } from '../../domain/value-objects/ticket-prize'
-import { NotificationType } from '../../../generated/prisma'
 import { PrismaService } from './prisma.service'
 
 const GROUP_USER_ID = 0n

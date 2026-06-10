@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { Prisma } from '../../../generated/prisma'
 import { ExecutorRepository } from '../../application/interfaces/repositories/executor.repository'
 import { EIP155 } from '../../constants'
 import { Executor } from '../../domain/entities/executor'
@@ -7,7 +8,6 @@ import {
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
 import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
-import { Prisma } from '../../../generated/prisma'
 import { PrismaService } from './prisma.service'
 
 @Injectable()

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { Prisma } from '../../../generated/prisma'
 import { UserRepository } from '../../application/interfaces/repositories/user.repository'
 import { EIP155 } from '../../constants'
 import { User } from '../../domain/entities/user'
@@ -11,7 +12,6 @@ import {
 	TelegramId,
 	toTelegramId,
 } from '../../domain/value-objects/telegram-id'
-import { Prisma } from '../../../generated/prisma'
 import { PrismaService } from './prisma.service'
 
 @Injectable()

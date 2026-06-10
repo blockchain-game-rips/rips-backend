@@ -47,7 +47,6 @@ export class AwsKmsService extends KmsService {
 		return { kmsKeyId, evmAddress }
 	}
 
-	 
 	async signTransaction(
 		_kmsKeyId: KmsKeyId,
 		_hash: Hex,

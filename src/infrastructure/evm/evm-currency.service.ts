@@ -9,9 +9,18 @@ import {
 } from 'viem'
 import { EIP155 } from '../../constants'
 import { CurrencyMetadata } from '../../domain/entities/currency'
-import { composeChainId, parseChainId } from '../../domain/services/chain-id-utils'
-import { composeCurrencyId, parseCurrencyId } from '../../domain/services/currency-id-utils'
-import { CurrencyId, tokenIdSchema } from '../../domain/value-objects/currency-id'
+import {
+	composeChainId,
+	parseChainId,
+} from '../../domain/services/chain-id-utils'
+import {
+	composeCurrencyId,
+	parseCurrencyId,
+} from '../../domain/services/currency-id-utils'
+import {
+	CurrencyId,
+	tokenIdSchema,
+} from '../../domain/value-objects/currency-id'
 import { EvmClientService } from './evm-client/evm-client.service'
 import {
 	ETH_METADATA,
