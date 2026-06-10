@@ -12,6 +12,7 @@ import { GetUserUseCase } from '../../src/application/use-cases/get-user/get-use
 import { QuoteSwapUseCase } from '../../src/application/use-cases/quote-swap/quote-swap.use-case'
 import { QuoteWithdrawUseCase } from '../../src/application/use-cases/quote-withdraw/quote-withdraw.use-case'
 import { RevealTicketPrizesUseCase } from '../../src/application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
+import { GetSwapResultUseCase } from '../../src/application/use-cases/get-swap-result/get-swap-result.use-case'
 import { SwapUseCase } from '../../src/application/use-cases/swap/swap.use-case'
 import { WithdrawUseCase } from '../../src/application/use-cases/withdraw.ts/withdraw.use-case'
 import { EVM_ADDRESS } from '../fixtures/entities'
@@ -94,6 +95,10 @@ export function makeMockQuoteWithdrawUseCase(): jest.Mocked<QuoteWithdrawUseCase
 }
 
 export function makeMockSwapUseCase(): jest.Mocked<SwapUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockGetSwapResultUseCase(): jest.Mocked<GetSwapResultUseCase> {
 	return { execute: jest.fn() }
 }
 
