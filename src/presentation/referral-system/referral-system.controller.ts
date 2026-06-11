@@ -1,9 +1,16 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common'
+import {
+	Body,
+	Controller,
+	Get,
+	Headers,
+	Post,
+	UseInterceptors,
+} from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
-import { PriceProvider } from '../../application/interfaces/price-service'
 import { GetReferrerTierTablesUseCase } from '../../application/use-cases/get-referrer-tier-tables/get-referrer-tier-tables.use-case'
 import { GetReferrerUseCase } from '../../application/use-cases/get-referrer/get-referrer.use-case'
 import { WithdrawRewardUseCase } from '../../application/use-cases/withdraw-reward/withdraw-reward.use-case'
+import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
 import {
 	TELEGRAM_ID_HEADER,
 	TelegramIdHeaderDto,
@@ -23,12 +30,12 @@ import {
 } from './withdraw-reward/withdraw-reward.response'
 
 @Controller('referral-system')
+@UseInterceptors(PriceEnrichmentInterceptor)
 export class ReferralSystemController {
 	constructor(
 		private readonly getReferrerUseCase: GetReferrerUseCase,
 		private readonly getReferrerTierTablesUseCase: GetReferrerTierTablesUseCase,
 		private readonly withdrawRewardUseCase: WithdrawRewardUseCase,
-		private readonly priceProvider: PriceProvider,
 	) {}
 
 	@Get('referrers')
@@ -40,18 +47,7 @@ export class ReferralSystemController {
 			telegramId: headers[TELEGRAM_ID_HEADER],
 		})
 
-		const currencyById = new Map(
-			referrer.states.map((referrerState) => [
-				referrerState.currency.id,
-				referrerState.currency,
-			]),
-		)
-
-		const prices = await this.priceProvider.getPrices(
-			Array.from(currencyById.values()),
-		)
-
-		return toGetReferrerResponseDto(referrer, prices)
+		return toGetReferrerResponseDto(referrer)
 	}
 
 	@Get('tier-tables')
@@ -59,15 +55,7 @@ export class ReferralSystemController {
 	async getTierTables(): Promise<GetTierTablesResponseDto> {
 		const tierTables = await this.getReferrerTierTablesUseCase.execute()
 
-		const currencyById = new Map(
-			tierTables.map((t) => [t.currency.id, t.currency]),
-		)
-
-		const prices = await this.priceProvider.getPrices(
-			Array.from(currencyById.values()),
-		)
-
-		return toGetTierTablesResponseDto(tierTables, prices)
+		return toGetTierTablesResponseDto(tierTables)
 	}
 
 	@Post('rewards')
@@ -81,10 +69,6 @@ export class ReferralSystemController {
 			currencyAddress: body.currencyAddress,
 		})
 
-		const priceUsd = await this.priceProvider.getPrice(
-			reward.amount.currency,
-		)
-
-		return toWithdrawRewardResponseDto(reward, priceUsd)
+		return toWithdrawRewardResponseDto(reward)
 	}
 }

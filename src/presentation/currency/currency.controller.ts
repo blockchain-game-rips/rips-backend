@@ -1,7 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common'
+import { Controller, Get, Query, UseInterceptors } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
-import { PriceProvider } from '../../application/interfaces/price-service'
+import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
 import { GetCurrenciesQueryDto } from './get-currencies/get-currencies.request'
 import {
 	GetCurrenciesResponseDto,
@@ -9,11 +9,9 @@ import {
 } from './get-currencies/get-currencies.response'
 
 @Controller('currencies')
+@UseInterceptors(PriceEnrichmentInterceptor)
 export class CurrencyController {
-	constructor(
-		private readonly currencyService: CurrencyService,
-		private readonly priceProvider: PriceProvider,
-	) {}
+	constructor(private readonly currencyService: CurrencyService) {}
 
 	@Get()
 	@ZodResponse({ type: GetCurrenciesResponseDto })
@@ -26,13 +24,6 @@ export class CurrencyController {
 			),
 		)
 
-		const prices = await this.priceProvider.getPrices(currencies)
-
-		return toGetCurrenciesResponseDto(
-			currencies.map((currency) => ({
-				currency,
-				priceUsd: prices.get(currency.id) ?? 0,
-			})),
-		)
+		return toGetCurrenciesResponseDto(currencies)
 	}
 }

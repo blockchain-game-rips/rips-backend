@@ -1,13 +1,21 @@
-import { Body, Controller, Get, Headers, Post, Query } from '@nestjs/common'
+import {
+	Body,
+	Controller,
+	Get,
+	Headers,
+	Post,
+	Query,
+	UseInterceptors,
+} from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
-import { PriceProvider } from '../../application/interfaces/price-service'
 import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
 import { GetSwapResultUseCase } from '../../application/use-cases/get-swap-result/get-swap-result.use-case'
 import { QuoteSwapUseCase } from '../../application/use-cases/quote-swap/quote-swap.use-case'
 import { QuoteWithdrawUseCase } from '../../application/use-cases/quote-withdraw/quote-withdraw.use-case'
 import { SwapUseCase } from '../../application/use-cases/swap/swap.use-case'
 import { WithdrawUseCase } from '../../application/use-cases/withdraw.ts/withdraw.use-case'
+import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
 import {
 	TELEGRAM_ID_HEADER,
 	TelegramIdHeaderDto,
@@ -44,10 +52,10 @@ import { SwapBodyDto } from './swap/swap.request'
 import { SwapResponseDto, toSwapResponseDto } from './swap/swap.response'
 
 @Controller('wallets')
+@UseInterceptors(PriceEnrichmentInterceptor)
 export class WalletsController {
 	constructor(
 		private readonly getBalanceUseCase: GetBalanceUseCase,
-		private readonly priceProvider: PriceProvider,
 		private readonly withdrawUseCase: WithdrawUseCase,
 		private readonly quoteWithdrawUseCase: QuoteWithdrawUseCase,
 		private readonly quoteSwapUseCase: QuoteSwapUseCase,
@@ -74,16 +82,7 @@ export class WalletsController {
 			),
 		)
 
-		const prices = await this.priceProvider.getPrices(
-			currencyAmounts.map((ca) => ca.currency),
-		)
-
-		return toGetBalancesResponseDto(
-			currencyAmounts.map((currencyAmount) => ({
-				currencyAmount,
-				priceUsd: prices.get(currencyAmount.currency.id) ?? 0,
-			})),
-		)
+		return toGetBalancesResponseDto(currencyAmounts)
 	}
 
 	@Post('withdrawals')
@@ -129,20 +128,7 @@ export class WalletsController {
 			amountIn: body.amountIn,
 		})
 
-		const currencyById = new Map([
-			[result.amountOut.currency.id, result.amountOut.currency],
-			[result.fee.currency.id, result.fee.currency],
-			[
-				result.transactionQuote.blockchainFee.currency.id,
-				result.transactionQuote.blockchainFee.currency,
-			],
-		])
-
-		const prices = await this.priceProvider.getPrices(
-			Array.from(currencyById.values()),
-		)
-
-		return toQuoteSwapResponseDto(result, prices)
+		return toQuoteSwapResponseDto(result)
 	}
 
 	@Post('swap')
@@ -163,16 +149,7 @@ export class WalletsController {
 			amountIn: body.amountIn,
 		})
 
-		const currencyById = new Map([
-			[pendingZap.amountIn.currency.id, pendingZap.amountIn.currency],
-			[pendingZap.fee.currency.id, pendingZap.fee.currency],
-		])
-
-		const prices = await this.priceProvider.getPrices(
-			Array.from(currencyById.values()),
-		)
-
-		return toSwapResponseDto(pendingZap, prices)
+		return toSwapResponseDto(pendingZap)
 	}
 
 	@Get('swap-result')
@@ -189,18 +166,10 @@ export class WalletsController {
 		if (result.status === 'cancelled') return cancelledSwapResultDto
 
 		if (result.status === 'failed') {
-			const refundPrice = await this.priceProvider.getPrice(
-				result.refund.currency,
-			)
-
-			return toFailedSwapResultDto(refundPrice, result)
+			return toFailedSwapResultDto(result)
 		}
 
-		const amountOutPrice = await this.priceProvider.getPrice(
-			result.result.amountOut.currency,
-		)
-
-		return toSuccessSwapResultDto(amountOutPrice, result)
+		return toSuccessSwapResultDto(result)
 	}
 
 	@Post('quote-withdraw')
@@ -223,10 +192,6 @@ export class WalletsController {
 			recipientAddress: body.recipientAddress,
 		})
 
-		const prices = await this.priceProvider.getPrices([
-			quote.blockchainFee.currency,
-		])
-
-		return toQuoteWithdrawResponseDto(quote, prices)
+		return toQuoteWithdrawResponseDto(quote)
 	}
 }

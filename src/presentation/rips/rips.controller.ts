@@ -6,9 +6,9 @@ import {
 	Patch,
 	Post,
 	Query,
+	UseInterceptors,
 } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
-import { PriceProvider } from '../../application/interfaces/price-service'
 import { BuyTicketsPurchaseUseCase } from '../../application/use-cases/buy-tickets-purchase/buy-tickets-purchase.use-case'
 import { BuyTicketsZapUseCase } from '../../application/use-cases/buy-tickets-zap/buy-tickets-zap.use-case'
 import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
@@ -23,6 +23,7 @@ import { GetZapResultUseCase } from '../../application/use-cases/get-zap-result/
 import { QuotePurchaseUseCase } from '../../application/use-cases/quote-purchase/quote-purchase.use-case'
 import { QuoteZapUseCase } from '../../application/use-cases/quote-zap/quote-zap.use-case'
 import { RevealTicketPrizesUseCase } from '../../application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
+import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
 import {
 	TELEGRAM_ID_HEADER,
 	TelegramIdHeaderDto,
@@ -77,6 +78,7 @@ import { toPrizeDto } from './shared/prize.dto'
 import { toRoundDto } from './shared/round.dto'
 
 @Controller('rips')
+@UseInterceptors(PriceEnrichmentInterceptor)
 export class RipsController {
 	constructor(
 		private readonly getRipsStateUseCase: GetRipsStateUseCase,
@@ -88,7 +90,6 @@ export class RipsController {
 		private readonly getZapResultUseCase: GetZapResultUseCase,
 		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
 		private readonly getCompletedRoundsUseCase: GetCompletedRoundsUseCase,
-		private readonly priceProvider: PriceProvider,
 		private readonly getUnrevealedPrizesUseCase: GetUnrevealedPrizesUseCase,
 		private readonly revealTicketPrizesUseCase: RevealTicketPrizesUseCase,
 		private readonly getRoundsUseCase: GetRoundsUseCase,
@@ -101,18 +102,8 @@ export class RipsController {
 	async getRipsState(): Promise<GetRipsStateResponseDto> {
 		const state = await this.getRipsStateUseCase.execute()
 
-		const currencies = state.availableStakes.map((s) =>
-			s.fillingRound !== null
-				? s.fillingRound.currency
-				: s.stake.currentConfig.ticketPrice.currency,
-		)
-
-		const prices = await this.priceProvider.getPrices(currencies)
-
 		return {
-			availableStakes: state.availableStakes.map((s, i) =>
-				toAvailableStakeDto(s, prices.get(currencies[i].id) ?? 0),
-			),
+			availableStakes: state.availableStakes.map(toAvailableStakeDto),
 			isPaused: state.isPaused,
 		}
 	}
@@ -122,18 +113,8 @@ export class RipsController {
 	async getStakes(): Promise<GetStakesResponseDto> {
 		const stakes = await this.getAvailableStakesUseCase.execute()
 
-		const currencies = stakes.map((s) =>
-			s.fillingRound !== null
-				? s.fillingRound.currency
-				: s.stake.currentConfig.ticketPrice.currency,
-		)
-
-		const prices = await this.priceProvider.getPrices(currencies)
-
 		return {
-			availableStakes: stakes.map((s, i) =>
-				toAvailableStakeDto(s, prices.get(currencies[i].id) ?? 0),
-			),
+			availableStakes: stakes.map(toAvailableStakeDto),
 		}
 	}
 
@@ -164,11 +145,7 @@ export class RipsController {
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		const prices = await this.priceProvider.getPrices([
-			quote.blockchainFee.currency,
-		])
-
-		return toQuotePurchaseResponseDto(quote, prices)
+		return toQuotePurchaseResponseDto(quote)
 	}
 
 	@Post('tickets/zap')
@@ -184,16 +161,7 @@ export class RipsController {
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		const prices = await this.priceProvider.getPrices([
-			pendingZap.amountIn.currency,
-			pendingZap.fee.currency,
-		])
-
-		return toBuyTicketsZapResponseDto(
-			pendingZap,
-			prices.get(pendingZap.amountIn.currency.id) ?? 0,
-			prices.get(pendingZap.fee.currency.id) ?? 0,
-		)
+		return toBuyTicketsZapResponseDto(pendingZap)
 	}
 
 	@Post('tickets/quote-zap')
@@ -209,20 +177,7 @@ export class RipsController {
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		const currencyById = new Map([
-			[quote.amountIn.currency.id, quote.amountIn.currency],
-			[quote.fee.currency.id, quote.fee.currency],
-			[
-				quote.transactionQuote.blockchainFee.currency.id,
-				quote.transactionQuote.blockchainFee.currency,
-			],
-		])
-
-		const prices = await this.priceProvider.getPrices(
-			Array.from(currencyById.values()),
-		)
-
-		return toQuoteZapResponseDto(quote, prices)
+		return toQuoteZapResponseDto(quote)
 	}
 
 	@Get('tickets/zap-result')
@@ -234,15 +189,7 @@ export class RipsController {
 			zapId: query.zapId,
 		})
 
-		if (result === null || result.status !== 'failed') {
-			return toGetZapResultResponseDto(result, 0)
-		}
-
-		const refundPrice = await this.priceProvider.getPrice(
-			result.refund.currency,
-		)
-
-		return toGetZapResultResponseDto(result, refundPrice)
+		return toGetZapResultResponseDto(result)
 	}
 
 	@Get('prizes')
@@ -280,14 +227,8 @@ export class RipsController {
 	async getOngoingRounds(): Promise<GetOngoingRoundsResponseDto> {
 		const rounds = await this.getOngoingRoundsUseCase.execute()
 
-		const prices = await this.priceProvider.getPrices(
-			rounds.map((r) => r.currency),
-		)
-
 		return {
-			rounds: rounds.map((r) =>
-				toRoundDto(r, prices.get(r.currency.id) ?? 0),
-			),
+			rounds: rounds.map(toRoundDto),
 		}
 	}
 
@@ -300,14 +241,8 @@ export class RipsController {
 			ids: new Set(query.ids),
 		})
 
-		const prices = await this.priceProvider.getPrices(
-			result.rounds.map((r) => r.currency),
-		)
-
 		return {
-			rounds: result.rounds.map((r) =>
-				toRoundDto(r, prices.get(r.currency.id) ?? 0),
-			),
+			rounds: result.rounds.map(toRoundDto),
 		}
 	}
 
@@ -321,14 +256,8 @@ export class RipsController {
 			cursor: query.cursor,
 		})
 
-		const prices = await this.priceProvider.getPrices(
-			result.rounds.map((r) => r.currency),
-		)
-
 		return {
-			rounds: result.rounds.map((r) =>
-				toRoundDto(r, prices.get(r.currency.id) ?? 0),
-			),
+			rounds: result.rounds.map(toRoundDto),
 			nextCursor: result.nextCursor,
 		}
 	}

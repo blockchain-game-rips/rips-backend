@@ -1,6 +1,5 @@
 import { CurrencyService } from '../../src/application/interfaces/currency.service'
 import { KmsService } from '../../src/application/interfaces/kms.service'
-import { PriceProvider } from '../../src/application/interfaces/price-service'
 import { UserRepository } from '../../src/application/interfaces/repositories/user.repository'
 import { WalletService } from '../../src/application/interfaces/wallet.service'
 import { BuyTicketsPurchaseUseCase } from '../../src/application/use-cases/buy-tickets-purchase/buy-tickets-purchase.use-case'
@@ -60,10 +59,6 @@ export function makeMockSetReferrerUseCase(): jest.Mocked<GetUserUseCase> {
 
 export function makeMockGetBalanceUseCase(): jest.Mocked<GetBalanceUseCase> {
 	return { execute: jest.fn() }
-}
-
-export function makeMockPriceProvider(): jest.Mocked<PriceProvider> {
-	return { getPrice: jest.fn(), getPrices: jest.fn() }
 }
 
 export function makeMockRevealTicketPrizesUseCase(): jest.Mocked<RevealTicketPrizesUseCase> {
