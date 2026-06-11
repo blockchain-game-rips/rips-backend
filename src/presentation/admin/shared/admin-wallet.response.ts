@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { GetAdminWalletResult } from '../../../application/use-cases/get-admin-wallet/get-admin-wallet.use-case'
 import {
 	CurrencyAmountDto,
-	toCurrencyAmountDto,
+	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
 
 const adminWalletSchema = z.object({
@@ -22,10 +22,9 @@ export class AdminWalletResponseDto extends createZodDto(
 
 export function toAdminWalletResponseDto(
 	result: GetAdminWalletResult,
-	balancePriceUsd: number,
 ): AdminWalletResponseDto {
 	return {
 		wallet: result.wallet,
-		balance: toCurrencyAmountDto(result.balance, balancePriceUsd),
+		balance: toPricedCurrencyAmountDto(result.balance),
 	}
 }

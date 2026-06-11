@@ -1,8 +1,8 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
 import { Referrer } from '../../../domain/entities/referrer'
-import { CurrencyId } from '../../../domain/value-objects/currency-id'
-import { CurrencyDto, toCurrencyDto } from '../../shared/currency.dto'
+import { CurrencyDto } from '../../shared/currency.dto'
+import { PricedCurrency } from '../../shared/pricing/priced-currency'
 
 const referrerStateSchema = z.object({
 	currency: CurrencyDto.schema,
@@ -28,15 +28,11 @@ export class GetReferrerResponseDto extends createZodDto(
 
 export function toGetReferrerResponseDto(
 	data: Referrer,
-	prices: Map<CurrencyId, number>,
 ): GetReferrerResponseDto {
 	return {
 		referrer: data.address,
 		states: data.states.map((state) => ({
-			currency: toCurrencyDto(
-				state.currency,
-				prices.get(state.currency.id) ?? 0,
-			),
+			currency: new PricedCurrency(state.currency),
 			fee: state.fee,
 			period: {
 				startTime:

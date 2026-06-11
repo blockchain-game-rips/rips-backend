@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { CurrencyAmount } from '../../../domain/value-objects/currency-amount'
 import {
 	CurrencyAmountDto,
-	toCurrencyAmountDto,
+	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
 
 const getBalancesResponseSchema = z.object({
@@ -15,11 +15,9 @@ export class GetBalancesResponseDto extends createZodDto(
 ) {}
 
 export function toGetBalancesResponseDto(
-	balances: { currencyAmount: CurrencyAmount; priceUsd: number }[],
+	balances: CurrencyAmount[],
 ): GetBalancesResponseDto {
 	return {
-		balances: balances.map(({ currencyAmount, priceUsd }) =>
-			toCurrencyAmountDto(currencyAmount, priceUsd),
-		),
+		balances: balances.map(toPricedCurrencyAmountDto),
 	}
 }

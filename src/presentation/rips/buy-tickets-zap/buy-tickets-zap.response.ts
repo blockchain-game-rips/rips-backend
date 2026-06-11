@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { PendingZap } from '../../../domain/value-objects/zap'
 import {
 	CurrencyAmountDto,
-	toCurrencyAmountDto,
+	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
 import { toTransactionDto, TransactionDto } from '../../shared/transaction.dto'
 
@@ -21,14 +21,12 @@ export class BuyTicketsZapResponseDto extends createZodDto(
 
 export function toBuyTicketsZapResponseDto(
 	pendingZap: PendingZap,
-	amountInPriceUsd: number,
-	feePriceUsd: number,
 ): BuyTicketsZapResponseDto {
 	return {
 		zapId: pendingZap.zapId,
 		srcTransaction: toTransactionDto(pendingZap.srcTransaction),
-		amountIn: toCurrencyAmountDto(pendingZap.amountIn, amountInPriceUsd),
-		fee: toCurrencyAmountDto(pendingZap.fee, feePriceUsd),
+		amountIn: toPricedCurrencyAmountDto(pendingZap.amountIn),
+		fee: toPricedCurrencyAmountDto(pendingZap.fee),
 		durationMs: pendingZap.durationMs,
 	}
 }

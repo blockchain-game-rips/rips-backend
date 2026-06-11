@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { ZapBuyResult } from '../../../domain/value-objects/zap'
 import {
 	CurrencyAmountDto,
-	toCurrencyAmountDto,
+	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
 import { toTransactionDto, TransactionDto } from '../../shared/transaction.dto'
 
@@ -26,7 +26,6 @@ export class GetZapResultResponseDto extends createZodDto(
 
 export function toGetZapResultResponseDto(
 	result: ZapBuyResult | null,
-	refundPriceUsd: number,
 ): GetZapResultResponseDto {
 	const base = { pending: null, cancelled: null, failed: null, success: null }
 
@@ -42,7 +41,7 @@ export function toGetZapResultResponseDto(
 		return {
 			...base,
 			failed: {
-				refund: toCurrencyAmountDto(result.refund, refundPriceUsd),
+				refund: toPricedCurrencyAmountDto(result.refund),
 			},
 		}
 	}

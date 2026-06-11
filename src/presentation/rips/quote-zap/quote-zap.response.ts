@@ -1,10 +1,9 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { CurrencyId } from '../../../domain/value-objects/currency-id'
 import { ZapQuoteBuyResult } from '../../../domain/value-objects/zap'
 import {
 	CurrencyAmountDto,
-	toCurrencyAmountDto,
+	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
 
 const quoteZapResponseSchema = z.object({
@@ -18,21 +17,13 @@ export class QuoteZapResponseDto extends createZodDto(quoteZapResponseSchema) {}
 
 export function toQuoteZapResponseDto(
 	quote: ZapQuoteBuyResult,
-	prices: Map<CurrencyId, number>,
 ): QuoteZapResponseDto {
 	return {
-		amountIn: toCurrencyAmountDto(
-			quote.amountIn,
-			prices.get(quote.amountIn.currency.id) ?? 0,
-		),
+		amountIn: toPricedCurrencyAmountDto(quote.amountIn),
 		durationMs: quote.durationMs,
-		fee: toCurrencyAmountDto(
-			quote.fee,
-			prices.get(quote.fee.currency.id) ?? 0,
-		),
-		blockchainFee: toCurrencyAmountDto(
+		fee: toPricedCurrencyAmountDto(quote.fee),
+		blockchainFee: toPricedCurrencyAmountDto(
 			quote.transactionQuote.blockchainFee,
-			prices.get(quote.transactionQuote.blockchainFee.currency.id) ?? 0,
 		),
 	}
 }

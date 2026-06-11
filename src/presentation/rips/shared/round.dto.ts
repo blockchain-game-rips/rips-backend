@@ -1,7 +1,8 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
 import { Round, RoundStatus } from '../../../domain/entities/round'
-import { CurrencyDto, toCurrencyDto } from '../../shared/currency.dto'
+import { CurrencyDto } from '../../shared/currency.dto'
+import { PricedCurrency } from '../../shared/pricing/priced-currency'
 import { configSchema, toConfigDto } from './config.dto'
 
 const purchaseActionSchema = z.object({
@@ -64,12 +65,12 @@ function toActionsDto(
 	}
 }
 
-export function toRoundDto(round: Round, priceUsd: number): RoundDto {
+export function toRoundDto(round: Round): RoundDto {
 	return {
 		id: round.id,
 		stakeId: round.stake.id,
-		currency: toCurrencyDto(round.currency, priceUsd),
-		config: toConfigDto(round.config, priceUsd),
+		currency: new PricedCurrency(round.currency),
+		config: toConfigDto(round.config),
 		actions: toActionsDto(round.actions),
 		status: round.status,
 		startTime: round.startTime.toISOString(),

@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { Reward } from '../../../domain/value-objects/reward'
 import {
 	CurrencyAmountDto,
-	toCurrencyAmountDto,
+	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
 import { TransactionDto, toTransactionDto } from '../../shared/transaction.dto'
 
@@ -18,10 +18,9 @@ export class WithdrawRewardResponseDto extends createZodDto(
 
 export function toWithdrawRewardResponseDto(
 	reward: Reward,
-	priceUsd: number,
 ): WithdrawRewardResponseDto {
 	return {
 		transaction: toTransactionDto(reward.transaction),
-		amount: toCurrencyAmountDto(reward.amount, priceUsd),
+		amount: toPricedCurrencyAmountDto(reward.amount),
 	}
 }

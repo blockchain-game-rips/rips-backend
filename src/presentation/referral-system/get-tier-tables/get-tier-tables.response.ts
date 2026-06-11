@@ -1,8 +1,8 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { CurrencyId } from '../../../domain/value-objects/currency-id'
 import { ReferrerTierTable } from '../../../domain/value-objects/referral-system'
-import { CurrencyDto, toCurrencyDto } from '../../shared/currency.dto'
+import { CurrencyDto } from '../../shared/currency.dto'
+import { PricedCurrency } from '../../shared/pricing/priced-currency'
 
 const referrerTierSchema = z.object({
 	minVolume: z.string(),
@@ -25,14 +25,10 @@ export class GetTierTablesResponseDto extends createZodDto(
 
 export function toGetTierTablesResponseDto(
 	tierTables: ReferrerTierTable[],
-	prices: Map<CurrencyId, number>,
 ): GetTierTablesResponseDto {
 	return {
 		tierTables: tierTables.map((table) => ({
-			currency: toCurrencyDto(
-				table.currency,
-				prices.get(table.currency.id) ?? 0,
-			),
+			currency: new PricedCurrency(table.currency),
 			defaultFeePercent: table.defaultFeePercent,
 			tiers: table.tiers.map((tier) => ({
 				minVolume: tier.minVolume.toString(),

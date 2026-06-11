@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { ZapSwapResult } from '../../../domain/value-objects/zap'
 import {
 	CurrencyAmountDto,
-	toCurrencyAmountDto,
+	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
 import { toTransactionDto, TransactionDto } from '../../shared/transaction.dto'
 
@@ -36,29 +36,24 @@ export const cancelledSwapResultDto: GetSwapResultResponseDto = {
 }
 
 export function toFailedSwapResultDto(
-	refundPriceUsd: number,
 	refund: ZapSwapResult & { status: 'failed' },
 ): GetSwapResultResponseDto {
 	return {
 		...base,
 		failed: {
-			refund: toCurrencyAmountDto(refund.refund, refundPriceUsd),
+			refund: toPricedCurrencyAmountDto(refund.refund),
 		},
 	}
 }
 
 export function toSuccessSwapResultDto(
-	amountOutPriceUsd: number,
 	result: ZapSwapResult & { status: 'success' },
 ): GetSwapResultResponseDto {
 	return {
 		...base,
 		success: {
 			dstTransaction: toTransactionDto(result.dstTransaction),
-			amountOut: toCurrencyAmountDto(
-				result.result.amountOut,
-				amountOutPriceUsd,
-			),
+			amountOut: toPricedCurrencyAmountDto(result.result.amountOut),
 		},
 	}
 }

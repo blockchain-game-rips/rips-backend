@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { Config } from '../../../domain/entities/config'
 import {
 	CurrencyAmountDto,
-	toCurrencyAmountDto,
+	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
 
 export const prizeTierSchema = z.object({
@@ -22,14 +22,11 @@ export const configSchema = z.object({
 
 export class ConfigDto extends createZodDto(configSchema) {}
 
-export function toConfigDto(
-	config: Config,
-	ticketPriceInUsd: number,
-): ConfigDto {
+export function toConfigDto(config: Config): ConfigDto {
 	return {
 		ticketCap: config.ticketCap,
 		feePercent: config.feePercent,
-		ticketPrice: toCurrencyAmountDto(config.ticketPrice, ticketPriceInUsd),
+		ticketPrice: toPricedCurrencyAmountDto(config.ticketPrice),
 		durationSeconds: config.durationSeconds,
 		prizeDistribution: config.prizeDistribution.map((tier) => ({
 			prizeCount: tier.prizeCount.toString(),
