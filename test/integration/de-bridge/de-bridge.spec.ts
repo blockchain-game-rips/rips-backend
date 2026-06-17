@@ -1,4 +1,4 @@
-import { Test } from '@nestjs/testing'
+import { Test, TestingModule } from '@nestjs/testing'
 import {
 	Chain,
 	createPublicClient,
@@ -36,7 +36,10 @@ import { Token } from '../../../src/infrastructure/evm/primitives/currencies/tok
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
 import { RIPS_CONTRACT } from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
-import { ANVIL_ACCOUNT_1_PRIVATE_KEY } from '../../fixtures/anvil-accounts'
+import {
+	ANVIL_ACCOUNT_1_PRIVATE_KEY,
+	ANVIL_ACCOUNT_2_PRIVATE_KEY,
+} from '../../fixtures/anvil-accounts'
 import { ANVIL_STATE_PATH, deployments } from '../../fixtures/state'
 import {
 	createMockDeBridgeApiService,
@@ -48,12 +51,12 @@ import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
 const ARBITRUM_CHAIN_ID = 42161
 const BASE_CHAIN_ID = 8453
 
-const USER_PRIVATE_KEY = ANVIL_ACCOUNT_1_PRIVATE_KEY
-
 const USDC_ARBITRUM_ADDRESS = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
+const USDC_BASE_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
 const USDC_DECIMALS = 6
-const USDC_AMOUNT = parseUnits('20000', USDC_DECIMALS)
-const ETH_AMOUNT = parseEther('0.01')
+
+const INITIAL_USDC_BALANCE = parseUnits('20000', USDC_DECIMALS)
+const INITIAL_ETH_BALANCE = parseEther('0.01')
 
 const ripsContractAddress = getAddress(deployments.rips)
 
@@ -76,6 +79,12 @@ const USDC_ARBITRUM = new Token(USDC_ARBITRUM_ADDRESS, ARBITRUM_CHAIN_ID, {
 	decimals: USDC_DECIMALS,
 })
 
+const USDC_BASE = new Token(USDC_BASE_ADDRESS, BASE_CHAIN_ID, {
+	symbol: 'USDC',
+	name: 'USD Coin',
+	decimals: USDC_DECIMALS,
+})
+
 const MOCK_CONFIG: Config = {
 	id: 1,
 	ticketCap: 8,
@@ -88,13 +97,63 @@ const MOCK_CONFIG: Config = {
 	prizeDistribution: [],
 }
 
-const USDC_BASE_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+const userAccount = privateKeyToAccount(ANVIL_ACCOUNT_1_PRIVATE_KEY)
+const receiverAccount = privateKeyToAccount(ANVIL_ACCOUNT_2_PRIVATE_KEY)
 
-const USDC_BASE = new Token(USDC_BASE_ADDRESS, BASE_CHAIN_ID, {
-	symbol: 'USDC',
-	name: 'USD Coin',
-	decimals: USDC_DECIMALS,
-})
+const userWallet: UserWallet = {
+	kind: 'user',
+	namespaceToAddress: { [EIP155]: userAccount.address },
+}
+
+const mockSignService: Pick<SignService, 'signTx'> = {
+	signTx: async (_wallet, tx: TransactionSerializableEIP1559) => {
+		const serializedUnsigned = serializeTransaction(tx)
+		const hash = keccak256(serializedUnsigned)
+		const signatureHex = await userAccount.sign({ hash })
+		const signature = parseSignature(signatureHex)
+		return serializeTransaction(tx, signature)
+	},
+}
+
+function toBaseChainAddress(address: `0x${string}`): ChainAddress {
+	return {
+		address,
+		chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
+	}
+}
+
+function assertNativeFeeOnChain(fee: CurrencyAmount, chainId: number): void {
+	expect(fee.amount).toBeGreaterThan(0n)
+	expect(fee.currency.chainAddress.address).toBe(zeroAddress)
+	expect(fee.currency.chainAddress.chain.reference).toBe(String(chainId))
+}
+
+async function buildTestModule(
+	rpcSettings: Record<
+		number,
+		{ rpcUrls: string[]; disableDefaultRpcUrl: boolean }
+	>,
+	extraProviders: { token: unknown; value: unknown }[] = [],
+): Promise<TestingModule> {
+	let builder = Test.createTestingModule({
+		imports: [DeBridgeModule],
+	})
+		.overrideProvider(RIPS_CONTRACT)
+		.useValue({
+			chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
+			address: ripsContractAddress,
+		})
+		.overrideProvider(EVM_CLIENT_CONFIG)
+		.useValue({ rpcSettings })
+		.overrideProvider(SignService)
+		.useValue(mockSignService)
+
+	for (const { token, value } of extraProviders) {
+		builder = builder.overrideProvider(token).useValue(value)
+	}
+
+	return builder.compile()
+}
 
 describe('DeBridge integration', () => {
 	const { anvils } = useAnvil([
@@ -110,23 +169,6 @@ describe('DeBridge integration', () => {
 	])
 
 	describe('buy tickets with USDC on Arbitrum', () => {
-		const userAccount = privateKeyToAccount(USER_PRIVATE_KEY)
-
-		const userWallet: UserWallet = {
-			kind: 'user',
-			namespaceToAddress: { [EIP155]: userAccount.address },
-		}
-
-		const mockSignService: Pick<SignService, 'signTx'> = {
-			signTx: async (_wallet, tx: TransactionSerializableEIP1559) => {
-				const serializedUnsigned = serializeTransaction(tx)
-				const hash = keccak256(serializedUnsigned)
-				const signatureHex = await userAccount.sign({ hash })
-				const signature = parseSignature(signatureHex)
-				return serializeTransaction(tx, signature)
-			},
-		}
-
 		let zapService: ZapService
 		let mockDeBridgeApiService: DeBridgeApiService
 		let arbitrumClient: PublicClient<HttpTransport, Chain>
@@ -149,13 +191,13 @@ describe('DeBridge integration', () => {
 				setTokenBalance(
 					userAccount.address,
 					USDC_ARBITRUM_ADDRESS,
-					USDC_AMOUNT,
+					INITIAL_USDC_BALANCE,
 					arbitrumClient,
 				),
 				setNativeBalance(
 					arbitrumClient,
 					userAccount.address,
-					ETH_AMOUNT,
+					INITIAL_ETH_BALANCE,
 				),
 			])
 
@@ -164,35 +206,19 @@ describe('DeBridge integration', () => {
 
 			mockDeBridgeApiService = createMockDeBridgeApiService()
 
-			const moduleRef = await Test.createTestingModule({
-				imports: [DeBridgeModule],
-			})
-				.overrideProvider(RIPS_CONTRACT)
-				.useValue({
-					chain: {
-						namespace: EIP155,
-						reference: String(BASE_CHAIN_ID),
+			const moduleRef = await buildTestModule(
+				{
+					[ARBITRUM_CHAIN_ID]: {
+						rpcUrls: [arbitrumRpcUrl],
+						disableDefaultRpcUrl: true,
 					},
-					address: ripsContractAddress,
-				})
-				.overrideProvider(EVM_CLIENT_CONFIG)
-				.useValue({
-					rpcSettings: {
-						[ARBITRUM_CHAIN_ID]: {
-							rpcUrls: [arbitrumRpcUrl],
-							disableDefaultRpcUrl: true,
-						},
-						[BASE_CHAIN_ID]: {
-							rpcUrls: [baseRpcUrl],
-							disableDefaultRpcUrl: true,
-						},
+					[BASE_CHAIN_ID]: {
+						rpcUrls: [baseRpcUrl],
+						disableDefaultRpcUrl: true,
 					},
-				})
-				.overrideProvider(SignService)
-				.useValue(mockSignService)
-				.overrideProvider(DeBridgeApiService)
-				.useValue(mockDeBridgeApiService)
-				.compile()
+				},
+				[{ token: DeBridgeApiService, value: mockDeBridgeApiService }],
+			)
 
 			zapService = moduleRef.get(ZapService)
 		})
@@ -329,15 +355,7 @@ describe('DeBridge integration', () => {
 		})
 
 		it('swaps USDC on Arbitrum to ETH on Base', async () => {
-			// Anvil account #2 — distinct from user and solver
-			const receiverAccount = privateKeyToAccount(
-				'0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
-			)
-
-			const recipient: ChainAddress = {
-				address: receiverAccount.address,
-				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
-			}
+			const recipient = toBaseChainAddress(receiverAccount.address)
 
 			const receiverBalanceBefore = await baseClient.getBalance({
 				address: receiverAccount.address,
@@ -401,10 +419,7 @@ describe('DeBridge integration', () => {
 		})
 
 		it('quoteSwap returns amountOut, durationMs and fee in native currency', async () => {
-			const recipient: ChainAddress = {
-				address: userAccount.address,
-				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
-			}
+			const recipient = toBaseChainAddress(userAccount.address)
 
 			const result = await zapService.quoteSwap(userWallet, {
 				currencyIn: USDC_ARBITRUM,
@@ -450,17 +465,6 @@ describe('DeBridge integration', () => {
 			).toBe(pendingZap.amountIn.amount)
 		}
 
-		function assertNativeFeeOnChain(
-			fee: CurrencyAmount,
-			chainId: number,
-		): void {
-			expect(fee.amount).toBeGreaterThan(0n)
-			expect(fee.currency.chainAddress.address).toBe(zeroAddress)
-			expect(fee.currency.chainAddress.chain.reference).toBe(
-				String(chainId),
-			)
-		}
-
 		async function readUsdcBalance(
 			address: `0x${string}`,
 		): Promise<bigint> {
@@ -498,23 +502,6 @@ describe('DeBridge integration', () => {
 	})
 
 	describe('swapOnchain USDC to ETH on Base', () => {
-		const userAccount = privateKeyToAccount(USER_PRIVATE_KEY)
-
-		const userWallet: UserWallet = {
-			kind: 'user',
-			namespaceToAddress: { [EIP155]: userAccount.address },
-		}
-
-		const mockSignService: Pick<SignService, 'signTx'> = {
-			signTx: async (_wallet, tx: TransactionSerializableEIP1559) => {
-				const serializedUnsigned = serializeTransaction(tx)
-				const hash = keccak256(serializedUnsigned)
-				const signatureHex = await userAccount.sign({ hash })
-				const signature = parseSignature(signatureHex)
-				return serializeTransaction(tx, signature)
-			},
-		}
-
 		let zapService: ZapService
 		let baseClient: PublicClient<HttpTransport, Chain>
 
@@ -530,46 +517,30 @@ describe('DeBridge integration', () => {
 				setTokenBalance(
 					userAccount.address,
 					USDC_BASE_ADDRESS,
-					USDC_AMOUNT,
+					INITIAL_USDC_BALANCE,
 					baseClient,
 				),
-				setNativeBalance(baseClient, userAccount.address, ETH_AMOUNT),
+				setNativeBalance(
+					baseClient,
+					userAccount.address,
+					INITIAL_ETH_BALANCE,
+				),
 			])
 
 			const baseRpcUrl = `http://127.0.0.1:${baseAnvil.port}`
 
-			const moduleRef = await Test.createTestingModule({
-				imports: [DeBridgeModule],
+			const moduleRef = await buildTestModule({
+				[BASE_CHAIN_ID]: {
+					rpcUrls: [baseRpcUrl],
+					disableDefaultRpcUrl: true,
+				},
 			})
-				.overrideProvider(RIPS_CONTRACT)
-				.useValue({
-					chain: {
-						namespace: EIP155,
-						reference: String(BASE_CHAIN_ID),
-					},
-					address: ripsContractAddress,
-				})
-				.overrideProvider(EVM_CLIENT_CONFIG)
-				.useValue({
-					rpcSettings: {
-						[BASE_CHAIN_ID]: {
-							rpcUrls: [baseRpcUrl],
-							disableDefaultRpcUrl: true,
-						},
-					},
-				})
-				.overrideProvider(SignService)
-				.useValue(mockSignService)
-				.compile()
 
 			zapService = moduleRef.get(ZapService)
 		})
 
 		it('quoteSwapOnchain returns amountOut and blockchainFee in native currency', async () => {
-			const recipient: ChainAddress = {
-				address: userAccount.address,
-				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
-			}
+			const recipient = toBaseChainAddress(userAccount.address)
 
 			const result = await zapService.quoteSwapOnchain(userWallet, {
 				currencyIn: USDC_BASE,
@@ -592,14 +563,7 @@ describe('DeBridge integration', () => {
 		})
 
 		it('swaps USDC on Base to ETH on Base and delivers ETH to recipient', async () => {
-			const receiverAccount = privateKeyToAccount(
-				'0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
-			)
-
-			const recipient: ChainAddress = {
-				address: receiverAccount.address,
-				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
-			}
+			const recipient = toBaseChainAddress(receiverAccount.address)
 
 			const receiverBalanceBefore = await baseClient.getBalance({
 				address: receiverAccount.address,
