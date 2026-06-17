@@ -20,6 +20,8 @@ import {
 } from '../../domain/value-objects/evm-address'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
+	OnchainSwapQuoteResult,
+	OnchainSwapResult,
 	PendingZap,
 	ZapBuyResult,
 	ZapQuoteBuyResult,
@@ -298,6 +300,104 @@ export class DeBridgeService implements ZapService {
 					amount: maxUint256,
 				})
 			}
+		}
+	}
+
+	async quoteSwapOnchain(
+		wallet: Wallet,
+		args: {
+			currencyIn: Currency
+			currencyOut: Currency
+			amountIn: bigint
+			recipient: ChainAddress
+		},
+	): Promise<OnchainSwapQuoteResult> {
+		const { currencyIn, currencyOut, amountIn, recipient } = args
+		const userAddress = evmAddressFromWallet(wallet)
+		const chainId = evmChainIdFromCurrency(currencyIn)
+
+		const swapResponse = await this.deBridgeApiService.fetchSameChainSwapTx(
+			{
+				chainId,
+				userAddress,
+				srcCurrency: currencyIn,
+				dstCurrency: currencyOut,
+				amountIn,
+				recipient: getAddress(recipient.address),
+			},
+		)
+
+		const nativeCurrency = this.evmCurrencyService.getNative(chainId)
+		const gasLimit = BigInt(
+			swapResponse.estimatedTransactionFee.details.gasLimit,
+		)
+		const gasPrice = await this.gasPriceService.getGasPrice(chainId)
+
+		return {
+			amountOut: {
+				currency: currencyOut,
+				amount: BigInt(swapResponse.tokenOut.amount),
+			},
+			transactionQuote: {
+				blockchainFee: {
+					currency: nativeCurrency,
+					amount: gasLimit * gasPrice,
+				},
+			},
+		}
+	}
+
+	async swapOnchain(
+		wallet: Wallet,
+		args: {
+			currencyIn: Currency
+			currencyOut: Currency
+			amountIn: bigint
+			recipient: ChainAddress
+		},
+	): Promise<OnchainSwapResult> {
+		const { currencyIn, currencyOut, amountIn, recipient } = args
+		const userAddress = evmAddressFromWallet(wallet)
+		const chainId = evmChainIdFromCurrency(currencyIn)
+
+		const swapResponse = await this.deBridgeApiService.fetchSameChainSwapTx(
+			{
+				chainId,
+				userAddress,
+				srcCurrency: currencyIn,
+				dstCurrency: currencyOut,
+				amountIn,
+				recipient: getAddress(recipient.address),
+			},
+		)
+
+		await this.approveIfNeeded({
+			wallet,
+			paymentCurrency: currencyIn,
+			amountIn,
+			spender: getAddress(swapResponse.tx.to),
+			userAddress,
+		})
+
+		const txRequest: TransactionRequestEIP1559 = {
+			to: swapResponse.tx.to as Address,
+			data: swapResponse.tx.data as `0x${string}`,
+			value: BigInt(swapResponse.tx.value),
+		}
+
+		const { transaction } =
+			await this.evmTransactionService.sendTransaction(
+				wallet,
+				txRequest,
+				chainId,
+			)
+
+		return {
+			transaction,
+			amountOut: {
+				currency: currencyOut,
+				amount: BigInt(swapResponse.tokenOut.amount),
+			},
 		}
 	}
 

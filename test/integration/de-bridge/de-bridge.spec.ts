@@ -24,7 +24,10 @@ import { Config } from '../../../src/domain/entities/config'
 import { ChainAddress } from '../../../src/domain/value-objects/chain-address'
 import { CurrencyAmount } from '../../../src/domain/value-objects/currency-amount'
 import { UserWallet } from '../../../src/domain/value-objects/wallet'
-import { PendingZap } from '../../../src/domain/value-objects/zap'
+import {
+	OnchainSwapResult,
+	PendingZap,
+} from '../../../src/domain/value-objects/zap'
 import { DeBridgeApiService } from '../../../src/infrastructure/de-bridge/de-bridge-api.service'
 import { DeBridgeModule } from '../../../src/infrastructure/de-bridge/de-bridge.module'
 import { EVM_CLIENT_CONFIG } from '../../../src/infrastructure/evm/evm-client/types'
@@ -85,6 +88,14 @@ const MOCK_CONFIG: Config = {
 	prizeDistribution: [],
 }
 
+const USDC_BASE_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+
+const USDC_BASE = new Token(USDC_BASE_ADDRESS, BASE_CHAIN_ID, {
+	symbol: 'USDC',
+	name: 'USD Coin',
+	decimals: USDC_DECIMALS,
+})
+
 describe('DeBridge integration', () => {
 	const { anvils } = useAnvil([
 		{
@@ -93,7 +104,7 @@ describe('DeBridge integration', () => {
 		},
 		{
 			chainId: BASE_CHAIN_ID,
-			fork: { rpcUrl: 'https://base.api.pocket.network' },
+			fork: { rpcUrl: 'https://mainnet.base.org' },
 			pathToState: ANVIL_STATE_PATH,
 		},
 	])
@@ -484,5 +495,138 @@ describe('DeBridge integration', () => {
 				dstTxHash: fulfillReceipt.transactionHash,
 			})
 		}
+	})
+
+	describe('swapOnchain USDC to ETH on Base', () => {
+		const userAccount = privateKeyToAccount(USER_PRIVATE_KEY)
+
+		const userWallet: UserWallet = {
+			kind: 'user',
+			namespaceToAddress: { [EIP155]: userAccount.address },
+		}
+
+		const mockSignService: Pick<SignService, 'signTx'> = {
+			signTx: async (_wallet, tx: TransactionSerializableEIP1559) => {
+				const serializedUnsigned = serializeTransaction(tx)
+				const hash = keccak256(serializedUnsigned)
+				const signatureHex = await userAccount.sign({ hash })
+				const signature = parseSignature(signatureHex)
+				return serializeTransaction(tx, signature)
+			},
+		}
+
+		let zapService: ZapService
+		let baseClient: PublicClient<HttpTransport, Chain>
+
+		beforeAll(async () => {
+			const [, baseAnvil] = anvils
+
+			baseClient = createPublicClient({
+				chain: baseChain,
+				transport: http(`http://127.0.0.1:${baseAnvil.port}`),
+			})
+
+			await Promise.all([
+				setTokenBalance(
+					userAccount.address,
+					USDC_BASE_ADDRESS,
+					USDC_AMOUNT,
+					baseClient,
+				),
+				setNativeBalance(baseClient, userAccount.address, ETH_AMOUNT),
+			])
+
+			const baseRpcUrl = `http://127.0.0.1:${baseAnvil.port}`
+
+			const moduleRef = await Test.createTestingModule({
+				imports: [DeBridgeModule],
+			})
+				.overrideProvider(RIPS_CONTRACT)
+				.useValue({
+					chain: {
+						namespace: EIP155,
+						reference: String(BASE_CHAIN_ID),
+					},
+					address: ripsContractAddress,
+				})
+				.overrideProvider(EVM_CLIENT_CONFIG)
+				.useValue({
+					rpcSettings: {
+						[BASE_CHAIN_ID]: {
+							rpcUrls: [baseRpcUrl],
+							disableDefaultRpcUrl: true,
+						},
+					},
+				})
+				.overrideProvider(SignService)
+				.useValue(mockSignService)
+				.compile()
+
+			zapService = moduleRef.get(ZapService)
+		})
+
+		it('quoteSwapOnchain returns amountOut and blockchainFee in native currency', async () => {
+			const recipient: ChainAddress = {
+				address: userAccount.address,
+				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
+			}
+
+			const result = await zapService.quoteSwapOnchain(userWallet, {
+				currencyIn: USDC_BASE,
+				currencyOut: ETH_BASE,
+				amountIn: 100_000000n,
+				recipient,
+			})
+
+			expect(result.amountOut.amount).toBeGreaterThan(0n)
+			expect(result.amountOut.currency.chainAddress.address).toBe(
+				ETH_BASE.chainAddress.address,
+			)
+			expect(
+				result.transactionQuote.blockchainFee.amount,
+			).toBeGreaterThan(0n)
+			expect(
+				result.transactionQuote.blockchainFee.currency.chainAddress
+					.address,
+			).toBe(ETH_BASE.chainAddress.address)
+		})
+
+		it('swaps USDC on Base to ETH on Base and delivers ETH to recipient', async () => {
+			const receiverAccount = privateKeyToAccount(
+				'0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
+			)
+
+			const recipient: ChainAddress = {
+				address: receiverAccount.address,
+				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
+			}
+
+			const receiverBalanceBefore = await baseClient.getBalance({
+				address: receiverAccount.address,
+			})
+
+			const result: OnchainSwapResult = await zapService.swapOnchain(
+				userWallet,
+				{
+					currencyIn: USDC_BASE,
+					currencyOut: ETH_BASE,
+					amountIn: 100_000000n,
+					recipient,
+				},
+			)
+
+			const receiverBalanceAfter = await baseClient.getBalance({
+				address: receiverAccount.address,
+			})
+
+			expect(result.transaction.id).toMatch(/^0x[0-9a-fA-F]{64}$/)
+			expect(result.amountOut.amount).toBeGreaterThan(0n)
+			expect(result.amountOut.currency.chainAddress.address).toBe(
+				ETH_BASE.chainAddress.address,
+			)
+			expect(
+				receiverBalanceAfter - receiverBalanceBefore,
+			).toBeGreaterThan(0n)
+		})
 	})
 })

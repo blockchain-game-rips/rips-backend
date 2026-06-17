@@ -3,6 +3,8 @@ import { Currency } from '../../domain/entities/currency'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
+	OnchainSwapQuoteResult,
+	OnchainSwapResult,
 	PendingZap,
 	ZapBuyResult,
 	ZapQuoteBuyResult,
@@ -50,6 +52,26 @@ export abstract class ZapService {
 			recipient: ChainAddress
 		},
 	): Promise<PendingZap>
+
+	abstract quoteSwapOnchain(
+		wallet: Wallet,
+		args: {
+			currencyIn: Currency
+			currencyOut: Currency
+			amountIn: bigint
+			recipient: ChainAddress
+		},
+	): Promise<OnchainSwapQuoteResult>
+
+	abstract swapOnchain(
+		wallet: Wallet,
+		args: {
+			currencyIn: Currency
+			currencyOut: Currency
+			amountIn: bigint
+			recipient: ChainAddress
+		},
+	): Promise<OnchainSwapResult>
 
 	abstract getBuyResult(zapId: string): Promise<ZapBuyResult | null>
 

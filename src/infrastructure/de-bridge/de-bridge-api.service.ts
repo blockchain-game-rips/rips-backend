@@ -6,9 +6,12 @@ import { Currency } from '../../domain/entities/currency'
 import { withCache } from '../cache/with-cache'
 import { CreateTxSchema } from './schemas/create-tx.schema'
 import { OrderSchema } from './schemas/order-status.schema'
+import { SameChainSwapSchema } from './schemas/same-chain-swap.schema'
 
-const DEBRIDGE_API_URL = 'https://api.dln.trade/v1.0'
+const DEBRIDGE_DLN_API_URL = 'https://api.dln.trade/v1.0'
+const DEBRIDGE_SWAP_API_URL = 'https://dln.debridge.finance/v1.0'
 const CREATE_TX_TTL_MS = 10000
+const SAME_CHAIN_SWAP_TTL_MS = 10000
 
 @Injectable()
 export class DeBridgeApiService {
@@ -80,6 +83,100 @@ export class DeBridgeApiService {
 		)
 	}
 
+	async fetchSameChainSwapTx(args: {
+		chainId: number
+		userAddress: Address
+		srcCurrency: Currency
+		dstCurrency: Currency
+		amountIn: bigint
+		recipient: Address
+	}) {
+		const {
+			chainId,
+			userAddress,
+			srcCurrency,
+			dstCurrency,
+			amountIn,
+			recipient,
+		} = args
+
+		const cacheKey = [
+			'debridge-same-chain-swap',
+			chainId,
+			userAddress,
+			srcCurrency.chainAddress.address,
+			dstCurrency.chainAddress.address,
+			amountIn.toString(),
+			recipient,
+		].join('-')
+
+		return withCache(
+			this.cacheManager,
+			cacheKey,
+			SAME_CHAIN_SWAP_TTL_MS,
+			() => this.doFetchSameChainSwapTx(args),
+		)
+	}
+
+	private async doFetchSameChainSwapTx(args: {
+		chainId: number
+		userAddress: Address
+		srcCurrency: Currency
+		dstCurrency: Currency
+		amountIn: bigint
+		recipient: Address
+	}) {
+		const {
+			chainId,
+			userAddress,
+			srcCurrency,
+			dstCurrency,
+			amountIn,
+			recipient,
+		} = args
+
+		const logContext = {
+			chainId,
+			userAddress,
+			srcToken: srcCurrency.chainAddress.address,
+			dstToken: dstCurrency.chainAddress.address,
+		}
+
+		const start = Date.now()
+
+		try {
+			const rawData = await ky
+				.get(`${DEBRIDGE_SWAP_API_URL}/chain/transaction`, {
+					timeout: 10000,
+					retry: 0,
+					searchParams: {
+						chainId: chainId.toString(),
+						tokenIn: srcCurrency.chainAddress.address,
+						tokenInAmount: amountIn.toString(),
+						tokenOut: dstCurrency.chainAddress.address,
+						tokenOutRecipient: recipient,
+						senderAddress: userAddress,
+						slippage: 'auto',
+					},
+				})
+				.json()
+
+			this.logger.log(
+				{ ...logContext, durationMs: Date.now() - start },
+				'DeBridge fetchSameChainSwapTx succeeded',
+			)
+
+			return SameChainSwapSchema.parse(rawData)
+		} catch (error) {
+			this.logger.error(
+				{ ...logContext, durationMs: Date.now() - start },
+				'DeBridge fetchSameChainSwapTx failed',
+			)
+
+			throw error
+		}
+	}
+
 	private async doFetchCreateTx(
 		args: {
 			userAddress: Address
@@ -118,8 +215,8 @@ export class DeBridgeApiService {
 
 		try {
 			const rawData = await ky
-				.get(`${DEBRIDGE_API_URL}/dln/order/create-tx`, {
-					timeout: 30000,
+				.get(`${DEBRIDGE_DLN_API_URL}/dln/order/create-tx`, {
+					timeout: 10000,
 					retry: 0,
 					searchParams: {
 						senderAddress: userAddress,

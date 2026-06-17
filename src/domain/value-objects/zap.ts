@@ -49,3 +49,13 @@ export type ZapQuoteSwapResult = {
 	fee: CurrencyAmount
 	transactionQuote: TransactionQuote
 }
+
+export type OnchainSwapResult = {
+	transaction: Transaction
+	amountOut: CurrencyAmount
+}
+
+export type OnchainSwapQuoteResult = {
+	amountOut: CurrencyAmount
+	transactionQuote: TransactionQuote
+}
