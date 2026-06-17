@@ -1,5 +1,5 @@
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import ky from 'ky'
 import { Address } from 'viem'
 import { Currency } from '../../domain/entities/currency'
@@ -15,35 +15,17 @@ const SAME_CHAIN_SWAP_TTL_MS = 10000
 
 @Injectable()
 export class DeBridgeApiService {
-	private readonly logger = new Logger(DeBridgeApiService.name)
-
 	constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
 	async getOrder(orderId: string) {
-		const start = Date.now()
+		const rawData = await ky
+			.get(`https://dln-api.debridge.finance/api/Orders/${orderId}`, {
+				timeout: 10000,
+				retry: 0,
+			})
+			.json()
 
-		try {
-			const rawData = await ky
-				.get(`https://dln-api.debridge.finance/api/Orders/${orderId}`, {
-					timeout: 10000,
-					retry: 0,
-				})
-				.json()
-
-			this.logger.log(
-				{ orderId, durationMs: Date.now() - start },
-				'DeBridge getOrder succeeded',
-			)
-
-			return OrderSchema.parse(rawData)
-		} catch (error) {
-			this.logger.error(
-				{ orderId, durationMs: Date.now() - start },
-				'DeBridge getOrder failed',
-			)
-
-			throw error
-		}
+		return OrderSchema.parse(rawData)
 	}
 
 	async fetchCreateTx(
@@ -135,46 +117,23 @@ export class DeBridgeApiService {
 			recipient,
 		} = args
 
-		const logContext = {
-			chainId,
-			userAddress,
-			srcToken: srcCurrency.chainAddress.address,
-			dstToken: dstCurrency.chainAddress.address,
-		}
+		const rawData = await ky
+			.get(`${DEBRIDGE_SWAP_API_URL}/chain/transaction`, {
+				timeout: 10000,
+				retry: 0,
+				searchParams: {
+					chainId: chainId.toString(),
+					tokenIn: srcCurrency.chainAddress.address,
+					tokenInAmount: amountIn.toString(),
+					tokenOut: dstCurrency.chainAddress.address,
+					tokenOutRecipient: recipient,
+					senderAddress: userAddress,
+					slippage: 'auto',
+				},
+			})
+			.json()
 
-		const start = Date.now()
-
-		try {
-			const rawData = await ky
-				.get(`${DEBRIDGE_SWAP_API_URL}/chain/transaction`, {
-					timeout: 10000,
-					retry: 0,
-					searchParams: {
-						chainId: chainId.toString(),
-						tokenIn: srcCurrency.chainAddress.address,
-						tokenInAmount: amountIn.toString(),
-						tokenOut: dstCurrency.chainAddress.address,
-						tokenOutRecipient: recipient,
-						senderAddress: userAddress,
-						slippage: 'auto',
-					},
-				})
-				.json()
-
-			this.logger.log(
-				{ ...logContext, durationMs: Date.now() - start },
-				'DeBridge fetchSameChainSwapTx succeeded',
-			)
-
-			return SameChainSwapSchema.parse(rawData)
-		} catch (error) {
-			this.logger.error(
-				{ ...logContext, durationMs: Date.now() - start },
-				'DeBridge fetchSameChainSwapTx failed',
-			)
-
-			throw error
-		}
+		return SameChainSwapSchema.parse(rawData)
 	}
 
 	private async doFetchCreateTx(
@@ -203,51 +162,27 @@ export class DeBridgeApiService {
 						dstChainTokenOutAmount: 'auto',
 					}
 
-		const logContext = {
-			userAddress,
-			srcChain: srcCurrency.chainAddress.chain.reference,
-			srcToken: srcCurrency.chainAddress.address,
-			dstChain: dstCurrency.chainAddress.chain.reference,
-			dstToken: dstCurrency.chainAddress.address,
-		}
+		const rawData = await ky
+			.get(`${DEBRIDGE_DLN_API_URL}/dln/order/create-tx`, {
+				timeout: 10000,
+				retry: 0,
+				searchParams: {
+					senderAddress: userAddress,
+					srcChainId: srcCurrency.chainAddress.chain.reference,
+					srcChainTokenIn: srcCurrency.chainAddress.address,
+					srcChainOrderAuthorityAddress: userAddress,
+					dstChainId: dstCurrency.chainAddress.chain.reference,
+					dstChainTokenOut: dstCurrency.chainAddress.address,
+					dstChainTokenOutRecipient: recipient,
+					dstChainOrderAuthorityAddress: userAddress,
+					...amountParams,
+					...(dlnHook !== undefined && {
+						dlnHook: JSON.stringify(dlnHook),
+					}),
+				},
+			})
+			.json()
 
-		const start = Date.now()
-
-		try {
-			const rawData = await ky
-				.get(`${DEBRIDGE_DLN_API_URL}/dln/order/create-tx`, {
-					timeout: 10000,
-					retry: 0,
-					searchParams: {
-						senderAddress: userAddress,
-						srcChainId: srcCurrency.chainAddress.chain.reference,
-						srcChainTokenIn: srcCurrency.chainAddress.address,
-						srcChainOrderAuthorityAddress: userAddress,
-						dstChainId: dstCurrency.chainAddress.chain.reference,
-						dstChainTokenOut: dstCurrency.chainAddress.address,
-						dstChainTokenOutRecipient: recipient,
-						dstChainOrderAuthorityAddress: userAddress,
-						...amountParams,
-						...(dlnHook !== undefined && {
-							dlnHook: JSON.stringify(dlnHook),
-						}),
-					},
-				})
-				.json()
-
-			this.logger.log(
-				{ ...logContext, durationMs: Date.now() - start },
-				'DeBridge fetchCreateTx succeeded',
-			)
-
-			return CreateTxSchema.parse(rawData)
-		} catch (error) {
-			this.logger.error(
-				{ ...logContext, durationMs: Date.now() - start },
-				'DeBridge fetchCreateTx failed',
-			)
-
-			throw error
-		}
+		return CreateTxSchema.parse(rawData)
 	}
 }
