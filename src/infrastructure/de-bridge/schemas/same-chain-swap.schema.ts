@@ -1,3 +1,4 @@
+import { isAddress } from 'viem'
 import * as z from 'zod'
 
 export const SameChainSwapTokenSchema = z.object({
@@ -9,8 +10,8 @@ export const SameChainSwapTokenSchema = z.object({
 })
 
 export const SameChainSwapTxSchema = z.object({
-	to: z.string(),
-	data: z.string(),
+	to: z.string().refine(isAddress),
+	data: z.string().refine((s): s is `0x${string}` => s.startsWith('0x')),
 	value: z.string(),
 })
 

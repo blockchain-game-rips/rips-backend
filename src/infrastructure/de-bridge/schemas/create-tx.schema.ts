@@ -1,3 +1,4 @@
+import { isAddress } from 'viem'
 import * as z from 'zod'
 
 export const DetailsSchema = z.object({
@@ -54,8 +55,8 @@ export const OrderSchema = z.object({
 export type Order = z.infer<typeof OrderSchema>
 
 export const TxSchema = z.object({
-	data: z.string(),
-	to: z.string(),
+	data: z.string().refine((s): s is `0x${string}` => s.startsWith('0x')),
+	to: z.string().refine(isAddress),
 	value: z.string(),
 })
 export type Tx = z.infer<typeof TxSchema>
