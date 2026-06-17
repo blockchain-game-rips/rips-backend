@@ -71,57 +71,64 @@ export class DeBridgeService implements ZapService {
 	}
 
 	async getBuyResult(zapId: string): Promise<ZapBuyResult | null> {
-		const orderId = zapId
+		const resolved = await this.resolveOrderReceipt(zapId)
 
-		const order = await this.deBridgeApiService.getOrder(orderId)
-
-		if (FULFILLED_STATES.has(order.state)) {
-			const receipt = await this.getDstReceipt(order, orderId)
-
-			const purchase = parsePurchase(receipt, this.ripsContractAddress)
-
-			if (purchase !== null) {
-				return {
-					status: 'success',
-					result: purchase,
-					dstTransaction: { id: receipt.transactionHash },
-				}
-			}
-
-			const refund = await this.parseCurrencyAmountOut(receipt, orderId)
-
-			return { status: 'failed', refund }
+		if (resolved === null || resolved === 'cancelled') {
+			return resolved === 'cancelled' ? { status: 'cancelled' } : null
 		}
 
-		if (CANCELLED_STATES.has(order.state)) {
-			return { status: 'cancelled' }
-		}
+		const { receipt, orderId } = resolved
+		const purchase = parsePurchase(receipt, this.ripsContractAddress)
 
-		return null
-	}
-
-	async getSwapResult(zapId: string): Promise<ZapSwapResult | null> {
-		const orderId = zapId
-
-		const order = await this.deBridgeApiService.getOrder(orderId)
-
-		if (FULFILLED_STATES.has(order.state)) {
-			const receipt = await this.getDstReceipt(order, orderId)
-
-			const amountOut = await this.parseCurrencyAmountOut(
-				receipt,
-				orderId,
-			)
-
+		if (purchase !== null) {
 			return {
 				status: 'success',
-				result: { amountOut },
+				result: purchase,
 				dstTransaction: { id: receipt.transactionHash },
 			}
 		}
 
+		const refund = await this.parseCurrencyAmountOut(receipt, orderId)
+
+		return { status: 'failed', refund }
+	}
+
+	async getSwapResult(zapId: string): Promise<ZapSwapResult | null> {
+		const resolved = await this.resolveOrderReceipt(zapId)
+
+		if (resolved === null || resolved === 'cancelled') {
+			return resolved === 'cancelled' ? { status: 'cancelled' } : null
+		}
+
+		const { receipt, orderId } = resolved
+		const amountOut = await this.parseCurrencyAmountOut(receipt, orderId)
+
+		return {
+			status: 'success',
+			result: { amountOut },
+			dstTransaction: { id: receipt.transactionHash },
+		}
+	}
+
+	private async resolveOrderReceipt(
+		zapId: string,
+	): Promise<
+		| {
+				receipt: Awaited<ReturnType<typeof this.getDstReceipt>>
+				orderId: string
+		  }
+		| 'cancelled'
+		| null
+	> {
+		const order = await this.deBridgeApiService.getOrder(zapId)
+
+		if (FULFILLED_STATES.has(order.state)) {
+			const receipt = await this.getDstReceipt(order, zapId)
+			return { receipt, orderId: zapId }
+		}
+
 		if (CANCELLED_STATES.has(order.state)) {
-			return { status: 'cancelled' }
+			return 'cancelled'
 		}
 
 		return null
@@ -380,8 +387,8 @@ export class DeBridgeService implements ZapService {
 		})
 
 		const txRequest: TransactionRequestEIP1559 = {
-			to: swapResponse.tx.to as Address,
-			data: swapResponse.tx.data as `0x${string}`,
+			to: swapResponse.tx.to,
+			data: swapResponse.tx.data,
 			value: BigInt(swapResponse.tx.value),
 		}
 
@@ -477,15 +484,12 @@ export class DeBridgeService implements ZapService {
 		createTxResponse: CreateTxResponse,
 	) {
 		const srcChainId = createTxResponse.estimation.srcChainTokenIn.chainId
-
-		const [gasPrice, nativeCurrency] = await Promise.all([
-			this.gasPriceService.getGasPrice(srcChainId),
-			Promise.resolve(this.evmCurrencyService.getNative(srcChainId)),
-		])
+		const nativeCurrency = this.evmCurrencyService.getNative(srcChainId)
 
 		const gasLimit = BigInt(
 			createTxResponse.estimatedTransactionFee.details.gasLimit,
 		)
+		const gasPrice = await this.gasPriceService.getGasPrice(srcChainId)
 
 		return {
 			blockchainFee: {
@@ -499,8 +503,8 @@ export class DeBridgeService implements ZapService {
 		createTxResponse: CreateTxResponse,
 	): TransactionRequestEIP1559 {
 		return {
-			to: createTxResponse.tx.to as Address,
-			data: createTxResponse.tx.data as `0x${string}`,
+			to: createTxResponse.tx.to,
+			data: createTxResponse.tx.data,
 			value: BigInt(createTxResponse.tx.value),
 		}
 	}
@@ -536,7 +540,7 @@ export class DeBridgeService implements ZapService {
 			},
 		}
 
-		const createTxResponse = await this.deBridgeApiService.fetchCreateTx({
+		return this.deBridgeApiService.fetchCreateTx({
 			userAddress,
 			recipient: userAddress,
 			srcCurrency: paymentCurrency,
@@ -544,8 +548,6 @@ export class DeBridgeService implements ZapService {
 			exactOut: paymentAmount,
 			dlnHook,
 		})
-
-		return createTxResponse
 	}
 
 	private buildBuyTicketsPayload(args: {
@@ -558,7 +560,7 @@ export class DeBridgeService implements ZapService {
 		const hookCalldata = encodeFunctionData({
 			abi: ripsAbi,
 			functionName: 'buyTickets',
-			args: [BigInt(stakeId), BigInt(ticketCount), userAddress],
+			args: [stakeId, ticketCount, userAddress],
 		})
 
 		const targetPayload = encodeAbiParameters(
