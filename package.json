@@ -6,8 +6,8 @@
 		"apps/*"
 	],
 	"scripts": {
-		"backend": "yarn workspace rips-backend",
-		"indexer": "yarn workspace squid"
+		"backend": "yarn workspace backend",
+		"indexer": "yarn workspace indexer"
 	},
 	"resolutions": {
 		"ox": "0.14.5"
