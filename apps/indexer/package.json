@@ -19,6 +19,7 @@
         "@subsquid/typeorm-store": "^1.4.0",
         "dotenv": "^16.4.5",
         "ethers": "^6.11.1",
+        "graphql": "^15.8.0",
         "pg": "^8.11.5",
         "typeorm": "^0.3.20"
     },
