@@ -1,0 +1,9 @@
+export enum RoundStatus {
+    FILLING = "FILLING",
+    SEALED = "SEALED",
+    VRF_REQUESTED = "VRF_REQUESTED",
+    CLAIMING = "CLAIMING",
+    CLAIMED = "CLAIMED",
+    REFUNDING = "REFUNDING",
+    REFUNDED = "REFUNDED",
+}

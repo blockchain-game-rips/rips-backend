@@ -1,0 +1,21 @@
+{
+    "semi": false,
+    "tabWidth": 4,
+    "useTabs": true,
+    "trailingComma": "all",
+    "singleQuote": true,
+    "plugins": [
+        "prettier-plugin-organize-imports"
+    ],
+    "overrides": [
+        {
+            "files": [
+                "**/*.yaml",
+                "**/*.yml"
+            ],
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
+}

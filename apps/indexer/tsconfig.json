@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2023",
+        "outDir": "lib",
+        "strict": true,
+        "resolveJsonModule": true,
+        "declaration": false,
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "skipLibCheck": true,
+        "baseUrl": "./",
+        "rootDir": ".",
+        "paths": {
+            "src/*": ["src/*"],
+            "generated/*": ["generated/*"],
+            "test/*": ["test/*"]
+        }
+    }
+}
