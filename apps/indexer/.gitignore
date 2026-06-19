@@ -1,6 +1,7 @@
 /node_modules
 /lib
 /generated
+/src/abi
 
 # IDE files
 /.idea
