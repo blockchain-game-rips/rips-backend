@@ -6,6 +6,7 @@ apps/indexer/lib/
 
 # generated artifacts
 apps/*/generated/
+apps/indexer/src/model/generated/
 apps/backend/config
 
 # Logs
