@@ -41,8 +41,8 @@
         "cmd": ["squid-typeorm-codegen"]
       },
       "typegen": {
-        "description": "Generate data access classes for an ABI file(s) in the ./abi folder",
-        "cmd": ["squid-evm-typegen", "./src/abi", {"glob": "./abi/*.json"}, "--multicall"]
+        "description": "Generate data access classes for an ABI file(s) in the ./abi folder and the shared packages/abi/src/rips.json",
+        "cmd": ["squid-evm-typegen", "./src/abi", "../../packages/abi/src/rips.json", "--multicall"]
       },
       "archives:ls": {
         "description": "List the available archives",

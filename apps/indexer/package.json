@@ -11,6 +11,7 @@
         "generate-schema": "ts-node src/generate-schema.ts"
     },
     "dependencies": {
+        "@rips/abi": "workspace:*",
         "@rips/test-harness": "workspace:*",
         "@subsquid/evm-processor": "^1.18.0",
         "@subsquid/evm-typegen": "^4.0.0",
