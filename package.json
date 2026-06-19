@@ -7,6 +7,7 @@
 		"packages/*"
 	],
 	"scripts": {
+		"prepare": "lefthook install",
 		"backend": "yarn workspace backend",
 		"indexer": "yarn workspace indexer"
 	},
