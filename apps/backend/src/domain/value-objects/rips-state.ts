@@ -1,6 +1,6 @@
-import { AvailableStake } from './available-stake'
+import { AvailablePreset } from './available-preset'
 
 export type RipsState = {
-	availableStakes: AvailableStake[]
+	availablePresets: AvailablePreset[]
 	isPaused: boolean
 }

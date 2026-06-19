@@ -16,7 +16,7 @@ import { SetPausedUseCase } from '../../application/use-cases/set-paused/set-pau
 import { SetReferralTiersUseCase } from '../../application/use-cases/set-referral-tiers/set-referral-tiers.use-case'
 import { SetReferrerCustomFeeUseCase } from '../../application/use-cases/set-referrer-custom-fee/set-referrer-custom-fee.use-case'
 import { SetReferrerFrozenUseCase } from '../../application/use-cases/set-referrer-frozen/set-referrer-frozen.use-case'
-import { UpdateStakeConfigUseCase } from '../../application/use-cases/update-stake-config/update-stake-config.use-case'
+import { UpdatePresetConfigUseCase } from '../../application/use-cases/update-preset-config/update-preset-config.use-case'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
 import { toTransactionDto } from '../shared/transaction.dto'
@@ -41,7 +41,7 @@ import {
 	AdminWalletResponseDto,
 	toAdminWalletResponseDto,
 } from './shared/admin-wallet.response'
-import { UpdateStakeConfigBodyDto } from './update-stake-config/update-stake-config.request'
+import { UpdatePresetConfigBodyDto } from './update-preset-config/update-preset-config.request'
 
 @Controller('admin')
 @UseGuards(AdminApiKeyGuard)
@@ -54,7 +54,7 @@ export class AdminController {
 		private readonly setReferrerFrozenUseCase: SetReferrerFrozenUseCase,
 		private readonly setDefaultReferralFeeUseCase: SetDefaultReferralFeeUseCase,
 		private readonly setReferralTiersUseCase: SetReferralTiersUseCase,
-		private readonly updateStakeConfigUseCase: UpdateStakeConfigUseCase,
+		private readonly updatePresetConfigUseCase: UpdatePresetConfigUseCase,
 		private readonly setReferrerCustomFeeUseCase: SetReferrerCustomFeeUseCase,
 		private readonly currencyService: CurrencyService,
 	) {}
@@ -105,34 +105,34 @@ export class AdminController {
 		return { transaction: toTransactionDto(transaction) }
 	}
 
-	@Put('stakes/:stakeId/config')
+	@Put('presets/:presetId/config')
 	@ZodResponse({ type: AdminTransactionResponseDto })
-	async updateStakeConfig(
-		@Param('stakeId') stakeId: string,
-		@Body() body: UpdateStakeConfigBodyDto,
+	async updatePresetConfig(
+		@Param('presetId') presetId: string,
+		@Body() body: UpdatePresetConfigBodyDto,
 	): Promise<AdminTransactionResponseDto> {
 		const {
 			durationSeconds,
 			feePercent,
-			prizeDistribution,
-			ticketCap,
-			ticketPrice,
+			payoutDistribution,
+			entryCap,
+			entryPrice,
 		} = body.config
 
 		const currency = await this.currencyService.fromAccount(
-			ticketPrice.currencyChainAddress as ChainAddress,
+			entryPrice.currencyChainAddress as ChainAddress,
 		)
 
-		const transaction = await this.updateStakeConfigUseCase.execute({
-			stakeId: Number(stakeId),
+		const transaction = await this.updatePresetConfigUseCase.execute({
+			presetId: Number(presetId),
 			config: {
 				durationSeconds: durationSeconds,
 				feePercent: feePercent,
-				prizeDistribution: prizeDistribution,
-				ticketCap: ticketCap,
-				ticketPrice: {
+				payoutDistribution: payoutDistribution,
+				entryCap: entryCap,
+				entryPrice: {
 					currency,
-					amount: ticketPrice.amount,
+					amount: entryPrice.amount,
 				},
 			},
 		})

@@ -14,8 +14,8 @@ const getZapResultResponseSchema = z.object({
 	success: z
 		.object({
 			dstTransaction: TransactionDto.schema,
-			ticketCount: z.number(),
-			roundId: z.number(),
+			entryCount: z.number(),
+			ripId: z.number(),
 		})
 		.nullable(),
 })
@@ -50,8 +50,8 @@ export function toGetZapResultResponseDto(
 		...base,
 		success: {
 			dstTransaction: toTransactionDto(result.dstTransaction),
-			ticketCount: result.result.ticketCount,
-			roundId: result.result.roundId,
+			entryCount: result.result.entryCount,
+			ripId: result.result.ripId,
 		},
 	}
 }

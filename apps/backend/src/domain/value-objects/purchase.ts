@@ -1,4 +1,4 @@
 export type Purchase = {
-	ticketCount: number
-	roundId: number
+	entryCount: number
+	ripId: number
 }

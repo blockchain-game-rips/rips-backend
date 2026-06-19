@@ -1,0 +1,40 @@
+query GetRipsByIds($ids: [String!]!) {
+    rips(
+        where: {
+            id_in: $ids
+        }
+    ) {
+        id
+        presetId
+        startTime
+        status
+        randomA
+        randomB
+        config {
+            id
+            currency
+            entryCap
+            entryCost
+            feePercent
+            durationSeconds
+            payoutDistribution(orderBy: tierIndex_ASC) {
+                payoutCount
+                minPayout
+                maxPayout
+            }
+        }
+        entryPurchases {
+            user
+            entryCount
+            startEntryIndex
+        }
+        payoutsClaimed {
+            user
+            amount
+        }
+        refunds {
+            user
+            amount
+        }
+    }
+}

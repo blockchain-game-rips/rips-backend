@@ -9,7 +9,7 @@ import { SetPausedModule } from '../../use-cases/set-paused.module'
 import { SetReferralTiersModule } from '../../use-cases/set-referral-tiers.module'
 import { SetReferrerCustomFeeModule } from '../../use-cases/set-referrer-custom-fee.module'
 import { SetReferrerFrozenModule } from '../../use-cases/set-referrer-frozen.module'
-import { UpdateStakeConfigModule } from '../../use-cases/update-stake-config.module'
+import { UpdatePresetConfigModule } from '../../use-cases/update-preset-config.module'
 
 @Module({
 	imports: [
@@ -20,7 +20,7 @@ import { UpdateStakeConfigModule } from '../../use-cases/update-stake-config.mod
 		SetReferrerCustomFeeModule,
 		SetDefaultReferralFeeModule,
 		SetReferralTiersModule,
-		UpdateStakeConfigModule,
+		UpdatePresetConfigModule,
 		CurrencyModule,
 	],
 	controllers: [AdminController],

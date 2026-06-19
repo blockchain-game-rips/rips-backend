@@ -13,23 +13,23 @@ import {
 } from '../../domain/value-objects/zap'
 
 export abstract class ZapService {
-	abstract quoteBuyTickets(
+	abstract quoteBuyEntries(
 		wallet: Wallet,
 		args: {
-			stakeId: number
+			presetId: number
 			config: Config
 			paymentCurrency: Currency
-			ticketCount: number
+			entryCount: number
 		},
 	): Promise<ZapQuoteBuyResult>
 
-	abstract buyTickets(
+	abstract buyEntries(
 		wallet: Wallet,
 		args: {
 			paymentCurrency: Currency
-			stakeId: number
+			presetId: number
 			config: Config
-			ticketCount: number
+			entryCount: number
 		},
 	): Promise<PendingZap>
 

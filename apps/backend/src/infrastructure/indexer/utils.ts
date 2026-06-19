@@ -1,85 +1,85 @@
 import {
-	GetCompletedRoundsQuery,
-	RoundStatus as RoundStatusRaw,
+	GetCompletedRipsQuery,
+	RipStatus as RipStatusRaw,
 } from '../../../generated/graphql/generated'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
-import { Round, RoundStatus } from '../../domain/entities/round'
+import { Rip, RipStatus } from '../../domain/entities/rip'
 import { AddressesActions } from '../../domain/value-objects/actions'
 import { toEvmAddress } from '../../domain/value-objects/evm-address'
 
-export type RoundRaw = GetCompletedRoundsQuery['rounds'][number]
+export type RipRaw = GetCompletedRipsQuery['rips'][number]
 
 export function fromConfigRaw(
-	configRaw: RoundRaw['config'],
+	configRaw: RipRaw['config'],
 	currency: Currency,
 ): Config {
 	return {
 		id: Number(configRaw.id),
-		ticketCap: Number(configRaw.ticketCap),
+		entryCap: Number(configRaw.entryCap),
 		feePercent: Number(configRaw.feePercent),
-		ticketPrice: {
+		entryPrice: {
 			currency,
-			amount: BigInt(configRaw.ticketCost),
+			amount: BigInt(configRaw.entryCost),
 		},
 		durationSeconds: Number(configRaw.durationSeconds),
-		prizeDistribution: configRaw.prizeDistribution.map((tier) => ({
-			prizeCount: BigInt(tier.prizeCount),
-			minPrize: BigInt(tier.minPrize),
-			maxPrize: BigInt(tier.maxPrize),
+		payoutDistribution: configRaw.payoutDistribution.map((tier) => ({
+			payoutCount: BigInt(tier.payoutCount),
+			minPayout: BigInt(tier.minPayout),
+			maxPayout: BigInt(tier.maxPayout),
 		})),
 	}
 }
 
-export function resolveRoundStatus(status: RoundStatusRaw): RoundStatus {
+export function resolveRipStatus(status: RipStatusRaw): RipStatus {
 	switch (status) {
-		case RoundStatusRaw.Filling:
-			return RoundStatus.FILLING
-		case RoundStatusRaw.Sealed:
-			return RoundStatus.SEALED
-		case RoundStatusRaw.VrfRequested:
-			return RoundStatus.VRF_REQUESTED
-		case RoundStatusRaw.Claiming:
-			return RoundStatus.CLAIMING
-		case RoundStatusRaw.Claimed:
-			return RoundStatus.CLAIMED
-		case RoundStatusRaw.Refunding:
-			return RoundStatus.REFUNDING
-		case RoundStatusRaw.Refunded:
-			return RoundStatus.REFUNDED
+		case RipStatusRaw.Filling:
+			return RipStatus.FILLING
+		case RipStatusRaw.Sealed:
+			return RipStatus.SEALED
+		case RipStatusRaw.VrfRequested:
+			return RipStatus.VRF_REQUESTED
+		case RipStatusRaw.Claiming:
+			return RipStatus.CLAIMING
+		case RipStatusRaw.Claimed:
+			return RipStatus.CLAIMED
+		case RipStatusRaw.Refunding:
+			return RipStatus.REFUNDING
+		case RipStatusRaw.Refunded:
+			return RipStatus.REFUNDED
 	}
 }
 
-function resolveActions(roundRaw: RoundRaw): AddressesActions {
+function resolveActions(ripRaw: RipRaw): AddressesActions {
 	return {
-		purchases: roundRaw.ticketPurchases.map((p) => ({
+		purchases: ripRaw.entryPurchases.map((p) => ({
 			userAddress: toEvmAddress(p.user),
-			ticketCount: BigInt(p.ticketCount),
-			startTicketIndex: BigInt(p.startTicketIndex),
+			entryCount: BigInt(p.entryCount),
+			startEntryIndex: BigInt(p.startEntryIndex),
 		})),
-		claims: roundRaw.prizesClaimed.map((c) => ({
+		claims: ripRaw.payoutsClaimed.map((c) => ({
 			userAddress: toEvmAddress(c.user),
 			amount: BigInt(c.amount),
 		})),
-		refunds: roundRaw.refunds.map((r) => ({
+		refunds: ripRaw.refunds.map((r) => ({
 			userAddress: toEvmAddress(r.user),
 			amount: BigInt(r.amount),
 		})),
 	}
 }
 
-export function fromRoundRaw(roundRaw: RoundRaw, currency: Currency): Round {
+export function fromRipRaw(ripRaw: RipRaw, currency: Currency): Rip {
 	return {
-		id: Number(roundRaw.id),
-		stake: { id: Number(roundRaw.stakeId), currentConfig: null },
-		config: fromConfigRaw(roundRaw.config, currency),
+		id: Number(ripRaw.id),
+		preset: { id: Number(ripRaw.presetId), currentConfig: null },
+		config: fromConfigRaw(ripRaw.config, currency),
 		currency,
-		actions: resolveActions(roundRaw),
-		status: resolveRoundStatus(roundRaw.status),
-		startTime: new Date(roundRaw.startTime),
+		actions: resolveActions(ripRaw),
+		status: resolveRipStatus(ripRaw.status),
+		startTime: new Date(ripRaw.startTime),
 		randoms:
-			roundRaw.randomA != null && roundRaw.randomB != null
-				? { a: BigInt(roundRaw.randomA), b: BigInt(roundRaw.randomB) }
+			ripRaw.randomA != null && ripRaw.randomB != null
+				? { a: BigInt(ripRaw.randomA), b: BigInt(ripRaw.randomB) }
 				: undefined,
 	}
 }

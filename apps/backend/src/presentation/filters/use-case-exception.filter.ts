@@ -10,8 +10,8 @@ import { Response } from 'express'
 import { AdminWalletNotFoundError } from '../../domain/errors/admin-wallet-not-found.error'
 import { CurrenciesMismatchError } from '../../domain/errors/currencies-mismatch.error'
 import { InsufficientBalanceError } from '../../domain/errors/insufficient-balance.error'
-import { AvailableStakeNotFoundError } from '../../domain/errors/stake-not-found.error'
-import { StakeTierCountMismatchError } from '../../domain/errors/stake-tier-count-mismatch.error'
+import { AvailablePresetNotFoundError } from '../../domain/errors/preset-not-found.error'
+import { PresetTierCountMismatchError } from '../../domain/errors/preset-tier-count-mismatch.error'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
 import { UserAlreadyExistsError } from '../../domain/errors/user-already-exists.error'
 import { UserNotFoundError } from '../../domain/errors/user-not-found.error'
@@ -21,13 +21,13 @@ type ErrorConstructor = new (...args: never[]) => ContextError
 
 const ERROR_STATUS_MAP: Map<ErrorConstructor, HttpStatus> = new Map([
 	[UserNotFoundError, HttpStatus.NOT_FOUND],
-	[AvailableStakeNotFoundError, HttpStatus.NOT_FOUND],
+	[AvailablePresetNotFoundError, HttpStatus.NOT_FOUND],
 	[UserAlreadyExistsError, HttpStatus.CONFLICT],
 	[InsufficientBalanceError, HttpStatus.UNPROCESSABLE_ENTITY],
 	[CurrenciesMismatchError, HttpStatus.BAD_REQUEST],
 	[TransactionFailedError, HttpStatus.BAD_GATEWAY],
 	[AdminWalletNotFoundError, HttpStatus.INTERNAL_SERVER_ERROR],
-	[StakeTierCountMismatchError, HttpStatus.BAD_REQUEST],
+	[PresetTierCountMismatchError, HttpStatus.BAD_REQUEST],
 ])
 
 @Catch()

@@ -19,17 +19,17 @@ CREATE TABLE "evm_wallets" (
 );
 
 -- CreateTable
-CREATE TABLE "ticket_prizes" (
+CREATE TABLE "entry_payouts" (
     "id" BIGSERIAL NOT NULL,
     "user_id" BIGINT NOT NULL,
-    "round_id" INTEGER NOT NULL,
-    "stake_id" INTEGER NOT NULL,
-    "ticket_number" INTEGER NOT NULL,
-    "prize_amount" BIGINT NOT NULL,
+    "rip_id" INTEGER NOT NULL,
+    "preset_id" INTEGER NOT NULL,
+    "entry_number" INTEGER NOT NULL,
+    "payout_amount" BIGINT NOT NULL,
     "revealed" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "ticket_prizes_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "entry_payouts_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -42,10 +42,10 @@ CREATE UNIQUE INDEX "evm_wallets_address_key" ON "evm_wallets"("address");
 CREATE UNIQUE INDEX "evm_wallets_user_id_key" ON "evm_wallets"("user_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ticket_prizes_round_id_ticket_number_key" ON "ticket_prizes"("round_id", "ticket_number");
+CREATE UNIQUE INDEX "entry_payouts_rip_id_entry_number_key" ON "entry_payouts"("rip_id", "entry_number");
 
 -- AddForeignKey
 ALTER TABLE "evm_wallets" ADD CONSTRAINT "evm_wallets_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ticket_prizes" ADD CONSTRAINT "ticket_prizes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "entry_payouts" ADD CONSTRAINT "entry_payouts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

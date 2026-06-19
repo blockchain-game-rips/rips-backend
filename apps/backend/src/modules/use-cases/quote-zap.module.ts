@@ -4,13 +4,13 @@ import { QuoteZapUseCase } from '../../application/use-cases/quote-zap/quote-zap
 import { CurrencyModule } from '../../infrastructure/currency/currency.module'
 import { DeBridgeModule } from '../../infrastructure/de-bridge/de-bridge.module'
 import { WalletModule } from '../../infrastructure/wallet/wallet.module'
-import { GetAvailableStakesModule } from './get-available-stakes.module'
+import { GetAvailablePresetsModule } from './get-available-presets.module'
 import { GetUserModule } from './get-user.module'
 
 @Module({
 	imports: [
 		GetUserModule,
-		GetAvailableStakesModule,
+		GetAvailablePresetsModule,
 		WalletModule,
 		CurrencyModule,
 		DeBridgeModule,

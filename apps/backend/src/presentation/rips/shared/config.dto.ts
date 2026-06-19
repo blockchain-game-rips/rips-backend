@@ -6,32 +6,32 @@ import {
 	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
 
-export const prizeTierSchema = z.object({
-	prizeCount: z.string(),
-	minPrize: z.string(),
-	maxPrize: z.string(),
+export const payoutTierSchema = z.object({
+	payoutCount: z.string(),
+	minPayout: z.string(),
+	maxPayout: z.string(),
 })
 
 export const configSchema = z.object({
-	ticketCap: z.number(),
+	entryCap: z.number(),
 	feePercent: z.number(),
-	ticketPrice: CurrencyAmountDto.schema,
+	entryPrice: CurrencyAmountDto.schema,
 	durationSeconds: z.number(),
-	prizeDistribution: z.array(prizeTierSchema),
+	payoutDistribution: z.array(payoutTierSchema),
 })
 
 export class ConfigDto extends createZodDto(configSchema) {}
 
 export function toConfigDto(config: Config): ConfigDto {
 	return {
-		ticketCap: config.ticketCap,
+		entryCap: config.entryCap,
 		feePercent: config.feePercent,
-		ticketPrice: toPricedCurrencyAmountDto(config.ticketPrice),
+		entryPrice: toPricedCurrencyAmountDto(config.entryPrice),
 		durationSeconds: config.durationSeconds,
-		prizeDistribution: config.prizeDistribution.map((tier) => ({
-			prizeCount: tier.prizeCount.toString(),
-			minPrize: tier.minPrize.toString(),
-			maxPrize: tier.maxPrize.toString(),
+		payoutDistribution: config.payoutDistribution.map((tier) => ({
+			payoutCount: tier.payoutCount.toString(),
+			minPayout: tier.minPayout.toString(),
+			maxPayout: tier.maxPayout.toString(),
 		})),
 	}
 }

@@ -2,8 +2,8 @@ import { ChainAddress } from '../../../domain/value-objects/chain-address'
 import { TransactionQuote } from '../../../domain/value-objects/transaction'
 
 export type QuotePurchaseInput = {
-	stakeId: number
-	ticketCount: number
+	presetId: number
+	entryCount: number
 	paymentCurrencyChainAddress: ChainAddress
 }
 

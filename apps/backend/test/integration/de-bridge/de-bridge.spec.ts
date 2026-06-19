@@ -90,14 +90,14 @@ const USDC_BASE = new Token(USDC_BASE_ADDRESS, BASE_CHAIN_ID, {
 
 const MOCK_CONFIG: Config = {
 	id: 1,
-	ticketCap: 8,
+	entryCap: 8,
 	feePercent: 1,
-	ticketPrice: {
+	entryPrice: {
 		currency: ETH_BASE,
 		amount: parseEther('0.005'),
 	},
 	durationSeconds: 300,
-	prizeDistribution: [],
+	payoutDistribution: [],
 }
 
 const userAccount = privateKeyToAccount(ANVIL_ACCOUNT_1_PRIVATE_KEY)
@@ -171,7 +171,7 @@ describe('DeBridge integration', () => {
 		},
 	])
 
-	describe('buy tickets with USDC on Arbitrum', () => {
+	describe('buy entries with USDC on Arbitrum', () => {
 		let zapService: ZapService
 		let mockDeBridgeApiService: DeBridgeApiService
 		let arbitrumClient: PublicClient<HttpTransport, Chain>
@@ -226,17 +226,17 @@ describe('DeBridge integration', () => {
 			zapService = moduleRef.get(ZapService)
 		})
 
-		it('fails and refunds full native amount when wrong stake id causes internal call revert', async () => {
-			const wrongStakeId = 999
-			const ticketCount = 3
+		it('fails and refunds full native amount when wrong preset id causes internal call revert', async () => {
+			const wrongPresetId = 999
+			const entryCount = 3
 			const expectedRefundAmount =
-				MOCK_CONFIG.ticketPrice.amount * BigInt(ticketCount)
+				MOCK_CONFIG.entryPrice.amount * BigInt(entryCount)
 
-			const pendingZap = await zapService.buyTickets(userWallet, {
+			const pendingZap = await zapService.buyEntries(userWallet, {
 				paymentCurrency: USDC_ARBITRUM,
-				stakeId: wrongStakeId,
+				presetId: wrongPresetId,
 				config: MOCK_CONFIG,
-				ticketCount,
+				entryCount,
 			})
 
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
@@ -257,9 +257,9 @@ describe('DeBridge integration', () => {
 			)
 		})
 
-		it('places order on Arbitrum and fulfills it on Base, buying over ticket cap refunds excess to user', async () => {
-			const ticketCap = MOCK_CONFIG.ticketCap
-			const overCapTicketCount = ticketCap + 2
+		it('places order on Arbitrum and fulfills it on Base, buying over entry cap refunds excess to user', async () => {
+			const entryCap = MOCK_CONFIG.entryCap
+			const overCapEntryCount = entryCap + 2
 
 			const basBalanceBefore = await baseClient.getBalance({
 				address: userAccount.address,
@@ -268,12 +268,12 @@ describe('DeBridge integration', () => {
 			const usdcBalanceBefore = await readUsdcBalance(userAccount.address)
 			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
-			// Step 1: place order on Arbitrum with ticket count over cap
-			const pendingZap = await zapService.buyTickets(userWallet, {
+			// Step 1: place order on Arbitrum with entry count over cap
+			const pendingZap = await zapService.buyEntries(userWallet, {
 				paymentCurrency: USDC_ARBITRUM,
-				stakeId: 1,
+				presetId: 1,
 				config: MOCK_CONFIG,
-				ticketCount: overCapTicketCount,
+				entryCount: overCapEntryCount,
 			})
 
 			await assertNativeSpentEqualsFeeAndGas(
@@ -297,20 +297,19 @@ describe('DeBridge integration', () => {
 				address: userAccount.address,
 			})
 
-			const excessTickets = BigInt(overCapTicketCount - ticketCap)
-			const expectedRefund =
-				MOCK_CONFIG.ticketPrice.amount * excessTickets
+			const excessEntries = BigInt(overCapEntryCount - entryCap)
+			const expectedRefund = MOCK_CONFIG.entryPrice.amount * excessEntries
 
-			expect(result.result.ticketCount).toBe(ticketCap)
+			expect(result.result.entryCount).toBe(entryCap)
 			expect(baseBalanceAfter - basBalanceBefore).toBe(expectedRefund)
 			expect(
 				await baseClient.readContract({
 					address: ripsContractAddress,
 					abi: ripsAbi,
-					functionName: 'userTicketCount',
+					functionName: 'userEntryCount',
 					args: [1n, userAccount.address],
 				}),
-			).toBe(BigInt(ticketCap))
+			).toBe(BigInt(entryCap))
 		})
 
 		it('places order on Arbitrum and fulfills it on Base', async () => {
@@ -318,11 +317,11 @@ describe('DeBridge integration', () => {
 			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
 			// Step 1: place order on Arbitrum
-			const pendingZap = await zapService.buyTickets(userWallet, {
+			const pendingZap = await zapService.buyEntries(userWallet, {
 				paymentCurrency: USDC_ARBITRUM,
-				stakeId: 1,
+				presetId: 1,
 				config: MOCK_CONFIG,
-				ticketCount: 5,
+				entryCount: 5,
 			})
 
 			await assertNativeSpentEqualsFeeAndGas(
@@ -342,17 +341,17 @@ describe('DeBridge integration', () => {
 					`result status is not success, result status: ${result?.status}`,
 				)
 
-			const roundId = 2 // roundId 1 is finished in previous test
+			const ripId = 2 // ripId 1 is finished in previous test
 
 			expect(result.dstTransaction).toBeDefined()
-			expect(result.result.roundId).toBe(roundId)
-			expect(result.result.ticketCount).toBe(5)
+			expect(result.result.ripId).toBe(ripId)
+			expect(result.result.entryCount).toBe(5)
 			expect(
 				await baseClient.readContract({
 					address: ripsContractAddress,
 					abi: ripsAbi,
-					functionName: 'userTicketCount',
-					args: [BigInt(roundId), userAccount.address],
+					functionName: 'userEntryCount',
+					args: [BigInt(ripId), userAccount.address],
 				}),
 			).toBe(5n)
 		})
@@ -405,12 +404,12 @@ describe('DeBridge integration', () => {
 			).toBe(String(BASE_CHAIN_ID))
 		})
 
-		it('quoteBuyTickets returns amountIn, durationMs and fee in native currency', async () => {
-			const result = await zapService.quoteBuyTickets(userWallet, {
-				stakeId: 1,
+		it('quoteBuyEntries returns amountIn, durationMs and fee in native currency', async () => {
+			const result = await zapService.quoteBuyEntries(userWallet, {
+				presetId: 1,
 				config: MOCK_CONFIG,
 				paymentCurrency: USDC_ARBITRUM,
-				ticketCount: 5,
+				entryCount: 5,
 			})
 
 			expect(result.amountIn.amount).toBeGreaterThan(0n)

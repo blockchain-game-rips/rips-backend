@@ -110,9 +110,7 @@ export class DeBridgeService implements ZapService {
 		}
 	}
 
-	private async resolveOrderReceipt(
-		zapId: string,
-	): Promise<
+	private async resolveOrderReceipt(zapId: string): Promise<
 		| {
 				receipt: Awaited<ReturnType<typeof this.getDstReceipt>>
 				orderId: string
@@ -226,22 +224,22 @@ export class DeBridgeService implements ZapService {
 		}
 	}
 
-	async quoteBuyTickets(
+	async quoteBuyEntries(
 		wallet: Wallet,
 		args: {
-			stakeId: number
+			presetId: number
 			config: Config
 			paymentCurrency: Currency
-			ticketCount: number
+			entryCount: number
 		},
 	): Promise<ZapQuoteBuyResult> {
-		const { config, paymentCurrency, ticketCount, stakeId } = args
+		const { config, paymentCurrency, entryCount, presetId } = args
 		const userAddress = evmAddressFromWallet(wallet)
 
-		const createTxResponse = await this.fetchCreateTxForBuyTickets({
+		const createTxResponse = await this.fetchCreateTxForBuyEntries({
 			userAddress,
-			stakeId,
-			ticketCount,
+			presetId,
+			entryCount,
 			config,
 			paymentCurrency,
 		})
@@ -261,22 +259,22 @@ export class DeBridgeService implements ZapService {
 		}
 	}
 
-	async buyTickets(
+	async buyEntries(
 		wallet: Wallet,
 		args: {
 			paymentCurrency: Currency
-			stakeId: number
+			presetId: number
 			config: Config
-			ticketCount: number
+			entryCount: number
 		},
 	): Promise<PendingZap> {
-		const { config, paymentCurrency, ticketCount, stakeId } = args
+		const { config, paymentCurrency, entryCount, presetId } = args
 		const userAddress = evmAddressFromWallet(wallet)
 
-		const createTxResponse = await this.fetchCreateTxForBuyTickets({
+		const createTxResponse = await this.fetchCreateTxForBuyEntries({
 			userAddress,
-			stakeId,
-			ticketCount,
+			presetId,
+			entryCount,
 			config,
 			paymentCurrency,
 		})
@@ -509,22 +507,22 @@ export class DeBridgeService implements ZapService {
 		}
 	}
 
-	private async fetchCreateTxForBuyTickets(args: {
+	private async fetchCreateTxForBuyEntries(args: {
 		userAddress: Address
-		stakeId: number
-		ticketCount: number
+		presetId: number
+		entryCount: number
 		config: Config
 		paymentCurrency: Currency
 	}): Promise<CreateTxResponse> {
-		const { userAddress, stakeId, ticketCount, config, paymentCurrency } =
+		const { userAddress, presetId, entryCount, config, paymentCurrency } =
 			args
 
-		const ticketCurrency = config.ticketPrice.currency
-		const paymentAmount = config.ticketPrice.amount * BigInt(ticketCount)
+		const entryCurrency = config.entryPrice.currency
+		const paymentAmount = config.entryPrice.amount * BigInt(entryCount)
 
-		const payload = this.buildBuyTicketsPayload({
-			stakeId: BigInt(stakeId),
-			ticketCount: BigInt(ticketCount),
+		const payload = this.buildBuyEntriesPayload({
+			presetId: BigInt(presetId),
+			entryCount: BigInt(entryCount),
 			userAddress,
 		})
 
@@ -544,23 +542,23 @@ export class DeBridgeService implements ZapService {
 			userAddress,
 			recipient: userAddress,
 			srcCurrency: paymentCurrency,
-			dstCurrency: ticketCurrency,
+			dstCurrency: entryCurrency,
 			exactOut: paymentAmount,
 			dlnHook,
 		})
 	}
 
-	private buildBuyTicketsPayload(args: {
-		stakeId: bigint
-		ticketCount: bigint
+	private buildBuyEntriesPayload(args: {
+		presetId: bigint
+		entryCount: bigint
 		userAddress: Address
 	}): Hex {
-		const { stakeId, ticketCount, userAddress } = args
+		const { presetId, entryCount, userAddress } = args
 
 		const hookCalldata = encodeFunctionData({
 			abi: ripsAbi,
-			functionName: 'buyTickets',
-			args: [stakeId, ticketCount, userAddress],
+			functionName: 'enterRip',
+			args: [presetId, entryCount, userAddress],
 		})
 
 		const targetPayload = encodeAbiParameters(

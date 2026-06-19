@@ -3,7 +3,7 @@ import { TelegramId } from '../../../domain/value-objects/telegram-id'
 
 export type GetCardCollectionInput = {
 	telegramId: TelegramId
-	stakeId: number
+	presetId: number
 }
 
 export abstract class GetCardCollectionUseCase {

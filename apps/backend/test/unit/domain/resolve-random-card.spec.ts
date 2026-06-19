@@ -1,4 +1,4 @@
-import { resolveRandomCard } from '../../../src/domain/services/prize-utils'
+import { resolveRandomCard } from '../../../src/domain/services/payout-utils'
 import { CardCollection } from '../../../src/domain/value-objects/card-collection'
 
 const CARD_A = { id: 1, name: 'A', tier: 0, imageUrl: '' }

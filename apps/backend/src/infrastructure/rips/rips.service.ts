@@ -32,7 +32,7 @@ import { RIPS_CONTRACT } from './rips.constants'
 
 const CLAIM_START_INDEX = 0n
 const CLAIM_MAX_RANGES = 100n
-const BUY_TICKETS_GAS = 800_000n
+const BUY_ENTRIES_GAS = 800_000n
 
 @Injectable()
 export class RipsServiceIpml implements RipsService {
@@ -54,7 +54,7 @@ export class RipsServiceIpml implements RipsService {
 	claim(
 		wallet: Wallet,
 		args: {
-			roundId: number
+			ripId: number
 			userAddress: EvmAddress
 			referrerAddress: EvmAddress | null
 		},
@@ -62,9 +62,9 @@ export class RipsServiceIpml implements RipsService {
 		return this.sendKeeperTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
-				functionName: 'claimPrizes',
+				functionName: 'claimPayout',
 				args: [
-					BigInt(args.roundId),
+					BigInt(args.ripId),
 					CLAIM_START_INDEX,
 					CLAIM_MAX_RANGES,
 					args.userAddress,
@@ -76,26 +76,23 @@ export class RipsServiceIpml implements RipsService {
 
 	refund(
 		wallet: Wallet,
-		args: { roundId: number; userAddress: EvmAddress },
+		args: { ripId: number; userAddress: EvmAddress },
 	): Promise<Transaction> {
 		return this.sendKeeperTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
 				functionName: 'refund',
-				args: [BigInt(args.roundId), args.userAddress],
+				args: [BigInt(args.ripId), args.userAddress],
 			}),
 		})
 	}
 
-	requestVrf(
-		wallet: Wallet,
-		args: { roundId: number },
-	): Promise<Transaction> {
+	requestVrf(wallet: Wallet, args: { ripId: number }): Promise<Transaction> {
 		return this.sendKeeperTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
 				functionName: 'requestRandomness',
-				args: [BigInt(args.roundId)],
+				args: [BigInt(args.ripId)],
 			}),
 		})
 	}
@@ -121,35 +118,35 @@ export class RipsServiceIpml implements RipsService {
 		return transaction
 	}
 
-	async quoteBuyTickets(): Promise<TransactionQuote> {
+	async quoteBuyEntries(): Promise<TransactionQuote> {
 		const gasPrice = await this.gasPriceService.getGasPrice(this.chainId)
 		const nativeCurrency = this.evmCurrencyService.getNative(this.chainId)
 
 		return {
 			blockchainFee: {
 				currency: nativeCurrency,
-				amount: BUY_TICKETS_GAS * gasPrice,
+				amount: BUY_ENTRIES_GAS * gasPrice,
 			},
 		}
 	}
 
-	async buyTickets(
+	async buyEntries(
 		wallet: Wallet,
-		args: { stakeId: number; config: Config; ticketCount: number },
+		args: { presetId: number; config: Config; entryCount: number },
 	): Promise<PurchaseReceipt> {
-		const { stakeId, config, ticketCount } = args
+		const { presetId, config, entryCount } = args
 
 		const chainId = this.chainId
 		const userAddress = evmAddressFromWallet(wallet)
 
-		const totalValue = config.ticketPrice.amount * BigInt(ticketCount)
+		const totalValue = config.entryPrice.amount * BigInt(entryCount)
 
 		const request: TransactionRequestEIP1559 = {
 			to: this.contractAddress,
 			data: encodeFunctionData({
 				abi: ripsAbi,
-				functionName: 'buyTickets',
-				args: [BigInt(stakeId), BigInt(ticketCount), userAddress],
+				functionName: 'enterRip',
+				args: [BigInt(presetId), BigInt(entryCount), userAddress],
 			}),
 			value: totalValue,
 		}
@@ -165,7 +162,7 @@ export class RipsServiceIpml implements RipsService {
 
 		if (!purchase) {
 			throw new TransactionFailedError(
-				`TicketsPurchased event not found in transaction: ${transaction.id}`,
+				`EntriesPurchased event not found in transaction: ${transaction.id}`,
 			)
 		}
 

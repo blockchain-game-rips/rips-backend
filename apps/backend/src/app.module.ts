@@ -13,7 +13,7 @@ import { RipsApiModule } from './modules/api/rips-api/rips-api.module'
 import { UsersApiModule } from './modules/api/users-api/users-api.module'
 import { WalletsApiModule } from './modules/api/wallets-api/wallets-api.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
-import { SyncCompletedRoundsModule } from './modules/sync-completed-rounds/sync-completed-rounds.module'
+import { SyncCompletedRipsModule } from './modules/sync-completed-rips/sync-completed-rips.module'
 
 @Module({
 	imports: [
@@ -30,7 +30,7 @@ import { SyncCompletedRoundsModule } from './modules/sync-completed-rounds/sync-
 		RipsApiModule,
 		ReferralSystemApiModule,
 		KeeperModule,
-		SyncCompletedRoundsModule,
+		SyncCompletedRipsModule,
 		NotificationsApiModule,
 	],
 })

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Card } from '../../../domain/value-objects/card'
-import { TicketPrizeRepository } from '../../interfaces/repositories/ticket-prize.repository'
+import { EntryPayoutRepository } from '../../interfaces/repositories/entry-payout.repository'
 import {
 	GetCardDefinitionsInput,
 	GetCardDefinitionsUseCase,
@@ -8,11 +8,11 @@ import {
 
 @Injectable()
 export class GetCardDefinitionsService extends GetCardDefinitionsUseCase {
-	constructor(private readonly ticketPrizeRepository: TicketPrizeRepository) {
+	constructor(private readonly entryPayoutRepository: EntryPayoutRepository) {
 		super()
 	}
 
-	async execute({ stakeId }: GetCardDefinitionsInput): Promise<Card[][]> {
-		return this.ticketPrizeRepository.getCardDefinitionsByStake(stakeId)
+	async execute({ presetId }: GetCardDefinitionsInput): Promise<Card[][]> {
+		return this.entryPayoutRepository.getCardDefinitionsByPreset(presetId)
 	}
 }

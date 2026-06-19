@@ -19,9 +19,9 @@ export abstract class RipsAdminService {
 		args: { feePercent: number },
 	): Promise<Transaction>
 
-	abstract updateStake(
+	abstract updatePreset(
 		wallet: Wallet,
-		args: { stakeId: number; config: Omit<Config, 'id'> },
+		args: { presetId: number; config: Omit<Config, 'id'> },
 	): Promise<Transaction>
 
 	abstract setReferralTiers(

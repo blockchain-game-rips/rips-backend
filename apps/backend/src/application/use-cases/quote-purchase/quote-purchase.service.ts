@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { CurrenciesMismatchError } from '../../../domain/errors/currencies-mismatch.error'
-import { AvailableStakeNotFoundError } from '../../../domain/errors/stake-not-found.error'
+import { AvailablePresetNotFoundError } from '../../../domain/errors/preset-not-found.error'
 import { TransactionQuote } from '../../../domain/value-objects/transaction'
 import { CurrencyService } from '../../interfaces/currency.service'
 import { RipsService } from '../../interfaces/rips.service'
-import { GetAvailableStakesUseCase } from '../get-available-stakes/get-available-stakes.use-case'
+import { GetAvailablePresetsUseCase } from '../get-available-presets/get-available-presets.use-case'
 import {
 	QuotePurchaseInput,
 	QuotePurchaseUseCase,
@@ -13,7 +13,7 @@ import {
 @Injectable()
 export class QuotePurchaseService extends QuotePurchaseUseCase {
 	constructor(
-		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
+		private readonly getAvailablePresetsUseCase: GetAvailablePresetsUseCase,
 		private readonly currencyService: CurrencyService,
 		private readonly ripsService: RipsService,
 	) {
@@ -21,34 +21,34 @@ export class QuotePurchaseService extends QuotePurchaseUseCase {
 	}
 
 	async execute(input: QuotePurchaseInput): Promise<TransactionQuote> {
-		const { stakeId, paymentCurrencyChainAddress } = input
+		const { presetId, paymentCurrencyChainAddress } = input
 
-		const [availableStakes, paymentCurrency] = await Promise.all([
-			this.getAvailableStakesUseCase.execute(),
+		const [availablePresets, paymentCurrency] = await Promise.all([
+			this.getAvailablePresetsUseCase.execute(),
 			this.currencyService.fromAccount(paymentCurrencyChainAddress),
 		])
 
-		const availableStake = availableStakes.find(
-			(s) => s.stake.id === stakeId,
+		const availablePreset = availablePresets.find(
+			(s) => s.preset.id === presetId,
 		)
 
-		if (!availableStake) {
-			throw new AvailableStakeNotFoundError(
-				`Stake with id ${stakeId} not found in available stakes`,
+		if (!availablePreset) {
+			throw new AvailablePresetNotFoundError(
+				`Preset with id ${presetId} not found in available presets`,
 			)
 		}
 
 		const config =
-			availableStake.fillingRound !== null
-				? availableStake.fillingRound.config
-				: availableStake.stake.currentConfig
+			availablePreset.fillingRip !== null
+				? availablePreset.fillingRip.config
+				: availablePreset.preset.currentConfig
 
-		if (config.ticketPrice.currency.id !== paymentCurrency.id) {
+		if (config.entryPrice.currency.id !== paymentCurrency.id) {
 			throw new CurrenciesMismatchError(
-				`Payment currency ${paymentCurrency.id} does not match ticket price currency ${config.ticketPrice.currency.id}`,
+				`Payment currency ${paymentCurrency.id} does not match entry price currency ${config.entryPrice.currency.id}`,
 			)
 		}
 
-		return await this.ripsService.quoteBuyTickets()
+		return await this.ripsService.quoteBuyEntries()
 	}
 }

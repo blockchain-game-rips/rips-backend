@@ -1,26 +1,26 @@
 import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
+import { PresetRepository } from '../../application/interfaces/repositories/preset.repository'
 import { ReferralSystemRepository } from '../../application/interfaces/repositories/referral-system.repository'
-import { RoundRepository } from '../../application/interfaces/repositories/round.repository'
-import { StakeRepository } from '../../application/interfaces/repositories/stake.repository'
+import { RipRepository } from '../../application/interfaces/repositories/rip.repository'
 import { EvmModule } from '../evm/evm.module'
 import { RipsModule } from '../rips/rips.module'
 import { IndexerService } from './indexer.service'
+import { IndexerPresetRepository } from './preset.repository'
 import { IndexerReferralSystemRepository } from './referral-system.repository'
-import { IndexerRoundRepository } from './rounds.repository'
-import { IndexerStakeRepository } from './stake.repository'
+import { IndexerRipRepository } from './rips.repository'
 
 @Module({
 	imports: [CacheModule.register(), EvmModule, RipsModule],
 	providers: [
 		IndexerService,
-		{ provide: StakeRepository, useClass: IndexerStakeRepository },
-		{ provide: RoundRepository, useClass: IndexerRoundRepository },
+		{ provide: PresetRepository, useClass: IndexerPresetRepository },
+		{ provide: RipRepository, useClass: IndexerRipRepository },
 		{
 			provide: ReferralSystemRepository,
 			useClass: IndexerReferralSystemRepository,
 		},
 	],
-	exports: [StakeRepository, RoundRepository, ReferralSystemRepository],
+	exports: [PresetRepository, RipRepository, ReferralSystemRepository],
 })
 export class IndexerModule {}

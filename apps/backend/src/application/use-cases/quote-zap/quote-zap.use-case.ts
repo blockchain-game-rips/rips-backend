@@ -4,8 +4,8 @@ import { ZapQuoteBuyResult } from '../../../domain/value-objects/zap'
 
 export type QuoteZapInput = {
 	telegramId: TelegramId
-	stakeId: number
-	ticketCount: number
+	presetId: number
+	entryCount: number
 	paymentCurrencyChainAddress: ChainAddress
 }
 

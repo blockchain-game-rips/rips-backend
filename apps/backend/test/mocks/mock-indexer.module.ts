@@ -1,34 +1,34 @@
 import { Module } from '@nestjs/common'
+import { PresetRepository } from '../../src/application/interfaces/repositories/preset.repository'
 import { ReferralSystemRepository } from '../../src/application/interfaces/repositories/referral-system.repository'
-import { RoundRepository } from '../../src/application/interfaces/repositories/round.repository'
-import { StakeRepository } from '../../src/application/interfaces/repositories/stake.repository'
+import { RipRepository } from '../../src/application/interfaces/repositories/rip.repository'
 import { Referrer } from '../../src/domain/entities/referrer'
-import { CompletedRound } from '../../src/domain/entities/round'
+import { CompletedRip } from '../../src/domain/entities/rip'
 import { EvmAddress } from '../../src/domain/value-objects/evm-address'
 import { ReferrerTierTable } from '../../src/domain/value-objects/referral-system'
 
-export class MockRoundRepository extends RoundRepository {
-	private nextCompletedRound: CompletedRound | null = null
+export class MockRipRepository extends RipRepository {
+	private nextCompletedRip: CompletedRip | null = null
 
-	setNextCompletedRound(round: CompletedRound | null) {
-		this.nextCompletedRound = round
+	setNextCompletedRip(rip: CompletedRip | null) {
+		this.nextCompletedRip = rip
 	}
 
-	async getCompletedRounds() {
+	async getCompletedRips() {
 		return Promise.resolve([])
 	}
 
-	async getRoundsByIds() {
+	async getRipsByIds() {
 		return Promise.resolve([])
 	}
 
-	async getNextCompletedRound() {
-		return Promise.resolve(this.nextCompletedRound)
+	async getNextCompletedRip() {
+		return Promise.resolve(this.nextCompletedRip)
 	}
 }
 
-class MockStakeRepository extends StakeRepository {
-	async getStakesWithOngoingRounds() {
+class MockPresetRepository extends PresetRepository {
+	async getPresetsWithOngoingRips() {
 		return Promise.resolve([])
 	}
 }
@@ -41,13 +41,13 @@ class MockReferralSystemRepository extends ReferralSystemRepository {
 
 @Module({
 	providers: [
-		{ provide: RoundRepository, useClass: MockRoundRepository },
-		{ provide: StakeRepository, useClass: MockStakeRepository },
+		{ provide: RipRepository, useClass: MockRipRepository },
+		{ provide: PresetRepository, useClass: MockPresetRepository },
 		{
 			provide: ReferralSystemRepository,
 			useClass: MockReferralSystemRepository,
 		},
 	],
-	exports: [RoundRepository, StakeRepository, ReferralSystemRepository],
+	exports: [RipRepository, PresetRepository, ReferralSystemRepository],
 })
 export class MockIndexerModule {}

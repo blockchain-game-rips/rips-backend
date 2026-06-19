@@ -7,7 +7,7 @@ export enum NotificationType {
 export type Notification = {
 	id: bigint
 	userTelegramId: bigint
-	roundId: bigint
+	ripId: bigint
 	type: NotificationType
 	createdAt: Date
 	isNotified: boolean

@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { z } from 'zod'
-import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
+import { GetAvailablePresetsUseCase } from '../../application/use-cases/get-available-presets/get-available-presets.use-case'
 import { PrismaService } from '../prisma/prisma.service'
 
 const CardDefinitionInputSchema = z.object({
-	stakeId: z.number().int().positive(),
+	presetId: z.number().int().positive(),
 	tier: z.number().int().min(0),
 	name: z.string().min(1),
 	imageUrl: z.string().url(),
@@ -19,7 +19,7 @@ export class SeedCardDefinitionsService {
 	private readonly logger = new Logger(SeedCardDefinitionsService.name)
 
 	constructor(
-		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
+		private readonly getAvailablePresetsUseCase: GetAvailablePresetsUseCase,
 		private readonly prisma: PrismaService,
 	) {}
 
@@ -28,49 +28,47 @@ export class SeedCardDefinitionsService {
 	}
 
 	async seed(config: CardDefinitionsConfig): Promise<void> {
-		const stakeTierCounts = await this.fetchStakeTierCounts()
+		const presetTierCounts = await this.fetchPresetTierCounts()
 
-		this.validateConfig(config, stakeTierCounts)
+		this.validateConfig(config, presetTierCounts)
 
 		await this.upsertCards(config)
 
 		this.logger.log(`Seeded ${config.length} card definitions.`)
 	}
 
-	private async fetchStakeTierCounts(): Promise<Map<number, number>> {
-		const availableStakes = await this.getAvailableStakesUseCase.execute()
+	private async fetchPresetTierCounts(): Promise<Map<number, number>> {
+		const availablePresets = await this.getAvailablePresetsUseCase.execute()
 
-		const stakeTierCounts = new Map<number, number>()
+		const presetTierCounts = new Map<number, number>()
 
-		for (const { stake, fillingRound } of availableStakes) {
+		for (const { preset, fillingRip } of availablePresets) {
 			const config =
-				fillingRound === null
-					? stake.currentConfig
-					: fillingRound.config
+				fillingRip === null ? preset.currentConfig : fillingRip.config
 
-			stakeTierCounts.set(stake.id, config.prizeDistribution.length)
+			presetTierCounts.set(preset.id, config.payoutDistribution.length)
 		}
 
-		return stakeTierCounts
+		return presetTierCounts
 	}
 
 	private validateConfig(
 		config: CardDefinitionsConfig,
-		stakeTierCounts: Map<number, number>,
+		presetTierCounts: Map<number, number>,
 	): void {
 		for (const card of config) {
-			const tierCount = stakeTierCounts.get(card.stakeId)
+			const tierCount = presetTierCounts.get(card.presetId)
 
 			if (tierCount === undefined) {
 				this.logger.error(
-					`Stake ${card.stakeId} not found on-chain. Aborting.`,
+					`Preset ${card.presetId} not found on-chain. Aborting.`,
 				)
 				process.exit(1)
 			}
 
 			if (card.tier >= tierCount) {
 				this.logger.error(
-					`Tier ${card.tier} does not exist for stake ${card.stakeId} (has ${tierCount} tiers). Aborting.`,
+					`Tier ${card.tier} does not exist for preset ${card.presetId} (has ${tierCount} tiers). Aborting.`,
 				)
 				process.exit(1)
 			}
@@ -81,8 +79,8 @@ export class SeedCardDefinitionsService {
 		for (const card of config) {
 			await this.prisma.cardDefinition.upsert({
 				where: {
-					stakeId_tier_name: {
-						stakeId: card.stakeId,
+					presetId_tier_name: {
+						presetId: card.presetId,
 						tier: card.tier,
 						name: card.name,
 					},

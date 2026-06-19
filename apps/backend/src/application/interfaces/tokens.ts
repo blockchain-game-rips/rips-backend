@@ -1,1 +1,1 @@
-export const STAKE_TO_TIER_BIASES = Symbol('STAKE_TO_TIER_BIASES')
+export const PRESET_TO_TIER_BIASES = Symbol('PRESET_TO_TIER_BIASES')

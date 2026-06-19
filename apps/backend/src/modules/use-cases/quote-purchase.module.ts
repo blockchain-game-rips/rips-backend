@@ -3,10 +3,10 @@ import { QuotePurchaseService } from '../../application/use-cases/quote-purchase
 import { QuotePurchaseUseCase } from '../../application/use-cases/quote-purchase/quote-purchase.use-case'
 import { CurrencyModule } from '../../infrastructure/currency/currency.module'
 import { RipsModule } from '../../infrastructure/rips/rips.module'
-import { GetAvailableStakesModule } from './get-available-stakes.module'
+import { GetAvailablePresetsModule } from './get-available-presets.module'
 
 @Module({
-	imports: [GetAvailableStakesModule, CurrencyModule, RipsModule],
+	imports: [GetAvailablePresetsModule, CurrencyModule, RipsModule],
 	providers: [
 		{ provide: QuotePurchaseUseCase, useClass: QuotePurchaseService },
 	],

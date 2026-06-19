@@ -1,7 +1,7 @@
 import { Card } from '../../../domain/value-objects/card'
 
 export type GetCardDefinitionsInput = {
-	stakeId: number
+	presetId: number
 }
 
 export abstract class GetCardDefinitionsUseCase {

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { AvailableStakeNotFoundError } from '../../../domain/errors/stake-not-found.error'
+import { AvailablePresetNotFoundError } from '../../../domain/errors/preset-not-found.error'
 import { ZapQuoteBuyResult } from '../../../domain/value-objects/zap'
 import { CurrencyService } from '../../interfaces/currency.service'
 import { ZapService } from '../../interfaces/zap.service'
-import { GetAvailableStakesUseCase } from '../get-available-stakes/get-available-stakes.use-case'
+import { GetAvailablePresetsUseCase } from '../get-available-presets/get-available-presets.use-case'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import { QuoteZapInput, QuoteZapUseCase } from './quote-zap.use-case'
 
@@ -11,7 +11,7 @@ import { QuoteZapInput, QuoteZapUseCase } from './quote-zap.use-case'
 export class QuoteZapService extends QuoteZapUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
-		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
+		private readonly getAvailablePresetsUseCase: GetAvailablePresetsUseCase,
 		private readonly zapService: ZapService,
 		private readonly currencyService: CurrencyService,
 	) {
@@ -21,37 +21,37 @@ export class QuoteZapService extends QuoteZapUseCase {
 	async execute(input: QuoteZapInput): Promise<ZapQuoteBuyResult> {
 		const {
 			telegramId,
-			stakeId,
-			ticketCount,
+			presetId,
+			entryCount,
 			paymentCurrencyChainAddress,
 		} = input
 
-		const [user, availableStakes, paymentCurrency] = await Promise.all([
+		const [user, availablePresets, paymentCurrency] = await Promise.all([
 			this.getUserUseCase.execute({ telegramId }),
-			this.getAvailableStakesUseCase.execute(),
+			this.getAvailablePresetsUseCase.execute(),
 			this.currencyService.fromAccount(paymentCurrencyChainAddress),
 		])
 
-		const availableStake = availableStakes.find(
-			(s) => s.stake.id === stakeId,
+		const availablePreset = availablePresets.find(
+			(s) => s.preset.id === presetId,
 		)
 
-		if (!availableStake) {
-			throw new AvailableStakeNotFoundError(
-				`Stake with id ${stakeId} not found in available stakes`,
+		if (!availablePreset) {
+			throw new AvailablePresetNotFoundError(
+				`Preset with id ${presetId} not found in available presets`,
 			)
 		}
 
 		const config =
-			availableStake.fillingRound !== null
-				? availableStake.fillingRound.config
-				: availableStake.stake.currentConfig
+			availablePreset.fillingRip !== null
+				? availablePreset.fillingRip.config
+				: availablePreset.preset.currentConfig
 
-		return this.zapService.quoteBuyTickets(user.wallet, {
-			stakeId: availableStake.stake.id,
+		return this.zapService.quoteBuyEntries(user.wallet, {
+			presetId: availablePreset.preset.id,
 			config,
 			paymentCurrency,
-			ticketCount,
+			entryCount,
 		})
 	}
 }

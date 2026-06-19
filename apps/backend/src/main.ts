@@ -4,10 +4,10 @@ import { Logger } from 'nestjs-pino'
 import { cleanupOpenApiDoc, ZodValidationPipe } from 'nestjs-zod'
 import { AppModule } from './app.module'
 import { UseCaseExceptionFilter } from './presentation/filters/use-case-exception.filter'
-import { AvailableStakeDto } from './presentation/rips/shared/available-stake.dto'
+import { AvailablePresetDto } from './presentation/rips/shared/available-preset.dto'
 import { ConfigDto } from './presentation/rips/shared/config.dto'
-import { PrizeDto } from './presentation/rips/shared/prize.dto'
-import { RoundDto } from './presentation/rips/shared/round.dto'
+import { PayoutDto } from './presentation/rips/shared/payout.dto'
+import { RipDto } from './presentation/rips/shared/rip.dto'
 import { ChainAddressDto } from './presentation/shared/chain-address.dto'
 import { CurrencyAmountDto } from './presentation/shared/currency-amount.dto'
 import { CurrencyDto } from './presentation/shared/currency.dto'
@@ -37,10 +37,10 @@ async function bootstrap() {
 			TransactionDto,
 			TelegramIdHeaderDto,
 			ConfigDto,
-			RoundDto,
-			AvailableStakeDto,
+			RipDto,
+			AvailablePresetDto,
 			UserDto,
-			PrizeDto,
+			PayoutDto,
 		],
 	})
 

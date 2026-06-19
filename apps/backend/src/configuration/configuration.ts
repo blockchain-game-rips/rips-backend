@@ -11,8 +11,8 @@ import { parsePretty } from '../utils/zod'
 export const CARD_CONFIG_KEY = 'cardConfig'
 
 export const CardConfigSchema = z.object({
-	// stakeId (as string key in yaml) → array of biases, one per prize tier
-	stakesBiases: z.record(z.string(), z.array(z.number())),
+	// presetId (as string key in yaml) → array of biases, one per payout tier
+	presetsBiases: z.record(z.string(), z.array(z.number())),
 })
 
 export type CardConfig = z.infer<typeof CardConfigSchema>

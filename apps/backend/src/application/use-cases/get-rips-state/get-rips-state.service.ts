@@ -1,24 +1,24 @@
 import { Injectable } from '@nestjs/common'
 import { RipsState } from '../../../domain/value-objects/rips-state'
 import { RipsReadService } from '../../interfaces/rips-read.service'
-import { GetAvailableStakesUseCase } from '../get-available-stakes/get-available-stakes.use-case'
+import { GetAvailablePresetsUseCase } from '../get-available-presets/get-available-presets.use-case'
 import { GetRipsStateUseCase } from './get-rips-state.use-case'
 
 @Injectable()
 export class GetRipsStateService extends GetRipsStateUseCase {
 	constructor(
 		private readonly ripsReadService: RipsReadService,
-		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
+		private readonly getAvailablePresetsUseCase: GetAvailablePresetsUseCase,
 	) {
 		super()
 	}
 
 	async execute(): Promise<RipsState> {
-		const [availableStakes, isPaused] = await Promise.all([
-			this.getAvailableStakesUseCase.execute(),
+		const [availablePresets, isPaused] = await Promise.all([
+			this.getAvailablePresetsUseCase.execute(),
 			this.ripsReadService.isPaused(),
 		])
 
-		return { availableStakes, isPaused }
+		return { availablePresets, isPaused }
 	}
 }

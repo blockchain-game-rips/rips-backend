@@ -61,30 +61,30 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 		})
 	}
 
-	updateStake(
+	updatePreset(
 		wallet: Wallet,
-		args: { stakeId: number; config: Omit<Config, 'id'> },
+		args: { presetId: number; config: Omit<Config, 'id'> },
 	): Promise<Transaction> {
-		const { stakeId, config } = args
+		const { presetId, config } = args
 
 		const currencyAddress = toEvmAddress(
-			config.ticketPrice.currency.chainAddress.address,
+			config.entryPrice.currency.chainAddress.address,
 		)
 
-		const ticketCost = BigInt(config.ticketPrice.amount)
+		const entryCost = BigInt(config.entryPrice.amount)
 
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
-				functionName: 'updateStake',
+				functionName: 'updatePreset',
 				args: [
-					BigInt(stakeId),
+					BigInt(presetId),
 					{
-						tiers: config.prizeDistribution,
+						tiers: config.payoutDistribution,
 						currency: currencyAddress,
-						ticketCap: BigInt(config.ticketCap),
+						entryCap: BigInt(config.entryCap),
 						duration: config.durationSeconds,
-						ticketCost: ticketCost,
+						entryCost: entryCost,
 						feePercent: config.feePercent,
 					},
 				],

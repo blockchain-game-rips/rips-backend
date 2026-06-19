@@ -17,14 +17,14 @@ export function parsePurchase(
 				return null
 			}
 		})
-		.find((event) => event?.eventName === 'TicketsPurchased')
+		.find((event) => event?.eventName === 'RipEntered')
 
-	if (!log || log.eventName !== 'TicketsPurchased') {
+	if (!log || log.eventName !== 'RipEntered') {
 		return null
 	}
 
 	return {
-		roundId: Number(log.args.roundId),
-		ticketCount: Number(log.args.ticketCount),
+		ripId: Number(log.args.ripId),
+		entryCount: Number(log.args.entryCount),
 	}
 }

@@ -1,22 +1,22 @@
 type Query {
-  stakes(where: StakeWhereInput, orderBy: [StakeOrderByInput!], offset: Int, limit: Int): [Stake!]!
-  stakeById(id: String!): Stake
-  stakesConnection(orderBy: [StakeOrderByInput!]!, after: String, first: Int, where: StakeWhereInput): StakesConnection!
+  presets(where: PresetWhereInput, orderBy: [PresetOrderByInput!], offset: Int, limit: Int): [Preset!]!
+  presetById(id: String!): Preset
+  presetsConnection(orderBy: [PresetOrderByInput!]!, after: String, first: Int, where: PresetWhereInput): PresetsConnection!
   configs(where: ConfigWhereInput, orderBy: [ConfigOrderByInput!], offset: Int, limit: Int): [Config!]!
   configById(id: String!): Config
   configsConnection(orderBy: [ConfigOrderByInput!]!, after: String, first: Int, where: ConfigWhereInput): ConfigsConnection!
-  prizeTiers(where: PrizeTierWhereInput, orderBy: [PrizeTierOrderByInput!], offset: Int, limit: Int): [PrizeTier!]!
-  prizeTierById(id: String!): PrizeTier
-  prizeTiersConnection(orderBy: [PrizeTierOrderByInput!]!, after: String, first: Int, where: PrizeTierWhereInput): PrizeTiersConnection!
-  rounds(where: RoundWhereInput, orderBy: [RoundOrderByInput!], offset: Int, limit: Int): [Round!]!
-  roundById(id: String!): Round
-  roundsConnection(orderBy: [RoundOrderByInput!]!, after: String, first: Int, where: RoundWhereInput): RoundsConnection!
-  ticketPurchases(where: TicketPurchaseWhereInput, orderBy: [TicketPurchaseOrderByInput!], offset: Int, limit: Int): [TicketPurchase!]!
-  ticketPurchaseById(id: String!): TicketPurchase
-  ticketPurchasesConnection(orderBy: [TicketPurchaseOrderByInput!]!, after: String, first: Int, where: TicketPurchaseWhereInput): TicketPurchasesConnection!
-  prizeClaims(where: PrizeClaimWhereInput, orderBy: [PrizeClaimOrderByInput!], offset: Int, limit: Int): [PrizeClaim!]!
-  prizeClaimById(id: String!): PrizeClaim
-  prizeClaimsConnection(orderBy: [PrizeClaimOrderByInput!]!, after: String, first: Int, where: PrizeClaimWhereInput): PrizeClaimsConnection!
+  payoutTiers(where: PayoutTierWhereInput, orderBy: [PayoutTierOrderByInput!], offset: Int, limit: Int): [PayoutTier!]!
+  payoutTierById(id: String!): PayoutTier
+  payoutTiersConnection(orderBy: [PayoutTierOrderByInput!]!, after: String, first: Int, where: PayoutTierWhereInput): PayoutTiersConnection!
+  rips(where: RipWhereInput, orderBy: [RipOrderByInput!], offset: Int, limit: Int): [Rip!]!
+  ripById(id: String!): Rip
+  ripsConnection(orderBy: [RipOrderByInput!]!, after: String, first: Int, where: RipWhereInput): RipsConnection!
+  entryPurchases(where: EntryPurchaseWhereInput, orderBy: [EntryPurchaseOrderByInput!], offset: Int, limit: Int): [EntryPurchase!]!
+  entryPurchaseById(id: String!): EntryPurchase
+  entryPurchasesConnection(orderBy: [EntryPurchaseOrderByInput!]!, after: String, first: Int, where: EntryPurchaseWhereInput): EntryPurchasesConnection!
+  payoutClaims(where: PayoutClaimWhereInput, orderBy: [PayoutClaimOrderByInput!], offset: Int, limit: Int): [PayoutClaim!]!
+  payoutClaimById(id: String!): PayoutClaim
+  payoutClaimsConnection(orderBy: [PayoutClaimOrderByInput!]!, after: String, first: Int, where: PayoutClaimWhereInput): PayoutClaimsConnection!
   refunds(where: RefundWhereInput, orderBy: [RefundOrderByInput!], offset: Int, limit: Int): [Refund!]!
   refundById(id: String!): Refund
   refundsConnection(orderBy: [RefundOrderByInput!]!, after: String, first: Int, where: RefundWhereInput): RefundsConnection!
@@ -73,40 +73,40 @@ type Query {
   protocolFeeAccruedsConnection(orderBy: [ProtocolFeeAccruedOrderByInput!]!, after: String, first: Int, where: ProtocolFeeAccruedWhereInput): ProtocolFeeAccruedsConnection!
 }
 
-type Stake {
+type Preset {
   id: String!
   deleted: Boolean!
   configs(where: ConfigWhereInput, orderBy: [ConfigOrderByInput!], offset: Int, limit: Int): [Config!]!
-  rounds(where: RoundWhereInput, orderBy: [RoundOrderByInput!], offset: Int, limit: Int): [Round!]!
+  rips(where: RipWhereInput, orderBy: [RipOrderByInput!], offset: Int, limit: Int): [Rip!]!
 }
 
 type Config {
   id: String!
-  stakeId: String!
-  stake: Stake!
-  ticketCap: BigInt!
+  presetId: String!
+  preset: Preset!
+  entryCap: BigInt!
   currency: String!
   durationSeconds: BigInt!
-  ticketCost: BigInt!
+  entryCost: BigInt!
   feePercent: BigInt!
-  prizeDistribution(where: PrizeTierWhereInput, orderBy: [PrizeTierOrderByInput!], offset: Int, limit: Int): [PrizeTier!]!
-  rounds(where: RoundWhereInput, orderBy: [RoundOrderByInput!], offset: Int, limit: Int): [Round!]!
+  payoutDistribution(where: PayoutTierWhereInput, orderBy: [PayoutTierOrderByInput!], offset: Int, limit: Int): [PayoutTier!]!
+  rips(where: RipWhereInput, orderBy: [RipOrderByInput!], offset: Int, limit: Int): [Rip!]!
 }
 
 """Big number integer"""
 scalar BigInt
 
-type PrizeTier {
+type PayoutTier {
   id: String!
   configId: String!
   config: Config!
   tierIndex: Int!
-  prizeCount: BigInt!
-  minPrize: BigInt!
-  maxPrize: BigInt!
+  payoutCount: BigInt!
+  minPayout: BigInt!
+  maxPayout: BigInt!
 }
 
-input PrizeTierWhereInput {
+input PayoutTierWhereInput {
   id_isNull: Boolean
   id_eq: String
   id_not_eq: String
@@ -152,35 +152,35 @@ input PrizeTierWhereInput {
   tierIndex_lte: Int
   tierIndex_in: [Int!]
   tierIndex_not_in: [Int!]
-  prizeCount_isNull: Boolean
-  prizeCount_eq: BigInt
-  prizeCount_not_eq: BigInt
-  prizeCount_gt: BigInt
-  prizeCount_gte: BigInt
-  prizeCount_lt: BigInt
-  prizeCount_lte: BigInt
-  prizeCount_in: [BigInt!]
-  prizeCount_not_in: [BigInt!]
-  minPrize_isNull: Boolean
-  minPrize_eq: BigInt
-  minPrize_not_eq: BigInt
-  minPrize_gt: BigInt
-  minPrize_gte: BigInt
-  minPrize_lt: BigInt
-  minPrize_lte: BigInt
-  minPrize_in: [BigInt!]
-  minPrize_not_in: [BigInt!]
-  maxPrize_isNull: Boolean
-  maxPrize_eq: BigInt
-  maxPrize_not_eq: BigInt
-  maxPrize_gt: BigInt
-  maxPrize_gte: BigInt
-  maxPrize_lt: BigInt
-  maxPrize_lte: BigInt
-  maxPrize_in: [BigInt!]
-  maxPrize_not_in: [BigInt!]
-  AND: [PrizeTierWhereInput!]
-  OR: [PrizeTierWhereInput!]
+  payoutCount_isNull: Boolean
+  payoutCount_eq: BigInt
+  payoutCount_not_eq: BigInt
+  payoutCount_gt: BigInt
+  payoutCount_gte: BigInt
+  payoutCount_lt: BigInt
+  payoutCount_lte: BigInt
+  payoutCount_in: [BigInt!]
+  payoutCount_not_in: [BigInt!]
+  minPayout_isNull: Boolean
+  minPayout_eq: BigInt
+  minPayout_not_eq: BigInt
+  minPayout_gt: BigInt
+  minPayout_gte: BigInt
+  minPayout_lt: BigInt
+  minPayout_lte: BigInt
+  minPayout_in: [BigInt!]
+  minPayout_not_in: [BigInt!]
+  maxPayout_isNull: Boolean
+  maxPayout_eq: BigInt
+  maxPayout_not_eq: BigInt
+  maxPayout_gt: BigInt
+  maxPayout_gte: BigInt
+  maxPayout_lt: BigInt
+  maxPayout_lte: BigInt
+  maxPayout_in: [BigInt!]
+  maxPayout_not_in: [BigInt!]
+  AND: [PayoutTierWhereInput!]
+  OR: [PayoutTierWhereInput!]
 }
 
 input ConfigWhereInput {
@@ -201,34 +201,34 @@ input ConfigWhereInput {
   id_not_startsWith: String
   id_endsWith: String
   id_not_endsWith: String
-  stake_isNull: Boolean
-  stake: StakeWhereInput
-  stakeId_isNull: Boolean
-  stakeId_eq: String
-  stakeId_not_eq: String
-  stakeId_gt: String
-  stakeId_gte: String
-  stakeId_lt: String
-  stakeId_lte: String
-  stakeId_in: [String!]
-  stakeId_not_in: [String!]
-  stakeId_contains: String
-  stakeId_not_contains: String
-  stakeId_containsInsensitive: String
-  stakeId_not_containsInsensitive: String
-  stakeId_startsWith: String
-  stakeId_not_startsWith: String
-  stakeId_endsWith: String
-  stakeId_not_endsWith: String
-  ticketCap_isNull: Boolean
-  ticketCap_eq: BigInt
-  ticketCap_not_eq: BigInt
-  ticketCap_gt: BigInt
-  ticketCap_gte: BigInt
-  ticketCap_lt: BigInt
-  ticketCap_lte: BigInt
-  ticketCap_in: [BigInt!]
-  ticketCap_not_in: [BigInt!]
+  preset_isNull: Boolean
+  preset: PresetWhereInput
+  presetId_isNull: Boolean
+  presetId_eq: String
+  presetId_not_eq: String
+  presetId_gt: String
+  presetId_gte: String
+  presetId_lt: String
+  presetId_lte: String
+  presetId_in: [String!]
+  presetId_not_in: [String!]
+  presetId_contains: String
+  presetId_not_contains: String
+  presetId_containsInsensitive: String
+  presetId_not_containsInsensitive: String
+  presetId_startsWith: String
+  presetId_not_startsWith: String
+  presetId_endsWith: String
+  presetId_not_endsWith: String
+  entryCap_isNull: Boolean
+  entryCap_eq: BigInt
+  entryCap_not_eq: BigInt
+  entryCap_gt: BigInt
+  entryCap_gte: BigInt
+  entryCap_lt: BigInt
+  entryCap_lte: BigInt
+  entryCap_in: [BigInt!]
+  entryCap_not_in: [BigInt!]
   currency_isNull: Boolean
   currency_eq: String
   currency_not_eq: String
@@ -255,15 +255,15 @@ input ConfigWhereInput {
   durationSeconds_lte: BigInt
   durationSeconds_in: [BigInt!]
   durationSeconds_not_in: [BigInt!]
-  ticketCost_isNull: Boolean
-  ticketCost_eq: BigInt
-  ticketCost_not_eq: BigInt
-  ticketCost_gt: BigInt
-  ticketCost_gte: BigInt
-  ticketCost_lt: BigInt
-  ticketCost_lte: BigInt
-  ticketCost_in: [BigInt!]
-  ticketCost_not_in: [BigInt!]
+  entryCost_isNull: Boolean
+  entryCost_eq: BigInt
+  entryCost_not_eq: BigInt
+  entryCost_gt: BigInt
+  entryCost_gte: BigInt
+  entryCost_lt: BigInt
+  entryCost_lte: BigInt
+  entryCost_in: [BigInt!]
+  entryCost_not_in: [BigInt!]
   feePercent_isNull: Boolean
   feePercent_eq: BigInt
   feePercent_not_eq: BigInt
@@ -273,17 +273,17 @@ input ConfigWhereInput {
   feePercent_lte: BigInt
   feePercent_in: [BigInt!]
   feePercent_not_in: [BigInt!]
-  prizeDistribution_every: PrizeTierWhereInput
-  prizeDistribution_some: PrizeTierWhereInput
-  prizeDistribution_none: PrizeTierWhereInput
-  rounds_every: RoundWhereInput
-  rounds_some: RoundWhereInput
-  rounds_none: RoundWhereInput
+  payoutDistribution_every: PayoutTierWhereInput
+  payoutDistribution_some: PayoutTierWhereInput
+  payoutDistribution_none: PayoutTierWhereInput
+  rips_every: RipWhereInput
+  rips_some: RipWhereInput
+  rips_none: RipWhereInput
   AND: [ConfigWhereInput!]
   OR: [ConfigWhereInput!]
 }
 
-input StakeWhereInput {
+input PresetWhereInput {
   id_isNull: Boolean
   id_eq: String
   id_not_eq: String
@@ -307,14 +307,14 @@ input StakeWhereInput {
   configs_every: ConfigWhereInput
   configs_some: ConfigWhereInput
   configs_none: ConfigWhereInput
-  rounds_every: RoundWhereInput
-  rounds_some: RoundWhereInput
-  rounds_none: RoundWhereInput
-  AND: [StakeWhereInput!]
-  OR: [StakeWhereInput!]
+  rips_every: RipWhereInput
+  rips_some: RipWhereInput
+  rips_none: RipWhereInput
+  AND: [PresetWhereInput!]
+  OR: [PresetWhereInput!]
 }
 
-input RoundWhereInput {
+input RipWhereInput {
   id_isNull: Boolean
   id_eq: String
   id_not_eq: String
@@ -351,25 +351,25 @@ input RoundWhereInput {
   configId_not_startsWith: String
   configId_endsWith: String
   configId_not_endsWith: String
-  stake_isNull: Boolean
-  stake: StakeWhereInput
-  stakeId_isNull: Boolean
-  stakeId_eq: String
-  stakeId_not_eq: String
-  stakeId_gt: String
-  stakeId_gte: String
-  stakeId_lt: String
-  stakeId_lte: String
-  stakeId_in: [String!]
-  stakeId_not_in: [String!]
-  stakeId_contains: String
-  stakeId_not_contains: String
-  stakeId_containsInsensitive: String
-  stakeId_not_containsInsensitive: String
-  stakeId_startsWith: String
-  stakeId_not_startsWith: String
-  stakeId_endsWith: String
-  stakeId_not_endsWith: String
+  preset_isNull: Boolean
+  preset: PresetWhereInput
+  presetId_isNull: Boolean
+  presetId_eq: String
+  presetId_not_eq: String
+  presetId_gt: String
+  presetId_gte: String
+  presetId_lt: String
+  presetId_lte: String
+  presetId_in: [String!]
+  presetId_not_in: [String!]
+  presetId_contains: String
+  presetId_not_contains: String
+  presetId_containsInsensitive: String
+  presetId_not_containsInsensitive: String
+  presetId_startsWith: String
+  presetId_not_startsWith: String
+  presetId_endsWith: String
+  presetId_not_endsWith: String
   startTime_isNull: Boolean
   startTime_eq: DateTime
   startTime_not_eq: DateTime
@@ -379,38 +379,38 @@ input RoundWhereInput {
   startTime_lte: DateTime
   startTime_in: [DateTime!]
   startTime_not_in: [DateTime!]
-  ticketsSold_isNull: Boolean
-  ticketsSold_eq: BigInt
-  ticketsSold_not_eq: BigInt
-  ticketsSold_gt: BigInt
-  ticketsSold_gte: BigInt
-  ticketsSold_lt: BigInt
-  ticketsSold_lte: BigInt
-  ticketsSold_in: [BigInt!]
-  ticketsSold_not_in: [BigInt!]
-  ticketsClaimed_isNull: Boolean
-  ticketsClaimed_eq: BigInt
-  ticketsClaimed_not_eq: BigInt
-  ticketsClaimed_gt: BigInt
-  ticketsClaimed_gte: BigInt
-  ticketsClaimed_lt: BigInt
-  ticketsClaimed_lte: BigInt
-  ticketsClaimed_in: [BigInt!]
-  ticketsClaimed_not_in: [BigInt!]
-  ticketsRefunded_isNull: Boolean
-  ticketsRefunded_eq: BigInt
-  ticketsRefunded_not_eq: BigInt
-  ticketsRefunded_gt: BigInt
-  ticketsRefunded_gte: BigInt
-  ticketsRefunded_lt: BigInt
-  ticketsRefunded_lte: BigInt
-  ticketsRefunded_in: [BigInt!]
-  ticketsRefunded_not_in: [BigInt!]
+  entriesSold_isNull: Boolean
+  entriesSold_eq: BigInt
+  entriesSold_not_eq: BigInt
+  entriesSold_gt: BigInt
+  entriesSold_gte: BigInt
+  entriesSold_lt: BigInt
+  entriesSold_lte: BigInt
+  entriesSold_in: [BigInt!]
+  entriesSold_not_in: [BigInt!]
+  entriesClaimed_isNull: Boolean
+  entriesClaimed_eq: BigInt
+  entriesClaimed_not_eq: BigInt
+  entriesClaimed_gt: BigInt
+  entriesClaimed_gte: BigInt
+  entriesClaimed_lt: BigInt
+  entriesClaimed_lte: BigInt
+  entriesClaimed_in: [BigInt!]
+  entriesClaimed_not_in: [BigInt!]
+  entriesRefunded_isNull: Boolean
+  entriesRefunded_eq: BigInt
+  entriesRefunded_not_eq: BigInt
+  entriesRefunded_gt: BigInt
+  entriesRefunded_gte: BigInt
+  entriesRefunded_lt: BigInt
+  entriesRefunded_lte: BigInt
+  entriesRefunded_in: [BigInt!]
+  entriesRefunded_not_in: [BigInt!]
   status_isNull: Boolean
-  status_eq: RoundStatus
-  status_not_eq: RoundStatus
-  status_in: [RoundStatus!]
-  status_not_in: [RoundStatus!]
+  status_eq: RipStatus
+  status_not_eq: RipStatus
+  status_in: [RipStatus!]
+  status_not_in: [RipStatus!]
   vrfRequestStatus_isNull: Boolean
   vrfRequestStatus_eq: VrfRequestStatus
   vrfRequestStatus_not_eq: VrfRequestStatus
@@ -443,17 +443,17 @@ input RoundWhereInput {
   vrfRequestId_lte: BigInt
   vrfRequestId_in: [BigInt!]
   vrfRequestId_not_in: [BigInt!]
-  ticketPurchases_every: TicketPurchaseWhereInput
-  ticketPurchases_some: TicketPurchaseWhereInput
-  ticketPurchases_none: TicketPurchaseWhereInput
-  prizesClaimed_every: PrizeClaimWhereInput
-  prizesClaimed_some: PrizeClaimWhereInput
-  prizesClaimed_none: PrizeClaimWhereInput
+  entryPurchases_every: EntryPurchaseWhereInput
+  entryPurchases_some: EntryPurchaseWhereInput
+  entryPurchases_none: EntryPurchaseWhereInput
+  payoutsClaimed_every: PayoutClaimWhereInput
+  payoutsClaimed_some: PayoutClaimWhereInput
+  payoutsClaimed_none: PayoutClaimWhereInput
   refunds_every: RefundWhereInput
   refunds_some: RefundWhereInput
   refunds_none: RefundWhereInput
-  AND: [RoundWhereInput!]
-  OR: [RoundWhereInput!]
+  AND: [RipWhereInput!]
+  OR: [RipWhereInput!]
 }
 
 """
@@ -461,7 +461,7 @@ A date-time string in simplified extended ISO 8601 format (YYYY-MM-DDTHH:mm:ss.s
 """
 scalar DateTime
 
-enum RoundStatus {
+enum RipStatus {
   FILLING
   SEALED
   VRF_REQUESTED
@@ -477,7 +477,7 @@ enum VrfRequestStatus {
   FULFILLED
 }
 
-input TicketPurchaseWhereInput {
+input EntryPurchaseWhereInput {
   id_isNull: Boolean
   id_eq: String
   id_not_eq: String
@@ -495,25 +495,25 @@ input TicketPurchaseWhereInput {
   id_not_startsWith: String
   id_endsWith: String
   id_not_endsWith: String
-  round_isNull: Boolean
-  round: RoundWhereInput
-  roundId_isNull: Boolean
-  roundId_eq: String
-  roundId_not_eq: String
-  roundId_gt: String
-  roundId_gte: String
-  roundId_lt: String
-  roundId_lte: String
-  roundId_in: [String!]
-  roundId_not_in: [String!]
-  roundId_contains: String
-  roundId_not_contains: String
-  roundId_containsInsensitive: String
-  roundId_not_containsInsensitive: String
-  roundId_startsWith: String
-  roundId_not_startsWith: String
-  roundId_endsWith: String
-  roundId_not_endsWith: String
+  rip_isNull: Boolean
+  rip: RipWhereInput
+  ripId_isNull: Boolean
+  ripId_eq: String
+  ripId_not_eq: String
+  ripId_gt: String
+  ripId_gte: String
+  ripId_lt: String
+  ripId_lte: String
+  ripId_in: [String!]
+  ripId_not_in: [String!]
+  ripId_contains: String
+  ripId_not_contains: String
+  ripId_containsInsensitive: String
+  ripId_not_containsInsensitive: String
+  ripId_startsWith: String
+  ripId_not_startsWith: String
+  ripId_endsWith: String
+  ripId_not_endsWith: String
   user_isNull: Boolean
   user_eq: String
   user_not_eq: String
@@ -531,24 +531,24 @@ input TicketPurchaseWhereInput {
   user_not_startsWith: String
   user_endsWith: String
   user_not_endsWith: String
-  ticketCount_isNull: Boolean
-  ticketCount_eq: BigInt
-  ticketCount_not_eq: BigInt
-  ticketCount_gt: BigInt
-  ticketCount_gte: BigInt
-  ticketCount_lt: BigInt
-  ticketCount_lte: BigInt
-  ticketCount_in: [BigInt!]
-  ticketCount_not_in: [BigInt!]
-  startTicketIndex_isNull: Boolean
-  startTicketIndex_eq: BigInt
-  startTicketIndex_not_eq: BigInt
-  startTicketIndex_gt: BigInt
-  startTicketIndex_gte: BigInt
-  startTicketIndex_lt: BigInt
-  startTicketIndex_lte: BigInt
-  startTicketIndex_in: [BigInt!]
-  startTicketIndex_not_in: [BigInt!]
+  entryCount_isNull: Boolean
+  entryCount_eq: BigInt
+  entryCount_not_eq: BigInt
+  entryCount_gt: BigInt
+  entryCount_gte: BigInt
+  entryCount_lt: BigInt
+  entryCount_lte: BigInt
+  entryCount_in: [BigInt!]
+  entryCount_not_in: [BigInt!]
+  startEntryIndex_isNull: Boolean
+  startEntryIndex_eq: BigInt
+  startEntryIndex_not_eq: BigInt
+  startEntryIndex_gt: BigInt
+  startEntryIndex_gte: BigInt
+  startEntryIndex_lt: BigInt
+  startEntryIndex_lte: BigInt
+  startEntryIndex_in: [BigInt!]
+  startEntryIndex_not_in: [BigInt!]
   blockNumber_isNull: Boolean
   blockNumber_eq: BigInt
   blockNumber_not_eq: BigInt
@@ -584,11 +584,11 @@ input TicketPurchaseWhereInput {
   txHash_not_startsWith: String
   txHash_endsWith: String
   txHash_not_endsWith: String
-  AND: [TicketPurchaseWhereInput!]
-  OR: [TicketPurchaseWhereInput!]
+  AND: [EntryPurchaseWhereInput!]
+  OR: [EntryPurchaseWhereInput!]
 }
 
-input PrizeClaimWhereInput {
+input PayoutClaimWhereInput {
   id_isNull: Boolean
   id_eq: String
   id_not_eq: String
@@ -606,25 +606,25 @@ input PrizeClaimWhereInput {
   id_not_startsWith: String
   id_endsWith: String
   id_not_endsWith: String
-  round_isNull: Boolean
-  round: RoundWhereInput
-  roundId_isNull: Boolean
-  roundId_eq: String
-  roundId_not_eq: String
-  roundId_gt: String
-  roundId_gte: String
-  roundId_lt: String
-  roundId_lte: String
-  roundId_in: [String!]
-  roundId_not_in: [String!]
-  roundId_contains: String
-  roundId_not_contains: String
-  roundId_containsInsensitive: String
-  roundId_not_containsInsensitive: String
-  roundId_startsWith: String
-  roundId_not_startsWith: String
-  roundId_endsWith: String
-  roundId_not_endsWith: String
+  rip_isNull: Boolean
+  rip: RipWhereInput
+  ripId_isNull: Boolean
+  ripId_eq: String
+  ripId_not_eq: String
+  ripId_gt: String
+  ripId_gte: String
+  ripId_lt: String
+  ripId_lte: String
+  ripId_in: [String!]
+  ripId_not_in: [String!]
+  ripId_contains: String
+  ripId_not_contains: String
+  ripId_containsInsensitive: String
+  ripId_not_containsInsensitive: String
+  ripId_startsWith: String
+  ripId_not_startsWith: String
+  ripId_endsWith: String
+  ripId_not_endsWith: String
   user_isNull: Boolean
   user_eq: String
   user_not_eq: String
@@ -659,15 +659,15 @@ input PrizeClaimWhereInput {
   referrer_not_startsWith: String
   referrer_endsWith: String
   referrer_not_endsWith: String
-  ticketCount_isNull: Boolean
-  ticketCount_eq: BigInt
-  ticketCount_not_eq: BigInt
-  ticketCount_gt: BigInt
-  ticketCount_gte: BigInt
-  ticketCount_lt: BigInt
-  ticketCount_lte: BigInt
-  ticketCount_in: [BigInt!]
-  ticketCount_not_in: [BigInt!]
+  entryCount_isNull: Boolean
+  entryCount_eq: BigInt
+  entryCount_not_eq: BigInt
+  entryCount_gt: BigInt
+  entryCount_gte: BigInt
+  entryCount_lt: BigInt
+  entryCount_lte: BigInt
+  entryCount_in: [BigInt!]
+  entryCount_not_in: [BigInt!]
   amount_isNull: Boolean
   amount_eq: BigInt
   amount_not_eq: BigInt
@@ -712,8 +712,8 @@ input PrizeClaimWhereInput {
   txHash_not_startsWith: String
   txHash_endsWith: String
   txHash_not_endsWith: String
-  AND: [PrizeClaimWhereInput!]
-  OR: [PrizeClaimWhereInput!]
+  AND: [PayoutClaimWhereInput!]
+  OR: [PayoutClaimWhereInput!]
 }
 
 input RefundWhereInput {
@@ -734,25 +734,25 @@ input RefundWhereInput {
   id_not_startsWith: String
   id_endsWith: String
   id_not_endsWith: String
-  round_isNull: Boolean
-  round: RoundWhereInput
-  roundId_isNull: Boolean
-  roundId_eq: String
-  roundId_not_eq: String
-  roundId_gt: String
-  roundId_gte: String
-  roundId_lt: String
-  roundId_lte: String
-  roundId_in: [String!]
-  roundId_not_in: [String!]
-  roundId_contains: String
-  roundId_not_contains: String
-  roundId_containsInsensitive: String
-  roundId_not_containsInsensitive: String
-  roundId_startsWith: String
-  roundId_not_startsWith: String
-  roundId_endsWith: String
-  roundId_not_endsWith: String
+  rip_isNull: Boolean
+  rip: RipWhereInput
+  ripId_isNull: Boolean
+  ripId_eq: String
+  ripId_not_eq: String
+  ripId_gt: String
+  ripId_gte: String
+  ripId_lt: String
+  ripId_lte: String
+  ripId_in: [String!]
+  ripId_not_in: [String!]
+  ripId_contains: String
+  ripId_not_contains: String
+  ripId_containsInsensitive: String
+  ripId_not_containsInsensitive: String
+  ripId_startsWith: String
+  ripId_not_startsWith: String
+  ripId_endsWith: String
+  ripId_not_endsWith: String
   user_isNull: Boolean
   user_eq: String
   user_not_eq: String
@@ -770,15 +770,15 @@ input RefundWhereInput {
   user_not_startsWith: String
   user_endsWith: String
   user_not_endsWith: String
-  ticketCount_isNull: Boolean
-  ticketCount_eq: BigInt
-  ticketCount_not_eq: BigInt
-  ticketCount_gt: BigInt
-  ticketCount_gte: BigInt
-  ticketCount_lt: BigInt
-  ticketCount_lte: BigInt
-  ticketCount_in: [BigInt!]
-  ticketCount_not_in: [BigInt!]
+  entryCount_isNull: Boolean
+  entryCount_eq: BigInt
+  entryCount_not_eq: BigInt
+  entryCount_gt: BigInt
+  entryCount_gte: BigInt
+  entryCount_lt: BigInt
+  entryCount_lte: BigInt
+  entryCount_in: [BigInt!]
+  entryCount_not_in: [BigInt!]
   amount_isNull: Boolean
   amount_eq: BigInt
   amount_not_eq: BigInt
@@ -827,7 +827,7 @@ input RefundWhereInput {
   OR: [RefundWhereInput!]
 }
 
-enum PrizeTierOrderByInput {
+enum PayoutTierOrderByInput {
   id_ASC
   id_DESC
   id_ASC_NULLS_FIRST
@@ -840,12 +840,12 @@ enum PrizeTierOrderByInput {
   config_id_ASC_NULLS_LAST
   config_id_DESC_NULLS_FIRST
   config_id_DESC_NULLS_LAST
-  config_ticketCap_ASC
-  config_ticketCap_DESC
-  config_ticketCap_ASC_NULLS_FIRST
-  config_ticketCap_ASC_NULLS_LAST
-  config_ticketCap_DESC_NULLS_FIRST
-  config_ticketCap_DESC_NULLS_LAST
+  config_entryCap_ASC
+  config_entryCap_DESC
+  config_entryCap_ASC_NULLS_FIRST
+  config_entryCap_ASC_NULLS_LAST
+  config_entryCap_DESC_NULLS_FIRST
+  config_entryCap_DESC_NULLS_LAST
   config_currency_ASC
   config_currency_DESC
   config_currency_ASC_NULLS_FIRST
@@ -858,12 +858,12 @@ enum PrizeTierOrderByInput {
   config_durationSeconds_ASC_NULLS_LAST
   config_durationSeconds_DESC_NULLS_FIRST
   config_durationSeconds_DESC_NULLS_LAST
-  config_ticketCost_ASC
-  config_ticketCost_DESC
-  config_ticketCost_ASC_NULLS_FIRST
-  config_ticketCost_ASC_NULLS_LAST
-  config_ticketCost_DESC_NULLS_FIRST
-  config_ticketCost_DESC_NULLS_LAST
+  config_entryCost_ASC
+  config_entryCost_DESC
+  config_entryCost_ASC_NULLS_FIRST
+  config_entryCost_ASC_NULLS_LAST
+  config_entryCost_DESC_NULLS_FIRST
+  config_entryCost_DESC_NULLS_LAST
   config_feePercent_ASC
   config_feePercent_DESC
   config_feePercent_ASC_NULLS_FIRST
@@ -876,143 +876,143 @@ enum PrizeTierOrderByInput {
   tierIndex_ASC_NULLS_LAST
   tierIndex_DESC_NULLS_FIRST
   tierIndex_DESC_NULLS_LAST
-  prizeCount_ASC
-  prizeCount_DESC
-  prizeCount_ASC_NULLS_FIRST
-  prizeCount_ASC_NULLS_LAST
-  prizeCount_DESC_NULLS_FIRST
-  prizeCount_DESC_NULLS_LAST
-  minPrize_ASC
-  minPrize_DESC
-  minPrize_ASC_NULLS_FIRST
-  minPrize_ASC_NULLS_LAST
-  minPrize_DESC_NULLS_FIRST
-  minPrize_DESC_NULLS_LAST
-  maxPrize_ASC
-  maxPrize_DESC
-  maxPrize_ASC_NULLS_FIRST
-  maxPrize_ASC_NULLS_LAST
-  maxPrize_DESC_NULLS_FIRST
-  maxPrize_DESC_NULLS_LAST
+  payoutCount_ASC
+  payoutCount_DESC
+  payoutCount_ASC_NULLS_FIRST
+  payoutCount_ASC_NULLS_LAST
+  payoutCount_DESC_NULLS_FIRST
+  payoutCount_DESC_NULLS_LAST
+  minPayout_ASC
+  minPayout_DESC
+  minPayout_ASC_NULLS_FIRST
+  minPayout_ASC_NULLS_LAST
+  minPayout_DESC_NULLS_FIRST
+  minPayout_DESC_NULLS_LAST
+  maxPayout_ASC
+  maxPayout_DESC
+  maxPayout_ASC_NULLS_FIRST
+  maxPayout_ASC_NULLS_LAST
+  maxPayout_DESC_NULLS_FIRST
+  maxPayout_DESC_NULLS_LAST
 }
 
-type Round {
+type Rip {
   id: String!
   configId: String!
   config: Config!
-  stakeId: String!
-  stake: Stake!
+  presetId: String!
+  preset: Preset!
   startTime: DateTime!
-  ticketsSold: BigInt!
-  ticketsClaimed: BigInt!
-  ticketsRefunded: BigInt!
-  status: RoundStatus!
+  entriesSold: BigInt!
+  entriesClaimed: BigInt!
+  entriesRefunded: BigInt!
+  status: RipStatus!
   vrfRequestStatus: VrfRequestStatus!
   randomA: BigInt
   randomB: BigInt
   vrfRequestId: BigInt
-  ticketPurchases(where: TicketPurchaseWhereInput, orderBy: [TicketPurchaseOrderByInput!], offset: Int, limit: Int): [TicketPurchase!]!
-  prizesClaimed(where: PrizeClaimWhereInput, orderBy: [PrizeClaimOrderByInput!], offset: Int, limit: Int): [PrizeClaim!]!
+  entryPurchases(where: EntryPurchaseWhereInput, orderBy: [EntryPurchaseOrderByInput!], offset: Int, limit: Int): [EntryPurchase!]!
+  payoutsClaimed(where: PayoutClaimWhereInput, orderBy: [PayoutClaimOrderByInput!], offset: Int, limit: Int): [PayoutClaim!]!
   refunds(where: RefundWhereInput, orderBy: [RefundOrderByInput!], offset: Int, limit: Int): [Refund!]!
 }
 
-type TicketPurchase {
+type EntryPurchase {
   id: String!
-  roundId: String!
-  round: Round!
+  ripId: String!
+  rip: Rip!
   user: String!
-  ticketCount: BigInt!
-  startTicketIndex: BigInt!
+  entryCount: BigInt!
+  startEntryIndex: BigInt!
   blockNumber: BigInt!
   time: DateTime!
   txHash: String!
 }
 
-enum TicketPurchaseOrderByInput {
+enum EntryPurchaseOrderByInput {
   id_ASC
   id_DESC
   id_ASC_NULLS_FIRST
   id_ASC_NULLS_LAST
   id_DESC_NULLS_FIRST
   id_DESC_NULLS_LAST
-  round_id_ASC
-  round_id_DESC
-  round_id_ASC_NULLS_FIRST
-  round_id_ASC_NULLS_LAST
-  round_id_DESC_NULLS_FIRST
-  round_id_DESC_NULLS_LAST
-  round_startTime_ASC
-  round_startTime_DESC
-  round_startTime_ASC_NULLS_FIRST
-  round_startTime_ASC_NULLS_LAST
-  round_startTime_DESC_NULLS_FIRST
-  round_startTime_DESC_NULLS_LAST
-  round_ticketsSold_ASC
-  round_ticketsSold_DESC
-  round_ticketsSold_ASC_NULLS_FIRST
-  round_ticketsSold_ASC_NULLS_LAST
-  round_ticketsSold_DESC_NULLS_FIRST
-  round_ticketsSold_DESC_NULLS_LAST
-  round_ticketsClaimed_ASC
-  round_ticketsClaimed_DESC
-  round_ticketsClaimed_ASC_NULLS_FIRST
-  round_ticketsClaimed_ASC_NULLS_LAST
-  round_ticketsClaimed_DESC_NULLS_FIRST
-  round_ticketsClaimed_DESC_NULLS_LAST
-  round_ticketsRefunded_ASC
-  round_ticketsRefunded_DESC
-  round_ticketsRefunded_ASC_NULLS_FIRST
-  round_ticketsRefunded_ASC_NULLS_LAST
-  round_ticketsRefunded_DESC_NULLS_FIRST
-  round_ticketsRefunded_DESC_NULLS_LAST
-  round_status_ASC
-  round_status_DESC
-  round_status_ASC_NULLS_FIRST
-  round_status_ASC_NULLS_LAST
-  round_status_DESC_NULLS_FIRST
-  round_status_DESC_NULLS_LAST
-  round_vrfRequestStatus_ASC
-  round_vrfRequestStatus_DESC
-  round_vrfRequestStatus_ASC_NULLS_FIRST
-  round_vrfRequestStatus_ASC_NULLS_LAST
-  round_vrfRequestStatus_DESC_NULLS_FIRST
-  round_vrfRequestStatus_DESC_NULLS_LAST
-  round_randomA_ASC
-  round_randomA_DESC
-  round_randomA_ASC_NULLS_FIRST
-  round_randomA_ASC_NULLS_LAST
-  round_randomA_DESC_NULLS_FIRST
-  round_randomA_DESC_NULLS_LAST
-  round_randomB_ASC
-  round_randomB_DESC
-  round_randomB_ASC_NULLS_FIRST
-  round_randomB_ASC_NULLS_LAST
-  round_randomB_DESC_NULLS_FIRST
-  round_randomB_DESC_NULLS_LAST
-  round_vrfRequestId_ASC
-  round_vrfRequestId_DESC
-  round_vrfRequestId_ASC_NULLS_FIRST
-  round_vrfRequestId_ASC_NULLS_LAST
-  round_vrfRequestId_DESC_NULLS_FIRST
-  round_vrfRequestId_DESC_NULLS_LAST
+  rip_id_ASC
+  rip_id_DESC
+  rip_id_ASC_NULLS_FIRST
+  rip_id_ASC_NULLS_LAST
+  rip_id_DESC_NULLS_FIRST
+  rip_id_DESC_NULLS_LAST
+  rip_startTime_ASC
+  rip_startTime_DESC
+  rip_startTime_ASC_NULLS_FIRST
+  rip_startTime_ASC_NULLS_LAST
+  rip_startTime_DESC_NULLS_FIRST
+  rip_startTime_DESC_NULLS_LAST
+  rip_entriesSold_ASC
+  rip_entriesSold_DESC
+  rip_entriesSold_ASC_NULLS_FIRST
+  rip_entriesSold_ASC_NULLS_LAST
+  rip_entriesSold_DESC_NULLS_FIRST
+  rip_entriesSold_DESC_NULLS_LAST
+  rip_entriesClaimed_ASC
+  rip_entriesClaimed_DESC
+  rip_entriesClaimed_ASC_NULLS_FIRST
+  rip_entriesClaimed_ASC_NULLS_LAST
+  rip_entriesClaimed_DESC_NULLS_FIRST
+  rip_entriesClaimed_DESC_NULLS_LAST
+  rip_entriesRefunded_ASC
+  rip_entriesRefunded_DESC
+  rip_entriesRefunded_ASC_NULLS_FIRST
+  rip_entriesRefunded_ASC_NULLS_LAST
+  rip_entriesRefunded_DESC_NULLS_FIRST
+  rip_entriesRefunded_DESC_NULLS_LAST
+  rip_status_ASC
+  rip_status_DESC
+  rip_status_ASC_NULLS_FIRST
+  rip_status_ASC_NULLS_LAST
+  rip_status_DESC_NULLS_FIRST
+  rip_status_DESC_NULLS_LAST
+  rip_vrfRequestStatus_ASC
+  rip_vrfRequestStatus_DESC
+  rip_vrfRequestStatus_ASC_NULLS_FIRST
+  rip_vrfRequestStatus_ASC_NULLS_LAST
+  rip_vrfRequestStatus_DESC_NULLS_FIRST
+  rip_vrfRequestStatus_DESC_NULLS_LAST
+  rip_randomA_ASC
+  rip_randomA_DESC
+  rip_randomA_ASC_NULLS_FIRST
+  rip_randomA_ASC_NULLS_LAST
+  rip_randomA_DESC_NULLS_FIRST
+  rip_randomA_DESC_NULLS_LAST
+  rip_randomB_ASC
+  rip_randomB_DESC
+  rip_randomB_ASC_NULLS_FIRST
+  rip_randomB_ASC_NULLS_LAST
+  rip_randomB_DESC_NULLS_FIRST
+  rip_randomB_DESC_NULLS_LAST
+  rip_vrfRequestId_ASC
+  rip_vrfRequestId_DESC
+  rip_vrfRequestId_ASC_NULLS_FIRST
+  rip_vrfRequestId_ASC_NULLS_LAST
+  rip_vrfRequestId_DESC_NULLS_FIRST
+  rip_vrfRequestId_DESC_NULLS_LAST
   user_ASC
   user_DESC
   user_ASC_NULLS_FIRST
   user_ASC_NULLS_LAST
   user_DESC_NULLS_FIRST
   user_DESC_NULLS_LAST
-  ticketCount_ASC
-  ticketCount_DESC
-  ticketCount_ASC_NULLS_FIRST
-  ticketCount_ASC_NULLS_LAST
-  ticketCount_DESC_NULLS_FIRST
-  ticketCount_DESC_NULLS_LAST
-  startTicketIndex_ASC
-  startTicketIndex_DESC
-  startTicketIndex_ASC_NULLS_FIRST
-  startTicketIndex_ASC_NULLS_LAST
-  startTicketIndex_DESC_NULLS_FIRST
-  startTicketIndex_DESC_NULLS_LAST
+  entryCount_ASC
+  entryCount_DESC
+  entryCount_ASC_NULLS_FIRST
+  entryCount_ASC_NULLS_LAST
+  entryCount_DESC_NULLS_FIRST
+  entryCount_DESC_NULLS_LAST
+  startEntryIndex_ASC
+  startEntryIndex_DESC
+  startEntryIndex_ASC_NULLS_FIRST
+  startEntryIndex_ASC_NULLS_LAST
+  startEntryIndex_DESC_NULLS_FIRST
+  startEntryIndex_DESC_NULLS_LAST
   blockNumber_ASC
   blockNumber_DESC
   blockNumber_ASC_NULLS_FIRST
@@ -1033,86 +1033,86 @@ enum TicketPurchaseOrderByInput {
   txHash_DESC_NULLS_LAST
 }
 
-type PrizeClaim {
+type PayoutClaim {
   id: String!
-  roundId: String!
-  round: Round!
+  ripId: String!
+  rip: Rip!
   user: String!
   referrer: String!
-  ticketCount: BigInt!
+  entryCount: BigInt!
   amount: BigInt!
   blockNumber: BigInt!
   time: DateTime!
   txHash: String!
 }
 
-enum PrizeClaimOrderByInput {
+enum PayoutClaimOrderByInput {
   id_ASC
   id_DESC
   id_ASC_NULLS_FIRST
   id_ASC_NULLS_LAST
   id_DESC_NULLS_FIRST
   id_DESC_NULLS_LAST
-  round_id_ASC
-  round_id_DESC
-  round_id_ASC_NULLS_FIRST
-  round_id_ASC_NULLS_LAST
-  round_id_DESC_NULLS_FIRST
-  round_id_DESC_NULLS_LAST
-  round_startTime_ASC
-  round_startTime_DESC
-  round_startTime_ASC_NULLS_FIRST
-  round_startTime_ASC_NULLS_LAST
-  round_startTime_DESC_NULLS_FIRST
-  round_startTime_DESC_NULLS_LAST
-  round_ticketsSold_ASC
-  round_ticketsSold_DESC
-  round_ticketsSold_ASC_NULLS_FIRST
-  round_ticketsSold_ASC_NULLS_LAST
-  round_ticketsSold_DESC_NULLS_FIRST
-  round_ticketsSold_DESC_NULLS_LAST
-  round_ticketsClaimed_ASC
-  round_ticketsClaimed_DESC
-  round_ticketsClaimed_ASC_NULLS_FIRST
-  round_ticketsClaimed_ASC_NULLS_LAST
-  round_ticketsClaimed_DESC_NULLS_FIRST
-  round_ticketsClaimed_DESC_NULLS_LAST
-  round_ticketsRefunded_ASC
-  round_ticketsRefunded_DESC
-  round_ticketsRefunded_ASC_NULLS_FIRST
-  round_ticketsRefunded_ASC_NULLS_LAST
-  round_ticketsRefunded_DESC_NULLS_FIRST
-  round_ticketsRefunded_DESC_NULLS_LAST
-  round_status_ASC
-  round_status_DESC
-  round_status_ASC_NULLS_FIRST
-  round_status_ASC_NULLS_LAST
-  round_status_DESC_NULLS_FIRST
-  round_status_DESC_NULLS_LAST
-  round_vrfRequestStatus_ASC
-  round_vrfRequestStatus_DESC
-  round_vrfRequestStatus_ASC_NULLS_FIRST
-  round_vrfRequestStatus_ASC_NULLS_LAST
-  round_vrfRequestStatus_DESC_NULLS_FIRST
-  round_vrfRequestStatus_DESC_NULLS_LAST
-  round_randomA_ASC
-  round_randomA_DESC
-  round_randomA_ASC_NULLS_FIRST
-  round_randomA_ASC_NULLS_LAST
-  round_randomA_DESC_NULLS_FIRST
-  round_randomA_DESC_NULLS_LAST
-  round_randomB_ASC
-  round_randomB_DESC
-  round_randomB_ASC_NULLS_FIRST
-  round_randomB_ASC_NULLS_LAST
-  round_randomB_DESC_NULLS_FIRST
-  round_randomB_DESC_NULLS_LAST
-  round_vrfRequestId_ASC
-  round_vrfRequestId_DESC
-  round_vrfRequestId_ASC_NULLS_FIRST
-  round_vrfRequestId_ASC_NULLS_LAST
-  round_vrfRequestId_DESC_NULLS_FIRST
-  round_vrfRequestId_DESC_NULLS_LAST
+  rip_id_ASC
+  rip_id_DESC
+  rip_id_ASC_NULLS_FIRST
+  rip_id_ASC_NULLS_LAST
+  rip_id_DESC_NULLS_FIRST
+  rip_id_DESC_NULLS_LAST
+  rip_startTime_ASC
+  rip_startTime_DESC
+  rip_startTime_ASC_NULLS_FIRST
+  rip_startTime_ASC_NULLS_LAST
+  rip_startTime_DESC_NULLS_FIRST
+  rip_startTime_DESC_NULLS_LAST
+  rip_entriesSold_ASC
+  rip_entriesSold_DESC
+  rip_entriesSold_ASC_NULLS_FIRST
+  rip_entriesSold_ASC_NULLS_LAST
+  rip_entriesSold_DESC_NULLS_FIRST
+  rip_entriesSold_DESC_NULLS_LAST
+  rip_entriesClaimed_ASC
+  rip_entriesClaimed_DESC
+  rip_entriesClaimed_ASC_NULLS_FIRST
+  rip_entriesClaimed_ASC_NULLS_LAST
+  rip_entriesClaimed_DESC_NULLS_FIRST
+  rip_entriesClaimed_DESC_NULLS_LAST
+  rip_entriesRefunded_ASC
+  rip_entriesRefunded_DESC
+  rip_entriesRefunded_ASC_NULLS_FIRST
+  rip_entriesRefunded_ASC_NULLS_LAST
+  rip_entriesRefunded_DESC_NULLS_FIRST
+  rip_entriesRefunded_DESC_NULLS_LAST
+  rip_status_ASC
+  rip_status_DESC
+  rip_status_ASC_NULLS_FIRST
+  rip_status_ASC_NULLS_LAST
+  rip_status_DESC_NULLS_FIRST
+  rip_status_DESC_NULLS_LAST
+  rip_vrfRequestStatus_ASC
+  rip_vrfRequestStatus_DESC
+  rip_vrfRequestStatus_ASC_NULLS_FIRST
+  rip_vrfRequestStatus_ASC_NULLS_LAST
+  rip_vrfRequestStatus_DESC_NULLS_FIRST
+  rip_vrfRequestStatus_DESC_NULLS_LAST
+  rip_randomA_ASC
+  rip_randomA_DESC
+  rip_randomA_ASC_NULLS_FIRST
+  rip_randomA_ASC_NULLS_LAST
+  rip_randomA_DESC_NULLS_FIRST
+  rip_randomA_DESC_NULLS_LAST
+  rip_randomB_ASC
+  rip_randomB_DESC
+  rip_randomB_ASC_NULLS_FIRST
+  rip_randomB_ASC_NULLS_LAST
+  rip_randomB_DESC_NULLS_FIRST
+  rip_randomB_DESC_NULLS_LAST
+  rip_vrfRequestId_ASC
+  rip_vrfRequestId_DESC
+  rip_vrfRequestId_ASC_NULLS_FIRST
+  rip_vrfRequestId_ASC_NULLS_LAST
+  rip_vrfRequestId_DESC_NULLS_FIRST
+  rip_vrfRequestId_DESC_NULLS_LAST
   user_ASC
   user_DESC
   user_ASC_NULLS_FIRST
@@ -1125,12 +1125,12 @@ enum PrizeClaimOrderByInput {
   referrer_ASC_NULLS_LAST
   referrer_DESC_NULLS_FIRST
   referrer_DESC_NULLS_LAST
-  ticketCount_ASC
-  ticketCount_DESC
-  ticketCount_ASC_NULLS_FIRST
-  ticketCount_ASC_NULLS_LAST
-  ticketCount_DESC_NULLS_FIRST
-  ticketCount_DESC_NULLS_LAST
+  entryCount_ASC
+  entryCount_DESC
+  entryCount_ASC_NULLS_FIRST
+  entryCount_ASC_NULLS_LAST
+  entryCount_DESC_NULLS_FIRST
+  entryCount_DESC_NULLS_LAST
   amount_ASC
   amount_DESC
   amount_ASC_NULLS_FIRST
@@ -1159,10 +1159,10 @@ enum PrizeClaimOrderByInput {
 
 type Refund {
   id: String!
-  roundId: String!
-  round: Round!
+  ripId: String!
+  rip: Rip!
   user: String!
-  ticketCount: BigInt!
+  entryCount: BigInt!
   amount: BigInt!
   blockNumber: BigInt!
   time: DateTime!
@@ -1176,78 +1176,78 @@ enum RefundOrderByInput {
   id_ASC_NULLS_LAST
   id_DESC_NULLS_FIRST
   id_DESC_NULLS_LAST
-  round_id_ASC
-  round_id_DESC
-  round_id_ASC_NULLS_FIRST
-  round_id_ASC_NULLS_LAST
-  round_id_DESC_NULLS_FIRST
-  round_id_DESC_NULLS_LAST
-  round_startTime_ASC
-  round_startTime_DESC
-  round_startTime_ASC_NULLS_FIRST
-  round_startTime_ASC_NULLS_LAST
-  round_startTime_DESC_NULLS_FIRST
-  round_startTime_DESC_NULLS_LAST
-  round_ticketsSold_ASC
-  round_ticketsSold_DESC
-  round_ticketsSold_ASC_NULLS_FIRST
-  round_ticketsSold_ASC_NULLS_LAST
-  round_ticketsSold_DESC_NULLS_FIRST
-  round_ticketsSold_DESC_NULLS_LAST
-  round_ticketsClaimed_ASC
-  round_ticketsClaimed_DESC
-  round_ticketsClaimed_ASC_NULLS_FIRST
-  round_ticketsClaimed_ASC_NULLS_LAST
-  round_ticketsClaimed_DESC_NULLS_FIRST
-  round_ticketsClaimed_DESC_NULLS_LAST
-  round_ticketsRefunded_ASC
-  round_ticketsRefunded_DESC
-  round_ticketsRefunded_ASC_NULLS_FIRST
-  round_ticketsRefunded_ASC_NULLS_LAST
-  round_ticketsRefunded_DESC_NULLS_FIRST
-  round_ticketsRefunded_DESC_NULLS_LAST
-  round_status_ASC
-  round_status_DESC
-  round_status_ASC_NULLS_FIRST
-  round_status_ASC_NULLS_LAST
-  round_status_DESC_NULLS_FIRST
-  round_status_DESC_NULLS_LAST
-  round_vrfRequestStatus_ASC
-  round_vrfRequestStatus_DESC
-  round_vrfRequestStatus_ASC_NULLS_FIRST
-  round_vrfRequestStatus_ASC_NULLS_LAST
-  round_vrfRequestStatus_DESC_NULLS_FIRST
-  round_vrfRequestStatus_DESC_NULLS_LAST
-  round_randomA_ASC
-  round_randomA_DESC
-  round_randomA_ASC_NULLS_FIRST
-  round_randomA_ASC_NULLS_LAST
-  round_randomA_DESC_NULLS_FIRST
-  round_randomA_DESC_NULLS_LAST
-  round_randomB_ASC
-  round_randomB_DESC
-  round_randomB_ASC_NULLS_FIRST
-  round_randomB_ASC_NULLS_LAST
-  round_randomB_DESC_NULLS_FIRST
-  round_randomB_DESC_NULLS_LAST
-  round_vrfRequestId_ASC
-  round_vrfRequestId_DESC
-  round_vrfRequestId_ASC_NULLS_FIRST
-  round_vrfRequestId_ASC_NULLS_LAST
-  round_vrfRequestId_DESC_NULLS_FIRST
-  round_vrfRequestId_DESC_NULLS_LAST
+  rip_id_ASC
+  rip_id_DESC
+  rip_id_ASC_NULLS_FIRST
+  rip_id_ASC_NULLS_LAST
+  rip_id_DESC_NULLS_FIRST
+  rip_id_DESC_NULLS_LAST
+  rip_startTime_ASC
+  rip_startTime_DESC
+  rip_startTime_ASC_NULLS_FIRST
+  rip_startTime_ASC_NULLS_LAST
+  rip_startTime_DESC_NULLS_FIRST
+  rip_startTime_DESC_NULLS_LAST
+  rip_entriesSold_ASC
+  rip_entriesSold_DESC
+  rip_entriesSold_ASC_NULLS_FIRST
+  rip_entriesSold_ASC_NULLS_LAST
+  rip_entriesSold_DESC_NULLS_FIRST
+  rip_entriesSold_DESC_NULLS_LAST
+  rip_entriesClaimed_ASC
+  rip_entriesClaimed_DESC
+  rip_entriesClaimed_ASC_NULLS_FIRST
+  rip_entriesClaimed_ASC_NULLS_LAST
+  rip_entriesClaimed_DESC_NULLS_FIRST
+  rip_entriesClaimed_DESC_NULLS_LAST
+  rip_entriesRefunded_ASC
+  rip_entriesRefunded_DESC
+  rip_entriesRefunded_ASC_NULLS_FIRST
+  rip_entriesRefunded_ASC_NULLS_LAST
+  rip_entriesRefunded_DESC_NULLS_FIRST
+  rip_entriesRefunded_DESC_NULLS_LAST
+  rip_status_ASC
+  rip_status_DESC
+  rip_status_ASC_NULLS_FIRST
+  rip_status_ASC_NULLS_LAST
+  rip_status_DESC_NULLS_FIRST
+  rip_status_DESC_NULLS_LAST
+  rip_vrfRequestStatus_ASC
+  rip_vrfRequestStatus_DESC
+  rip_vrfRequestStatus_ASC_NULLS_FIRST
+  rip_vrfRequestStatus_ASC_NULLS_LAST
+  rip_vrfRequestStatus_DESC_NULLS_FIRST
+  rip_vrfRequestStatus_DESC_NULLS_LAST
+  rip_randomA_ASC
+  rip_randomA_DESC
+  rip_randomA_ASC_NULLS_FIRST
+  rip_randomA_ASC_NULLS_LAST
+  rip_randomA_DESC_NULLS_FIRST
+  rip_randomA_DESC_NULLS_LAST
+  rip_randomB_ASC
+  rip_randomB_DESC
+  rip_randomB_ASC_NULLS_FIRST
+  rip_randomB_ASC_NULLS_LAST
+  rip_randomB_DESC_NULLS_FIRST
+  rip_randomB_DESC_NULLS_LAST
+  rip_vrfRequestId_ASC
+  rip_vrfRequestId_DESC
+  rip_vrfRequestId_ASC_NULLS_FIRST
+  rip_vrfRequestId_ASC_NULLS_LAST
+  rip_vrfRequestId_DESC_NULLS_FIRST
+  rip_vrfRequestId_DESC_NULLS_LAST
   user_ASC
   user_DESC
   user_ASC_NULLS_FIRST
   user_ASC_NULLS_LAST
   user_DESC_NULLS_FIRST
   user_DESC_NULLS_LAST
-  ticketCount_ASC
-  ticketCount_DESC
-  ticketCount_ASC_NULLS_FIRST
-  ticketCount_ASC_NULLS_LAST
-  ticketCount_DESC_NULLS_FIRST
-  ticketCount_DESC_NULLS_LAST
+  entryCount_ASC
+  entryCount_DESC
+  entryCount_ASC_NULLS_FIRST
+  entryCount_ASC_NULLS_LAST
+  entryCount_DESC_NULLS_FIRST
+  entryCount_DESC_NULLS_LAST
   amount_ASC
   amount_DESC
   amount_ASC_NULLS_FIRST
@@ -1274,7 +1274,7 @@ enum RefundOrderByInput {
   txHash_DESC_NULLS_LAST
 }
 
-enum RoundOrderByInput {
+enum RipOrderByInput {
   id_ASC
   id_DESC
   id_ASC_NULLS_FIRST
@@ -1287,12 +1287,12 @@ enum RoundOrderByInput {
   config_id_ASC_NULLS_LAST
   config_id_DESC_NULLS_FIRST
   config_id_DESC_NULLS_LAST
-  config_ticketCap_ASC
-  config_ticketCap_DESC
-  config_ticketCap_ASC_NULLS_FIRST
-  config_ticketCap_ASC_NULLS_LAST
-  config_ticketCap_DESC_NULLS_FIRST
-  config_ticketCap_DESC_NULLS_LAST
+  config_entryCap_ASC
+  config_entryCap_DESC
+  config_entryCap_ASC_NULLS_FIRST
+  config_entryCap_ASC_NULLS_LAST
+  config_entryCap_DESC_NULLS_FIRST
+  config_entryCap_DESC_NULLS_LAST
   config_currency_ASC
   config_currency_DESC
   config_currency_ASC_NULLS_FIRST
@@ -1305,54 +1305,54 @@ enum RoundOrderByInput {
   config_durationSeconds_ASC_NULLS_LAST
   config_durationSeconds_DESC_NULLS_FIRST
   config_durationSeconds_DESC_NULLS_LAST
-  config_ticketCost_ASC
-  config_ticketCost_DESC
-  config_ticketCost_ASC_NULLS_FIRST
-  config_ticketCost_ASC_NULLS_LAST
-  config_ticketCost_DESC_NULLS_FIRST
-  config_ticketCost_DESC_NULLS_LAST
+  config_entryCost_ASC
+  config_entryCost_DESC
+  config_entryCost_ASC_NULLS_FIRST
+  config_entryCost_ASC_NULLS_LAST
+  config_entryCost_DESC_NULLS_FIRST
+  config_entryCost_DESC_NULLS_LAST
   config_feePercent_ASC
   config_feePercent_DESC
   config_feePercent_ASC_NULLS_FIRST
   config_feePercent_ASC_NULLS_LAST
   config_feePercent_DESC_NULLS_FIRST
   config_feePercent_DESC_NULLS_LAST
-  stake_id_ASC
-  stake_id_DESC
-  stake_id_ASC_NULLS_FIRST
-  stake_id_ASC_NULLS_LAST
-  stake_id_DESC_NULLS_FIRST
-  stake_id_DESC_NULLS_LAST
-  stake_deleted_ASC
-  stake_deleted_DESC
-  stake_deleted_ASC_NULLS_FIRST
-  stake_deleted_ASC_NULLS_LAST
-  stake_deleted_DESC_NULLS_FIRST
-  stake_deleted_DESC_NULLS_LAST
+  preset_id_ASC
+  preset_id_DESC
+  preset_id_ASC_NULLS_FIRST
+  preset_id_ASC_NULLS_LAST
+  preset_id_DESC_NULLS_FIRST
+  preset_id_DESC_NULLS_LAST
+  preset_deleted_ASC
+  preset_deleted_DESC
+  preset_deleted_ASC_NULLS_FIRST
+  preset_deleted_ASC_NULLS_LAST
+  preset_deleted_DESC_NULLS_FIRST
+  preset_deleted_DESC_NULLS_LAST
   startTime_ASC
   startTime_DESC
   startTime_ASC_NULLS_FIRST
   startTime_ASC_NULLS_LAST
   startTime_DESC_NULLS_FIRST
   startTime_DESC_NULLS_LAST
-  ticketsSold_ASC
-  ticketsSold_DESC
-  ticketsSold_ASC_NULLS_FIRST
-  ticketsSold_ASC_NULLS_LAST
-  ticketsSold_DESC_NULLS_FIRST
-  ticketsSold_DESC_NULLS_LAST
-  ticketsClaimed_ASC
-  ticketsClaimed_DESC
-  ticketsClaimed_ASC_NULLS_FIRST
-  ticketsClaimed_ASC_NULLS_LAST
-  ticketsClaimed_DESC_NULLS_FIRST
-  ticketsClaimed_DESC_NULLS_LAST
-  ticketsRefunded_ASC
-  ticketsRefunded_DESC
-  ticketsRefunded_ASC_NULLS_FIRST
-  ticketsRefunded_ASC_NULLS_LAST
-  ticketsRefunded_DESC_NULLS_FIRST
-  ticketsRefunded_DESC_NULLS_LAST
+  entriesSold_ASC
+  entriesSold_DESC
+  entriesSold_ASC_NULLS_FIRST
+  entriesSold_ASC_NULLS_LAST
+  entriesSold_DESC_NULLS_FIRST
+  entriesSold_DESC_NULLS_LAST
+  entriesClaimed_ASC
+  entriesClaimed_DESC
+  entriesClaimed_ASC_NULLS_FIRST
+  entriesClaimed_ASC_NULLS_LAST
+  entriesClaimed_DESC_NULLS_FIRST
+  entriesClaimed_DESC_NULLS_LAST
+  entriesRefunded_ASC
+  entriesRefunded_DESC
+  entriesRefunded_ASC_NULLS_FIRST
+  entriesRefunded_ASC_NULLS_LAST
+  entriesRefunded_DESC_NULLS_FIRST
+  entriesRefunded_DESC_NULLS_LAST
   status_ASC
   status_DESC
   status_ASC_NULLS_FIRST
@@ -1392,24 +1392,24 @@ enum ConfigOrderByInput {
   id_ASC_NULLS_LAST
   id_DESC_NULLS_FIRST
   id_DESC_NULLS_LAST
-  stake_id_ASC
-  stake_id_DESC
-  stake_id_ASC_NULLS_FIRST
-  stake_id_ASC_NULLS_LAST
-  stake_id_DESC_NULLS_FIRST
-  stake_id_DESC_NULLS_LAST
-  stake_deleted_ASC
-  stake_deleted_DESC
-  stake_deleted_ASC_NULLS_FIRST
-  stake_deleted_ASC_NULLS_LAST
-  stake_deleted_DESC_NULLS_FIRST
-  stake_deleted_DESC_NULLS_LAST
-  ticketCap_ASC
-  ticketCap_DESC
-  ticketCap_ASC_NULLS_FIRST
-  ticketCap_ASC_NULLS_LAST
-  ticketCap_DESC_NULLS_FIRST
-  ticketCap_DESC_NULLS_LAST
+  preset_id_ASC
+  preset_id_DESC
+  preset_id_ASC_NULLS_FIRST
+  preset_id_ASC_NULLS_LAST
+  preset_id_DESC_NULLS_FIRST
+  preset_id_DESC_NULLS_LAST
+  preset_deleted_ASC
+  preset_deleted_DESC
+  preset_deleted_ASC_NULLS_FIRST
+  preset_deleted_ASC_NULLS_LAST
+  preset_deleted_DESC_NULLS_FIRST
+  preset_deleted_DESC_NULLS_LAST
+  entryCap_ASC
+  entryCap_DESC
+  entryCap_ASC_NULLS_FIRST
+  entryCap_ASC_NULLS_LAST
+  entryCap_DESC_NULLS_FIRST
+  entryCap_DESC_NULLS_LAST
   currency_ASC
   currency_DESC
   currency_ASC_NULLS_FIRST
@@ -1422,12 +1422,12 @@ enum ConfigOrderByInput {
   durationSeconds_ASC_NULLS_LAST
   durationSeconds_DESC_NULLS_FIRST
   durationSeconds_DESC_NULLS_LAST
-  ticketCost_ASC
-  ticketCost_DESC
-  ticketCost_ASC_NULLS_FIRST
-  ticketCost_ASC_NULLS_LAST
-  ticketCost_DESC_NULLS_FIRST
-  ticketCost_DESC_NULLS_LAST
+  entryCost_ASC
+  entryCost_DESC
+  entryCost_ASC_NULLS_FIRST
+  entryCost_ASC_NULLS_LAST
+  entryCost_DESC_NULLS_FIRST
+  entryCost_DESC_NULLS_LAST
   feePercent_ASC
   feePercent_DESC
   feePercent_ASC_NULLS_FIRST
@@ -1436,7 +1436,7 @@ enum ConfigOrderByInput {
   feePercent_DESC_NULLS_LAST
 }
 
-enum StakeOrderByInput {
+enum PresetOrderByInput {
   id_ASC
   id_DESC
   id_ASC_NULLS_FIRST
@@ -1451,14 +1451,14 @@ enum StakeOrderByInput {
   deleted_DESC_NULLS_LAST
 }
 
-type StakesConnection {
-  edges: [StakeEdge!]!
+type PresetsConnection {
+  edges: [PresetEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
-type StakeEdge {
-  node: Stake!
+type PresetEdge {
+  node: Preset!
   cursor: String!
 }
 
@@ -1480,47 +1480,47 @@ type ConfigEdge {
   cursor: String!
 }
 
-type PrizeTiersConnection {
-  edges: [PrizeTierEdge!]!
+type PayoutTiersConnection {
+  edges: [PayoutTierEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
-type PrizeTierEdge {
-  node: PrizeTier!
+type PayoutTierEdge {
+  node: PayoutTier!
   cursor: String!
 }
 
-type RoundsConnection {
-  edges: [RoundEdge!]!
+type RipsConnection {
+  edges: [RipEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
-type RoundEdge {
-  node: Round!
+type RipEdge {
+  node: Rip!
   cursor: String!
 }
 
-type TicketPurchasesConnection {
-  edges: [TicketPurchaseEdge!]!
+type EntryPurchasesConnection {
+  edges: [EntryPurchaseEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
-type TicketPurchaseEdge {
-  node: TicketPurchase!
+type EntryPurchaseEdge {
+  node: EntryPurchase!
   cursor: String!
 }
 
-type PrizeClaimsConnection {
-  edges: [PrizeClaimEdge!]!
+type PayoutClaimsConnection {
+  edges: [PayoutClaimEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
-type PrizeClaimEdge {
-  node: PrizeClaim!
+type PayoutClaimEdge {
+  node: PayoutClaim!
   cursor: String!
 }
 
@@ -3636,8 +3636,8 @@ type ReferrerRewardEdge {
 
 type ReferralFeeAccrued {
   id: String!
-  roundId: String!
-  round: Round!
+  ripId: String!
+  rip: Rip!
   referrer: String!
   amount: BigInt!
   blockNumber: BigInt!
@@ -3663,25 +3663,25 @@ input ReferralFeeAccruedWhereInput {
   id_not_startsWith: String
   id_endsWith: String
   id_not_endsWith: String
-  round_isNull: Boolean
-  round: RoundWhereInput
-  roundId_isNull: Boolean
-  roundId_eq: String
-  roundId_not_eq: String
-  roundId_gt: String
-  roundId_gte: String
-  roundId_lt: String
-  roundId_lte: String
-  roundId_in: [String!]
-  roundId_not_in: [String!]
-  roundId_contains: String
-  roundId_not_contains: String
-  roundId_containsInsensitive: String
-  roundId_not_containsInsensitive: String
-  roundId_startsWith: String
-  roundId_not_startsWith: String
-  roundId_endsWith: String
-  roundId_not_endsWith: String
+  rip_isNull: Boolean
+  rip: RipWhereInput
+  ripId_isNull: Boolean
+  ripId_eq: String
+  ripId_not_eq: String
+  ripId_gt: String
+  ripId_gte: String
+  ripId_lt: String
+  ripId_lte: String
+  ripId_in: [String!]
+  ripId_not_in: [String!]
+  ripId_contains: String
+  ripId_not_contains: String
+  ripId_containsInsensitive: String
+  ripId_not_containsInsensitive: String
+  ripId_startsWith: String
+  ripId_not_startsWith: String
+  ripId_endsWith: String
+  ripId_not_endsWith: String
   referrer_isNull: Boolean
   referrer_eq: String
   referrer_not_eq: String
@@ -3754,66 +3754,66 @@ enum ReferralFeeAccruedOrderByInput {
   id_ASC_NULLS_LAST
   id_DESC_NULLS_FIRST
   id_DESC_NULLS_LAST
-  round_id_ASC
-  round_id_DESC
-  round_id_ASC_NULLS_FIRST
-  round_id_ASC_NULLS_LAST
-  round_id_DESC_NULLS_FIRST
-  round_id_DESC_NULLS_LAST
-  round_startTime_ASC
-  round_startTime_DESC
-  round_startTime_ASC_NULLS_FIRST
-  round_startTime_ASC_NULLS_LAST
-  round_startTime_DESC_NULLS_FIRST
-  round_startTime_DESC_NULLS_LAST
-  round_ticketsSold_ASC
-  round_ticketsSold_DESC
-  round_ticketsSold_ASC_NULLS_FIRST
-  round_ticketsSold_ASC_NULLS_LAST
-  round_ticketsSold_DESC_NULLS_FIRST
-  round_ticketsSold_DESC_NULLS_LAST
-  round_ticketsClaimed_ASC
-  round_ticketsClaimed_DESC
-  round_ticketsClaimed_ASC_NULLS_FIRST
-  round_ticketsClaimed_ASC_NULLS_LAST
-  round_ticketsClaimed_DESC_NULLS_FIRST
-  round_ticketsClaimed_DESC_NULLS_LAST
-  round_ticketsRefunded_ASC
-  round_ticketsRefunded_DESC
-  round_ticketsRefunded_ASC_NULLS_FIRST
-  round_ticketsRefunded_ASC_NULLS_LAST
-  round_ticketsRefunded_DESC_NULLS_FIRST
-  round_ticketsRefunded_DESC_NULLS_LAST
-  round_status_ASC
-  round_status_DESC
-  round_status_ASC_NULLS_FIRST
-  round_status_ASC_NULLS_LAST
-  round_status_DESC_NULLS_FIRST
-  round_status_DESC_NULLS_LAST
-  round_vrfRequestStatus_ASC
-  round_vrfRequestStatus_DESC
-  round_vrfRequestStatus_ASC_NULLS_FIRST
-  round_vrfRequestStatus_ASC_NULLS_LAST
-  round_vrfRequestStatus_DESC_NULLS_FIRST
-  round_vrfRequestStatus_DESC_NULLS_LAST
-  round_randomA_ASC
-  round_randomA_DESC
-  round_randomA_ASC_NULLS_FIRST
-  round_randomA_ASC_NULLS_LAST
-  round_randomA_DESC_NULLS_FIRST
-  round_randomA_DESC_NULLS_LAST
-  round_randomB_ASC
-  round_randomB_DESC
-  round_randomB_ASC_NULLS_FIRST
-  round_randomB_ASC_NULLS_LAST
-  round_randomB_DESC_NULLS_FIRST
-  round_randomB_DESC_NULLS_LAST
-  round_vrfRequestId_ASC
-  round_vrfRequestId_DESC
-  round_vrfRequestId_ASC_NULLS_FIRST
-  round_vrfRequestId_ASC_NULLS_LAST
-  round_vrfRequestId_DESC_NULLS_FIRST
-  round_vrfRequestId_DESC_NULLS_LAST
+  rip_id_ASC
+  rip_id_DESC
+  rip_id_ASC_NULLS_FIRST
+  rip_id_ASC_NULLS_LAST
+  rip_id_DESC_NULLS_FIRST
+  rip_id_DESC_NULLS_LAST
+  rip_startTime_ASC
+  rip_startTime_DESC
+  rip_startTime_ASC_NULLS_FIRST
+  rip_startTime_ASC_NULLS_LAST
+  rip_startTime_DESC_NULLS_FIRST
+  rip_startTime_DESC_NULLS_LAST
+  rip_entriesSold_ASC
+  rip_entriesSold_DESC
+  rip_entriesSold_ASC_NULLS_FIRST
+  rip_entriesSold_ASC_NULLS_LAST
+  rip_entriesSold_DESC_NULLS_FIRST
+  rip_entriesSold_DESC_NULLS_LAST
+  rip_entriesClaimed_ASC
+  rip_entriesClaimed_DESC
+  rip_entriesClaimed_ASC_NULLS_FIRST
+  rip_entriesClaimed_ASC_NULLS_LAST
+  rip_entriesClaimed_DESC_NULLS_FIRST
+  rip_entriesClaimed_DESC_NULLS_LAST
+  rip_entriesRefunded_ASC
+  rip_entriesRefunded_DESC
+  rip_entriesRefunded_ASC_NULLS_FIRST
+  rip_entriesRefunded_ASC_NULLS_LAST
+  rip_entriesRefunded_DESC_NULLS_FIRST
+  rip_entriesRefunded_DESC_NULLS_LAST
+  rip_status_ASC
+  rip_status_DESC
+  rip_status_ASC_NULLS_FIRST
+  rip_status_ASC_NULLS_LAST
+  rip_status_DESC_NULLS_FIRST
+  rip_status_DESC_NULLS_LAST
+  rip_vrfRequestStatus_ASC
+  rip_vrfRequestStatus_DESC
+  rip_vrfRequestStatus_ASC_NULLS_FIRST
+  rip_vrfRequestStatus_ASC_NULLS_LAST
+  rip_vrfRequestStatus_DESC_NULLS_FIRST
+  rip_vrfRequestStatus_DESC_NULLS_LAST
+  rip_randomA_ASC
+  rip_randomA_DESC
+  rip_randomA_ASC_NULLS_FIRST
+  rip_randomA_ASC_NULLS_LAST
+  rip_randomA_DESC_NULLS_FIRST
+  rip_randomA_DESC_NULLS_LAST
+  rip_randomB_ASC
+  rip_randomB_DESC
+  rip_randomB_ASC_NULLS_FIRST
+  rip_randomB_ASC_NULLS_LAST
+  rip_randomB_DESC_NULLS_FIRST
+  rip_randomB_DESC_NULLS_LAST
+  rip_vrfRequestId_ASC
+  rip_vrfRequestId_DESC
+  rip_vrfRequestId_ASC_NULLS_FIRST
+  rip_vrfRequestId_ASC_NULLS_LAST
+  rip_vrfRequestId_DESC_NULLS_FIRST
+  rip_vrfRequestId_DESC_NULLS_LAST
   referrer_ASC
   referrer_DESC
   referrer_ASC_NULLS_FIRST
@@ -3859,8 +3859,8 @@ type ReferralFeeAccruedEdge {
 
 type ProtocolFeeAccrued {
   id: String!
-  roundId: String!
-  round: Round!
+  ripId: String!
+  rip: Rip!
   amount: BigInt!
   blockNumber: BigInt!
   time: DateTime!
@@ -3885,25 +3885,25 @@ input ProtocolFeeAccruedWhereInput {
   id_not_startsWith: String
   id_endsWith: String
   id_not_endsWith: String
-  round_isNull: Boolean
-  round: RoundWhereInput
-  roundId_isNull: Boolean
-  roundId_eq: String
-  roundId_not_eq: String
-  roundId_gt: String
-  roundId_gte: String
-  roundId_lt: String
-  roundId_lte: String
-  roundId_in: [String!]
-  roundId_not_in: [String!]
-  roundId_contains: String
-  roundId_not_contains: String
-  roundId_containsInsensitive: String
-  roundId_not_containsInsensitive: String
-  roundId_startsWith: String
-  roundId_not_startsWith: String
-  roundId_endsWith: String
-  roundId_not_endsWith: String
+  rip_isNull: Boolean
+  rip: RipWhereInput
+  ripId_isNull: Boolean
+  ripId_eq: String
+  ripId_not_eq: String
+  ripId_gt: String
+  ripId_gte: String
+  ripId_lt: String
+  ripId_lte: String
+  ripId_in: [String!]
+  ripId_not_in: [String!]
+  ripId_contains: String
+  ripId_not_contains: String
+  ripId_containsInsensitive: String
+  ripId_not_containsInsensitive: String
+  ripId_startsWith: String
+  ripId_not_startsWith: String
+  ripId_endsWith: String
+  ripId_not_endsWith: String
   amount_isNull: Boolean
   amount_eq: BigInt
   amount_not_eq: BigInt
@@ -3959,66 +3959,66 @@ enum ProtocolFeeAccruedOrderByInput {
   id_ASC_NULLS_LAST
   id_DESC_NULLS_FIRST
   id_DESC_NULLS_LAST
-  round_id_ASC
-  round_id_DESC
-  round_id_ASC_NULLS_FIRST
-  round_id_ASC_NULLS_LAST
-  round_id_DESC_NULLS_FIRST
-  round_id_DESC_NULLS_LAST
-  round_startTime_ASC
-  round_startTime_DESC
-  round_startTime_ASC_NULLS_FIRST
-  round_startTime_ASC_NULLS_LAST
-  round_startTime_DESC_NULLS_FIRST
-  round_startTime_DESC_NULLS_LAST
-  round_ticketsSold_ASC
-  round_ticketsSold_DESC
-  round_ticketsSold_ASC_NULLS_FIRST
-  round_ticketsSold_ASC_NULLS_LAST
-  round_ticketsSold_DESC_NULLS_FIRST
-  round_ticketsSold_DESC_NULLS_LAST
-  round_ticketsClaimed_ASC
-  round_ticketsClaimed_DESC
-  round_ticketsClaimed_ASC_NULLS_FIRST
-  round_ticketsClaimed_ASC_NULLS_LAST
-  round_ticketsClaimed_DESC_NULLS_FIRST
-  round_ticketsClaimed_DESC_NULLS_LAST
-  round_ticketsRefunded_ASC
-  round_ticketsRefunded_DESC
-  round_ticketsRefunded_ASC_NULLS_FIRST
-  round_ticketsRefunded_ASC_NULLS_LAST
-  round_ticketsRefunded_DESC_NULLS_FIRST
-  round_ticketsRefunded_DESC_NULLS_LAST
-  round_status_ASC
-  round_status_DESC
-  round_status_ASC_NULLS_FIRST
-  round_status_ASC_NULLS_LAST
-  round_status_DESC_NULLS_FIRST
-  round_status_DESC_NULLS_LAST
-  round_vrfRequestStatus_ASC
-  round_vrfRequestStatus_DESC
-  round_vrfRequestStatus_ASC_NULLS_FIRST
-  round_vrfRequestStatus_ASC_NULLS_LAST
-  round_vrfRequestStatus_DESC_NULLS_FIRST
-  round_vrfRequestStatus_DESC_NULLS_LAST
-  round_randomA_ASC
-  round_randomA_DESC
-  round_randomA_ASC_NULLS_FIRST
-  round_randomA_ASC_NULLS_LAST
-  round_randomA_DESC_NULLS_FIRST
-  round_randomA_DESC_NULLS_LAST
-  round_randomB_ASC
-  round_randomB_DESC
-  round_randomB_ASC_NULLS_FIRST
-  round_randomB_ASC_NULLS_LAST
-  round_randomB_DESC_NULLS_FIRST
-  round_randomB_DESC_NULLS_LAST
-  round_vrfRequestId_ASC
-  round_vrfRequestId_DESC
-  round_vrfRequestId_ASC_NULLS_FIRST
-  round_vrfRequestId_ASC_NULLS_LAST
-  round_vrfRequestId_DESC_NULLS_FIRST
-  round_vrfRequestId_DESC_NULLS_LAST
+  rip_id_ASC
+  rip_id_DESC
+  rip_id_ASC_NULLS_FIRST
+  rip_id_ASC_NULLS_LAST
+  rip_id_DESC_NULLS_FIRST
+  rip_id_DESC_NULLS_LAST
+  rip_startTime_ASC
+  rip_startTime_DESC
+  rip_startTime_ASC_NULLS_FIRST
+  rip_startTime_ASC_NULLS_LAST
+  rip_startTime_DESC_NULLS_FIRST
+  rip_startTime_DESC_NULLS_LAST
+  rip_entriesSold_ASC
+  rip_entriesSold_DESC
+  rip_entriesSold_ASC_NULLS_FIRST
+  rip_entriesSold_ASC_NULLS_LAST
+  rip_entriesSold_DESC_NULLS_FIRST
+  rip_entriesSold_DESC_NULLS_LAST
+  rip_entriesClaimed_ASC
+  rip_entriesClaimed_DESC
+  rip_entriesClaimed_ASC_NULLS_FIRST
+  rip_entriesClaimed_ASC_NULLS_LAST
+  rip_entriesClaimed_DESC_NULLS_FIRST
+  rip_entriesClaimed_DESC_NULLS_LAST
+  rip_entriesRefunded_ASC
+  rip_entriesRefunded_DESC
+  rip_entriesRefunded_ASC_NULLS_FIRST
+  rip_entriesRefunded_ASC_NULLS_LAST
+  rip_entriesRefunded_DESC_NULLS_FIRST
+  rip_entriesRefunded_DESC_NULLS_LAST
+  rip_status_ASC
+  rip_status_DESC
+  rip_status_ASC_NULLS_FIRST
+  rip_status_ASC_NULLS_LAST
+  rip_status_DESC_NULLS_FIRST
+  rip_status_DESC_NULLS_LAST
+  rip_vrfRequestStatus_ASC
+  rip_vrfRequestStatus_DESC
+  rip_vrfRequestStatus_ASC_NULLS_FIRST
+  rip_vrfRequestStatus_ASC_NULLS_LAST
+  rip_vrfRequestStatus_DESC_NULLS_FIRST
+  rip_vrfRequestStatus_DESC_NULLS_LAST
+  rip_randomA_ASC
+  rip_randomA_DESC
+  rip_randomA_ASC_NULLS_FIRST
+  rip_randomA_ASC_NULLS_LAST
+  rip_randomA_DESC_NULLS_FIRST
+  rip_randomA_DESC_NULLS_LAST
+  rip_randomB_ASC
+  rip_randomB_DESC
+  rip_randomB_ASC_NULLS_FIRST
+  rip_randomB_ASC_NULLS_LAST
+  rip_randomB_DESC_NULLS_FIRST
+  rip_randomB_DESC_NULLS_LAST
+  rip_vrfRequestId_ASC
+  rip_vrfRequestId_DESC
+  rip_vrfRequestId_ASC_NULLS_FIRST
+  rip_vrfRequestId_ASC_NULLS_LAST
+  rip_vrfRequestId_DESC_NULLS_FIRST
+  rip_vrfRequestId_DESC_NULLS_LAST
   amount_ASC
   amount_DESC
   amount_ASC_NULLS_FIRST

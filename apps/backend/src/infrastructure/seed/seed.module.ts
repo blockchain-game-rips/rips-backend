@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { GetAvailableStakesModule } from '../../modules/use-cases/get-available-stakes.module'
+import { GetAvailablePresetsModule } from '../../modules/use-cases/get-available-presets.module'
 import { PrismaModule } from '../prisma/prisma.module'
 import { SeedCardDefinitionsService } from './seed-card-definitions.service'
 
 @Module({
 	imports: [
-		GetAvailableStakesModule,
+		GetAvailablePresetsModule,
 		PrismaModule,
 		ConfigModule.forRoot({ isGlobal: true }),
 	],

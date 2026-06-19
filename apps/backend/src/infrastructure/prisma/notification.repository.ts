@@ -47,7 +47,7 @@ export class PrismaNotificationRepository extends NotificationRepository {
 		return {
 			id: record.id,
 			userTelegramId,
-			roundId: BigInt(record.roundId),
+			ripId: BigInt(record.ripId),
 			type: NotificationType[
 				record.type as keyof typeof NotificationType
 			],
@@ -62,7 +62,7 @@ const GROUP_BROADCAST_USER_ID = BigInt(0)
 type NotificationRecord = {
 	id: bigint
 	userId: bigint
-	roundId: number
+	ripId: number
 	type: string
 	createdAt: Date
 	isNotified: boolean

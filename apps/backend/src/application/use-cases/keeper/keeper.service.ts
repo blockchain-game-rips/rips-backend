@@ -1,28 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Executor } from '../../../domain/entities/executor'
-import {
-	OngoingRound,
-	Round,
-	RoundStatus,
-} from '../../../domain/entities/round'
+import { OngoingRip, Rip, RipStatus } from '../../../domain/entities/rip'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
 import { ExecutorRepository } from '../../interfaces/repositories/executor.repository'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
 import { RipsService } from '../../interfaces/rips.service'
-import { GetOngoingRoundsUseCase } from '../get-ongoing-rounds/get-ongoing-rounds.use-case'
+import { GetOngoingRipsUseCase } from '../get-ongoing-rips/get-ongoing-rips.use-case'
 import { KeeperUseCase } from './keeper.use-case'
 
 type KeeperAction =
-	| { type: 'requestVrf'; round: Round }
-	| { type: 'claim'; round: Round; userAddress: EvmAddress }
-	| { type: 'refund'; round: Round; userAddress: EvmAddress }
+	| { type: 'requestVrf'; rip: Rip }
+	| { type: 'claim'; rip: Rip; userAddress: EvmAddress }
+	| { type: 'refund'; rip: Rip; userAddress: EvmAddress }
 
 @Injectable()
 export class KeeperService extends KeeperUseCase {
 	private readonly logger = new Logger(KeeperService.name)
 
 	constructor(
-		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
+		private readonly getOngoingRipsUseCase: GetOngoingRipsUseCase,
 		private readonly executorRepository: ExecutorRepository,
 		private readonly userRepository: UserRepository,
 		private readonly ripsService: RipsService,
@@ -31,14 +27,14 @@ export class KeeperService extends KeeperUseCase {
 	}
 
 	async execute(): Promise<void> {
-		const [rounds, executors] = await Promise.all([
-			this.getOngoingRoundsUseCase.execute(),
+		const [rips, executors] = await Promise.all([
+			this.getOngoingRipsUseCase.execute(),
 			this.executorRepository.getAll(),
 		])
 
 		if (executors.length === 0) return
 
-		const actions = this.collectActions(rounds)
+		const actions = this.collectActions(rips)
 
 		const actionsByExecutor = this.groupByExecutor(
 			actions,
@@ -66,36 +62,36 @@ export class KeeperService extends KeeperUseCase {
 		return groups
 	}
 
-	private collectActions(rounds: OngoingRound[]): KeeperAction[] {
-		return rounds.flatMap((round): KeeperAction[] => {
-			switch (round.status) {
-				case RoundStatus.SEALED:
-					return [{ type: 'requestVrf', round }]
+	private collectActions(rips: OngoingRip[]): KeeperAction[] {
+		return rips.flatMap((rip): KeeperAction[] => {
+			switch (rip.status) {
+				case RipStatus.SEALED:
+					return [{ type: 'requestVrf', rip }]
 
-				case RoundStatus.CLAIMING: {
+				case RipStatus.CLAIMING: {
 					const claimedAddresses = new Set(
-						round.actions.claims.map((c) => c.userAddress),
+						rip.actions.claims.map((c) => c.userAddress),
 					)
 
-					return round.actions.purchases
+					return rip.actions.purchases
 						.filter((p) => !claimedAddresses.has(p.userAddress))
 						.map((p) => ({
 							type: 'claim',
-							round,
+							rip,
 							userAddress: p.userAddress,
 						}))
 				}
 
-				case RoundStatus.REFUNDING: {
+				case RipStatus.REFUNDING: {
 					const refundedAddresses = new Set(
-						round.actions.refunds.map((r) => r.userAddress),
+						rip.actions.refunds.map((r) => r.userAddress),
 					)
 
-					return round.actions.purchases
+					return rip.actions.purchases
 						.filter((p) => !refundedAddresses.has(p.userAddress))
 						.map((p) => ({
 							type: 'refund',
-							round,
+							rip,
 							userAddress: p.userAddress,
 						}))
 				}
@@ -126,7 +122,7 @@ export class KeeperService extends KeeperUseCase {
 		switch (action.type) {
 			case 'requestVrf':
 				await this.ripsService.requestVrf(executor.wallet, {
-					roundId: action.round.id,
+					ripId: action.rip.id,
 				})
 				break
 
@@ -136,7 +132,7 @@ export class KeeperService extends KeeperUseCase {
 				)
 
 				const claimTx = await this.ripsService.claim(executor.wallet, {
-					roundId: action.round.id,
+					ripId: action.rip.id,
 					userAddress: action.userAddress,
 					referrerAddress: user?.referrerAddress ?? null,
 				})
@@ -144,18 +140,18 @@ export class KeeperService extends KeeperUseCase {
 				this.logger.log(
 					{
 						userId: user?.id.toString(),
-						roundId: action.round.id,
+						ripId: action.rip.id,
 						userAddress: action.userAddress,
 						txHash: claimTx.id,
 					},
-					'Prize claimed',
+					'Payout claimed',
 				)
 				break
 			}
 
 			case 'refund':
 				await this.ripsService.refund(executor.wallet, {
-					roundId: action.round.id,
+					ripId: action.rip.id,
 					userAddress: action.userAddress,
 				})
 				break

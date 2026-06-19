@@ -26,7 +26,7 @@ import {
 import { privateKeyToAccount } from 'viem/accounts'
 import { AppModule } from '../../src/app.module'
 import { KmsService } from '../../src/application/interfaces/kms.service'
-import { STAKE_TO_TIER_BIASES } from '../../src/application/interfaces/tokens'
+import { PRESET_TO_TIER_BIASES } from '../../src/application/interfaces/tokens'
 import { AppConfigModule } from '../../src/configuration/app-config.module'
 import { EIP155 } from '../../src/constants'
 import { Executor } from '../../src/domain/entities/executor'
@@ -115,7 +115,7 @@ export function useRipsApp(
 				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
 				address: deployments.rips,
 			})
-			.overrideProvider(STAKE_TO_TIER_BIASES)
+			.overrideProvider(PRESET_TO_TIER_BIASES)
 			.useValue(
 				new Map([
 					['1', [2, 2, 2]],

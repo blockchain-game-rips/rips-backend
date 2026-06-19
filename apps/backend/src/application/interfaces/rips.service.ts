@@ -12,7 +12,7 @@ export abstract class RipsService {
 	abstract claim(
 		wallet: Wallet,
 		args: {
-			roundId: number
+			ripId: number
 			userAddress: EvmAddress
 			referrerAddress: EvmAddress | null
 		},
@@ -20,19 +20,19 @@ export abstract class RipsService {
 
 	abstract refund(
 		wallet: Wallet,
-		args: { roundId: number; userAddress: EvmAddress },
+		args: { ripId: number; userAddress: EvmAddress },
 	): Promise<Transaction>
 
 	abstract requestVrf(
 		wallet: Wallet,
-		args: { roundId: number },
+		args: { ripId: number },
 	): Promise<Transaction>
 
-	abstract quoteBuyTickets(): Promise<TransactionQuote>
+	abstract quoteBuyEntries(): Promise<TransactionQuote>
 
-	abstract buyTickets(
+	abstract buyEntries(
 		wallet: Wallet,
-		args: { stakeId: number; config: Config; ticketCount: number },
+		args: { presetId: number; config: Config; entryCount: number },
 	): Promise<PurchaseReceipt>
 
 	abstract withdrawReward(

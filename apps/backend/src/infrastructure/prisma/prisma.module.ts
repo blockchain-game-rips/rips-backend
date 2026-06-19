@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common'
 import { AdminWalletRepository } from '../../application/interfaces/repositories/admin-wallet.repository'
+import { EntryPayoutRepository } from '../../application/interfaces/repositories/entry-payout.repository'
 import { ExecutorRepository } from '../../application/interfaces/repositories/executor.repository'
 import { NotificationRepository } from '../../application/interfaces/repositories/notification.repository'
-import { RoundSyncRepository } from '../../application/interfaces/repositories/round-sync.repository'
-import { TicketPrizeRepository } from '../../application/interfaces/repositories/ticket-prize.repository'
+import { RipSyncRepository } from '../../application/interfaces/repositories/rip-sync.repository'
 import { UserRepository } from '../../application/interfaces/repositories/user.repository'
 import { WalletRepository } from '../../application/interfaces/repositories/wallet.repository'
 import { MetricsModule } from '../metrics/metrics.module'
 import { PrismaAdminWalletRepository } from './admin-wallet.repository'
+import { PrismaEntryPayoutRepository } from './entry-payout.repository'
 import { PrismaExecutorRepository } from './executor.repository'
 import { PrismaNotificationRepository } from './notification.repository'
 import { PrismaService } from './prisma.service'
-import { PrismaRoundSyncRepository } from './round-sync.repository'
-import { PrismaTicketPrizeRepository } from './ticket-prize.repository'
+import { PrismaRipSyncRepository } from './rip-sync.repository'
 import { PrismaUserRepository } from './user.repository'
 import { PrismaWalletRepository } from './wallet.repository'
 
@@ -29,10 +29,10 @@ import { PrismaWalletRepository } from './wallet.repository'
 			useClass: PrismaAdminWalletRepository,
 		},
 		{
-			provide: TicketPrizeRepository,
-			useClass: PrismaTicketPrizeRepository,
+			provide: EntryPayoutRepository,
+			useClass: PrismaEntryPayoutRepository,
 		},
-		{ provide: RoundSyncRepository, useClass: PrismaRoundSyncRepository },
+		{ provide: RipSyncRepository, useClass: PrismaRipSyncRepository },
 		{
 			provide: NotificationRepository,
 			useClass: PrismaNotificationRepository,
@@ -44,8 +44,8 @@ import { PrismaWalletRepository } from './wallet.repository'
 		ExecutorRepository,
 		WalletRepository,
 		AdminWalletRepository,
-		TicketPrizeRepository,
-		RoundSyncRepository,
+		EntryPayoutRepository,
+		RipSyncRepository,
 		NotificationRepository,
 	],
 })

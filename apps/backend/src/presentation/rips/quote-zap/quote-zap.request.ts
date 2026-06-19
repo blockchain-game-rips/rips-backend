@@ -3,8 +3,8 @@ import { z } from 'zod'
 import { chainAddressInputSchema } from '../../shared/chain-address.dto'
 
 const quoteZapBodySchema = z.object({
-	stakeId: z.number().int().min(1),
-	ticketCount: z.number().int().min(1),
+	presetId: z.number().int().min(1),
+	entryCount: z.number().int().min(1),
 	paymentCurrencyChainAddress: chainAddressInputSchema,
 })
 

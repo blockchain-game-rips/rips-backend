@@ -9,35 +9,35 @@ import {
 	UseInterceptors,
 } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
-import { BuyTicketsPurchaseUseCase } from '../../application/use-cases/buy-tickets-purchase/buy-tickets-purchase.use-case'
-import { BuyTicketsZapUseCase } from '../../application/use-cases/buy-tickets-zap/buy-tickets-zap.use-case'
-import { GetAvailableStakesUseCase } from '../../application/use-cases/get-available-stakes/get-available-stakes.use-case'
+import { BuyEntriesPurchaseUseCase } from '../../application/use-cases/buy-entries-purchase/buy-entries-purchase.use-case'
+import { BuyEntriesZapUseCase } from '../../application/use-cases/buy-entries-zap/buy-entries-zap.use-case'
+import { GetAvailablePresetsUseCase } from '../../application/use-cases/get-available-presets/get-available-presets.use-case'
 import { GetCardCollectionUseCase } from '../../application/use-cases/get-card-collection/get-card-collection.use-case'
 import { GetCardDefinitionsUseCase } from '../../application/use-cases/get-card-definitions/get-card-definitions.use-case'
-import { GetCompletedRoundsUseCase } from '../../application/use-cases/get-completed-rounds/get-completed-rounds.use-case'
-import { GetOngoingRoundsUseCase } from '../../application/use-cases/get-ongoing-rounds/get-ongoing-rounds.use-case'
+import { GetCompletedRipsUseCase } from '../../application/use-cases/get-completed-rips/get-completed-rips.use-case'
+import { GetOngoingRipsUseCase } from '../../application/use-cases/get-ongoing-rips/get-ongoing-rips.use-case'
 import { GetRipsStateUseCase } from '../../application/use-cases/get-rips-state/get-rips-state.use-case'
-import { GetRoundsUseCase } from '../../application/use-cases/get-rounds/get-rounds.use-case'
-import { GetUnrevealedPrizesUseCase } from '../../application/use-cases/get-unrevealed-prizes/get-unrevealed-prizes.use-case'
+import { GetRipsUseCase } from '../../application/use-cases/get-rips/get-rips.use-case'
+import { GetUnrevealedPayoutsUseCase } from '../../application/use-cases/get-unrevealed-payouts/get-unrevealed-payouts.use-case'
 import { GetZapResultUseCase } from '../../application/use-cases/get-zap-result/get-zap-result.use-case'
 import { QuotePurchaseUseCase } from '../../application/use-cases/quote-purchase/quote-purchase.use-case'
 import { QuoteZapUseCase } from '../../application/use-cases/quote-zap/quote-zap.use-case'
-import { RevealTicketPrizesUseCase } from '../../application/use-cases/reveal-ticket-prizes/reveal-ticket-prizes.use-case'
+import { RevealEntryPayoutsUseCase } from '../../application/use-cases/reveal-entry-payouts/reveal-entry-payouts.use-case'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
 import {
 	TELEGRAM_ID_HEADER,
 	TelegramIdHeaderDto,
 } from '../shared/telegram-id.header'
-import { BuyTicketsPurchaseBodyDto } from './buy-tickets-purchase/buy-tickets-purchase.request'
+import { BuyEntriesPurchaseBodyDto } from './buy-entries-purchase/buy-entries-purchase.request'
 import {
-	BuyTicketsPurchaseResponseDto,
-	toBuyTicketsPurchaseResponseDto,
-} from './buy-tickets-purchase/buy-tickets-purchase.response'
-import { BuyTicketsZapBodyDto } from './buy-tickets-zap/buy-tickets-zap.request'
+	BuyEntriesPurchaseResponseDto,
+	toBuyEntriesPurchaseResponseDto,
+} from './buy-entries-purchase/buy-entries-purchase.response'
+import { BuyEntriesZapBodyDto } from './buy-entries-zap/buy-entries-zap.request'
 import {
-	BuyTicketsZapResponseDto,
-	toBuyTicketsZapResponseDto,
-} from './buy-tickets-zap/buy-tickets-zap.response'
+	BuyEntriesZapResponseDto,
+	toBuyEntriesZapResponseDto,
+} from './buy-entries-zap/buy-entries-zap.response'
 import { GetCardCollectionQueryDto } from './get-card-collection/get-card-collection.request'
 import {
 	GetCardCollectionResponseDto,
@@ -48,14 +48,14 @@ import {
 	GetCardDefinitionsResponseDto,
 	toGetCardDefinitionsResponseDto,
 } from './get-card-definitions/get-card-definitions.response'
-import { GetCompletedRoundsQueryDto } from './get-completed-rounds/get-completed-rounds.request'
-import { GetCompletedRoundsResponseDto } from './get-completed-rounds/get-completed-rounds.response'
-import { GetOngoingRoundsResponseDto } from './get-ongoing-rounds/get-ongoing-rounds.response'
-import { GetPrizesResponseDto } from './get-prizes/get-prizes.response'
+import { GetCompletedRipsQueryDto } from './get-completed-rips/get-completed-rips.request'
+import { GetCompletedRipsResponseDto } from './get-completed-rips/get-completed-rips.response'
+import { GetOngoingRipsResponseDto } from './get-ongoing-rips/get-ongoing-rips.response'
+import { GetPayoutsResponseDto } from './get-payouts/get-payouts.response'
+import { GetPresetsResponseDto } from './get-presets/get-presets.response'
 import { GetRipsStateResponseDto } from './get-rips-state/get-rips-state.response'
-import { GetRoundsQueryDto } from './get-rounds/get-rounds.request'
-import { GetRoundsResponseDto } from './get-rounds/get-rounds.response'
-import { GetStakesResponseDto } from './get-stakes/get-stakes.response'
+import { GetRipsQueryDto } from './get-rips/get-rips.request'
+import { GetRipsResponseDto } from './get-rips/get-rips.response'
 import { GetZapResultQueryDto } from './get-zap-result/get-zap-result.request'
 import {
 	GetZapResultResponseDto,
@@ -71,28 +71,28 @@ import {
 	QuoteZapResponseDto,
 	toQuoteZapResponseDto,
 } from './quote-zap/quote-zap.response'
-import { RevealPrizesBodyDto } from './reveal-prizes/reveal-prizes.request'
-import { RevealPrizesResponseDto } from './reveal-prizes/reveal-prizes.response'
-import { toAvailableStakeDto } from './shared/available-stake.dto'
-import { toPrizeDto } from './shared/prize.dto'
-import { toRoundDto } from './shared/round.dto'
+import { RevealPayoutsBodyDto } from './reveal-payouts/reveal-payouts.request'
+import { RevealPayoutsResponseDto } from './reveal-payouts/reveal-payouts.response'
+import { toAvailablePresetDto } from './shared/available-preset.dto'
+import { toPayoutDto } from './shared/payout.dto'
+import { toRipDto } from './shared/rip.dto'
 
 @Controller('rips')
 @UseInterceptors(PriceEnrichmentInterceptor)
 export class RipsController {
 	constructor(
 		private readonly getRipsStateUseCase: GetRipsStateUseCase,
-		private readonly getAvailableStakesUseCase: GetAvailableStakesUseCase,
-		private readonly buyTicketsPurchaseUseCase: BuyTicketsPurchaseUseCase,
-		private readonly buyTicketsZapUseCase: BuyTicketsZapUseCase,
+		private readonly getAvailablePresetsUseCase: GetAvailablePresetsUseCase,
+		private readonly buyEntriesPurchaseUseCase: BuyEntriesPurchaseUseCase,
+		private readonly buyEntriesZapUseCase: BuyEntriesZapUseCase,
 		private readonly quotePurchaseUseCase: QuotePurchaseUseCase,
 		private readonly quoteZapUseCase: QuoteZapUseCase,
 		private readonly getZapResultUseCase: GetZapResultUseCase,
-		private readonly getOngoingRoundsUseCase: GetOngoingRoundsUseCase,
-		private readonly getCompletedRoundsUseCase: GetCompletedRoundsUseCase,
-		private readonly getUnrevealedPrizesUseCase: GetUnrevealedPrizesUseCase,
-		private readonly revealTicketPrizesUseCase: RevealTicketPrizesUseCase,
-		private readonly getRoundsUseCase: GetRoundsUseCase,
+		private readonly getOngoingRipsUseCase: GetOngoingRipsUseCase,
+		private readonly getCompletedRipsUseCase: GetCompletedRipsUseCase,
+		private readonly getUnrevealedPayoutsUseCase: GetUnrevealedPayoutsUseCase,
+		private readonly revealEntryPayoutsUseCase: RevealEntryPayoutsUseCase,
+		private readonly getRipsUseCase: GetRipsUseCase,
 		private readonly getCardCollectionUseCase: GetCardCollectionUseCase,
 		private readonly getCardDefinitionsUseCase: GetCardDefinitionsUseCase,
 	) {}
@@ -103,68 +103,68 @@ export class RipsController {
 		const state = await this.getRipsStateUseCase.execute()
 
 		return {
-			availableStakes: state.availableStakes.map(toAvailableStakeDto),
+			availablePresets: state.availablePresets.map(toAvailablePresetDto),
 			isPaused: state.isPaused,
 		}
 	}
 
-	@Get('stakes')
-	@ZodResponse({ type: GetStakesResponseDto })
-	async getStakes(): Promise<GetStakesResponseDto> {
-		const stakes = await this.getAvailableStakesUseCase.execute()
+	@Get('presets')
+	@ZodResponse({ type: GetPresetsResponseDto })
+	async getPresets(): Promise<GetPresetsResponseDto> {
+		const presets = await this.getAvailablePresetsUseCase.execute()
 
 		return {
-			availableStakes: stakes.map(toAvailableStakeDto),
+			availablePresets: presets.map(toAvailablePresetDto),
 		}
 	}
 
-	@Post('tickets/purchase')
-	@ZodResponse({ type: BuyTicketsPurchaseResponseDto })
-	async buyTicketsPurchase(
+	@Post('entries/purchase')
+	@ZodResponse({ type: BuyEntriesPurchaseResponseDto })
+	async buyEntriesPurchase(
 		@Headers() headers: TelegramIdHeaderDto,
-		@Body() body: BuyTicketsPurchaseBodyDto,
-	): Promise<BuyTicketsPurchaseResponseDto> {
-		const purchaseReceipt = await this.buyTicketsPurchaseUseCase.execute({
+		@Body() body: BuyEntriesPurchaseBodyDto,
+	): Promise<BuyEntriesPurchaseResponseDto> {
+		const purchaseReceipt = await this.buyEntriesPurchaseUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
-			stakeId: body.stakeId,
-			ticketCount: body.ticketCount,
+			presetId: body.presetId,
+			entryCount: body.entryCount,
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		return toBuyTicketsPurchaseResponseDto(purchaseReceipt)
+		return toBuyEntriesPurchaseResponseDto(purchaseReceipt)
 	}
 
-	@Post('tickets/quote-purchase')
+	@Post('entries/quote-purchase')
 	@ZodResponse({ type: QuotePurchaseResponseDto })
 	async quotePurchase(
 		@Body() body: QuotePurchaseBodyDto,
 	): Promise<QuotePurchaseResponseDto> {
 		const quote = await this.quotePurchaseUseCase.execute({
-			stakeId: body.stakeId,
-			ticketCount: body.ticketCount,
+			presetId: body.presetId,
+			entryCount: body.entryCount,
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
 		return toQuotePurchaseResponseDto(quote)
 	}
 
-	@Post('tickets/zap')
-	@ZodResponse({ type: BuyTicketsZapResponseDto })
-	async buyTicketsZap(
+	@Post('entries/zap')
+	@ZodResponse({ type: BuyEntriesZapResponseDto })
+	async buyEntriesZap(
 		@Headers() headers: TelegramIdHeaderDto,
-		@Body() body: BuyTicketsZapBodyDto,
-	): Promise<BuyTicketsZapResponseDto> {
-		const pendingZap = await this.buyTicketsZapUseCase.execute({
+		@Body() body: BuyEntriesZapBodyDto,
+	): Promise<BuyEntriesZapResponseDto> {
+		const pendingZap = await this.buyEntriesZapUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
-			stakeId: body.stakeId,
-			ticketCount: body.ticketCount,
+			presetId: body.presetId,
+			entryCount: body.entryCount,
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		return toBuyTicketsZapResponseDto(pendingZap)
+		return toBuyEntriesZapResponseDto(pendingZap)
 	}
 
-	@Post('tickets/quote-zap')
+	@Post('entries/quote-zap')
 	@ZodResponse({ type: QuoteZapResponseDto })
 	async quoteZap(
 		@Headers() headers: TelegramIdHeaderDto,
@@ -172,15 +172,15 @@ export class RipsController {
 	): Promise<QuoteZapResponseDto> {
 		const quote = await this.quoteZapUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
-			stakeId: body.stakeId,
-			ticketCount: body.ticketCount,
+			presetId: body.presetId,
+			entryCount: body.entryCount,
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
 		return toQuoteZapResponseDto(quote)
 	}
 
-	@Get('tickets/zap-result')
+	@Get('entries/zap-result')
 	@ZodResponse({ type: GetZapResultResponseDto })
 	async getZapResult(
 		@Query() query: GetZapResultQueryDto,
@@ -192,72 +192,72 @@ export class RipsController {
 		return toGetZapResultResponseDto(result)
 	}
 
-	@Get('prizes')
-	@ZodResponse({ type: GetPrizesResponseDto })
-	async getPrizes(
+	@Get('payouts')
+	@ZodResponse({ type: GetPayoutsResponseDto })
+	async getPayouts(
 		@Headers() headers: TelegramIdHeaderDto,
-	): Promise<GetPrizesResponseDto> {
-		const prizes = await this.getUnrevealedPrizesUseCase.execute({
+	): Promise<GetPayoutsResponseDto> {
+		const payouts = await this.getUnrevealedPayoutsUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
 		})
 
 		return {
-			prizes: prizes.map(toPrizeDto),
+			payouts: payouts.map(toPayoutDto),
 		}
 	}
 
-	@Patch('prizes')
-	@ZodResponse({ type: RevealPrizesResponseDto })
-	async revealPrizes(
+	@Patch('payouts')
+	@ZodResponse({ type: RevealPayoutsResponseDto })
+	async revealPayouts(
 		@Headers() headers: TelegramIdHeaderDto,
-		@Body() body: RevealPrizesBodyDto,
-	): Promise<RevealPrizesResponseDto> {
-		const prizes = await this.revealTicketPrizesUseCase.execute({
+		@Body() body: RevealPayoutsBodyDto,
+	): Promise<RevealPayoutsResponseDto> {
+		const payouts = await this.revealEntryPayoutsUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
 			revealAll: body.revealAll,
 		})
 
 		return {
-			prizes: prizes.map(toPrizeDto),
+			payouts: payouts.map(toPayoutDto),
 		}
 	}
 
-	@Get('rounds/ongoing')
-	@ZodResponse({ type: GetOngoingRoundsResponseDto })
-	async getOngoingRounds(): Promise<GetOngoingRoundsResponseDto> {
-		const rounds = await this.getOngoingRoundsUseCase.execute()
+	@Get('rips/ongoing')
+	@ZodResponse({ type: GetOngoingRipsResponseDto })
+	async getOngoingRips(): Promise<GetOngoingRipsResponseDto> {
+		const rips = await this.getOngoingRipsUseCase.execute()
 
 		return {
-			rounds: rounds.map(toRoundDto),
+			rips: rips.map(toRipDto),
 		}
 	}
 
-	@Get('rounds')
-	@ZodResponse({ type: GetRoundsResponseDto })
-	async getRounds(
-		@Query() query: GetRoundsQueryDto,
-	): Promise<GetRoundsResponseDto> {
-		const result = await this.getRoundsUseCase.execute({
+	@Get('rips')
+	@ZodResponse({ type: GetRipsResponseDto })
+	async getRips(
+		@Query() query: GetRipsQueryDto,
+	): Promise<GetRipsResponseDto> {
+		const result = await this.getRipsUseCase.execute({
 			ids: new Set(query.ids),
 		})
 
 		return {
-			rounds: result.rounds.map(toRoundDto),
+			rips: result.rips.map(toRipDto),
 		}
 	}
 
-	@Get('rounds/completed')
-	@ZodResponse({ type: GetCompletedRoundsResponseDto })
-	async getCompletedRounds(
-		@Query() query: GetCompletedRoundsQueryDto,
-	): Promise<GetCompletedRoundsResponseDto> {
-		const result = await this.getCompletedRoundsUseCase.execute({
+	@Get('rips/completed')
+	@ZodResponse({ type: GetCompletedRipsResponseDto })
+	async getCompletedRips(
+		@Query() query: GetCompletedRipsQueryDto,
+	): Promise<GetCompletedRipsResponseDto> {
+		const result = await this.getCompletedRipsUseCase.execute({
 			limit: query.limit,
 			cursor: query.cursor,
 		})
 
 		return {
-			rounds: result.rounds.map(toRoundDto),
+			rips: result.rips.map(toRipDto),
 			nextCursor: result.nextCursor,
 		}
 	}
@@ -270,7 +270,7 @@ export class RipsController {
 	): Promise<GetCardCollectionResponseDto> {
 		const tiers = await this.getCardCollectionUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
-			stakeId: query.stakeId,
+			presetId: query.presetId,
 		})
 
 		return toGetCardCollectionResponseDto(tiers)
@@ -282,7 +282,7 @@ export class RipsController {
 		@Query() query: GetCardDefinitionsQueryDto,
 	): Promise<GetCardDefinitionsResponseDto> {
 		const tiers = await this.getCardDefinitionsUseCase.execute({
-			stakeId: query.stakeId,
+			presetId: query.presetId,
 		})
 
 		return toGetCardDefinitionsResponseDto(tiers)

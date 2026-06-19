@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common'
 import { GetRipsStateService } from '../../application/use-cases/get-rips-state/get-rips-state.service'
 import { GetRipsStateUseCase } from '../../application/use-cases/get-rips-state/get-rips-state.use-case'
 import { RipsModule } from '../../infrastructure/rips/rips.module'
-import { GetAvailableStakesModule } from './get-available-stakes.module'
+import { GetAvailablePresetsModule } from './get-available-presets.module'
 
 @Module({
-	imports: [RipsModule, GetAvailableStakesModule],
+	imports: [RipsModule, GetAvailablePresetsModule],
 	providers: [
 		{ provide: GetRipsStateUseCase, useClass: GetRipsStateService },
 	],
