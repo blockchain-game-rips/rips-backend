@@ -49,7 +49,7 @@ export class Multicall extends ContractBase {
   ): Promise<any[]>
 
   async aggregate(...args: any[]): Promise<any[]> {
-    let [calls, pageSize] = this.makeCalls(args)
+    const [calls, pageSize] = this.makeCalls(args)
     if (calls.length === 0) return []
 
     const pages = Array.from(splitArray(pageSize, calls))
@@ -82,7 +82,7 @@ export class Multicall extends ContractBase {
   ): Promise<MulticallResult<any>[]>
 
   async tryAggregate(...args: any[]): Promise<any[]> {
-    let [calls, pageSize] = this.makeCalls(args)
+    const [calls, pageSize] = this.makeCalls(args)
     if (calls.length === 0) return []
 
     const pages = Array.from(splitArray(pageSize, calls))
@@ -113,34 +113,34 @@ export class Multicall extends ContractBase {
   }
 
   private makeCalls(args: any[]): [calls: Call[], page: number] {
-    let page = typeof args[args.length - 1] == 'number' ? args.pop()! : Number.MAX_SAFE_INTEGER
+    const page = typeof args[args.length - 1] == 'number' ? args.pop()! : Number.MAX_SAFE_INTEGER
     switch (args.length) {
       case 1: {
-        let list: AggregateTuple[] = args[0]
-        let calls: Call[] = new Array(list.length)
+        const list: AggregateTuple[] = args[0]
+        const calls: Call[] = new Array(list.length)
         for (let i = 0; i < list.length; i++) {
-          let [func, address, args] = list[i]
+          const [func, address, args] = list[i]
           calls[i] = {target: address, callData: func.encode(args), func}
         }
         return [calls, page]
       }
       case 2: {
-        let func: AnyFunc = args[0]
-        let list: [address: string, args: any][] = args[1]
-        let calls: Call[] = new Array(list.length)
+        const func: AnyFunc = args[0]
+        const list: [address: string, args: any][] = args[1]
+        const calls: Call[] = new Array(list.length)
         for (let i = 0; i < list.length; i++) {
-          let [address, args] = list[i]
+          const [address, args] = list[i]
           calls[i] = {target: address, callData: func.encode(args), func}
         }
         return [calls, page]
       }
       case 3: {
-        let func: AnyFunc = args[0]
-        let address: string = args[1]
-        let list: any = args[2]
-        let calls: Call[] = new Array(list.length)
+        const func: AnyFunc = args[0]
+        const address: string = args[1]
+        const list: any = args[2]
+        const calls: Call[] = new Array(list.length)
         for (let i = 0; i < list.length; i++) {
-          let args = list[i]
+          const args = list[i]
           calls[i] = {target: address, callData: func.encode(args), func}
         }
         return [calls, page]
@@ -155,9 +155,9 @@ function* splitSlice(maxSize: number, beg: number, end?: number): Iterable<[beg:
   maxSize = Math.max(1, maxSize)
   end = end ?? Number.MAX_SAFE_INTEGER
   while (beg < end) {
-      let left = end - beg
-      let splits = Math.ceil(left / maxSize)
-      let step = Math.round(left / splits)
+      const left = end - beg
+      const splits = Math.ceil(left / maxSize)
+      const step = Math.round(left / splits)
       yield [beg, beg + step]
       beg += step
   }
@@ -167,7 +167,7 @@ function* splitArray<T>(maxSize: number, arr: T[]): Iterable<T[]> {
   if (arr.length <= maxSize) {
       yield arr
   } else {
-      for (let [beg, end] of splitSlice(maxSize, 0, arr.length)) {
+      for (const [beg, end] of splitSlice(maxSize, 0, arr.length)) {
           yield arr.slice(beg, end)
       }
   }
