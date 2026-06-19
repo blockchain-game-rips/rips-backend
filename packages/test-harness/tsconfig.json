@@ -1,13 +1,7 @@
 {
+    "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "es2023",
-        "strict": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "resolveJsonModule": true,
-        "declaration": true,
-        "forceConsistentCasingInFileNames": true
+        "strict": true
     },
     "include": [
         "src/**/*"
