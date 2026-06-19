@@ -3,8 +3,12 @@ import { Entity } from '@subsquid/typeorm-store/lib/store'
 import * as rips from './abi/rips'
 import { handleCallbackGasLimitUpdated } from './handlers/handle-callback-gas-limit-updated'
 import { handleDefaultReferralFeeUpdated } from './handlers/handle-default-referral-fee-updated'
+import { handleEntriesPurchased } from './handlers/handle-entries-purchased'
 import { handleFeeRecipientUpdated } from './handlers/handle-fee-recipient-updated'
-import { handlePrizesClaimed } from './handlers/handle-prizes-claimed'
+import { handlePayoutsClaimed } from './handlers/handle-payouts-claimed'
+import { handlePresetCreated } from './handlers/handle-preset-created'
+import { handlePresetDeleted } from './handlers/handle-preset-deleted'
+import { handlePresetUpdated } from './handlers/handle-preset-updated'
 import { handleProtocolFeeAccrued } from './handlers/handle-protocol-fee-accrued'
 import { handleProtocolFeeWithdrawn } from './handlers/handle-protocol-fee-withdrawn'
 import { handleRandomnessFulfilled } from './handlers/handle-randomness-fulfilled'
@@ -17,29 +21,25 @@ import { handleReferrerFeeSeized } from './handlers/handle-referrer-fee-seized'
 import { handleReferrerFeeWithdrawn } from './handlers/handle-referrer-fee-withdrawn'
 import { handleReferrerFreezeUpdated } from './handlers/handle-referrer-freeze-updated'
 import { handleRefundIssued } from './handlers/handle-refund-issued'
-import { handleRoundCreated } from './handlers/handle-round-created'
-import { handleStakeCreated } from './handlers/handle-stake-created'
-import { handleStakeDeleted } from './handlers/handle-stake-deleted'
-import { handleStakeUpdated } from './handlers/handle-stake-updated'
-import { handleTicketsPurchased } from './handlers/handle-tickets-purchased'
+import { handleRipCreated } from './handlers/handle-rip-created'
 import { handleVrfKeyHashUpdated } from './handlers/handle-vrf-key-hash-updated'
 import { handleVrfRequestConfirmationsUpdated } from './handlers/handle-vrf-request-confirmations-updated'
 import { handleVrfSubscriptionIdUpdated } from './handlers/handle-vrf-subscription-id-updated'
-import { Round, RoundStatus } from './model'
+import { Rip, RipStatus } from './model'
 import { Block, Context, processor } from './processor'
 import { Entities, HandlerArgs } from './types'
 
 type Handler = (args: HandlerArgs) => void | Promise<void>
 
 const handlers: Record<string, Handler> = {
-	[rips.events.StakeCreated.topic]: handleStakeCreated,
-	[rips.events.StakeUpdated.topic]: handleStakeUpdated,
-	[rips.events.StakeDeleted.topic]: handleStakeDeleted,
-	[rips.events.RoundCreated.topic]: handleRoundCreated,
-	[rips.events.TicketsPurchased.topic]: handleTicketsPurchased,
+	[rips.events.PresetCreated.topic]: handlePresetCreated,
+	[rips.events.PresetUpdated.topic]: handlePresetUpdated,
+	[rips.events.PresetDeleted.topic]: handlePresetDeleted,
+	[rips.events.RipCreated.topic]: handleRipCreated,
+	[rips.events.RipEntered.topic]: handleEntriesPurchased,
 	[rips.events.RandomnessRequested.topic]: handleRandomnessRequested,
 	[rips.events.RandomnessFulfilled.topic]: handleRandomnessFulfilled,
-	[rips.events.PrizesClaimed.topic]: handlePrizesClaimed,
+	[rips.events.PayoutClaimed.topic]: handlePayoutsClaimed,
 	[rips.events.RefundIssued.topic]: handleRefundIssued,
 	[rips.events.FeeRecipientUpdated.topic]: handleFeeRecipientUpdated,
 	[rips.events.CallbackGasLimitUpdated.topic]: handleCallbackGasLimitUpdated,
@@ -71,34 +71,34 @@ async function handleFillingToRefunding(
 ): Promise<void> {
 	const lastBlockTimestamp = BigInt(lastBlock.timestamp)
 
-	const fillingRounds = await ctx.store.find(Round, {
-		where: { status: RoundStatus.FILLING },
+	const fillingRips = await ctx.store.find(Rip, {
+		where: { status: RipStatus.FILLING },
 		relations: { config: true },
 	})
 
-	for (const round of fillingRounds) {
-		const inMemoryRound = entities.rounds.get(round.id)
-		const target = inMemoryRound ?? round
+	for (const rip of fillingRips) {
+		const inMemoryRip = entities.rips.get(rip.id)
+		const target = inMemoryRip ?? rip
 
 		const deadlineMs =
 			BigInt(target.startTime.getTime()) +
 			target.config.durationSeconds * MILLISECONDS_PER_SECOND
 
 		if (lastBlockTimestamp >= deadlineMs) {
-			target.status = RoundStatus.REFUNDING
-			entities.rounds.set(target.id, target)
+			target.status = RipStatus.REFUNDING
+			entities.rips.set(target.id, target)
 		}
 	}
 }
 
 processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 	const entities: Entities = {
-		stakes: new Map(),
+		presets: new Map(),
 		configs: new Map(),
-		prizeTiers: [],
-		rounds: new Map(),
-		ticketPurchases: [],
-		prizeClaims: [],
+		payoutTiers: [],
+		rips: new Map(),
+		entryPurchases: [],
+		payoutClaims: [],
 		refunds: [],
 		feeRecipientUpdates: [],
 		callbackGasLimitUpdates: [],

@@ -3,9 +3,9 @@
 A [Subsquid](https://subsquid.io)-based indexer for the Rips Protocol — an EVM game. It processes on-chain events from the Rips smart contract and stores them in a PostgreSQL database, exposing the data through a GraphQL API.
 
 **Indexed data:**
-- Stake configurations and prize tiers
-- Round lifecycle (Active → SoldOut → VRFRequested → Finalized)
-- Ticket purchases, prize claims, and refunds
+- Preset configurations and payout tiers
+- Rip lifecycle (Active → SoldOut → VRFRequested → Finalized)
+- Entry purchases, payout claims, and refunds
 - VRF randomness requests and finalization
 - Protocol configuration changes (fees, recipients, callback gas limits)
 
@@ -33,7 +33,7 @@ sqd build
 sqd run .
 ```
 
-The GraphiQL playground will be available at [localhost:4350/graphql](http://localhost:4350/graphql).
+The GraphiQL playgrip will be available at [localhost:4350/graphql](http://localhost:4350/graphql).
 
 You can also start services individually:
 

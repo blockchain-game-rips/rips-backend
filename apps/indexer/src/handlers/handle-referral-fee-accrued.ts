@@ -1,5 +1,5 @@
 import * as rips from '../abi/rips'
-import { resolveReferrerRewardState, resolveRoundOrThrow } from '../helpers'
+import { resolveReferrerRewardState, resolveRipOrThrow } from '../helpers'
 import { ReferralFeeAccrued } from '../model'
 import { HandlerArgs } from '../types'
 
@@ -8,16 +8,12 @@ export async function handleReferralFeeAccrued(
 ): Promise<void> {
 	const { ctx, entities, block, log } = args
 
-	const { roundId, referrer, amount } =
+	const { ripId, referrer, amount } =
 		rips.events.ReferralFeeAccrued.decode(log)
 
 	const referrerLower = referrer.toLowerCase()
-	const round = await resolveRoundOrThrow(
-		ctx,
-		entities.rounds,
-		roundId.toString(),
-	)
-	const currency = round.config.currency
+	const rip = await resolveRipOrThrow(ctx, entities.rips, ripId.toString())
+	const currency = rip.config.currency
 
 	const rewardState = await resolveReferrerRewardState(
 		ctx,
@@ -30,7 +26,7 @@ export async function handleReferralFeeAccrued(
 	entities.referralFeeAccruals.push(
 		new ReferralFeeAccrued({
 			id: log.id,
-			round,
+			rip,
 			referrer: referrerLower,
 			amount,
 			blockNumber: BigInt(block.height),

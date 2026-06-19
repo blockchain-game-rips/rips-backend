@@ -1,6 +1,6 @@
 import * as rips from '../abi/rips'
-import { resolveRoundOrThrow } from '../helpers'
-import { RoundStatus, VrfRequestStatus } from '../model'
+import { resolveRipOrThrow } from '../helpers'
+import { RipStatus, VrfRequestStatus } from '../model'
 import { HandlerArgs } from '../types'
 
 export async function handleRandomnessRequested(
@@ -8,15 +8,14 @@ export async function handleRandomnessRequested(
 ): Promise<void> {
 	const { ctx, entities, log } = args
 
-	const { roundId, vrfRequestId } =
-		rips.events.RandomnessRequested.decode(log)
-	const roundIdStr = roundId.toString()
+	const { ripId, vrfRequestId } = rips.events.RandomnessRequested.decode(log)
+	const ripIdStr = ripId.toString()
 
-	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
+	const rip = await resolveRipOrThrow(ctx, entities.rips, ripIdStr)
 
-	round.vrfRequestStatus = VrfRequestStatus.REQUESTED
-	round.vrfRequestId = vrfRequestId
-	round.status = RoundStatus.VRF_REQUESTED
+	rip.vrfRequestStatus = VrfRequestStatus.REQUESTED
+	rip.vrfRequestId = vrfRequestId
+	rip.status = RipStatus.VRF_REQUESTED
 
-	entities.rounds.set(roundIdStr, round)
+	entities.rips.set(ripIdStr, rip)
 }

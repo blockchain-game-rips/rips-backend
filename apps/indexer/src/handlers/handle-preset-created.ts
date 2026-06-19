@@ -1,44 +1,44 @@
 import { assertNotNull } from '@subsquid/util-internal'
 import * as rips from '../abi/rips'
-import { buildPrizeTiers } from '../helpers'
-import { Config, Stake } from '../model'
+import { buildPayoutTiers } from '../helpers'
+import { Config, Preset } from '../model'
 import { Log } from '../processor'
 import { HandlerArgs } from '../types'
 
-export function handleStakeCreated(args: HandlerArgs): void {
+export function handlePresetCreated(args: HandlerArgs): void {
 	const { entities, log } = args
 
-	const { stakeId, configId } = rips.events.StakeCreated.decode(log)
-	const stakeIdStr = stakeId.toString()
+	const { presetId, configId } = rips.events.PresetCreated.decode(log)
+	const presetIdStr = presetId.toString()
 	const configIdStr = configId.toString()
 
 	const txConfig = decodeInputOrThrow(log)
 
-	const stake = new Stake({ id: stakeIdStr, deleted: false })
-	entities.stakes.set(stakeIdStr, stake)
+	const preset = new Preset({ id: presetIdStr, deleted: false })
+	entities.presets.set(presetIdStr, preset)
 
 	const config = new Config({
 		id: configIdStr,
-		stake,
-		ticketCap: txConfig.ticketCap,
+		preset,
+		entryCap: txConfig.entryCap,
 		currency: txConfig.currency.toLowerCase(),
 		durationSeconds: BigInt(txConfig.duration),
-		ticketCost: txConfig.ticketCost,
+		entryPrice: txConfig.entryPrice,
 		feePercent: BigInt(txConfig.feePercent),
 	})
 
 	entities.configs.set(configIdStr, config)
-	entities.prizeTiers.push(...buildPrizeTiers(config, txConfig.tiers))
+	entities.payoutTiers.push(...buildPayoutTiers(config, txConfig.tiers))
 }
 
 function decodeInputOrThrow(log: Log) {
 	try {
-		return rips.functions.createStake.decode(
+		return rips.functions.createPreset.decode(
 			assertNotNull(log.transaction).input,
 		).config
 	} catch {
 		throw new Error(
-			`Could not decode createStake with input ${log.transaction?.input}`,
+			`Could not decode createPreset with input ${log.transaction?.input}`,
 		)
 	}
 }

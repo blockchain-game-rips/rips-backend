@@ -1,6 +1,6 @@
 import * as rips from '../abi/rips'
-import { resolveRoundOrThrow } from '../helpers'
-import { RoundStatus, VrfRequestStatus } from '../model'
+import { resolveRipOrThrow } from '../helpers'
+import { RipStatus, VrfRequestStatus } from '../model'
 import { HandlerArgs } from '../types'
 
 export async function handleRandomnessFulfilled(
@@ -8,16 +8,16 @@ export async function handleRandomnessFulfilled(
 ): Promise<void> {
 	const { ctx, entities, log } = args
 
-	const { roundId, randomA, randomB } =
+	const { ripId, randomA, randomB } =
 		rips.events.RandomnessFulfilled.decode(log)
-	const roundIdStr = roundId.toString()
+	const ripIdStr = ripId.toString()
 
-	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
+	const rip = await resolveRipOrThrow(ctx, entities.rips, ripIdStr)
 
-	round.vrfRequestStatus = VrfRequestStatus.FULFILLED
-	round.randomA = randomA
-	round.randomB = randomB
-	round.status = RoundStatus.CLAIMING
+	rip.vrfRequestStatus = VrfRequestStatus.FULFILLED
+	rip.randomA = randomA
+	rip.randomB = randomB
+	rip.status = RipStatus.CLAIMING
 
-	entities.rounds.set(roundIdStr, round)
+	entities.rips.set(ripIdStr, rip)
 }

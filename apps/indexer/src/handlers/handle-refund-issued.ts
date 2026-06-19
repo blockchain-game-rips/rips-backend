@@ -1,31 +1,31 @@
 import * as rips from '../abi/rips'
-import { resolveRoundOrThrow } from '../helpers'
-import { Refund, RoundStatus } from '../model'
+import { resolveRipOrThrow } from '../helpers'
+import { Refund, RipStatus } from '../model'
 import { HandlerArgs } from '../types'
 
 export async function handleRefundIssued(args: HandlerArgs): Promise<void> {
 	const { ctx, entities, block, log } = args
 
-	const { roundId, user, ticketCount } = rips.events.RefundIssued.decode(log)
-	const roundIdStr = roundId.toString()
+	const { ripId, user, entryCount } = rips.events.RefundIssued.decode(log)
+	const ripIdStr = ripId.toString()
 
-	const round = await resolveRoundOrThrow(ctx, entities.rounds, roundIdStr)
+	const rip = await resolveRipOrThrow(ctx, entities.rips, ripIdStr)
 
-	round.ticketsRefunded += ticketCount
+	rip.entriesRefunded += entryCount
 
-	if (round.ticketsRefunded === round.ticketsSold) {
-		round.status = RoundStatus.REFUNDED
+	if (rip.entriesRefunded === rip.entriesSold) {
+		rip.status = RipStatus.REFUNDED
 	}
 
-	entities.rounds.set(roundIdStr, round)
+	entities.rips.set(ripIdStr, rip)
 
 	entities.refunds.push(
 		new Refund({
 			id: log.id,
-			round,
+			rip,
 			user: user.toLowerCase(),
-			ticketCount,
-			amount: ticketCount * round.config.ticketCost,
+			entryCount,
+			amount: entryCount * rip.config.entryPrice,
 			blockNumber: BigInt(block.height),
 			time: new Date(block.timestamp),
 			txHash: log.transactionHash,

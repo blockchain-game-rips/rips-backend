@@ -1,42 +1,42 @@
-# Round status state machine
+# Rip status state machine
 #
-# Happy path (ticket cap reached):
-#   FILLING --(TicketsPurchased: ticketsSold === ticketCap)--> SEALED
+# Happy path (entry cap reached):
+#   FILLING --(EntriesPurchased: entriesSold === entryCap)--> SEALED
 #   SEALED  --(RandomnessRequested)--> VRF_REQUESTED
 #   VRF_REQUESTED --(RandomnessFulfilled)--> CLAIMING
-#   CLAIMING --(PrizesClaimed: ticketsClaimed === ticketsSold)--> CLAIMED
+#   CLAIMING --(PayoutsClaimed: entriesClaimed === entriesSold)--> CLAIMED
 #
-# Refund path (round expired before cap):
+# Refund path (rip expired before cap):
 #   FILLING --(no event: startTime + duration < now)--> REFUNDING
-#   REFUNDING --(RefundIssued: ticketsRefunded === ticketsSold)--> REFUNDED
+#   REFUNDING --(RefundIssued: entriesRefunded === entriesSold)--> REFUNDED
 #
 # Transition conditions per status:
 #   FILLING     vrfRequestStatus = NOT_REQUESTED
-#               ticketsSold < ticketCap
+#               entriesSold < entryCap
 #               startTime + durationSeconds >= now
 #
 #   SEALED      vrfRequestStatus = NOT_REQUESTED
-#               ticketsSold = ticketCap
+#               entriesSold = entryCap
 #
 #   VRF_REQUESTED  vrfRequestStatus = REQUESTED
 #
 #   CLAIMING    vrfRequestStatus = FULFILLED
-#               ticketsClaimed < ticketsSold
+#               entriesClaimed < entriesSold
 #
 #   CLAIMED     vrfRequestStatus = FULFILLED
-#               ticketsClaimed = ticketsSold
+#               entriesClaimed = entriesSold
 #
 #   REFUNDING   vrfRequestStatus = NOT_REQUESTED
-#               ticketsSold < ticketCap
+#               entriesSold < entryCap
 #               startTime + durationSeconds < now
-#               ticketsRefunded < ticketsSold
+#               entriesRefunded < entriesSold
 #
 #   REFUNDED    vrfRequestStatus = NOT_REQUESTED
-#               ticketsSold < ticketCap
+#               entriesSold < entryCap
 #               startTime + durationSeconds < now
-#               ticketsRefunded = ticketsSold
+#               entriesRefunded = entriesSold
 
-enum RoundStatus {
+enum RipStatus {
 	FILLING
 	SEALED
 	VRF_REQUESTED
@@ -46,32 +46,32 @@ enum RoundStatus {
 	REFUNDED
 }
 
-type Stake @entity {
+type Preset @entity {
 	id: ID!
 	deleted: Boolean!
-	configs: [Config!]! @derivedFrom(field: "stake")
-	rounds: [Round!]! @derivedFrom(field: "stake")
+	configs: [Config!]! @derivedFrom(field: "preset")
+	rips: [Rip!]! @derivedFrom(field: "preset")
 }
 
 type Config @entity {
 	id: ID!
-	stake: Stake!
-	ticketCap: BigInt!
+	preset: Preset!
+	entryCap: BigInt!
 	currency: String!
 	durationSeconds: BigInt!
-	ticketCost: BigInt!
+	entryPrice: BigInt!
 	feePercent: BigInt!
-	prizeDistribution: [PrizeTier!]! @derivedFrom(field: "config")
-	rounds: [Round!]! @derivedFrom(field: "config")
+	payoutDistribution: [PayoutTier!]! @derivedFrom(field: "config")
+	rips: [Rip!]! @derivedFrom(field: "config")
 }
 
-type PrizeTier @entity {
+type PayoutTier @entity {
 	id: ID!
 	config: Config!
 	tierIndex: Int!
-	prizeCount: BigInt!
-	minPrize: BigInt!
-	maxPrize: BigInt!
+	payoutCount: BigInt!
+	minPayout: BigInt!
+	maxPayout: BigInt!
 }
 
 enum VrfRequestStatus {
@@ -80,41 +80,41 @@ enum VrfRequestStatus {
 	FULFILLED
 }
 
-type Round @entity {
+type Rip @entity {
 	id: ID!
 	config: Config!
-	stake: Stake!
+	preset: Preset!
 	startTime: DateTime!
-	ticketsSold: BigInt!
-	ticketsClaimed: BigInt!
-	ticketsRefunded: BigInt!
-	status: RoundStatus!
+	entriesSold: BigInt!
+	entriesClaimed: BigInt!
+	entriesRefunded: BigInt!
+	status: RipStatus!
 	vrfRequestStatus: VrfRequestStatus!
 	randomA: BigInt
 	randomB: BigInt
 	vrfRequestId: BigInt
-	ticketPurchases: [TicketPurchase!]! @derivedFrom(field: "round")
-	prizesClaimed: [PrizeClaim!]! @derivedFrom(field: "round")
-	refunds: [Refund!]! @derivedFrom(field: "round")
+	entryPurchases: [EntryPurchase!]! @derivedFrom(field: "rip")
+	payoutsClaimed: [PayoutClaim!]! @derivedFrom(field: "rip")
+	refunds: [Refund!]! @derivedFrom(field: "rip")
 }
 
-type TicketPurchase @entity {
+type EntryPurchase @entity {
 	id: ID!
-	round: Round!
+	rip: Rip!
 	user: String!
-	ticketCount: BigInt!
-	startTicketIndex: BigInt!
+	entryCount: BigInt!
+	startEntryIndex: BigInt!
 	blockNumber: BigInt!
 	time: DateTime!
 	txHash: String!
 }
 
-type PrizeClaim @entity {
+type PayoutClaim @entity {
 	id: ID!
-	round: Round!
+	rip: Rip!
 	user: String!
 	referrer: String!
-	ticketCount: BigInt!
+	entryCount: BigInt!
 	amount: BigInt!
 	blockNumber: BigInt!
 	time: DateTime!
@@ -123,9 +123,9 @@ type PrizeClaim @entity {
 
 type Refund @entity {
 	id: ID!
-	round: Round!
+	rip: Rip!
 	user: String!
-	ticketCount: BigInt!
+	entryCount: BigInt!
 	amount: BigInt!
 	blockNumber: BigInt!
 	time: DateTime!
@@ -267,7 +267,7 @@ type ReferrerReward @entity {
 
 type ReferralFeeAccrued @entity {
 	id: ID!
-	round: Round!
+	rip: Rip!
 	referrer: String!
 	amount: BigInt!
 	blockNumber: BigInt!
@@ -277,7 +277,7 @@ type ReferralFeeAccrued @entity {
 
 type ProtocolFeeAccrued @entity {
 	id: ID!
-	round: Round!
+	rip: Rip!
 	amount: BigInt!
 	blockNumber: BigInt!
 	time: DateTime!

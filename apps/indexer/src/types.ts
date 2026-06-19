@@ -2,9 +2,11 @@ import {
 	CallbackGasLimitUpdated,
 	Config,
 	DefaultReferralFeeUpdated,
+	EntryPurchase,
 	FeeRecipientUpdated,
-	PrizeClaim,
-	PrizeTier,
+	PayoutClaim,
+	PayoutTier,
+	Preset,
 	ProtocolFeeAccrued,
 	ProtocolFeeWithdrawn,
 	ReferralFeeAccrued,
@@ -17,9 +19,7 @@ import {
 	ReferrerReward,
 	ReferrerStateUpdated,
 	Refund,
-	Round,
-	Stake,
-	TicketPurchase,
+	Rip,
 	VrfKeyHashUpdated,
 	VrfRequestConfirmationsUpdated,
 	VrfSubscriptionIdUpdated,
@@ -27,12 +27,12 @@ import {
 import { Block, Context, Log } from './processor'
 
 export interface Entities {
-	stakes: Map<string, Stake>
+	presets: Map<string, Preset>
 	configs: Map<string, Config>
-	prizeTiers: PrizeTier[]
-	rounds: Map<string, Round>
-	ticketPurchases: TicketPurchase[]
-	prizeClaims: PrizeClaim[]
+	payoutTiers: PayoutTier[]
+	rips: Map<string, Rip>
+	entryPurchases: EntryPurchase[]
+	payoutClaims: PayoutClaim[]
 	refunds: Refund[]
 	feeRecipientUpdates: FeeRecipientUpdated[]
 	callbackGasLimitUpdates: CallbackGasLimitUpdated[]

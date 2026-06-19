@@ -1,46 +1,46 @@
-import { Config, PrizeTier, ReferrerReward, Round, Stake } from './model'
+import { Config, PayoutTier, Preset, ReferrerReward, Rip } from './model'
 import { Context } from './processor'
 
-export function buildPrizeTiers(
+export function buildPayoutTiers(
 	config: Config,
-	prizeDistribution: {
-		prizeCount: bigint
-		minPrize: bigint
-		maxPrize: bigint
+	payoutDistribution: {
+		payoutCount: bigint
+		minPayout: bigint
+		maxPayout: bigint
 	}[],
-): PrizeTier[] {
-	return prizeDistribution.map(
+): PayoutTier[] {
+	return payoutDistribution.map(
 		(tier, i) =>
-			new PrizeTier({
+			new PayoutTier({
 				id: `${config.id}-${i}`,
 				config,
 				tierIndex: i,
-				prizeCount: tier.prizeCount,
-				minPrize: tier.minPrize,
-				maxPrize: tier.maxPrize,
+				payoutCount: tier.payoutCount,
+				minPayout: tier.minPayout,
+				maxPayout: tier.maxPayout,
 			}),
 	)
 }
 
-export async function resolveRoundOrThrow(
+export async function resolveRipOrThrow(
 	ctx: Context,
-	rounds: Map<string, Round>,
-	roundId: string,
-): Promise<Round> {
-	let round = rounds.get(roundId)
+	rips: Map<string, Rip>,
+	ripId: string,
+): Promise<Rip> {
+	let rip = rips.get(ripId)
 
-	if (round !== undefined) return round
+	if (rip !== undefined) return rip
 
-	round = await ctx.store.findOne(Round, {
-		where: { id: roundId },
-		relations: { config: { stake: true } },
+	rip = await ctx.store.findOne(Rip, {
+		where: { id: ripId },
+		relations: { config: { preset: true } },
 	})
 
-	if (round === undefined) {
-		throw new Error(`Round ${roundId} not found`)
+	if (rip === undefined) {
+		throw new Error(`Rip ${ripId} not found`)
 	}
 
-	return round
+	return rip
 }
 
 export async function resolveReferrerRewardState(
@@ -73,20 +73,20 @@ export async function resolveReferrerRewardState(
 	return state
 }
 
-export async function resolveStakeOrThrow(
+export async function resolvePresetOrThrow(
 	ctx: Context,
-	stakes: Map<string, Stake>,
-	stakeId: string,
-): Promise<Stake> {
-	let stake = stakes.get(stakeId)
+	presets: Map<string, Preset>,
+	presetId: string,
+): Promise<Preset> {
+	let preset = presets.get(presetId)
 
-	if (stake !== undefined) return stake
+	if (preset !== undefined) return preset
 
-	stake = await ctx.store.get(Stake, stakeId)
+	preset = await ctx.store.get(Preset, presetId)
 
-	if (stake === undefined) {
-		throw new Error(`Stake ${stakeId} not found`)
+	if (preset === undefined) {
+		throw new Error(`Preset ${presetId} not found`)
 	}
 
-	return stake
+	return preset
 }
