@@ -3544,8 +3544,6 @@ __metadata:
 "@rips/abi@workspace:*, @rips/abi@workspace:packages/abi":
   version: 0.0.0-use.local
   resolution: "@rips/abi@workspace:packages/abi"
-  dependencies:
-    ts-node: "npm:^10.9.0"
   languageName: unknown
   linkType: soft
 
@@ -12346,7 +12344,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.4.2":
+"prettier@npm:^3.4.2, prettier@npm:^3.8.4":
   version: 3.8.4
   resolution: "prettier@npm:3.8.4"
   bin:
@@ -12916,6 +12914,9 @@ __metadata:
 "rips-monorepo@workspace:.":
   version: 0.0.0-use.local
   resolution: "rips-monorepo@workspace:."
+  dependencies:
+    prettier: "npm:^3.8.4"
+    prettier-plugin-organize-imports: "npm:^4.3.0"
   languageName: unknown
   linkType: soft
 
@@ -14192,7 +14193,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.9.0, ts-node@npm:^10.9.2":
+"ts-node@npm:^10.9.2":
   version: 10.9.2
   resolution: "ts-node@npm:10.9.2"
   dependencies:
