@@ -7,7 +7,6 @@
         "test:e2e": "yarn build && jest --testPathPattern=test/e2e",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "build": "rm -rf lib && tsc -p tsconfig.build.json",
-        "update": "npx npm-check-updates --filter /subsquid/ --upgrade && npm i -f",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
         "generate-schema": "ts-node src/generate-schema.ts"
     },
