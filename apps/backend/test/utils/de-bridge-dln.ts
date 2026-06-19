@@ -1,4 +1,9 @@
 import {
+	ANVIL_ACCOUNT_0_PRIVATE_KEY,
+	setNativeBalance,
+	waitForReceipt,
+} from '@rips/test-harness'
+import {
 	createWalletClient,
 	custom,
 	decodeEventLog,
@@ -12,8 +17,6 @@ import {
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { Chain } from 'viem/chains'
-import { ANVIL_ACCOUNT_0_PRIVATE_KEY } from '../fixtures/anvil-accounts'
-import { setNativeBalance, waitForReceipt } from './anvil'
 
 const DLN_DESTINATION_ADDRESSES: Record<number, string> = {
 	8453: '0xe7351fd770a37282b91d153ee690b63579d6dd7f',

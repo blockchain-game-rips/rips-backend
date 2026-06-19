@@ -1,4 +1,9 @@
-import path from 'path'
+import {
+	ANVIL_STATE_PATH,
+	deployments,
+	increaseTime,
+	useAnvil,
+} from '@rips/test-harness'
 import { waitForReceipt } from 'test/utils/contracts'
 import { DataSource } from 'typeorm'
 import {
@@ -14,18 +19,11 @@ import {
 import { LocalAccount, privateKeyToAccount } from 'viem/accounts'
 import vrfAbi from '../contracts/abi/VRFCoordinatorV2_5Mock.json'
 import { ripsAbi } from '../contracts/abi/rips'
-import { increaseTime, useAnvil } from '../utils/anvil'
 import { waitForRecord, waitForRow } from '../utils/db'
 import { usePostgres } from '../utils/postgres'
 import { useProcessor } from '../utils/processor'
-import deployments from '../utils/state/deployments.json'
 
 const CHAIN_ID = 8453
-
-const ANVIL_STATE_PATH = path.resolve(
-	__dirname,
-	'../utils/state/anvil-state.json',
-)
 
 const NATIVE_CURRENCY = '0x0000000000000000000000000000000000000000'
 const DURATION = 300n // 5 minutes

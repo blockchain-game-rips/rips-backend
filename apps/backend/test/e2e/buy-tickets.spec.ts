@@ -1,9 +1,9 @@
+import { setNativeBalance } from '@rips/test-harness'
 import request from 'supertest'
 import { parseEther } from 'viem'
 import { GetAvailableStakesUseCase } from '../../src/application/use-cases/get-available-stakes/get-available-stakes.use-case'
 import { AvailableStake } from '../../src/domain/value-objects/available-stake'
 import { ANVIL_NATIVE_CURRENCY } from '../fixtures/entities'
-import { setNativeBalance } from '../utils/anvil'
 import { useRipsApp } from '../utils/rips-app'
 
 const STAKE_ID = 1

@@ -12,6 +12,7 @@
         "generate-schema": "ts-node src/generate-schema.ts"
     },
     "dependencies": {
+        "@rips/test-harness": "workspace:*",
         "@subsquid/evm-processor": "^1.18.0",
         "@subsquid/evm-typegen": "^4.0.0",
         "@subsquid/graphql-server": "^4.5.1",

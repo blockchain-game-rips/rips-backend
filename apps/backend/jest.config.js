@@ -11,6 +11,10 @@ const sharedConfig = {
 	moduleNameMapper: {
 		'^src/(.*)$': '<rootDir>/src/$1',
 		'^generated/(.*)$': '<rootDir>/generated/$1',
+		'^@rips/test-harness/state$':
+			'<rootDir>/../../packages/test-harness/src/state/index.ts',
+		'^@rips/test-harness$':
+			'<rootDir>/../../packages/test-harness/src/index.ts',
 	},
 }
 

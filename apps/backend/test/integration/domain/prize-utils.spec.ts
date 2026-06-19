@@ -1,4 +1,14 @@
 import {
+	ANVIL_ACCOUNT_0_PRIVATE_KEY,
+	ANVIL_ACCOUNT_1_PRIVATE_KEY,
+	ANVIL_ACCOUNT_2_PRIVATE_KEY,
+	ANVIL_STATE_PATH,
+	deployments,
+	getBalances,
+	useAnvil,
+	waitForReceipt,
+} from '@rips/test-harness'
+import {
 	Chain,
 	createPublicClient,
 	createWalletClient,
@@ -19,14 +29,7 @@ import {
 } from '../../../src/domain/services/prize-utils'
 import { CardCollection } from '../../../src/domain/value-objects/card-collection'
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
-import {
-	ANVIL_ACCOUNT_0_PRIVATE_KEY,
-	ANVIL_ACCOUNT_1_PRIVATE_KEY,
-	ANVIL_ACCOUNT_2_PRIVATE_KEY,
-} from '../../fixtures/anvil-accounts'
-import { ANVIL_STATE_PATH, deployments } from '../../fixtures/state'
 import { vrfCoordinatorAbi } from '../../fixtures/vrf-coordinator-abi'
-import { getBalances, useAnvil, waitForReceipt } from '../../utils/anvil'
 import { parseRandomnessFulfilled } from '../../utils/rips-events'
 
 const CHAIN_ID = 8453

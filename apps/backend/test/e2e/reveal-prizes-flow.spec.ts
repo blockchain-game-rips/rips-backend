@@ -1,4 +1,10 @@
 import { Test } from '@nestjs/testing'
+import {
+	ANVIL_ACCOUNT_0_PRIVATE_KEY,
+	deployments,
+	getBalances,
+	setNativeBalance,
+} from '@rips/test-harness'
 import request from 'supertest'
 import {
 	createWalletClient,
@@ -29,16 +35,13 @@ import { IndexerModule } from '../../src/infrastructure/indexer/indexer.module'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { SeedCardDefinitionsService } from '../../src/infrastructure/seed/seed-card-definitions.service'
 import { SeedModule } from '../../src/infrastructure/seed/seed.module'
-import { ANVIL_ACCOUNT_0_PRIVATE_KEY } from '../fixtures/anvil-accounts'
 import cardsConfig from '../fixtures/cards.json'
 import { ANVIL_NATIVE_CURRENCY } from '../fixtures/entities'
-import { deployments } from '../fixtures/state'
 import { vrfCoordinatorAbi } from '../fixtures/vrf-coordinator-abi'
 import {
 	MockIndexerModule,
 	MockRoundRepository,
 } from '../mocks/mock-indexer.module'
-import { getBalances, setNativeBalance } from '../utils/anvil'
 import { useRipsApp } from '../utils/rips-app'
 import { parseRandomnessFulfilled } from '../utils/rips-events'
 

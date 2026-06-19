@@ -3541,6 +3541,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rips/test-harness@workspace:*, @rips/test-harness@workspace:packages/test-harness":
+  version: 0.0.0-use.local
+  resolution: "@rips/test-harness@workspace:packages/test-harness"
+  dependencies:
+    get-port: "npm:5"
+    viem: "npm:^2.47.5"
+  languageName: unknown
+  linkType: soft
+
 "@scarf/scarf@npm:=1.4.0":
   version: 1.4.0
   resolution: "@scarf/scarf@npm:1.4.0"
@@ -6090,6 +6099,7 @@ __metadata:
     "@nestjs/testing": "npm:^11.0.1"
     "@prisma/adapter-pg": "npm:^7.5.0"
     "@prisma/client": "npm:^7.5.0"
+    "@rips/test-harness": "workspace:*"
     "@swc/cli": "npm:^0.6.0"
     "@swc/core": "npm:^1.10.7"
     "@testcontainers/postgresql": "npm:^11.13.0"
@@ -9464,6 +9474,7 @@ __metadata:
   dependencies:
     "@eslint/eslintrc": "npm:^3.2.0"
     "@eslint/js": "npm:^9.18.0"
+    "@rips/test-harness": "workspace:*"
     "@subsquid/evm-processor": "npm:^1.18.0"
     "@subsquid/evm-typegen": "npm:^4.0.0"
     "@subsquid/graphql-server": "npm:^4.5.1"

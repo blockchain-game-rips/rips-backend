@@ -1,6 +1,15 @@
 import { INestApplication, Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { Test, TestingModuleBuilder } from '@nestjs/testing'
+import {
+	ANVIL_ACCOUNT_0_PRIVATE_KEY,
+	ANVIL_MNEMONIC,
+	ANVIL_STATE_PATH,
+	Anvil,
+	deployments,
+	setNativeBalance,
+	useAnvil,
+} from '@rips/test-harness'
 import { Logger } from 'nestjs-pino'
 import { ZodValidationPipe } from 'nestjs-zod'
 import {
@@ -30,13 +39,7 @@ import { ProvisionService } from '../../src/infrastructure/provision/provision.s
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { RIPS_CONTRACT } from '../../src/infrastructure/rips/rips.constants'
 import { UseCaseExceptionFilter } from '../../src/presentation/filters/use-case-exception.filter'
-import {
-	ANVIL_ACCOUNT_0_PRIVATE_KEY,
-	ANVIL_MNEMONIC,
-} from '../fixtures/anvil-accounts'
-import { ANVIL_STATE_PATH, deployments } from '../fixtures/state'
 import { MockIndexerModule } from '../mocks/mock-indexer.module'
-import { Anvil, setNativeBalance, useAnvil } from './anvil'
 import { usePostgres } from './postgres'
 import { TestConfigModule } from './test-config.module'
 

@@ -1,7 +1,7 @@
+import { setNativeBalance } from '@rips/test-harness'
 import request from 'supertest'
 import { parseEther } from 'viem'
 import { MOCK_CURRENCY_CHAIN_ADDRESS } from '../fixtures/entities'
-import { setNativeBalance } from '../utils/anvil'
 import { useRipsApp } from '../utils/rips-app'
 
 const USER_TG_ID = '123456789'

@@ -1,4 +1,10 @@
 import {
+	ANVIL_MNEMONIC,
+	Anvil,
+	setNativeBalance,
+	useAnvil,
+} from '@rips/test-harness'
+import {
 	createPublicClient,
 	createWalletClient,
 	http,
@@ -10,8 +16,6 @@ import {
 } from 'viem'
 import { base } from 'viem/chains'
 import { MnemonicKmsService } from '../../../src/infrastructure/kms/mnemonic-kms.service'
-import { ANVIL_MNEMONIC } from '../../fixtures/anvil-accounts'
-import { Anvil, setNativeBalance, useAnvil } from '../../utils/anvil'
 
 const TEST_MNEMONIC = ANVIL_MNEMONIC
 
