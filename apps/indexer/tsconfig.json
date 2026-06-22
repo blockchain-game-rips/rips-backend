@@ -4,12 +4,11 @@
         "declaration": false,
         "strict": true,
         "outDir": "lib",
-        "baseUrl": "./",
         "rootDir": ".",
         "paths": {
-            "src/*": ["src/*"],
-            "generated/*": ["generated/*"],
-            "test/*": ["test/*"]
+            "src/*": ["./src/*"],
+            "generated/*": ["./generated/*"],
+            "test/*": ["./test/*"]
         }
     }
 }
