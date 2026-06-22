@@ -9,6 +9,7 @@ export type ProcessorEnv = {
 	CONTRACT_ADDRESS: string
 	CONTRACT_DEPLOYED_AT: string
 	DB_URL: string
+	HEAD_POLL_INTERVAL_MS: string
 }
 
 export class Processor {

@@ -25,6 +25,8 @@ import { useProcessor } from '../utils/processor'
 
 const CHAIN_ID = 8453
 
+const TEST_HEAD_POLL_INTERVAL_MS = '50'
+
 const NATIVE_CURRENCY = '0x0000000000000000000000000000000000000000'
 const DURATION = 300n // 5 minutes
 
@@ -123,6 +125,7 @@ describe('indexer e2e', () => {
 		CONTRACT_ADDRESS: ripsAddress,
 		CONTRACT_DEPLOYED_AT: '0',
 		DB_URL: postgres.connectionUrl,
+		HEAD_POLL_INTERVAL_MS: TEST_HEAD_POLL_INTERVAL_MS,
 	}))
 
 	beforeAll(async () => {
@@ -273,14 +276,20 @@ describe('indexer e2e', () => {
 		const REMAINING_ENTRIES = PRESET_1_ENTRY_CAP - 3n
 
 		beforeAll(async () => {
+			console.time('buyEntries')
 			await buyEntries(REMAINING_ENTRIES)
+			console.timeEnd('buyEntries')
 		})
 
 		it('fills rip 1 to entry cap', async () => {
+			console.time('waitForRow')
+
 			const rip = await waitForRow(
 				dataSource,
 				`SELECT * FROM rip WHERE id = '${PRESET_1_RIP_1_ID}' AND entries_sold = '${PRESET_1_ENTRY_CAP}'`,
 			)
+
+			console.timeEnd('waitForRow')
 
 			expect(rip).toMatchObject({
 				id: PRESET_1_RIP_1_ID,
