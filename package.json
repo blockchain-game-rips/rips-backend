@@ -9,7 +9,8 @@
 	"scripts": {
 		"prepare": "lefthook install",
 		"backend": "yarn workspace backend",
-		"indexer": "yarn workspace indexer"
+		"indexer": "yarn workspace indexer",
+		"sync-indexer-prisma-schema": "yarn workspace indexer build && ts-node scripts/sync-indexer-prisma-schema.ts"
 	},
 	"resolutions": {
 		"ox": "0.14.5"
