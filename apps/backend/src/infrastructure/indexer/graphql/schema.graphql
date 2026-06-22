@@ -87,7 +87,7 @@ type Config {
   entryCap: BigInt!
   currency: String!
   durationSeconds: BigInt!
-  entryCost: BigInt!
+  entryPrice: BigInt!
   feePercent: BigInt!
   payoutDistribution(where: PayoutTierWhereInput, orderBy: [PayoutTierOrderByInput!], offset: Int, limit: Int): [PayoutTier!]!
   rips(where: RipWhereInput, orderBy: [RipOrderByInput!], offset: Int, limit: Int): [Rip!]!
@@ -255,15 +255,15 @@ input ConfigWhereInput {
   durationSeconds_lte: BigInt
   durationSeconds_in: [BigInt!]
   durationSeconds_not_in: [BigInt!]
-  entryCost_isNull: Boolean
-  entryCost_eq: BigInt
-  entryCost_not_eq: BigInt
-  entryCost_gt: BigInt
-  entryCost_gte: BigInt
-  entryCost_lt: BigInt
-  entryCost_lte: BigInt
-  entryCost_in: [BigInt!]
-  entryCost_not_in: [BigInt!]
+  entryPrice_isNull: Boolean
+  entryPrice_eq: BigInt
+  entryPrice_not_eq: BigInt
+  entryPrice_gt: BigInt
+  entryPrice_gte: BigInt
+  entryPrice_lt: BigInt
+  entryPrice_lte: BigInt
+  entryPrice_in: [BigInt!]
+  entryPrice_not_in: [BigInt!]
   feePercent_isNull: Boolean
   feePercent_eq: BigInt
   feePercent_not_eq: BigInt
@@ -858,12 +858,12 @@ enum PayoutTierOrderByInput {
   config_durationSeconds_ASC_NULLS_LAST
   config_durationSeconds_DESC_NULLS_FIRST
   config_durationSeconds_DESC_NULLS_LAST
-  config_entryCost_ASC
-  config_entryCost_DESC
-  config_entryCost_ASC_NULLS_FIRST
-  config_entryCost_ASC_NULLS_LAST
-  config_entryCost_DESC_NULLS_FIRST
-  config_entryCost_DESC_NULLS_LAST
+  config_entryPrice_ASC
+  config_entryPrice_DESC
+  config_entryPrice_ASC_NULLS_FIRST
+  config_entryPrice_ASC_NULLS_LAST
+  config_entryPrice_DESC_NULLS_FIRST
+  config_entryPrice_DESC_NULLS_LAST
   config_feePercent_ASC
   config_feePercent_DESC
   config_feePercent_ASC_NULLS_FIRST
@@ -1305,12 +1305,12 @@ enum RipOrderByInput {
   config_durationSeconds_ASC_NULLS_LAST
   config_durationSeconds_DESC_NULLS_FIRST
   config_durationSeconds_DESC_NULLS_LAST
-  config_entryCost_ASC
-  config_entryCost_DESC
-  config_entryCost_ASC_NULLS_FIRST
-  config_entryCost_ASC_NULLS_LAST
-  config_entryCost_DESC_NULLS_FIRST
-  config_entryCost_DESC_NULLS_LAST
+  config_entryPrice_ASC
+  config_entryPrice_DESC
+  config_entryPrice_ASC_NULLS_FIRST
+  config_entryPrice_ASC_NULLS_LAST
+  config_entryPrice_DESC_NULLS_FIRST
+  config_entryPrice_DESC_NULLS_LAST
   config_feePercent_ASC
   config_feePercent_DESC
   config_feePercent_ASC_NULLS_FIRST
@@ -1422,12 +1422,12 @@ enum ConfigOrderByInput {
   durationSeconds_ASC_NULLS_LAST
   durationSeconds_DESC_NULLS_FIRST
   durationSeconds_DESC_NULLS_LAST
-  entryCost_ASC
-  entryCost_DESC
-  entryCost_ASC_NULLS_FIRST
-  entryCost_ASC_NULLS_LAST
-  entryCost_DESC_NULLS_FIRST
-  entryCost_DESC_NULLS_LAST
+  entryPrice_ASC
+  entryPrice_DESC
+  entryPrice_ASC_NULLS_FIRST
+  entryPrice_ASC_NULLS_LAST
+  entryPrice_DESC_NULLS_FIRST
+  entryPrice_DESC_NULLS_LAST
   feePercent_ASC
   feePercent_DESC
   feePercent_ASC_NULLS_FIRST

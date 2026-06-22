@@ -71,7 +71,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 			config.entryPrice.currency.chainAddress.address,
 		)
 
-		const entryCost = BigInt(config.entryPrice.amount)
+		const entryPrice = BigInt(config.entryPrice.amount)
 
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
@@ -84,7 +84,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 						currency: currencyAddress,
 						entryCap: BigInt(config.entryCap),
 						duration: config.durationSeconds,
-						entryCost: entryCost,
+						entryPrice: entryPrice,
 						feePercent: config.feePercent,
 					},
 				],

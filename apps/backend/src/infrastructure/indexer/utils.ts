@@ -20,7 +20,7 @@ export function fromConfigRaw(
 		feePercent: Number(configRaw.feePercent),
 		entryPrice: {
 			currency,
-			amount: BigInt(configRaw.entryCost),
+			amount: BigInt(configRaw.entryPrice),
 		},
 		durationSeconds: Number(configRaw.durationSeconds),
 		payoutDistribution: configRaw.payoutDistribution.map((tier) => ({

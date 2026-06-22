@@ -17,7 +17,7 @@ query GetNextCompletedRip($afterRipId: String!) {
             id
             currency
             entryCap
-            entryCost
+            entryPrice
             feePercent
             durationSeconds
             payoutDistribution(orderBy: tierIndex_ASC) {
