@@ -52,10 +52,18 @@ if (!gatewayUrl) {
 	)
 }
 
-const processorBuilder = new EvmBatchProcessor().setRpcEndpoint({
-	url: assertNotNull(process.env.RPC_ENDPOINT),
-	rateLimit: 10,
-})
+const headPollInterval = process.env.HEAD_POLL_INTERVAL_MS
+
+const processorBuilder = new EvmBatchProcessor()
+	.setRpcEndpoint({
+		url: assertNotNull(process.env.RPC_ENDPOINT),
+		rateLimit: 10,
+	})
+	.setRpcDataIngestionSettings(
+		headPollInterval
+			? { headPollInterval: parseInt(headPollInterval) }
+			: {},
+	)
 
 export const processor = (
 	gatewayUrl ? processorBuilder.setGateway(gatewayUrl) : processorBuilder
