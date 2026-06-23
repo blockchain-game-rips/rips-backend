@@ -1,7 +1,7 @@
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
 import { zeroAddress } from 'viem'
-import { GetReferrerDataQuery } from '../../../generated/graphql/generated'
+import { Prisma } from '../../../generated/prisma-indexer'
 import { ReferralSystemRepository } from '../../application/interfaces/repositories/referral-system.repository'
 import { Referrer } from '../../domain/entities/referrer'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
@@ -10,17 +10,25 @@ import { ReferrerTierTable } from '../../domain/value-objects/referral-system'
 import { withCache } from '../cache/with-cache'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { RIPS_CONTRACT } from '../rips/rips.constants'
-import { IndexerService } from './indexer.service'
+import { IndexerPrismaService } from './indexer-prisma.service'
+import { INDEXER_TTL_MS } from './indexer.constants'
 
 const REFERRAL_PERIOD_MS = 30 * 24 * 60 * 60 * 1000
-const INDEXER_TTL_MS = 5000
+
+type ReferrerReward = Prisma.referrer_rewardGetPayload<true>
+type ReferrerStateUpdated = Prisma.referrer_state_updatedGetPayload<true>
+type ReferrerCustomFeeUpdated =
+	Prisma.referrer_custom_fee_updatedGetPayload<true>
+type DefaultReferralFeeUpdated =
+	Prisma.default_referral_fee_updatedGetPayload<true>
+type ReferralTier = Prisma.referral_tierGetPayload<true>
 
 @Injectable()
 export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 	private readonly chainId: number
 
 	constructor(
-		private readonly indexer: IndexerService,
+		private readonly indexer: IndexerPrismaService,
 		private readonly evmCurrencyService: EvmCurrencyService,
 		@Inject(RIPS_CONTRACT) contract: ChainAddress,
 		@Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
@@ -34,21 +42,17 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 		const lowerCaseReferrer = referrer.toLowerCase()
 
 		const {
-			referrerCustomFeeUpdateds,
-			referrerStateUpdateds,
-			referralTiersUpdateds,
-			defaultReferralFeeUpdateds,
 			referrerRewards,
+			referrerStateUpdateds,
+			referralTiers,
+			defaultReferralFeeUpdateds,
+			referrerCustomFeeUpdateds,
 			referrerFreezeUpdateds,
 		} = await withCache(
 			this.cacheManager,
 			`indexer-referrer-${lowerCaseReferrer}`,
 			INDEXER_TTL_MS,
-			() =>
-				this.indexer.sdk.GetReferrerData({
-					currencyAddress: zeroAddress,
-					referrer: lowerCaseReferrer,
-				}),
+			() => this.fetchReferrerData(lowerCaseReferrer),
 		)
 
 		const customFee = this.resolveCustomFee(referrerCustomFeeUpdateds)
@@ -58,7 +62,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 		const { activeFee, currMonthVolume, monthStartTime } =
 			this.resolveVolumeActiveFeeMonthStart(
 				referrerStateUpdateds,
-				referralTiersUpdateds,
+				referralTiers,
 			)
 
 		const rewards = this.resolveRewards(referrerRewards)
@@ -87,9 +91,56 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 		}
 	}
 
-	private resolveRewards(
-		referrerRewards: GetReferrerDataQuery['referrerRewards'],
-	): {
+	private async fetchReferrerData(referrer: string) {
+		const [
+			referrerRewards,
+			referrerStateUpdateds,
+			referrerCustomFeeUpdateds,
+			defaultReferralFeeUpdateds,
+			latestTiersUpdate,
+			referrerFreezeUpdateds,
+		] = await Promise.all([
+			this.indexer.referrer_reward.findMany({
+				where: { referrer, currency: zeroAddress },
+				take: 1,
+			}),
+			this.indexer.referrer_state_updated.findMany({
+				where: { referrer, currency: zeroAddress },
+				orderBy: { block_number: 'desc' },
+				take: 1,
+			}),
+			this.indexer.referrer_custom_fee_updated.findMany({
+				where: { referrer },
+				orderBy: { block_number: 'desc' },
+				take: 1,
+			}),
+			this.indexer.default_referral_fee_updated.findMany({
+				orderBy: { block_number: 'desc' },
+				take: 1,
+			}),
+			this.indexer.referral_tiers_updated.findFirst({
+				where: { currency: zeroAddress },
+				orderBy: { block_number: 'desc' },
+				include: { referral_tier: true },
+			}),
+			this.indexer.referrer_freeze_updated.findMany({
+				where: { referrer },
+				orderBy: { block_number: 'desc' },
+				take: 1,
+			}),
+		])
+
+		return {
+			referrerRewards,
+			referrerStateUpdateds,
+			referrerCustomFeeUpdateds,
+			defaultReferralFeeUpdateds,
+			referralTiers: latestTiersUpdate?.referral_tier ?? [],
+			referrerFreezeUpdateds,
+		}
+	}
+
+	private resolveRewards(referrerRewards: ReferrerReward[]): {
 		available: bigint
 		withdrawn: bigint
 	} {
@@ -97,9 +148,9 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			return { available: 0n, withdrawn: 0n }
 
 		const rewardState = referrerRewards[0]
-		const accrued = BigInt(rewardState.accrued)
-		const seized = BigInt(rewardState.seized)
-		const withdrawn = BigInt(rewardState.withdrawn)
+		const accrued = BigInt(rewardState.accrued.toFixed(0))
+		const seized = BigInt(rewardState.seized.toFixed(0))
+		const withdrawn = BigInt(rewardState.withdrawn.toFixed(0))
 
 		return {
 			available: accrued - seized - withdrawn,
@@ -108,19 +159,19 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 	}
 
 	private resolveDefaultFee(
-		defaultReferralFeeUpdateds: GetReferrerDataQuery['defaultReferralFeeUpdateds'],
+		defaultReferralFeeUpdateds: DefaultReferralFeeUpdated[],
 	): number {
 		if (defaultReferralFeeUpdateds.length === 0) return 0
 
-		return defaultReferralFeeUpdateds[0].defaultReferralFee
+		return defaultReferralFeeUpdateds[0].default_referral_fee
 	}
 
 	private resolveCustomFee(
-		customFeeUpdates: GetReferrerDataQuery['referrerCustomFeeUpdateds'],
+		customFeeUpdates: ReferrerCustomFeeUpdated[],
 	): number | null {
 		if (customFeeUpdates.length === 0) return null
 
-		const customFee = customFeeUpdates[0].customFeePercent
+		const customFee = customFeeUpdates[0].custom_fee_percent
 
 		// will be applyed another fee if custom fee overriden to 0
 		if (customFee === 0) return null
@@ -129,24 +180,23 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 	}
 
 	private resolveActiveFeeFromTiers(
-		referralTiersUpdates: GetReferrerDataQuery['referralTiersUpdateds'],
+		tiers: ReferralTier[],
 		volume: bigint,
 	): number {
-		if (referralTiersUpdates.length === 0) return 0
-
-		const tiers = referralTiersUpdates[0].tiers
-
 		if (tiers.length === 0) return 0
 
 		const sorted = [...tiers].sort((a, b) =>
-			Number(BigInt(a.minVolume) - BigInt(b.minVolume)),
+			Number(
+				BigInt(a.min_volume.toFixed(0)) -
+					BigInt(b.min_volume.toFixed(0)),
+			),
 		)
 
 		let activeFee = 0
 
 		for (const tier of sorted) {
-			if (volume >= BigInt(tier.minVolume)) {
-				activeFee = tier.feePercent
+			if (volume >= BigInt(tier.min_volume.toFixed(0))) {
+				activeFee = tier.fee_percent
 			}
 		}
 
@@ -154,8 +204,8 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 	}
 
 	private resolveVolumeActiveFeeMonthStart(
-		stateUpdates: GetReferrerDataQuery['referrerStateUpdateds'],
-		referralTiersUpdates: GetReferrerDataQuery['referralTiersUpdateds'],
+		stateUpdates: ReferrerStateUpdated[],
+		tiers: ReferralTier[],
 	): {
 		activeFee: number
 		monthStartTime: Date | null
@@ -169,7 +219,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			}
 
 		const lastStateUpdate = stateUpdates[0]
-		const storedMonthStart = new Date(lastStateUpdate.periodStartTime)
+		const storedMonthStart = lastStateUpdate.period_start_time
 		const now = Date.now()
 
 		const elapsedPeriods = Math.floor(
@@ -178,9 +228,11 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 
 		if (elapsedPeriods === 0) {
 			return {
-				activeFee: lastStateUpdate.activeFeePercent,
+				activeFee: lastStateUpdate.active_fee_percent,
 				monthStartTime: storedMonthStart,
-				currMonthVolume: BigInt(lastStateUpdate.periodVolume),
+				currMonthVolume: BigInt(
+					lastStateUpdate.period_volume.toFixed(0),
+				),
 			}
 		}
 
@@ -189,25 +241,22 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 		)
 
 		return {
-			activeFee: this.resolveActiveFeeFromTiers(referralTiersUpdates, 0n),
+			activeFee: this.resolveActiveFeeFromTiers(tiers, 0n),
 			monthStartTime,
 			currMonthVolume: 0n,
 		}
 	}
 
 	async getReferrerTierTables(): Promise<ReferrerTierTable[]> {
-		const { referralTiersUpdateds, defaultReferralFeeUpdateds } =
+		const { latestTiersUpdate, defaultReferralFeeUpdateds } =
 			await withCache(
 				this.cacheManager,
 				'indexer-referrer-tier-tables',
 				INDEXER_TTL_MS,
-				() =>
-					this.indexer.sdk.GetReferrerTierTables({
-						currencyAddress: zeroAddress,
-					}),
+				() => this.fetchTierTables(),
 			)
 
-		if (referralTiersUpdateds.length === 0) return []
+		if (latestTiersUpdate == null) return []
 
 		const defaultFeePercent = this.resolveDefaultFee(
 			defaultReferralFeeUpdateds,
@@ -218,11 +267,35 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			this.chainId,
 		)
 
-		const tiers = referralTiersUpdateds[0].tiers.map((tier) => ({
-			minVolume: BigInt(tier.minVolume),
-			feePercent: tier.feePercent,
-		}))
+		const tiers = [...latestTiersUpdate.referral_tier]
+			.sort((a, b) =>
+				Number(
+					BigInt(a.min_volume.toFixed(0)) -
+						BigInt(b.min_volume.toFixed(0)),
+				),
+			)
+			.map((tier) => ({
+				minVolume: BigInt(tier.min_volume.toFixed(0)),
+				feePercent: tier.fee_percent,
+			}))
 
 		return [{ currency, defaultFeePercent, tiers }]
+	}
+
+	private async fetchTierTables() {
+		const [latestTiersUpdate, defaultReferralFeeUpdateds] =
+			await Promise.all([
+				this.indexer.referral_tiers_updated.findFirst({
+					where: { currency: zeroAddress },
+					orderBy: { block_number: 'desc' },
+					include: { referral_tier: true },
+				}),
+				this.indexer.default_referral_fee_updated.findMany({
+					orderBy: { block_number: 'desc' },
+					take: 1,
+				}),
+			])
+
+		return { latestTiersUpdate, defaultReferralFeeUpdateds }
 	}
 }

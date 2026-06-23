@@ -5,7 +5,7 @@ import { ReferralSystemRepository } from '../../application/interfaces/repositor
 import { RipRepository } from '../../application/interfaces/repositories/rip.repository'
 import { EvmModule } from '../evm/evm.module'
 import { RipsModule } from '../rips/rips.module'
-import { IndexerService } from './indexer.service'
+import { IndexerPrismaService } from './indexer-prisma.service'
 import { IndexerPresetRepository } from './preset.repository'
 import { IndexerReferralSystemRepository } from './referral-system.repository'
 import { IndexerRipRepository } from './rips.repository'
@@ -13,7 +13,7 @@ import { IndexerRipRepository } from './rips.repository'
 @Module({
 	imports: [CacheModule.register(), EvmModule, RipsModule],
 	providers: [
-		IndexerService,
+		IndexerPrismaService,
 		{ provide: PresetRepository, useClass: IndexerPresetRepository },
 		{ provide: RipRepository, useClass: IndexerRipRepository },
 		{
