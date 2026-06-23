@@ -17,8 +17,7 @@
         "executor:ensure": "ts-node -r tsconfig-paths/register scripts/ensure-executors.ts",
         "cards:seed": "ts-node -r tsconfig-paths/register scripts/seed-card-definitions.ts",
         "admin:ensure": "ts-node scripts/ensure-admin-wallet.ts",
-        "gen-config-schema": "ts-node -r tsconfig-paths/register utils/generate-configuration-schema.ts",
-        "graphql": "graphql-codegen"
+        "gen-config-schema": "ts-node -r tsconfig-paths/register utils/generate-configuration-schema.ts"
     },
     "dependencies": {
         "@aws-sdk/client-kms": "^3.1010.0",
@@ -38,8 +37,6 @@
         "axios": "^1.13.6",
         "cache-manager": "^7.2.8",
         "get-port": "5",
-        "graphql": "^16.13.1",
-        "graphql-request": "^7.4.0",
         "js-yaml": "4.1.0",
         "ky": "1.7.5",
         "nestjs-pino": "^4.6.1",
@@ -56,10 +53,6 @@
     "devDependencies": {
         "@eslint/eslintrc": "^3.2.0",
         "@eslint/js": "^9.18.0",
-        "@graphql-codegen/cli": "^6.2.1",
-        "@graphql-codegen/typescript": "^5.0.9",
-        "@graphql-codegen/typescript-graphql-request": "^7.0.0",
-        "@graphql-codegen/typescript-operations": "^5.0.9",
         "@nestjs/cli": "^11.0.0",
         "@nestjs/schematics": "^11.0.0",
         "@nestjs/testing": "^11.0.1",
