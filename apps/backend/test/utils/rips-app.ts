@@ -7,8 +7,11 @@ import {
 	ANVIL_STATE_PATH,
 	Anvil,
 	deployments,
+	ensureIndexerSync,
 	setNativeBalance,
 	useAnvil,
+	useIndexer,
+	type Indexer,
 } from '@rips/test-harness'
 import { Logger } from 'nestjs-pino'
 import { ZodValidationPipe } from 'nestjs-zod'
@@ -32,14 +35,12 @@ import { EIP155 } from '../../src/constants'
 import { Executor } from '../../src/domain/entities/executor'
 import { EVM_CLIENT_CONFIG } from '../../src/infrastructure/evm/evm-client/types'
 import { evmAddressFromWallet } from '../../src/infrastructure/evm/helpers'
-import { IndexerModule } from '../../src/infrastructure/indexer/indexer.module'
 import { MnemonicKmsService } from '../../src/infrastructure/kms/mnemonic-kms.service'
 import { WARMUP_CURRENCY_IDS } from '../../src/infrastructure/price-provider/price-provider-warmup.service'
 import { ProvisionService } from '../../src/infrastructure/provision/provision.service'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { RIPS_CONTRACT } from '../../src/infrastructure/rips/rips.constants'
 import { UseCaseExceptionFilter } from '../../src/presentation/filters/use-case-exception.filter'
-import { MockIndexerModule } from '../mocks/mock-indexer.module'
 import { usePostgres } from './postgres'
 import { TestConfigModule } from './test-config.module'
 
@@ -65,6 +66,7 @@ export type RipsApp = {
 	app: INestApplication
 	publicClient: PublicClient<HttpTransport, Chain>
 	anvil: Anvil
+	indexer: Indexer
 }
 
 export function useRipsApp(
@@ -78,10 +80,15 @@ export function useRipsApp(
 		pathToState: ANVIL_STATE_PATH,
 	}).anvils[0]
 
+	const indexer = useIndexer(() => `http://127.0.0.1:${anvil.port}`)
+
 	beforeAll(async () => {
 		result.anvil = anvil
+		result.indexer = indexer
 
 		const rpcUrl = `http://127.0.0.1:${anvil.port}`
+
+		process.env.INDEXER_DATABASE_URL = indexer.databaseUrl
 
 		result.publicClient = createPublicClient({
 			chain,
@@ -108,8 +115,6 @@ export function useRipsApp(
 			.useClass(MnemonicKmsService)
 			.overrideProvider(EVM_CLIENT_CONFIG)
 			.useValue(testEvmClientConfig)
-			.overrideModule(IndexerModule)
-			.useModule(MockIndexerModule)
 			.overrideProvider(RIPS_CONTRACT)
 			.useValue({
 				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
@@ -141,6 +146,8 @@ export function useRipsApp(
 		const executors = await provisionService.ensureExecutors(EXECUTOR_COUNT)
 
 		await setupExecutors(executors, result.publicClient, rpcUrl)
+
+		await ensureIndexerSync(indexer, anvil)
 	})
 
 	afterAll(async () => {
