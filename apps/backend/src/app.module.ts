@@ -1,3 +1,4 @@
+import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { AppConfigModule } from './configuration/app-config.module'
@@ -20,6 +21,7 @@ import { SyncCompletedRipsModule } from './modules/sync-completed-rips/sync-comp
 		LoggingModule,
 		MetricsModule,
 		AppConfigModule,
+		CacheModule.register({ isGlobal: true }),
 		ScheduleModule.forRoot(),
 		PrismaModule,
 		ProvisionModule,

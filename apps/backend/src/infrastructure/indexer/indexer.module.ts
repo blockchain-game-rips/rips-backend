@@ -1,4 +1,3 @@
-import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { PresetRepository } from '../../application/interfaces/repositories/preset.repository'
 import { ReferralSystemRepository } from '../../application/interfaces/repositories/referral-system.repository'
@@ -11,7 +10,7 @@ import { IndexerReferralSystemRepository } from './referral-system.repository'
 import { IndexerRipRepository } from './rips.repository'
 
 @Module({
-	imports: [CacheModule.register(), EvmModule, RipsModule],
+	imports: [EvmModule, RipsModule],
 	providers: [
 		IndexerPrismaService,
 		{ provide: PresetRepository, useClass: IndexerPresetRepository },
