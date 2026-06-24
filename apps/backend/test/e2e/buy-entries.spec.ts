@@ -1,9 +1,6 @@
 import { setNativeBalance } from '@rips/test-harness'
 import request from 'supertest'
 import { parseEther } from 'viem'
-import { GetAvailablePresetsUseCase } from '../../src/application/use-cases/get-available-presets/get-available-presets.use-case'
-import { AvailablePreset } from '../../src/domain/value-objects/available-preset'
-import { ANVIL_NATIVE_CURRENCY } from '../fixtures/entities'
 import { useRipsApp } from '../utils/rips-app'
 
 const PRESET_ID = 1
@@ -12,43 +9,8 @@ const ENTRY_COUNT = 2
 
 const USER_TG_ID = '999888777'
 
-const mockGetAvailablePresetsUseCase: Pick<
-	GetAvailablePresetsUseCase,
-	'execute'
-> = {
-	execute: (): Promise<AvailablePreset[]> =>
-		Promise.resolve([
-			{
-				preset: { id: PRESET_ID, currentConfig: null },
-				fillingRip: {
-					id: 1,
-					preset: { id: PRESET_ID, currentConfig: null },
-					config: {
-						id: 1,
-						entryCap: 8,
-						feePercent: 0,
-						entryPrice: {
-							currency: ANVIL_NATIVE_CURRENCY,
-							amount: ENTRY_COST,
-						},
-						durationSeconds: 86400,
-						payoutDistribution: [],
-					},
-					currency: ANVIL_NATIVE_CURRENCY,
-					actions: { purchases: [], claims: [], refunds: [] },
-					status: 'FILLING' as never,
-					startTime: new Date(),
-				},
-			},
-		]),
-}
-
 describe('Buy entries E2E', () => {
-	const ctx = useRipsApp((builder) =>
-		builder
-			.overrideProvider(GetAvailablePresetsUseCase)
-			.useValue(mockGetAvailablePresetsUseCase),
-	)
+	const ctx = useRipsApp()
 
 	it('creates a user', async () => {
 		const res = await request(ctx.app.getHttpServer())
@@ -77,7 +39,7 @@ describe('Buy entries E2E', () => {
 				entryCount: ENTRY_COUNT,
 				paymentCurrencyChainAddress: {
 					address: '0x0000000000000000000000000000000000000000',
-					chain: { namespace: 'eip155', reference: '31337' },
+					chain: { namespace: 'eip155', reference: '8453' },
 				},
 			})
 			.expect(201)
