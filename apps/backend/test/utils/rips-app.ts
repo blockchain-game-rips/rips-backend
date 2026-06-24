@@ -40,6 +40,7 @@ import { WARMUP_CURRENCY_IDS } from '../../src/infrastructure/price-provider/pri
 import { ProvisionService } from '../../src/infrastructure/provision/provision.service'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { RIPS_CONTRACT } from '../../src/infrastructure/rips/rips.constants'
+import { SeedModule } from '../../src/infrastructure/seed/seed.module'
 import { UseCaseExceptionFilter } from '../../src/presentation/filters/use-case-exception.filter'
 import { usePostgres } from './postgres'
 import { TestConfigModule } from './test-config.module'
@@ -106,7 +107,9 @@ export function useRipsApp(
 			},
 		}
 
-		let builder = Test.createTestingModule({ imports: [AppModule] })
+		let builder = Test.createTestingModule({
+			imports: [AppModule, SeedModule],
+		})
 			.overrideModule(AppConfigModule)
 			.useModule(TestConfigModule)
 			.overrideModule(ScheduleModule)
