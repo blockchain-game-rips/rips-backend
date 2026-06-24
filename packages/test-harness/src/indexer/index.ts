@@ -1,3 +1,4 @@
+export * from './ensure-indexer-sync'
 export * from './indexer-paths'
 export * from './indexer-postgres'
 export * from './indexer-processor'
