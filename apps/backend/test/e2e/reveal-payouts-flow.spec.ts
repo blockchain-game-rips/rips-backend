@@ -1,36 +1,34 @@
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager'
 import {
 	ANVIL_ACCOUNT_0_PRIVATE_KEY,
-	deployments,
 	ensureIndexerSync,
 	getBalances,
-	setNativeBalance,
 } from '@rips/test-harness'
 import request from 'supertest'
-import {
-	createWalletClient,
-	http,
-	parseEther,
-	parseEventLogs,
-	type Address,
-	type TransactionReceipt,
-} from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
+import { parseEventLogs } from 'viem'
 import { KeeperUseCase } from '../../src/application/use-cases/keeper/keeper.use-case'
 import { SyncCompletedRipsUseCase } from '../../src/application/use-cases/sync-completed-rips/sync-completed-rips.use-case'
-import {
-	EvmAddress,
-	toEvmAddress,
-} from '../../src/domain/value-objects/evm-address'
+import { EvmAddress } from '../../src/domain/value-objects/evm-address'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { SeedCardDefinitionsService } from '../../src/infrastructure/seed/seed-card-definitions.service'
 import cardsConfig from '../fixtures/cards.json'
-import { vrfCoordinatorAbi } from '../fixtures/vrf-coordinator-abi'
+import {
+	BALANCE_BUFFER_MULTIPLIER,
+	ENTRY_COST,
+	NATIVE_CURRENCY_CHAIN_ADDRESS,
+} from '../fixtures/entities'
 import { useRipsApp } from '../utils/rips-app'
-import { parseRandomnessFulfilled } from '../utils/rips-events'
+import {
+	parseRandomnessFulfilled,
+	parseRandomnessRequested,
+} from '../utils/rips-events'
+import {
+	clearCache,
+	createUserAndFund,
+	fulfillRandomWords,
+	getRipsLogs,
+} from '../utils/rips-flow'
 
 const PRESET_ID = 1
-const ENTRY_COST = parseEther('0.005')
 const ENTRIES_PER_USER = 4
 
 const KEEPER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
@@ -46,73 +44,20 @@ describe('Reveal payouts flow E2E', () => {
 
 	const ctx = useRipsApp()
 
+	const entryFunding =
+		ENTRY_COST * BigInt(ENTRIES_PER_USER) * BALANCE_BUFFER_MULTIPLIER
+
 	beforeAll(async () => {
-		await clearCache()
+		await clearCache(ctx)
 
 		const seedService = ctx.app.get(SeedCardDefinitionsService)
 		await seedService.seed(seedService.parseConfig(cardsConfig))
 	})
 
-	async function clearCache(): Promise<void> {
-		const cache = ctx.app.get<Cache>(CACHE_MANAGER)
-		await cache.clear()
-	}
-
-	async function createUserAndFund(telegramId: string): Promise<EvmAddress> {
-		await request(ctx.app.getHttpServer())
-			.post('/users')
-			.send({ telegramId })
-			.expect(201)
-
-		const userRes = await request(ctx.app.getHttpServer())
-			.get(`/users/${telegramId}`)
-			.expect(200)
-
-		const address = toEvmAddress(userRes.body.wallets['eip155'])
-
-		await setNativeBalance(
-			ctx.publicClient,
-			address,
-			ENTRY_COST * BigInt(ENTRIES_PER_USER) * 2n,
-		)
-
-		return address
-	}
-
-	async function fulfillRandomWords(
-		requestId: bigint,
-	): Promise<TransactionReceipt> {
-		const { chain, transport } = ctx.publicClient
-
-		const walletClient = createWalletClient({
-			account: privateKeyToAccount(KEEPER_PRIVATE_KEY),
-			chain,
-			transport: http(transport.url),
-		})
-
-		const hash = await walletClient.writeContract({
-			address: deployments.vrfCoordinator as Address,
-			abi: vrfCoordinatorAbi,
-			functionName: 'fulfillRandomWords',
-			args: [requestId, deployments.rips as Address],
-		})
-
-		const receipt = await ctx.publicClient.waitForTransactionReceipt({
-			hash,
-		})
-
-		expect(receipt.status).toBe('success')
-
-		return receipt
-	}
-
 	async function getPayoutClaimedByUser(
 		userAddress: EvmAddress,
 	): Promise<bigint | undefined> {
-		const rawLogs = await ctx.publicClient.getLogs({
-			address: deployments.rips as Address,
-			fromBlock: 0n,
-		})
+		const rawLogs = await getRipsLogs(ctx)
 
 		const payoutsClaimed = parseEventLogs({
 			abi: ripsAbi,
@@ -126,16 +71,21 @@ describe('Reveal payouts flow E2E', () => {
 	}
 
 	it('creates two users and buys 4 entries each to fill the rip', async () => {
-		user1Address = await createUserAndFund(TELEGRAM_ID_USER_1)
-		user2Address = await createUserAndFund(TELEGRAM_ID_USER_2)
+		user1Address = await createUserAndFund(
+			ctx,
+			TELEGRAM_ID_USER_1,
+			entryFunding,
+		)
+		user2Address = await createUserAndFund(
+			ctx,
+			TELEGRAM_ID_USER_2,
+			entryFunding,
+		)
 
 		const buyEntriesBody = (entryCount: number) => ({
 			presetId: PRESET_ID,
 			entryCount,
-			paymentCurrencyChainAddress: {
-				address: '0x0000000000000000000000000000000000000000',
-				chain: { namespace: 'eip155', reference: '8453' },
-			},
+			paymentCurrencyChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 		})
 
 		const res1 = await request(ctx.app.getHttpServer())
@@ -161,13 +111,10 @@ describe('Reveal payouts flow E2E', () => {
 	})
 
 	it('keeper requests VRF on the sealed rip', async () => {
-		await clearCache()
+		await clearCache(ctx)
 		await ctx.app.get(KeeperUseCase).execute()
 
-		const rawLogs = await ctx.publicClient.getLogs({
-			address: deployments.rips as Address,
-			fromBlock: 0n,
-		})
+		const rawLogs = await getRipsLogs(ctx)
 
 		vrfRequestId = parseRandomnessRequested(rawLogs)
 
@@ -177,7 +124,11 @@ describe('Reveal payouts flow E2E', () => {
 	})
 
 	it('VRF coordinator fulfills randomness and rip is finalized', async () => {
-		const fulfillReceipt = await fulfillRandomWords(vrfRequestId)
+		const fulfillReceipt = await fulfillRandomWords(
+			ctx,
+			KEEPER_PRIVATE_KEY,
+			vrfRequestId,
+		)
 
 		const randoms = parseRandomnessFulfilled(fulfillReceipt.logs)
 
@@ -187,7 +138,7 @@ describe('Reveal payouts flow E2E', () => {
 	})
 
 	it('keeper claims payouts and records them in the database', async () => {
-		await clearCache()
+		await clearCache(ctx)
 
 		const [user1BalanceBeforeClaim, user2BalanceBeforeClaim] =
 			await getBalances([user1Address, user2Address], ctx.publicClient)
@@ -195,7 +146,7 @@ describe('Reveal payouts flow E2E', () => {
 		await ctx.app.get(KeeperUseCase).execute()
 
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
-		await clearCache()
+		await clearCache(ctx)
 
 		await ctx.app.get(SyncCompletedRipsUseCase).execute()
 
@@ -264,12 +215,3 @@ describe('Reveal payouts flow E2E', () => {
 		expect(res2.body.payouts).toHaveLength(0)
 	})
 })
-
-function parseRandomnessRequested(logs: TransactionReceipt['logs']): bigint {
-	const [log] = parseEventLogs({
-		abi: ripsAbi,
-		eventName: 'RandomnessRequested',
-		logs,
-	})
-	return log.args.vrfRequestId
-}

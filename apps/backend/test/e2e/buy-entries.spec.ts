@@ -1,10 +1,13 @@
 import { setNativeBalance } from '@rips/test-harness'
 import request from 'supertest'
-import { parseEther } from 'viem'
+import {
+	BALANCE_BUFFER_MULTIPLIER,
+	ENTRY_COST,
+	NATIVE_CURRENCY_CHAIN_ADDRESS,
+} from '../fixtures/entities'
 import { useRipsApp } from '../utils/rips-app'
 
 const PRESET_ID = 1
-const ENTRY_COST = parseEther('0.005')
 const ENTRY_COUNT = 2
 
 const USER_TG_ID = '999888777'
@@ -27,7 +30,8 @@ describe('Buy entries E2E', () => {
 			.expect(200)
 
 		const walletAddress = userRes.body.wallets['eip155']
-		const requiredBalance = ENTRY_COST * BigInt(ENTRY_COUNT) * 2n
+		const requiredBalance =
+			ENTRY_COST * BigInt(ENTRY_COUNT) * BALANCE_BUFFER_MULTIPLIER
 
 		await setNativeBalance(ctx.publicClient, walletAddress, requiredBalance)
 
@@ -37,10 +41,7 @@ describe('Buy entries E2E', () => {
 			.send({
 				presetId: PRESET_ID,
 				entryCount: ENTRY_COUNT,
-				paymentCurrencyChainAddress: {
-					address: '0x0000000000000000000000000000000000000000',
-					chain: { namespace: 'eip155', reference: '8453' },
-				},
+				paymentCurrencyChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 			})
 			.expect(201)
 

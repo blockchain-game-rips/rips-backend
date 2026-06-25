@@ -12,3 +12,15 @@ export function parseRandomnessFulfilled(logs: TransactionReceipt['logs']): {
 	})
 	return { randomA: log.args.randomA, randomB: log.args.randomB }
 }
+
+export function parseRandomnessRequested(
+	logs: TransactionReceipt['logs'],
+): bigint {
+	const [log] = parseEventLogs({
+		abi: ripsAbi,
+		eventName: 'RandomnessRequested',
+		logs,
+	})
+
+	return log.args.vrfRequestId
+}

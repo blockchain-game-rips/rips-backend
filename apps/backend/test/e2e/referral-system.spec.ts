@@ -1,21 +1,11 @@
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager'
 import {
 	ANVIL_ACCOUNT_0_PRIVATE_KEY,
-	deployments,
 	ensureIndexerSync,
 	getBalances,
 	setNativeBalance,
 } from '@rips/test-harness'
 import request from 'supertest'
-import {
-	createWalletClient,
-	http,
-	parseEther,
-	parseEventLogs,
-	type Address,
-	type TransactionReceipt,
-} from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
+import { parseEventLogs } from 'viem'
 import { KeeperUseCase } from '../../src/application/use-cases/keeper/keeper.use-case'
 import { SyncCompletedRipsUseCase } from '../../src/application/use-cases/sync-completed-rips/sync-completed-rips.use-case'
 import {
@@ -26,15 +16,19 @@ import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { SeedCardDefinitionsService } from '../../src/infrastructure/seed/seed-card-definitions.service'
 import cardsConfig from '../fixtures/cards.json'
 import {
+	BALANCE_BUFFER_MULTIPLIER,
+	ENTRY_COST,
 	NATIVE_ADDRESS,
 	NATIVE_CURRENCY_CHAIN_ADDRESS,
 } from '../fixtures/entities'
-import { vrfCoordinatorAbi } from '../fixtures/vrf-coordinator-abi'
 import { useRipsApp } from '../utils/rips-app'
-import { parseRandomnessFulfilled } from '../utils/rips-events'
+import {
+	parseRandomnessFulfilled,
+	parseRandomnessRequested,
+} from '../utils/rips-events'
+import { clearCache, fulfillRandomWords, getRipsLogs } from '../utils/rips-flow'
 
 const PRESET_ID = 1
-const ENTRY_COST = parseEther('0.005')
 const ENTRIES_PER_USER = 4
 
 const KEEPER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
@@ -50,43 +44,11 @@ describe('Referral system E2E', () => {
 	const ctx = useRipsApp()
 
 	beforeAll(async () => {
-		await clearCache()
+		await clearCache(ctx)
 
 		const seedService = ctx.app.get(SeedCardDefinitionsService)
 		await seedService.seed(seedService.parseConfig(cardsConfig))
 	})
-
-	async function clearCache(): Promise<void> {
-		const cache = ctx.app.get<Cache>(CACHE_MANAGER)
-		await cache.clear()
-	}
-
-	async function fulfillRandomWords(
-		requestId: bigint,
-	): Promise<TransactionReceipt> {
-		const { chain, transport } = ctx.publicClient
-
-		const walletClient = createWalletClient({
-			account: privateKeyToAccount(KEEPER_PRIVATE_KEY),
-			chain,
-			transport: http(transport.url),
-		})
-
-		const hash = await walletClient.writeContract({
-			address: deployments.vrfCoordinator as Address,
-			abi: vrfCoordinatorAbi,
-			functionName: 'fulfillRandomWords',
-			args: [requestId, deployments.rips as Address],
-		})
-
-		const receipt = await ctx.publicClient.waitForTransactionReceipt({
-			hash,
-		})
-
-		expect(receipt.status).toBe('success')
-
-		return receipt
-	}
 
 	it('creates referrer user', async () => {
 		const res = await request(ctx.app.getHttpServer())
@@ -119,7 +81,8 @@ describe('Referral system E2E', () => {
 
 		playerAddress = toEvmAddress(playerRes.body.wallets['eip155'])
 
-		const entryBalance = ENTRY_COST * BigInt(ENTRIES_PER_USER) * 2n
+		const entryBalance =
+			ENTRY_COST * BigInt(ENTRIES_PER_USER) * BALANCE_BUFFER_MULTIPLIER
 
 		await setNativeBalance(
 			ctx.publicClient,
@@ -149,17 +112,18 @@ describe('Referral system E2E', () => {
 
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
 
-		await clearCache()
+		await clearCache(ctx)
 		await ctx.app.get(KeeperUseCase).execute()
 
-		const rawLogs = await ctx.publicClient.getLogs({
-			address: deployments.rips as Address,
-			fromBlock: 0n,
-		})
+		const rawLogs = await getRipsLogs(ctx)
 
 		const vrfRequestId = parseRandomnessRequested(rawLogs)
 
-		const receipt = await fulfillRandomWords(vrfRequestId)
+		const receipt = await fulfillRandomWords(
+			ctx,
+			KEEPER_PRIVATE_KEY,
+			vrfRequestId,
+		)
 		parseRandomnessFulfilled(receipt.logs)
 
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
@@ -168,18 +132,15 @@ describe('Referral system E2E', () => {
 	it('keeper claims payouts and accrued reward on-chain matches endpoint result', async () => {
 		await runGameCycle()
 
-		await clearCache()
+		await clearCache(ctx)
 		await ctx.app.get(KeeperUseCase).execute()
 
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
-		await clearCache()
+		await clearCache(ctx)
 
 		await ctx.app.get(SyncCompletedRipsUseCase).execute()
 
-		const rawLogs = await ctx.publicClient.getLogs({
-			address: deployments.rips as Address,
-			fromBlock: 0n,
-		})
+		const rawLogs = await getRipsLogs(ctx)
 
 		const referralFeeAccrued = parseEventLogs({
 			abi: ripsAbi,
@@ -216,7 +177,7 @@ describe('Referral system E2E', () => {
 		const txCost = BigInt(withdrawRes.body.transaction.cost.amount)
 
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
-		await clearCache()
+		await clearCache(ctx)
 
 		const [balanceAfter] = await getBalances(
 			[referrerAddress],
@@ -236,12 +197,3 @@ describe('Referral system E2E', () => {
 		expect(BigInt(state.rewards.withdrawn)).toBe(availableReward)
 	})
 })
-
-function parseRandomnessRequested(logs: TransactionReceipt['logs']): bigint {
-	const [log] = parseEventLogs({
-		abi: ripsAbi,
-		eventName: 'RandomnessRequested',
-		logs,
-	})
-	return log.args.vrfRequestId
-}
