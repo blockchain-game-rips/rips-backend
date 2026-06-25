@@ -4,9 +4,9 @@ import { UserNotFoundError } from '../../../src/application/use-cases/get-user/g
 import { CurrencyAmount } from '../../../src/domain/value-objects/currency-amount'
 import {
 	MOCK_CURRENCY,
-	MOCK_CURRENCY_CHAIN_ADDRESS,
 	MOCK_USER,
 	MOCK_WALLET,
+	NATIVE_CURRENCY_CHAIN_ADDRESS,
 	TELEGRAM_ID,
 } from '../../fixtures/entities'
 import {
@@ -44,7 +44,7 @@ describe('GetBalanceService', () => {
 
 		const result: CurrencyAmount = await service.execute({
 			telegramId: TELEGRAM_ID,
-			currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+			currencyChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 		})
 
 		expect(result).toEqual({ currency: MOCK_CURRENCY, amount: balance })
@@ -62,7 +62,7 @@ describe('GetBalanceService', () => {
 		await expect(
 			service.execute({
 				telegramId: TELEGRAM_ID,
-				currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+				currencyChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 			}),
 		).rejects.toThrow(UserNotFoundError)
 	})

@@ -1,7 +1,7 @@
 import { setNativeBalance } from '@rips/test-harness'
 import request from 'supertest'
 import { parseEther } from 'viem'
-import { MOCK_CURRENCY_CHAIN_ADDRESS } from '../fixtures/entities'
+import { NATIVE_CURRENCY_CHAIN_ADDRESS } from '../fixtures/entities'
 import { useRipsApp } from '../utils/rips-app'
 
 const USER_TG_ID = '123456789'
@@ -9,7 +9,7 @@ const DEPOSIT_AMOUNT = parseEther('1')
 const WITHDRAW_AMOUNT = parseEther('0.1')
 const RECIPIENT_ADDRESS = '0x000000000000000000000000000000000000dEaD'
 
-const { chain, address } = MOCK_CURRENCY_CHAIN_ADDRESS
+const { chain, address } = NATIVE_CURRENCY_CHAIN_ADDRESS
 const CHAIN_ADDRESS_QUERY = `${chain.namespace}:${chain.reference}:${address}`
 
 describe('Wallet flow E2E', () => {
@@ -54,9 +54,9 @@ describe('Wallet flow E2E', () => {
 			.send({
 				amountIn: {
 					amount: WITHDRAW_AMOUNT.toString(),
-					currencyChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+					currencyChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 				},
-				currencyOutChainAddress: MOCK_CURRENCY_CHAIN_ADDRESS,
+				currencyOutChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 				recipientAddress: RECIPIENT_ADDRESS,
 			})
 			.expect(201)
