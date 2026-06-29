@@ -8,6 +8,9 @@
 	],
 	"scripts": {
 		"prepare": "lefthook install",
+		"build:packages": "yarn workspaces foreach -Apt --include 'packages/*' run build",
+		"build:apps": "yarn workspaces foreach -Apt --include 'apps/*' run build",
+		"build": "yarn build:packages && yarn build:apps",
 		"backend": "yarn workspace backend",
 		"indexer": "yarn workspace indexer",
 		"sync-indexer-prisma-schema": "yarn workspace indexer build && ts-node scripts/sync-indexer-prisma-schema.ts"
