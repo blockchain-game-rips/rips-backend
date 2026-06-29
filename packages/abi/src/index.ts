@@ -1,1 +1,1 @@
-export { ripsAbi } from './rips'
+export * from './rips'
