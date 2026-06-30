@@ -13,6 +13,8 @@
 		"build": "yarn build:packages && yarn build:apps",
 		"backend": "yarn workspace backend",
 		"indexer": "yarn workspace indexer",
+		"dev:up": "yarn workspace indexer build && NODE_ENV=development ts-node scripts/dev-up.ts",
+		"dev:backend": "yarn workspace backend build && node --env-file=.env.backend.local apps/backend/dist/src/main.js",
 		"sync-indexer-prisma-schema": "yarn workspace indexer build && ts-node scripts/sync-indexer-prisma-schema.ts"
 	},
 	"resolutions": {
