@@ -12,7 +12,7 @@ import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { ripsAbi } from './rips-abi'
-import { RIPS_CONTRACT } from './rips.constants'
+import { OPERATOR_ROLE, RIPS_CONTRACT } from './rips.constants'
 
 @Injectable()
 export class RipsAdminServiceImpl extends RipsAdminService {
@@ -127,6 +127,19 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 				abi: ripsAbi,
 				functionName: 'setReferrerCustomFee',
 				args: [args.referrer, args.feePercent],
+			}),
+		})
+	}
+
+	grantOperatorRole(
+		wallet: Wallet,
+		args: { operator: EvmAddress },
+	): Promise<Transaction> {
+		return this.sendAdminTransaction(wallet, {
+			data: encodeFunctionData({
+				abi: ripsAbi,
+				functionName: 'grantRole',
+				args: [OPERATOR_ROLE, args.operator],
 			}),
 		})
 	}

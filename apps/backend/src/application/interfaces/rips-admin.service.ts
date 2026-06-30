@@ -33,4 +33,9 @@ export abstract class RipsAdminService {
 		wallet: Wallet,
 		args: { referrer: EvmAddress; feePercent: number },
 	): Promise<Transaction>
+
+	abstract grantOperatorRole(
+		wallet: Wallet,
+		args: { operator: EvmAddress },
+	): Promise<Transaction>
 }
