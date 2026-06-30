@@ -14,6 +14,7 @@ export class PriceOracleModule {
 	static forRoot(warmupCurrencyIds: CurrencyId[]): DynamicModule {
 		return {
 			module: PriceOracleModule,
+			global: true,
 			imports: [EvmModule],
 			providers: [
 				GeckoTerminalService,

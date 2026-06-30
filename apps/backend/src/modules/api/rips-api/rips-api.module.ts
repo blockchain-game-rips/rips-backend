@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common'
-import { KNOWN_TOKENS } from '../../../infrastructure/evm/primitives/currencies/constants'
-import { PriceOracleModule } from '../../../infrastructure/price-provider/price-provider.module'
 import { RipsController } from '../../../presentation/rips/rips.controller'
 import { BuyEntriesPurchaseModule } from '../../use-cases/buy-entries-purchase.module'
 import { BuyEntriesZapModule } from '../../use-cases/buy-entries-zap.module'
@@ -19,7 +17,6 @@ import { RevealEntryPayoutsModule } from '../../use-cases/reveal-entry-payouts.m
 
 @Module({
 	imports: [
-		PriceOracleModule.forRoot(Array.from(KNOWN_TOKENS.keys())),
 		GetRipsModule,
 		GetAvailablePresetsModule,
 		GetRipsStateModule,

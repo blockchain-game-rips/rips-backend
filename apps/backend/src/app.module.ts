@@ -2,8 +2,10 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { AppConfigModule } from './configuration/app-config.module'
+import { KNOWN_TOKENS } from './infrastructure/evm/primitives/currencies/constants'
 import { LoggingModule } from './infrastructure/logging/logging.module'
 import { MetricsModule } from './infrastructure/metrics/metrics.module'
+import { PriceOracleModule } from './infrastructure/price-provider/price-provider.module'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
 import { ProvisionModule } from './infrastructure/provision/provision.module'
 import { AdminApiModule } from './modules/api/admin-api/admin-api.module'
@@ -25,6 +27,7 @@ import { SyncCompletedRipsModule } from './modules/sync-completed-rips/sync-comp
 		ScheduleModule.forRoot(),
 		PrismaModule,
 		ProvisionModule,
+		PriceOracleModule.forRoot(Array.from(KNOWN_TOKENS.keys())),
 		AdminApiModule,
 		CurrencyApiModule,
 		UsersApiModule,

@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common'
 import { CurrencyModule } from '../../../infrastructure/currency/currency.module'
-import { KNOWN_TOKENS } from '../../../infrastructure/evm/primitives/currencies/constants'
-import { PriceOracleModule } from '../../../infrastructure/price-provider/price-provider.module'
 import { AdminController } from '../../../presentation/admin/admin.controller'
 import { GetAdminWalletModule } from '../../use-cases/get-admin-wallet.module'
 import { SetDefaultReferralFeeModule } from '../../use-cases/set-default-referral-fee.module'
@@ -13,7 +11,6 @@ import { UpdatePresetConfigModule } from '../../use-cases/update-preset-config.m
 
 @Module({
 	imports: [
-		PriceOracleModule.forRoot(Array.from(KNOWN_TOKENS.keys())),
 		GetAdminWalletModule,
 		SetPausedModule,
 		SetReferrerFrozenModule,
