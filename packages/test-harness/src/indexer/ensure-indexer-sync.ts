@@ -1,6 +1,6 @@
 import { createPublicClient, http } from 'viem'
 import { Anvil } from '../anvil'
-import { Indexer } from './use-indexer'
+import { Indexer } from './indexer'
 
 export async function ensureIndexerSync(
 	indexer: Indexer,
