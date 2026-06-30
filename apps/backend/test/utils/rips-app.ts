@@ -2,7 +2,6 @@ import { INestApplication, Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { Test, TestingModuleBuilder } from '@nestjs/testing'
 import {
-	ANVIL_ACCOUNT_0_PRIVATE_KEY,
 	ANVIL_MNEMONIC,
 	ANVIL_STATE_PATH,
 	Anvil,
@@ -13,32 +12,33 @@ import {
 	useIndexer,
 	type Indexer,
 } from '@rips/test-harness'
+import { mkdtempSync } from 'fs'
 import { Logger } from 'nestjs-pino'
 import { ZodValidationPipe } from 'nestjs-zod'
+import { tmpdir } from 'os'
+import { join } from 'path'
 import {
 	createPublicClient,
-	createWalletClient,
 	defineChain,
 	http,
 	parseEther,
-	type Address,
 	type Chain,
 	type HttpTransport,
 	type PublicClient,
 } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
 import { AppModule } from '../../src/app.module'
 import { KmsService } from '../../src/application/interfaces/kms.service'
 import { PRESET_TO_TIER_BIASES } from '../../src/application/interfaces/tokens'
 import { AppConfigModule } from '../../src/configuration/app-config.module'
 import { EIP155 } from '../../src/constants'
 import { Executor } from '../../src/domain/entities/executor'
+import { toEvmAddress } from '../../src/domain/value-objects/evm-address'
+import { toKmsKeyId } from '../../src/domain/value-objects/kms-key-id'
 import { EVM_CLIENT_CONFIG } from '../../src/infrastructure/evm/evm-client/types'
 import { evmAddressFromWallet } from '../../src/infrastructure/evm/helpers'
 import { MnemonicKmsService } from '../../src/infrastructure/kms/mnemonic-kms.service'
 import { WARMUP_CURRENCY_IDS } from '../../src/infrastructure/price-provider/price-provider-warmup.service'
 import { ProvisionService } from '../../src/infrastructure/provision/provision.service'
-import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { RIPS_CONTRACT } from '../../src/infrastructure/rips/rips.constants'
 import { SeedModule } from '../../src/infrastructure/seed/seed.module'
 import { UseCaseExceptionFilter } from '../../src/presentation/filters/use-case-exception.filter'
@@ -49,7 +49,9 @@ import { TestConfigModule } from './test-config.module'
 class NoopScheduleModule {}
 
 const KMS_MNEMONIC = ANVIL_MNEMONIC
-const DEPLOYER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
+
+const DEPLOYER_ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+const DEPLOYER_KMS_KEY_ID = '0'
 
 const EXECUTOR_COUNT = 2
 const EXECUTOR_BALANCE = parseEther('10')
@@ -75,6 +77,8 @@ export function useRipsApp(
 ): RipsApp {
 	const result = {} as RipsApp
 
+	const keyIndexDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
+
 	usePostgres()
 	const anvil = useAnvil({
 		chainId: chain.id,
@@ -97,6 +101,10 @@ export function useRipsApp(
 		})
 
 		process.env.KMS_MNEMONIC = KMS_MNEMONIC
+		process.env.KMS_LAST_KEY_INDEX_FILE = join(
+			keyIndexDir,
+			'last-key-index.txt',
+		)
 
 		const testEvmClientConfig = {
 			rpcSettings: {
@@ -146,9 +154,15 @@ export function useRipsApp(
 		await result.app.init()
 
 		const provisionService = result.app.get(ProvisionService)
+
+		await provisionService.seedAdminWallet(
+			toEvmAddress(DEPLOYER_ADDRESS),
+			toKmsKeyId(DEPLOYER_KMS_KEY_ID),
+		)
+
 		const executors = await provisionService.ensureExecutors(EXECUTOR_COUNT)
 
-		await setupExecutors(executors, result.publicClient, rpcUrl)
+		await setupExecutors(executors, result.publicClient, provisionService)
 
 		await ensureIndexerSync(indexer, anvil)
 	})
@@ -163,32 +177,13 @@ export function useRipsApp(
 async function setupExecutors(
 	executors: Executor[],
 	publicClient: PublicClient<HttpTransport, Chain>,
-	rpcUrl: string,
+	provisionService: ProvisionService,
 ): Promise<void> {
-	const deployerAccount = privateKeyToAccount(DEPLOYER_PRIVATE_KEY)
-
-	const walletClient = createWalletClient({
-		account: deployerAccount,
-		chain,
-		transport: http(rpcUrl),
-	})
-
-	const operatorRole = await publicClient.readContract({
-		address: deployments.rips as Address,
-		abi: ripsAbi,
-		functionName: 'OPERATOR_ROLE',
-	})
-
 	for (const executor of executors) {
 		const address = evmAddressFromWallet(executor.wallet)
 
 		await setNativeBalance(publicClient, address, EXECUTOR_BALANCE)
-
-		await walletClient.writeContract({
-			address: deployments.rips as Address,
-			abi: ripsAbi,
-			functionName: 'grantRole',
-			args: [operatorRole, address],
-		})
 	}
+
+	await provisionService.grantExecutorRoles(executors)
 }
