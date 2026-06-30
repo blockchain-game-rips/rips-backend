@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { dirname } from 'path'
 import { type Hex } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import { type KmsKeyResult } from '../../application/interfaces/kms.service'
@@ -13,17 +13,17 @@ import { getEnvSafe } from '../../utils/common'
 import { KmsMetricsService } from '../metrics/kms-metrics.service'
 import { KmsWithMetrics } from './kms-with-metrics.service'
 
-const CONFIG_DIR = join(process.cwd(), 'config')
-const LAST_KEY_FILE = join(CONFIG_DIR, 'last-key.txt')
 const INITIAL_KEY_INDEX = 1
 
 @Injectable()
 export class MnemonicKmsService extends KmsWithMetrics {
 	private readonly mnemonic: string
+	private readonly lastKeyIndexFile: string
 
 	constructor(metrics?: KmsMetricsService) {
 		super(metrics)
 		this.mnemonic = getEnvSafe('KMS_MNEMONIC')
+		this.lastKeyIndexFile = getEnvSafe('KMS_LAST_KEY_INDEX_FILE')
 	}
 
 	protected async doCreateEvmKey(): Promise<KmsKeyResult> {
@@ -56,24 +56,24 @@ export class MnemonicKmsService extends KmsWithMetrics {
 	}
 
 	private getNextKeyIndex(): number {
-		if (!existsSync(CONFIG_DIR)) {
-			mkdirSync(CONFIG_DIR, { recursive: true })
-		}
-
-		if (!existsSync(LAST_KEY_FILE)) {
+		if (!existsSync(this.lastKeyIndexFile)) {
 			return INITIAL_KEY_INDEX
 		}
 
-		const lastIndex = Number(readFileSync(LAST_KEY_FILE, 'utf-8').trim())
+		const lastIndex = Number(
+			readFileSync(this.lastKeyIndexFile, 'utf-8').trim(),
+		)
 
 		return lastIndex + 1
 	}
 
 	private saveKeyIndex(index: number): void {
-		if (!existsSync(CONFIG_DIR)) {
-			mkdirSync(CONFIG_DIR, { recursive: true })
+		const dir = dirname(this.lastKeyIndexFile)
+
+		if (!existsSync(dir)) {
+			mkdirSync(dir, { recursive: true })
 		}
 
-		writeFileSync(LAST_KEY_FILE, String(index), 'utf-8')
+		writeFileSync(this.lastKeyIndexFile, String(index), 'utf-8')
 	}
 }
