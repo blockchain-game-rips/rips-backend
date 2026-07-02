@@ -4,6 +4,9 @@ import {
 	setNativeBalance,
 	useAnvil,
 } from '@rips/test-harness'
+import { mkdtempSync } from 'fs'
+import { tmpdir } from 'os'
+import { join } from 'path'
 import {
 	createPublicClient,
 	createWalletClient,
@@ -28,7 +31,14 @@ describe('MnemonicKmsService integration', () => {
 	let kmsService: MnemonicKmsService
 
 	beforeAll(() => {
+		const keyIndexDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
+
 		process.env.KMS_MNEMONIC = TEST_MNEMONIC
+		process.env.KMS_LAST_KEY_INDEX_FILE = join(
+			keyIndexDir,
+			'last-key-index.txt',
+		)
+
 		kmsService = new MnemonicKmsService()
 	})
 
