@@ -63,12 +63,10 @@ export class PrismaEntryPayoutRepository extends EntryPayoutRepository {
 		})
 	}
 
-	async getCardCollectionsByPreset(
+	async getCardCollections(
 		userAddress: EvmAddress,
-		presetId: number,
 	): Promise<CardCollection[]> {
 		const cardDefinitions = await this.prisma.cardDefinition.findMany({
-			where: { presetId },
 			include: {
 				userCards: { where: { userAddress } },
 			},
@@ -78,28 +76,32 @@ export class PrismaEntryPayoutRepository extends EntryPayoutRepository {
 		const tierMap = new Map<number, CardCollection>()
 
 		for (const def of cardDefinitions) {
-			if (!tierMap.has(def.tier)) tierMap.set(def.tier, [])
+			const tier = tierMap.get(def.tier) ?? []
 
-			tierMap.get(def.tier)!.push({
+			tier.push({
 				card: toCard(def),
 				count: def.userCards[0]?.quantity ?? 0,
 			})
+
+			tierMap.set(def.tier, tier)
 		}
 
 		return Array.from(tierMap.values())
 	}
 
-	async getCardDefinitionsByPreset(presetId: number): Promise<Card[][]> {
+	async getCardDefinitions(): Promise<Card[][]> {
 		const cardDefinitions = await this.prisma.cardDefinition.findMany({
-			where: { presetId },
 			orderBy: { tier: 'asc' },
 		})
 
 		const tierMap = new Map<number, Card[]>()
 
 		for (const def of cardDefinitions) {
-			if (!tierMap.has(def.tier)) tierMap.set(def.tier, [])
-			tierMap.get(def.tier)!.push(toCard(def))
+			const tier = tierMap.get(def.tier) ?? []
+
+			tier.push(toCard(def))
+
+			tierMap.set(def.tier, tier)
 		}
 
 		return Array.from(tierMap.values())

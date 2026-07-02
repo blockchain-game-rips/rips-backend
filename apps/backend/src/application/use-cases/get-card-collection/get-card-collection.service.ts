@@ -20,15 +20,11 @@ export class GetCardCollectionService extends GetCardCollectionUseCase {
 
 	async execute({
 		telegramId,
-		presetId,
 	}: GetCardCollectionInput): Promise<CardCollection[]> {
 		const user = await this.getUserUseCase.execute({ telegramId })
 
 		const userAddress = toEvmAddress(user.wallet.namespaceToAddress[EIP155])
 
-		return this.entryPayoutRepository.getCardCollectionsByPreset(
-			userAddress,
-			presetId,
-		)
+		return this.entryPayoutRepository.getCardCollections(userAddress)
 	}
 }

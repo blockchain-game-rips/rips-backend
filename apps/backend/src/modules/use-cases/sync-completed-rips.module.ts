@@ -20,27 +20,21 @@ async function assertConfig(
 ) {
 	const availablePresets = await getAvailablePresetsUseCase.execute()
 
-	await Promise.all(
-		availablePresets.map(async (preset) => {
-			const tierBiases =
-				cardConfig.presetsBiases[preset.preset.id.toString()]
+	const cardDefinitions = await entryPayoutRepository.getCardDefinitions()
 
-			if (tierBiases === undefined)
-				throw new Error(
-					`tier bieases are not found in config for preset id ${preset.preset.id}`,
-				)
+	for (const preset of availablePresets) {
+		const tierBiases = cardConfig.presetsBiases[preset.preset.id.toString()]
 
-			const cardDefinitions =
-				await entryPayoutRepository.getCardDefinitionsByPreset(
-					preset.preset.id,
-				)
+		if (tierBiases === undefined)
+			throw new Error(
+				`tier bieases are not found in config for preset id ${preset.preset.id}`,
+			)
 
-			if (tierBiases.length !== cardDefinitions.length)
-				throw new Error(
-					`tier biases count (${tierBiases.length}) mismatch with card definitions count (${cardDefinitions.length}) for preset id ${preset.preset.id}`,
-				)
-		}),
-	)
+		if (tierBiases.length !== cardDefinitions.length)
+			throw new Error(
+				`tier biases count (${tierBiases.length}) mismatch with card definitions count (${cardDefinitions.length}) for preset id ${preset.preset.id}`,
+			)
+	}
 }
 
 const presetToTierBiasesProvider: Provider = {

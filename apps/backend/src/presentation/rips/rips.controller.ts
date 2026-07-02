@@ -38,12 +38,10 @@ import {
 	BuyEntriesZapResponseDto,
 	toBuyEntriesZapResponseDto,
 } from './buy-entries-zap/buy-entries-zap.response'
-import { GetCardCollectionQueryDto } from './get-card-collection/get-card-collection.request'
 import {
 	GetCardCollectionResponseDto,
 	toGetCardCollectionResponseDto,
 } from './get-card-collection/get-card-collection.response'
-import { GetCardDefinitionsQueryDto } from './get-card-definitions/get-card-definitions.request'
 import {
 	GetCardDefinitionsResponseDto,
 	toGetCardDefinitionsResponseDto,
@@ -266,11 +264,9 @@ export class RipsController {
 	@ZodResponse({ type: GetCardCollectionResponseDto })
 	async getCardCollection(
 		@Headers() headers: TelegramIdHeaderDto,
-		@Query() query: GetCardCollectionQueryDto,
 	): Promise<GetCardCollectionResponseDto> {
 		const tiers = await this.getCardCollectionUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
-			presetId: query.presetId,
 		})
 
 		return toGetCardCollectionResponseDto(tiers)
@@ -278,12 +274,8 @@ export class RipsController {
 
 	@Get('card-definition')
 	@ZodResponse({ type: GetCardDefinitionsResponseDto })
-	async getCardDefinitions(
-		@Query() query: GetCardDefinitionsQueryDto,
-	): Promise<GetCardDefinitionsResponseDto> {
-		const tiers = await this.getCardDefinitionsUseCase.execute({
-			presetId: query.presetId,
-		})
+	async getCardDefinitions(): Promise<GetCardDefinitionsResponseDto> {
+		const tiers = await this.getCardDefinitionsUseCase.execute()
 
 		return toGetCardDefinitionsResponseDto(tiers)
 	}

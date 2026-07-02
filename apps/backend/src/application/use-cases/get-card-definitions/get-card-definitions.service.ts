@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Card } from '../../../domain/value-objects/card'
 import { EntryPayoutRepository } from '../../interfaces/repositories/entry-payout.repository'
-import {
-	GetCardDefinitionsInput,
-	GetCardDefinitionsUseCase,
-} from './get-card-definitions.use-case'
+import { GetCardDefinitionsUseCase } from './get-card-definitions.use-case'
 
 @Injectable()
 export class GetCardDefinitionsService extends GetCardDefinitionsUseCase {
@@ -12,7 +9,7 @@ export class GetCardDefinitionsService extends GetCardDefinitionsUseCase {
 		super()
 	}
 
-	async execute({ presetId }: GetCardDefinitionsInput): Promise<Card[][]> {
-		return this.entryPayoutRepository.getCardDefinitionsByPreset(presetId)
+	async execute(): Promise<Card[][]> {
+		return this.entryPayoutRepository.getCardDefinitions()
 	}
 }

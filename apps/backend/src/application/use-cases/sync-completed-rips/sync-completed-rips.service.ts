@@ -145,11 +145,8 @@ export class SyncCompletedRipsService extends SyncCompletedRipsUseCase {
 		address: EvmAddress,
 		purchases: PurchaseAction[],
 	): Promise<EntryPayout[]> {
-		const presetCardCollections =
-			await this.entryPayoutRepository.getCardCollectionsByPreset(
-				address,
-				rip.preset.id,
-			)
+		const cardCollections =
+			await this.entryPayoutRepository.getCardCollections(address)
 
 		const tierBiases = this.presetToBiases.get(rip.preset.id) ?? []
 		const payouts: EntryPayout[] = []
@@ -162,11 +159,11 @@ export class SyncCompletedRipsService extends SyncCompletedRipsUseCase {
 					entryNumber,
 					rip.randoms,
 					rip.config,
-					presetCardCollections,
+					cardCollections,
 					tierBiases,
 				)
 
-				const tierCollection = presetCardCollections[payout.card.tier]
+				const tierCollection = cardCollections[payout.card.tier]
 				const cardIndex = tierCollection.findIndex(
 					(c) => c.card.id === payout.card.id,
 				)

@@ -13,10 +13,9 @@ export abstract class EntryPayoutRepository {
 
 	abstract revealAllAndGet(userAddress: EvmAddress): Promise<EntryPayout[]>
 
-	abstract getCardCollectionsByPreset(
+	abstract getCardCollections(
 		userAddress: EvmAddress,
-		presetId: number,
 	): Promise<CardCollection[]>
 
-	abstract getCardDefinitionsByPreset(presetId: number): Promise<Card[][]>
+	abstract getCardDefinitions(): Promise<Card[][]>
 }
