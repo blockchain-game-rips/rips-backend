@@ -5424,7 +5424,6 @@ __metadata:
     jest: "npm:^29.7.0"
     js-yaml: "npm:4.1.0"
     ky: "npm:1.7.5"
-    lefthook: "npm:^2.1.9"
     nestjs-pino: "npm:^4.6.1"
     nestjs-zod: "npm:^5.3.0"
     pg: "npm:^8.20.0"
@@ -11633,6 +11632,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "rips-monorepo@workspace:."
   dependencies:
+    lefthook: "npm:^2.1.9"
     prettier: "npm:^3.8.4"
     prettier-plugin-organize-imports: "npm:^4.3.0"
   languageName: unknown
