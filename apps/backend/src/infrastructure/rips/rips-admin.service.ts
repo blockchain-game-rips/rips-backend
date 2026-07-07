@@ -85,7 +85,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 						entryCap: BigInt(config.entryCap),
 						duration: config.durationSeconds,
 						entryPrice: entryPrice,
-						feeBps: config.feePercent,
+						feeBps: config.feeBps,
 					},
 				],
 			}),
@@ -107,26 +107,26 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 
 	setDefaultReferralFee(
 		wallet: Wallet,
-		args: { feePercent: number },
+		args: { feeBps: number },
 	): Promise<Transaction> {
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
 				functionName: 'setDefaultReferralFee',
-				args: [args.feePercent],
+				args: [args.feeBps],
 			}),
 		})
 	}
 
 	setReferrerCustomFee(
 		wallet: Wallet,
-		args: { referrer: EvmAddress; feePercent: number },
+		args: { referrer: EvmAddress; feeBps: number },
 	): Promise<Transaction> {
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
 				functionName: 'setReferrerCustomFee',
-				args: [args.referrer, args.feePercent],
+				args: [args.referrer, args.feeBps],
 			}),
 		})
 	}

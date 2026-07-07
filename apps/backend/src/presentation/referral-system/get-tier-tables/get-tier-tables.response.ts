@@ -6,12 +6,12 @@ import { PricedCurrency } from '../../shared/pricing/priced-currency'
 
 const referrerTierSchema = z.object({
 	minVolume: z.string(),
-	feePercent: z.number(),
+	feeBps: z.number(),
 })
 
 const referrerTierTableSchema = z.object({
 	currency: CurrencyDto.schema,
-	defaultFeePercent: z.number(),
+	defaultFeeBps: z.number(),
 	tiers: z.array(referrerTierSchema),
 })
 
@@ -29,10 +29,10 @@ export function toGetTierTablesResponseDto(
 	return {
 		tierTables: tierTables.map((table) => ({
 			currency: new PricedCurrency(table.currency),
-			defaultFeePercent: table.defaultFeePercent,
+			defaultFeeBps: table.defaultFeeBps,
 			tiers: table.tiers.map((tier) => ({
 				minVolume: tier.minVolume.toString(),
-				feePercent: tier.feeBps,
+				feeBps: tier.feeBps,
 			})),
 		})),
 	}

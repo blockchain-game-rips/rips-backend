@@ -4,6 +4,6 @@ import { Transaction } from '../../../domain/value-objects/transaction'
 export abstract class SetReferrerCustomFeeUseCase {
 	abstract execute(input: {
 		referrer: EvmAddress
-		feePercent: number
+		feeBps: number
 	}): Promise<Transaction>
 }

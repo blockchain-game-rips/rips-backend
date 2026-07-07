@@ -373,7 +373,7 @@ function sumPayouts(
 	const config = {
 		id: 1,
 		entryCap: 8,
-		feePercent: 0,
+		feeBps: 0,
 		entryPrice: { currency: {} as never, amount: ENTRY_COST },
 		durationSeconds: 300,
 		payoutDistribution: PAYOUT_DISTRIBUTION,

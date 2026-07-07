@@ -5,7 +5,7 @@ import { ChainAddressDto } from '../../shared/chain-address.dto'
 
 const configSchema = z.object({
 	entryCap: z.number(),
-	feePercent: z.number(),
+	feeBps: z.number(),
 	entryPrice: z.object({
 		currencyChainAddress: ChainAddressDto.schema,
 		amount: z.string().transform((value) => BigInt(value)),

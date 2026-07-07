@@ -17,7 +17,7 @@ export class SetReferrerCustomFeeService extends SetReferrerCustomFeeUseCase {
 
 	async execute(input: {
 		referrer: EvmAddress
-		feePercent: number
+		feeBps: number
 	}): Promise<Transaction> {
 		const adminWallet = await this.adminWalletRepository.get()
 

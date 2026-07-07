@@ -96,7 +96,7 @@ const USDC_BASE = new Token(USDC_BASE_ADDRESS, BASE_CHAIN_ID, {
 const MOCK_CONFIG: Config = {
 	id: 1,
 	entryCap: 8,
-	feePercent: 1,
+	feeBps: 1,
 	entryPrice: {
 		currency: ETH_BASE,
 		amount: parseEther('0.005'),

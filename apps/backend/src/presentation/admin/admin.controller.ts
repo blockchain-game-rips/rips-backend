@@ -85,7 +85,7 @@ export class AdminController {
 		@Body() body: SetDefaultReferralFeeBodyDto,
 	): Promise<AdminTransactionResponseDto> {
 		const transaction = await this.setDefaultReferralFeeUseCase.execute({
-			feePercent: body.feePercent,
+			feeBps: body.feeBps,
 		})
 
 		return { transaction: toTransactionDto(transaction) }
@@ -113,7 +113,7 @@ export class AdminController {
 	): Promise<AdminTransactionResponseDto> {
 		const {
 			durationSeconds,
-			feePercent,
+			feeBps,
 			payoutDistribution,
 			entryCap,
 			entryPrice,
@@ -127,7 +127,7 @@ export class AdminController {
 			presetId: Number(presetId),
 			config: {
 				durationSeconds: durationSeconds,
-				feePercent: feePercent,
+				feeBps: feeBps,
 				payoutDistribution: payoutDistribution,
 				entryCap: entryCap,
 				entryPrice: {
@@ -162,7 +162,7 @@ export class AdminController {
 	): Promise<AdminTransactionResponseDto> {
 		const transaction = await this.setReferrerCustomFeeUseCase.execute({
 			referrer: params.address,
-			feePercent: body.feePercent,
+			feeBps: body.feeBps,
 		})
 
 		return { transaction: toTransactionDto(transaction) }

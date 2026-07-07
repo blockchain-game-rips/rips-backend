@@ -51,7 +51,7 @@ export function fromConfigRaw(
 	return {
 		id: Number(configRaw.id),
 		entryCap: Number(configRaw.entry_cap),
-		feePercent: Number(configRaw.fee_percent),
+		feeBps: Number(configRaw.fee_bps),
 		entryPrice: {
 			currency,
 			amount: toBigInt(configRaw.entry_price),

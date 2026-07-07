@@ -163,7 +163,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 	): number {
 		if (defaultReferralFeeUpdateds.length === 0) return 0
 
-		return defaultReferralFeeUpdateds[0].default_referral_fee
+		return defaultReferralFeeUpdateds[0].default_referral_fee_bps
 	}
 
 	private resolveCustomFee(
@@ -171,7 +171,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 	): number | null {
 		if (customFeeUpdates.length === 0) return null
 
-		const customFee = customFeeUpdates[0].custom_fee_percent
+		const customFee = customFeeUpdates[0].custom_fee_bps
 
 		// will be applyed another fee if custom fee overriden to 0
 		if (customFee === 0) return null
@@ -196,7 +196,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 
 		for (const tier of sorted) {
 			if (volume >= BigInt(tier.min_volume.toFixed(0))) {
-				activeFee = tier.fee_percent
+				activeFee = tier.fee_bps
 			}
 		}
 
@@ -228,7 +228,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 
 		if (elapsedPeriods === 0) {
 			return {
-				activeFee: lastStateUpdate.active_fee_percent,
+				activeFee: lastStateUpdate.active_fee_bps,
 				monthStartTime: storedMonthStart,
 				currMonthVolume: BigInt(
 					lastStateUpdate.period_volume.toFixed(0),
@@ -258,9 +258,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 
 		if (latestTiersUpdate == null) return []
 
-		const defaultFeePercent = this.resolveDefaultFee(
-			defaultReferralFeeUpdateds,
-		)
+		const defaultFeeBps = this.resolveDefaultFee(defaultReferralFeeUpdateds)
 
 		const currency = await this.evmCurrencyService.fromAddress(
 			zeroAddress,
@@ -276,10 +274,10 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			)
 			.map((tier) => ({
 				minVolume: BigInt(tier.min_volume.toFixed(0)),
-				feeBps: tier.fee_percent,
+				feeBps: tier.fee_bps,
 			}))
 
-		return [{ currency, defaultFeePercent, tiers }]
+		return [{ currency, defaultFeeBps, tiers }]
 	}
 
 	private async fetchTierTables() {

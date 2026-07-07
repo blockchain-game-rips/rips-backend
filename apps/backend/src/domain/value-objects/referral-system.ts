@@ -7,6 +7,6 @@ export type ReferrerTier = {
 
 export type ReferrerTierTable = {
 	currency: Currency
-	defaultFeePercent: number
+	defaultFeeBps: number
 	tiers: ReferrerTier[]
 }

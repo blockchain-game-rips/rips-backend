@@ -9,7 +9,7 @@ export type PayoutTier = {
 export type Config = {
 	id: number
 	entryCap: number
-	feePercent: number
+	feeBps: number
 	entryPrice: CurrencyAmount
 	durationSeconds: number
 	payoutDistribution: PayoutTier[]

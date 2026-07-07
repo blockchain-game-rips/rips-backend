@@ -16,7 +16,7 @@ export abstract class RipsAdminService {
 
 	abstract setDefaultReferralFee(
 		wallet: Wallet,
-		args: { feePercent: number },
+		args: { feeBps: number },
 	): Promise<Transaction>
 
 	abstract updatePreset(
@@ -31,7 +31,7 @@ export abstract class RipsAdminService {
 
 	abstract setReferrerCustomFee(
 		wallet: Wallet,
-		args: { referrer: EvmAddress; feePercent: number },
+		args: { referrer: EvmAddress; feeBps: number },
 	): Promise<Transaction>
 
 	abstract grantOperatorRole(

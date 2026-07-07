@@ -14,7 +14,7 @@ export class SetDefaultReferralFeeService extends SetDefaultReferralFeeUseCase {
 		super()
 	}
 
-	async execute(input: { feePercent: number }): Promise<Transaction> {
+	async execute(input: { feeBps: number }): Promise<Transaction> {
 		const adminWallet = await this.adminWalletRepository.get()
 
 		if (!adminWallet) {

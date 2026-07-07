@@ -14,7 +14,7 @@ export const payoutTierSchema = z.object({
 
 export const configSchema = z.object({
 	entryCap: z.number(),
-	feePercent: z.number(),
+	feeBps: z.number(),
 	entryPrice: CurrencyAmountDto.schema,
 	durationSeconds: z.number(),
 	payoutDistribution: z.array(payoutTierSchema),
@@ -25,7 +25,7 @@ export class ConfigDto extends createZodDto(configSchema) {}
 export function toConfigDto(config: Config): ConfigDto {
 	return {
 		entryCap: config.entryCap,
-		feePercent: config.feePercent,
+		feeBps: config.feeBps,
 		entryPrice: toPricedCurrencyAmountDto(config.entryPrice),
 		durationSeconds: config.durationSeconds,
 		payoutDistribution: config.payoutDistribution.map((tier) => ({

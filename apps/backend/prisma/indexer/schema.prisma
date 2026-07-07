@@ -21,7 +21,7 @@ model config {
   currency         String
   duration_seconds Decimal       @db.Decimal
   entry_price      Decimal       @db.Decimal
-  fee_percent      Decimal       @db.Decimal
+  fee_bps          Decimal       @db.Decimal
   preset_id        String?       @db.VarChar
   preset           preset?       @relation(fields: [preset_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_fdef900a0897e034d4915860209")
   payout_tier      payout_tier[]
@@ -32,7 +32,7 @@ model config {
 
 model default_referral_fee_updated {
   id                   String   @id(map: "PK_5ffc9a5b3b9e0722c5c182ac277") @db.VarChar
-  default_referral_fee Int
+  default_referral_fee_bps Int
   block_number         Decimal  @db.Decimal
   time                 DateTime @db.Timestamptz(6)
   tx_hash              String
@@ -138,7 +138,7 @@ model referral_fee_accrued {
 model referral_tier {
   id                     String                  @id(map: "PK_9d3816e17a818012d3c620d779d") @db.VarChar
   min_volume             Decimal                 @db.Decimal
-  fee_percent            Int
+  fee_bps                Int
   update_id              String?                 @db.VarChar
   referral_tiers_updated referral_tiers_updated? @relation(fields: [update_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_6b61e94b7ef089009a27b561e68")
 
@@ -157,7 +157,7 @@ model referral_tiers_updated {
 model referrer_custom_fee_updated {
   id                 String   @id(map: "PK_ff5880fec7f44ed1db4121f6453") @db.VarChar
   referrer           String
-  custom_fee_percent Int
+  custom_fee_bps     Int
   block_number       Decimal  @db.Decimal
   time               DateTime @db.Timestamptz(6)
   tx_hash            String
@@ -205,7 +205,7 @@ model referrer_state_updated {
   id                 String   @id(map: "PK_7b1e67952d6b61a65f5da7cb656") @db.VarChar
   referrer           String
   currency           String
-  active_fee_percent Int
+  active_fee_bps     Int
   period_start_time  DateTime @db.Timestamptz(6)
   period_volume      Decimal  @db.Decimal
   block_number       Decimal  @db.Decimal
