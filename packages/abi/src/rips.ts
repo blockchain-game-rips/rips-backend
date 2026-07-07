@@ -220,7 +220,7 @@ export const ripsAbi = [
 				internalType: 'uint256',
 			},
 			{
-				name: 'feePercent',
+				name: 'feeBps',
 				type: 'uint16',
 				internalType: 'uint16',
 			},
@@ -303,7 +303,7 @@ export const ripsAbi = [
 						internalType: 'uint256',
 					},
 					{
-						name: 'feePercent',
+						name: 'feeBps',
 						type: 'uint16',
 						internalType: 'uint16',
 					},
@@ -321,7 +321,7 @@ export const ripsAbi = [
 	},
 	{
 		type: 'function',
-		name: 'defaultReferralFee',
+		name: 'defaultReferralFeeBps',
 		inputs: [],
 		outputs: [
 			{
@@ -403,7 +403,7 @@ export const ripsAbi = [
 						internalType: 'uint128',
 					},
 					{
-						name: 'feePercent',
+						name: 'feeBps',
 						type: 'uint16',
 						internalType: 'uint16',
 					},
@@ -683,7 +683,7 @@ export const ripsAbi = [
 		],
 		outputs: [
 			{
-				name: 'customFeePercent',
+				name: 'customFeeBps',
 				type: 'uint16',
 				internalType: 'uint16',
 			},
@@ -731,7 +731,7 @@ export const ripsAbi = [
 		],
 		outputs: [
 			{
-				name: 'activeFeePercent',
+				name: 'activeFeeBps',
 				type: 'uint16',
 				internalType: 'uint16',
 			},
@@ -906,7 +906,7 @@ export const ripsAbi = [
 		name: 'setDefaultReferralFee',
 		inputs: [
 			{
-				name: 'newDefaultReferralFee',
+				name: 'newDefaultReferralFeeBps',
 				type: 'uint16',
 				internalType: 'uint16',
 			},
@@ -947,7 +947,7 @@ export const ripsAbi = [
 						internalType: 'uint128',
 					},
 					{
-						name: 'feePercent',
+						name: 'feeBps',
 						type: 'uint16',
 						internalType: 'uint16',
 					},
@@ -967,7 +967,7 @@ export const ripsAbi = [
 				internalType: 'address',
 			},
 			{
-				name: 'customFeePercent',
+				name: 'customFeeBps',
 				type: 'uint16',
 				internalType: 'uint16',
 			},
@@ -1089,7 +1089,7 @@ export const ripsAbi = [
 						internalType: 'uint256',
 					},
 					{
-						name: 'feePercent',
+						name: 'feeBps',
 						type: 'uint16',
 						internalType: 'uint16',
 					},
@@ -1276,7 +1276,7 @@ export const ripsAbi = [
 		name: 'DefaultReferralFeeUpdated',
 		inputs: [
 			{
-				name: 'newDefaultReferralFee',
+				name: 'newDefaultReferralFeeBps',
 				type: 'uint16',
 				indexed: false,
 				internalType: 'uint16',
@@ -1534,7 +1534,7 @@ export const ripsAbi = [
 				internalType: 'struct IRips.ReferrerState',
 				components: [
 					{
-						name: 'activeFeePercent',
+						name: 'activeFeeBps',
 						type: 'uint16',
 						internalType: 'uint16',
 					},
@@ -1575,7 +1575,7 @@ export const ripsAbi = [
 						internalType: 'uint128',
 					},
 					{
-						name: 'feePercent',
+						name: 'feeBps',
 						type: 'uint16',
 						internalType: 'uint16',
 					},
@@ -1595,7 +1595,7 @@ export const ripsAbi = [
 				internalType: 'address',
 			},
 			{
-				name: 'customFeePercent',
+				name: 'customFeeBps',
 				type: 'uint16',
 				indexed: false,
 				internalType: 'uint16',

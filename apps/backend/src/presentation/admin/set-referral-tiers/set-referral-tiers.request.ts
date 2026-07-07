@@ -12,7 +12,7 @@ const setReferralTiersParamsSchema = z.object({
 
 const referralTierSchema = z.object({
 	minVolume: z.string().transform(BigInt),
-	feePercent: z.number().int().min(0).max(10000),
+	feeBps: z.number().int().min(0).max(10000),
 })
 
 const setReferralTiersBodySchema = z.object({

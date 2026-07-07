@@ -32,7 +32,7 @@ export function toGetTierTablesResponseDto(
 			defaultFeePercent: table.defaultFeePercent,
 			tiers: table.tiers.map((tier) => ({
 				minVolume: tier.minVolume.toString(),
-				feePercent: tier.feePercent,
+				feePercent: tier.feeBps,
 			})),
 		})),
 	}

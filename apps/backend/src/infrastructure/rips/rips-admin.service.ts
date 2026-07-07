@@ -85,7 +85,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 						entryCap: BigInt(config.entryCap),
 						duration: config.durationSeconds,
 						entryPrice: entryPrice,
-						feePercent: config.feePercent,
+						feeBps: config.feePercent,
 					},
 				],
 			}),

@@ -2,7 +2,7 @@ import { Currency } from '../entities/currency'
 
 export type ReferrerTier = {
 	minVolume: bigint
-	feePercent: number
+	feeBps: number
 }
 
 export type ReferrerTierTable = {

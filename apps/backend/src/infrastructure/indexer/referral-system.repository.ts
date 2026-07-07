@@ -276,7 +276,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			)
 			.map((tier) => ({
 				minVolume: BigInt(tier.min_volume.toFixed(0)),
-				feePercent: tier.fee_percent,
+				feeBps: tier.fee_percent,
 			}))
 
 		return [{ currency, defaultFeePercent, tiers }]
