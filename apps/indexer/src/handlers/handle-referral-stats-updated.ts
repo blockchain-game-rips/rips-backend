@@ -13,7 +13,7 @@ export function handleReferralStatsUpdated(args: HandlerArgs): void {
 			id: log.id,
 			referrer: referrer,
 			currency: currency,
-			activeFeePercent: referrerState.activeFeePercent,
+			activeFeeBps: referrerState.activeFeeBps,
 			periodStartTime: new Date(
 				Number(referrerState.periodStartTimestamp) * 1000,
 			),

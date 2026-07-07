@@ -548,8 +548,8 @@ describe('indexer e2e', () => {
 
 	describe('setReferralTiers', () => {
 		const REFERRAL_TIERS = [
-			{ minVolume: parseEther('0.1'), feePercent: 1000 },
-			{ minVolume: parseEther('1'), feePercent: 3000 },
+			{ minVolume: parseEther('0.1'), feeBps: 1000 },
+			{ minVolume: parseEther('1'), feeBps: 3000 },
 		]
 
 		let txHash: `0x${string}`
@@ -589,14 +589,14 @@ describe('indexer e2e', () => {
 			expect(tiers).toMatchObject(
 				REFERRAL_TIERS.map((tier) => ({
 					min_volume: tier.minVolume.toString(),
-					fee_percent: tier.feePercent,
+					fee_bps: tier.feeBps,
 				})),
 			)
 		})
 	})
 
 	describe('setReferrerCustomFee', () => {
-		const CUSTOM_FEE_PERCENT = 5000
+		const CUSTOM_FEE_BPS = 5000
 
 		let txHash: `0x${string}`
 
@@ -604,7 +604,7 @@ describe('indexer e2e', () => {
 			txHash = await walletClient.writeContract({
 				...ripsAbiAndAddress,
 				functionName: 'setReferrerCustomFee',
-				args: [referrer.address, CUSTOM_FEE_PERCENT],
+				args: [referrer.address, CUSTOM_FEE_BPS],
 				gas: DEFAULT_GAS,
 			})
 			await waitForReceipt(publicClient, txHash)
@@ -618,7 +618,7 @@ describe('indexer e2e', () => {
 
 			expect(row).toMatchObject({
 				referrer: referrer.address.toLowerCase(),
-				custom_fee_percent: CUSTOM_FEE_PERCENT,
+				custom_fee_bps: CUSTOM_FEE_BPS,
 				tx_hash: txHash,
 			})
 		})

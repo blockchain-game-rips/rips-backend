@@ -23,7 +23,7 @@ export function handleReferralTiersUpdated(args: HandlerArgs): void {
 				id: `${log.id}-${i}`,
 				update,
 				minVolume: tier.minVolume,
-				feePercent: tier.feePercent,
+				feeBps: tier.feeBps,
 			}),
 		)
 	})

@@ -60,7 +60,7 @@ type Config @entity {
 	currency: String!
 	durationSeconds: BigInt!
 	entryPrice: BigInt!
-	feePercent: BigInt!
+	feeBps: BigInt!
 	payoutDistribution: [PayoutTier!]! @derivedFrom(field: "config")
 	rips: [Rip!]! @derivedFrom(field: "config")
 }
@@ -215,7 +215,7 @@ type ReferralTier @entity {
 	id: ID!
 	update: ReferralTiersUpdated!
 	minVolume: BigInt!
-	feePercent: Int!
+	feeBps: Int!
 }
 
 type ReferralTiersUpdated @entity {
@@ -229,7 +229,7 @@ type ReferralTiersUpdated @entity {
 
 type DefaultReferralFeeUpdated @entity {
 	id: ID!
-	defaultReferralFee: Int!
+	defaultReferralFeeBps: Int!
 	blockNumber: BigInt!
 	time: DateTime!
 	txHash: String!
@@ -239,7 +239,7 @@ type ReferrerStateUpdated @entity {
 	id: ID!
 	referrer: String!
 	currency: String!
-	activeFeePercent: Int!
+	activeFeeBps: Int!
 	periodStartTime: DateTime!
 	periodVolume: BigInt!
 	blockNumber: BigInt!
@@ -250,7 +250,7 @@ type ReferrerStateUpdated @entity {
 type ReferrerCustomFeeUpdated @entity {
 	id: ID!
 	referrer: String!
-	customFeePercent: Int!
+	customFeeBps: Int!
 	blockNumber: BigInt!
 	time: DateTime!
 	txHash: String!

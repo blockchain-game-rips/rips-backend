@@ -24,7 +24,7 @@ export function handlePresetCreated(args: HandlerArgs): void {
 		currency: txConfig.currency.toLowerCase(),
 		durationSeconds: BigInt(txConfig.duration),
 		entryPrice: txConfig.entryPrice,
-		feePercent: BigInt(txConfig.feePercent),
+		feeBps: BigInt(txConfig.feeBps),
 	})
 
 	entities.configs.set(configIdStr, config)
