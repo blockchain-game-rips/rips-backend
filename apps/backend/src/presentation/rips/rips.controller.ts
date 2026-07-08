@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { BuyEntriesPurchaseUseCase } from '../../application/use-cases/buy-entries-purchase/buy-entries-purchase.use-case'
+import { BuyEntriesZapSamechainUseCase } from '../../application/use-cases/buy-entries-zap-samechain/buy-entries-zap-samechain.use-case'
 import { BuyEntriesZapUseCase } from '../../application/use-cases/buy-entries-zap/buy-entries-zap.use-case'
 import { GetAvailablePresetsUseCase } from '../../application/use-cases/get-available-presets/get-available-presets.use-case'
 import { GetCardCollectionUseCase } from '../../application/use-cases/get-card-collection/get-card-collection.use-case'
@@ -21,6 +22,7 @@ import { GetRipsUseCase } from '../../application/use-cases/get-rips/get-rips.us
 import { GetUnrevealedPayoutsUseCase } from '../../application/use-cases/get-unrevealed-payouts/get-unrevealed-payouts.use-case'
 import { GetZapResultUseCase } from '../../application/use-cases/get-zap-result/get-zap-result.use-case'
 import { QuotePurchaseUseCase } from '../../application/use-cases/quote-purchase/quote-purchase.use-case'
+import { QuoteZapSamechainUseCase } from '../../application/use-cases/quote-zap-samechain/quote-zap-samechain.use-case'
 import { QuoteZapUseCase } from '../../application/use-cases/quote-zap/quote-zap.use-case'
 import { RevealEntryPayoutsUseCase } from '../../application/use-cases/reveal-entry-payouts/reveal-entry-payouts.use-case'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
@@ -33,6 +35,10 @@ import {
 	BuyEntriesPurchaseResponseDto,
 	toBuyEntriesPurchaseResponseDto,
 } from './buy-entries-purchase/buy-entries-purchase.response'
+import {
+	BuyEntriesZapSamechainResponseDto,
+	toBuyEntriesZapSamechainResponseDto,
+} from './buy-entries-zap-samechain/buy-entries-zap-samechain.response'
 import { BuyEntriesZapBodyDto } from './buy-entries-zap/buy-entries-zap.request'
 import {
 	BuyEntriesZapResponseDto,
@@ -64,6 +70,10 @@ import {
 	QuotePurchaseResponseDto,
 	toQuotePurchaseResponseDto,
 } from './quote-purchase/quote-purchase.response'
+import {
+	QuoteZapSamechainResponseDto,
+	toQuoteZapSamechainResponseDto,
+} from './quote-zap-samechain/quote-zap-samechain.response'
 import { QuoteZapBodyDto } from './quote-zap/quote-zap.request'
 import {
 	QuoteZapResponseDto,
@@ -83,8 +93,10 @@ export class RipsController {
 		private readonly getAvailablePresetsUseCase: GetAvailablePresetsUseCase,
 		private readonly buyEntriesPurchaseUseCase: BuyEntriesPurchaseUseCase,
 		private readonly buyEntriesZapUseCase: BuyEntriesZapUseCase,
+		private readonly buyEntriesZapSamechainUseCase: BuyEntriesZapSamechainUseCase,
 		private readonly quotePurchaseUseCase: QuotePurchaseUseCase,
 		private readonly quoteZapUseCase: QuoteZapUseCase,
+		private readonly quoteZapSamechainUseCase: QuoteZapSamechainUseCase,
 		private readonly getZapResultUseCase: GetZapResultUseCase,
 		private readonly getOngoingRipsUseCase: GetOngoingRipsUseCase,
 		private readonly getCompletedRipsUseCase: GetCompletedRipsUseCase,
@@ -146,9 +158,9 @@ export class RipsController {
 		return toQuotePurchaseResponseDto(quote)
 	}
 
-	@Post('entries/zap')
+	@Post('entries/zap/crosschain')
 	@ZodResponse({ type: BuyEntriesZapResponseDto })
-	async buyEntriesZap(
+	async buyEntriesZapCrosschain(
 		@Headers() headers: TelegramIdHeaderDto,
 		@Body() body: BuyEntriesZapBodyDto,
 	): Promise<BuyEntriesZapResponseDto> {
@@ -162,9 +174,25 @@ export class RipsController {
 		return toBuyEntriesZapResponseDto(pendingZap)
 	}
 
-	@Post('entries/quote-zap')
+	@Post('entries/zap/samechain')
+	@ZodResponse({ type: BuyEntriesZapSamechainResponseDto })
+	async buyEntriesZapSamechain(
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: BuyEntriesZapBodyDto,
+	): Promise<BuyEntriesZapSamechainResponseDto> {
+		const result = await this.buyEntriesZapSamechainUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+			presetId: body.presetId,
+			entryCount: body.entryCount,
+			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
+		})
+
+		return toBuyEntriesZapSamechainResponseDto(result)
+	}
+
+	@Post('entries/quote-zap/crosschain')
 	@ZodResponse({ type: QuoteZapResponseDto })
-	async quoteZap(
+	async quoteZapCrosschain(
 		@Headers() headers: TelegramIdHeaderDto,
 		@Body() body: QuoteZapBodyDto,
 	): Promise<QuoteZapResponseDto> {
@@ -178,7 +206,23 @@ export class RipsController {
 		return toQuoteZapResponseDto(quote)
 	}
 
-	@Get('entries/zap-result')
+	@Post('entries/quote-zap/samechain')
+	@ZodResponse({ type: QuoteZapSamechainResponseDto })
+	async quoteZapSamechain(
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: QuoteZapBodyDto,
+	): Promise<QuoteZapSamechainResponseDto> {
+		const quote = await this.quoteZapSamechainUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+			presetId: body.presetId,
+			entryCount: body.entryCount,
+			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
+		})
+
+		return toQuoteZapSamechainResponseDto(quote)
+	}
+
+	@Get('entries/zap/crosschain/result')
 	@ZodResponse({ type: GetZapResultResponseDto })
 	async getZapResult(
 		@Query() query: GetZapResultQueryDto,

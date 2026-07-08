@@ -11,8 +11,10 @@ import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
 import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
 import { GetSwapResultUseCase } from '../../application/use-cases/get-swap-result/get-swap-result.use-case'
+import { QuoteSwapSamechainUseCase } from '../../application/use-cases/quote-swap-samechain/quote-swap-samechain.use-case'
 import { QuoteSwapUseCase } from '../../application/use-cases/quote-swap/quote-swap.use-case'
 import { QuoteWithdrawUseCase } from '../../application/use-cases/quote-withdraw/quote-withdraw.use-case'
+import { SwapSamechainUseCase } from '../../application/use-cases/swap-samechain/swap-samechain.use-case'
 import { SwapUseCase } from '../../application/use-cases/swap/swap.use-case'
 import { WithdrawUseCase } from '../../application/use-cases/withdraw.ts/withdraw.use-case'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
@@ -38,6 +40,10 @@ import {
 	toFailedSwapResultDto,
 	toSuccessSwapResultDto,
 } from './get-swap-result/get-swap-result.response'
+import {
+	QuoteSwapSamechainResponseDto,
+	toQuoteSwapSamechainResponseDto,
+} from './quote-swap-samechain/quote-swap-samechain.response'
 import { QuoteSwapBodyDto } from './quote-swap/quote-swap.request'
 import {
 	QuoteSwapResponseDto,
@@ -48,6 +54,10 @@ import {
 	QuoteWithdrawResponseDto,
 	toQuoteWithdrawResponseDto,
 } from './quote-withdraw/quote-withdraw.response'
+import {
+	SwapSamechainResponseDto,
+	toSwapSamechainResponseDto,
+} from './swap-samechain/swap-samechain.response'
 import { SwapBodyDto } from './swap/swap.request'
 import { SwapResponseDto, toSwapResponseDto } from './swap/swap.response'
 
@@ -59,7 +69,9 @@ export class WalletsController {
 		private readonly withdrawUseCase: WithdrawUseCase,
 		private readonly quoteWithdrawUseCase: QuoteWithdrawUseCase,
 		private readonly quoteSwapUseCase: QuoteSwapUseCase,
+		private readonly quoteSwapSamechainUseCase: QuoteSwapSamechainUseCase,
 		private readonly swapUseCase: SwapUseCase,
+		private readonly swapSamechainUseCase: SwapSamechainUseCase,
 		private readonly getSwapResultUseCase: GetSwapResultUseCase,
 		private readonly currencyService: CurrencyService,
 	) {}
@@ -110,9 +122,9 @@ export class WalletsController {
 		return toCreateWithdrawalResponseDto(transaction)
 	}
 
-	@Post('quote-swap')
+	@Post('quote-swap/crosschain')
 	@ZodResponse({ type: QuoteSwapResponseDto })
-	async quoteSwap(
+	async quoteSwapCrosschain(
 		@Headers() headers: TelegramIdHeaderDto,
 		@Body() body: QuoteSwapBodyDto,
 	): Promise<QuoteSwapResponseDto> {
@@ -131,9 +143,30 @@ export class WalletsController {
 		return toQuoteSwapResponseDto(result)
 	}
 
-	@Post('swap')
+	@Post('quote-swap/samechain')
+	@ZodResponse({ type: QuoteSwapSamechainResponseDto })
+	async quoteSwapSamechain(
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: QuoteSwapBodyDto,
+	): Promise<QuoteSwapSamechainResponseDto> {
+		const [currencyIn, currencyOut] = await Promise.all([
+			this.currencyService.fromAccount(body.tokenInChainAddress),
+			this.currencyService.fromAccount(body.tokenOutChainAddress),
+		])
+
+		const result = await this.quoteSwapSamechainUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+			currencyIn,
+			currencyOut,
+			amountIn: body.amountIn,
+		})
+
+		return toQuoteSwapSamechainResponseDto(result)
+	}
+
+	@Post('swap/crosschain')
 	@ZodResponse({ type: SwapResponseDto })
-	async swap(
+	async swapCrosschain(
 		@Headers() headers: TelegramIdHeaderDto,
 		@Body() body: SwapBodyDto,
 	): Promise<SwapResponseDto> {
@@ -152,7 +185,28 @@ export class WalletsController {
 		return toSwapResponseDto(pendingZap)
 	}
 
-	@Get('swap-result')
+	@Post('swap/samechain')
+	@ZodResponse({ type: SwapSamechainResponseDto })
+	async swapSamechain(
+		@Headers() headers: TelegramIdHeaderDto,
+		@Body() body: SwapBodyDto,
+	): Promise<SwapSamechainResponseDto> {
+		const [currencyIn, currencyOut] = await Promise.all([
+			this.currencyService.fromAccount(body.tokenInChainAddress),
+			this.currencyService.fromAccount(body.tokenOutChainAddress),
+		])
+
+		const result = await this.swapSamechainUseCase.execute({
+			telegramId: headers[TELEGRAM_ID_HEADER],
+			currencyIn,
+			currencyOut,
+			amountIn: body.amountIn,
+		})
+
+		return toSwapSamechainResponseDto(result)
+	}
+
+	@Get('swap/crosschain/result')
 	@ZodResponse({ type: GetSwapResultResponseDto })
 	async getSwapResult(
 		@Query() query: GetSwapResultQueryDto,
