@@ -55,6 +55,16 @@ export type SamechainSwapResult = {
 	amountOut: CurrencyAmount
 }
 
+export type SamechainEnterResult = {
+	transaction: Transaction
+	purchase: Purchase
+}
+
+export type SamechainEnterQuoteResult = {
+	amountIn: CurrencyAmount
+	transactionQuote: TransactionQuote
+}
+
 export type SamechainSwapQuoteResult = {
 	amountOut: CurrencyAmount
 	transactionQuote: TransactionQuote

@@ -6,6 +6,8 @@ import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
 	PendingZap,
+	SamechainEnterQuoteResult,
+	SamechainEnterResult,
 	SamechainSwapQuoteResult,
 	SamechainSwapResult,
 	ZapBuyResult,
@@ -19,7 +21,7 @@ import { DeBridgeService } from '../de-bridge/de-bridge.service'
 export class ZapServiceImpl implements ZapService {
 	constructor(private readonly deBridgeService: DeBridgeService) {}
 
-	quoteEnter(
+	quoteEnterCrosschain(
 		wallet: Wallet,
 		args: {
 			presetId: number
@@ -28,10 +30,10 @@ export class ZapServiceImpl implements ZapService {
 			entryCount: number
 		},
 	): Promise<ZapQuoteEnterResult> {
-		return this.deBridgeService.quoteEnter(wallet, args)
+		return this.deBridgeService.quoteEnterCrosschain(wallet, args)
 	}
 
-	enter(
+	enterCrosschain(
 		wallet: Wallet,
 		args: {
 			paymentCurrency: Currency
@@ -40,7 +42,33 @@ export class ZapServiceImpl implements ZapService {
 			entryCount: number
 		},
 	): Promise<PendingZap> {
-		return this.deBridgeService.enter(wallet, args)
+		return this.deBridgeService.enterCrosschain(wallet, args)
+	}
+
+	quoteEnterSamechain(
+		_wallet: Wallet,
+		_args: {
+			presetId: number
+			config: Config
+			paymentCurrency: Currency
+			entryCount: number
+		},
+	): Promise<SamechainEnterQuoteResult> {
+		// TODO: implement samechain enter
+		throw new Error('quoteEnterSamechain is not implemented')
+	}
+
+	enterSamechain(
+		_wallet: Wallet,
+		_args: {
+			paymentCurrency: Currency
+			presetId: number
+			config: Config
+			entryCount: number
+		},
+	): Promise<SamechainEnterResult> {
+		// TODO: implement samechain enter
+		throw new Error('enterSamechain is not implemented')
 	}
 
 	quoteSwapCrosschain(

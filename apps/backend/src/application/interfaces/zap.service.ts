@@ -4,6 +4,8 @@ import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
 	PendingZap,
+	SamechainEnterQuoteResult,
+	SamechainEnterResult,
 	SamechainSwapQuoteResult,
 	SamechainSwapResult,
 	ZapBuyResult,
@@ -13,7 +15,7 @@ import {
 } from '../../domain/value-objects/zap'
 
 export abstract class ZapService {
-	abstract quoteEnter(
+	abstract quoteEnterCrosschain(
 		wallet: Wallet,
 		args: {
 			presetId: number
@@ -23,7 +25,7 @@ export abstract class ZapService {
 		},
 	): Promise<ZapQuoteEnterResult>
 
-	abstract enter(
+	abstract enterCrosschain(
 		wallet: Wallet,
 		args: {
 			paymentCurrency: Currency
@@ -32,6 +34,26 @@ export abstract class ZapService {
 			entryCount: number
 		},
 	): Promise<PendingZap>
+
+	abstract quoteEnterSamechain(
+		wallet: Wallet,
+		args: {
+			presetId: number
+			config: Config
+			paymentCurrency: Currency
+			entryCount: number
+		},
+	): Promise<SamechainEnterQuoteResult>
+
+	abstract enterSamechain(
+		wallet: Wallet,
+		args: {
+			paymentCurrency: Currency
+			presetId: number
+			config: Config
+			entryCount: number
+		},
+	): Promise<SamechainEnterResult>
 
 	abstract quoteSwapCrosschain(
 		wallet: Wallet,

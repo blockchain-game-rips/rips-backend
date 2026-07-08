@@ -245,12 +245,15 @@ describe('DeBridge integration', () => {
 			const expectedRefundAmount =
 				MOCK_CONFIG.entryPrice.amount * BigInt(entryCount)
 
-			const pendingZap = await deBridgeService.enter(userWallet, {
-				paymentCurrency: USDC_ARBITRUM,
-				presetId: wrongPresetId,
-				config: MOCK_CONFIG,
-				entryCount,
-			})
+			const pendingZap = await deBridgeService.enterCrosschain(
+				userWallet,
+				{
+					paymentCurrency: USDC_ARBITRUM,
+					presetId: wrongPresetId,
+					config: MOCK_CONFIG,
+					entryCount,
+				},
+			)
 
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
@@ -282,12 +285,15 @@ describe('DeBridge integration', () => {
 			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
 			// Step 1: place order on Arbitrum with entry count over cap
-			const pendingZap = await deBridgeService.enter(userWallet, {
-				paymentCurrency: USDC_ARBITRUM,
-				presetId: 1,
-				config: MOCK_CONFIG,
-				entryCount: overCapEntryCount,
-			})
+			const pendingZap = await deBridgeService.enterCrosschain(
+				userWallet,
+				{
+					paymentCurrency: USDC_ARBITRUM,
+					presetId: 1,
+					config: MOCK_CONFIG,
+					entryCount: overCapEntryCount,
+				},
+			)
 
 			await assertNativeSpentEqualsFeeAndGas(
 				nativeBalanceBefore,
@@ -330,12 +336,15 @@ describe('DeBridge integration', () => {
 			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
 			// Step 1: place order on Arbitrum
-			const pendingZap = await deBridgeService.enter(userWallet, {
-				paymentCurrency: USDC_ARBITRUM,
-				presetId: 1,
-				config: MOCK_CONFIG,
-				entryCount: 5,
-			})
+			const pendingZap = await deBridgeService.enterCrosschain(
+				userWallet,
+				{
+					paymentCurrency: USDC_ARBITRUM,
+					presetId: 1,
+					config: MOCK_CONFIG,
+					entryCount: 5,
+				},
+			)
 
 			await assertNativeSpentEqualsFeeAndGas(
 				nativeBalanceBefore,
@@ -421,12 +430,15 @@ describe('DeBridge integration', () => {
 		})
 
 		it('quoteBuyEntries returns amountIn, durationMs and fee in native currency', async () => {
-			const result = await deBridgeService.quoteEnter(userWallet, {
-				presetId: 1,
-				config: MOCK_CONFIG,
-				paymentCurrency: USDC_ARBITRUM,
-				entryCount: 5,
-			})
+			const result = await deBridgeService.quoteEnterCrosschain(
+				userWallet,
+				{
+					presetId: 1,
+					config: MOCK_CONFIG,
+					paymentCurrency: USDC_ARBITRUM,
+					entryCount: 5,
+				},
+			)
 
 			expect(result.amountIn.amount).toBeGreaterThan(0n)
 			expect(result.amountIn.currency.chainAddress.address).toBe(

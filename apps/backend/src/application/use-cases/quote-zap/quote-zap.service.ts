@@ -47,7 +47,7 @@ export class QuoteZapService extends QuoteZapUseCase {
 				? availablePreset.fillingRip.config
 				: availablePreset.preset.currentConfig
 
-		return this.zapService.quoteEnter(user.wallet, {
+		return this.zapService.quoteEnterCrosschain(user.wallet, {
 			presetId: availablePreset.preset.id,
 			config,
 			paymentCurrency,

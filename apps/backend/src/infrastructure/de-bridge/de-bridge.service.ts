@@ -223,7 +223,7 @@ export class DeBridgeService {
 		}
 	}
 
-	async quoteEnter(
+	async quoteEnterCrosschain(
 		wallet: Wallet,
 		args: {
 			presetId: number
@@ -258,7 +258,7 @@ export class DeBridgeService {
 		}
 	}
 
-	async enter(
+	async enterCrosschain(
 		wallet: Wallet,
 		args: {
 			paymentCurrency: Currency
