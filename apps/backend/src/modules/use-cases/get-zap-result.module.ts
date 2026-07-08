@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
 import { GetZapResultService } from '../../application/use-cases/get-zap-result/get-zap-result.service'
 import { GetZapResultUseCase } from '../../application/use-cases/get-zap-result/get-zap-result.use-case'
-import { DeBridgeModule } from '../../infrastructure/de-bridge/de-bridge.module'
+import { ZapModule } from '../../infrastructure/zap/zap.module'
 
 @Module({
-	imports: [DeBridgeModule],
+	imports: [ZapModule],
 	providers: [
 		{ provide: GetZapResultUseCase, useClass: GetZapResultService },
 	],

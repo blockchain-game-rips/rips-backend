@@ -10,7 +10,6 @@ import {
 	maxUint256,
 	TransactionRequestEIP1559,
 } from 'viem'
-import { ZapService } from '../../application/interfaces/zap.service'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
@@ -54,7 +53,7 @@ const UNIVERSAL_HOOK_ADDRESS = '0x0000000000000000000000000000000000000000'
 const DEFAULT_GAS_LIMIT = 2_000_000n
 
 @Injectable()
-export class DeBridgeService implements ZapService {
+export class DeBridgeService {
 	private readonly ripsContractAddress: EvmAddress
 
 	constructor(

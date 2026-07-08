@@ -32,7 +32,6 @@ import {
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { arbitrum } from 'viem/chains'
-import { ZapService } from '../../../src/application/interfaces/zap.service'
 import { EIP155 } from '../../../src/constants'
 import { Config } from '../../../src/domain/entities/config'
 import { ChainAddress } from '../../../src/domain/value-objects/chain-address'
@@ -44,6 +43,7 @@ import {
 } from '../../../src/domain/value-objects/zap'
 import { DeBridgeApiService } from '../../../src/infrastructure/de-bridge/de-bridge-api.service'
 import { DeBridgeModule } from '../../../src/infrastructure/de-bridge/de-bridge.module'
+import { DeBridgeService } from '../../../src/infrastructure/de-bridge/de-bridge.service'
 import { EVM_CLIENT_CONFIG } from '../../../src/infrastructure/evm/evm-client/types'
 import { NativeCurrency } from '../../../src/infrastructure/evm/primitives/currencies/native-currency'
 import { Token } from '../../../src/infrastructure/evm/primitives/currencies/token'
@@ -185,7 +185,7 @@ describe('DeBridge integration', () => {
 	])
 
 	describe('buy entries with USDC on Arbitrum', () => {
-		let zapService: ZapService
+		let deBridgeService: DeBridgeService
 		let mockDeBridgeApiService: DeBridgeApiService
 		let arbitrumClient: PublicClient<HttpTransport, Chain>
 		let baseClient: PublicClient<HttpTransport, Chain>
@@ -236,7 +236,7 @@ describe('DeBridge integration', () => {
 				[{ token: DeBridgeApiService, value: mockDeBridgeApiService }],
 			)
 
-			zapService = moduleRef.get(ZapService)
+			deBridgeService = moduleRef.get(DeBridgeService)
 		})
 
 		it('fails and refunds full native amount when wrong preset id causes internal call revert', async () => {
@@ -245,7 +245,7 @@ describe('DeBridge integration', () => {
 			const expectedRefundAmount =
 				MOCK_CONFIG.entryPrice.amount * BigInt(entryCount)
 
-			const pendingZap = await zapService.enter(userWallet, {
+			const pendingZap = await deBridgeService.enter(userWallet, {
 				paymentCurrency: USDC_ARBITRUM,
 				presetId: wrongPresetId,
 				config: MOCK_CONFIG,
@@ -254,7 +254,7 @@ describe('DeBridge integration', () => {
 
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
-			const result = await zapService.getBuyResult(pendingZap.zapId)
+			const result = await deBridgeService.getBuyResult(pendingZap.zapId)
 
 			if (result === null || result.status !== 'failed')
 				throw new Error(
@@ -282,7 +282,7 @@ describe('DeBridge integration', () => {
 			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
 			// Step 1: place order on Arbitrum with entry count over cap
-			const pendingZap = await zapService.enter(userWallet, {
+			const pendingZap = await deBridgeService.enter(userWallet, {
 				paymentCurrency: USDC_ARBITRUM,
 				presetId: 1,
 				config: MOCK_CONFIG,
@@ -299,7 +299,7 @@ describe('DeBridge integration', () => {
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
 			// Step 3: get buy result
-			const result = await zapService.getBuyResult(pendingZap.zapId)
+			const result = await deBridgeService.getBuyResult(pendingZap.zapId)
 
 			if (result === null || result.status !== 'success')
 				throw new Error(
@@ -330,7 +330,7 @@ describe('DeBridge integration', () => {
 			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
 			// Step 1: place order on Arbitrum
-			const pendingZap = await zapService.enter(userWallet, {
+			const pendingZap = await deBridgeService.enter(userWallet, {
 				paymentCurrency: USDC_ARBITRUM,
 				presetId: 1,
 				config: MOCK_CONFIG,
@@ -347,7 +347,7 @@ describe('DeBridge integration', () => {
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
 			// Step 3: get buy result
-			const result = await zapService.getBuyResult(pendingZap.zapId)
+			const result = await deBridgeService.getBuyResult(pendingZap.zapId)
 
 			if (result === null || result.status !== 'success')
 				throw new Error(
@@ -379,12 +379,15 @@ describe('DeBridge integration', () => {
 			const usdcBalanceBefore = await readUsdcBalance(userAccount.address)
 			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
-			const pendingZap = await zapService.swapCrosschain(userWallet, {
-				currencyIn: USDC_ARBITRUM,
-				currencyOut: ETH_BASE,
-				amountIn: 100_000000n,
-				recipient,
-			})
+			const pendingZap = await deBridgeService.swapCrosschain(
+				userWallet,
+				{
+					currencyIn: USDC_ARBITRUM,
+					currencyOut: ETH_BASE,
+					amountIn: 100_000000n,
+					recipient,
+				},
+			)
 
 			await assertNativeSpentEqualsFeeAndGas(
 				nativeBalanceBefore,
@@ -394,7 +397,7 @@ describe('DeBridge integration', () => {
 
 			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
 
-			const result = await zapService.getSwapResult(pendingZap.zapId)
+			const result = await deBridgeService.getSwapResult(pendingZap.zapId)
 
 			if (result === null || result.status !== 'success')
 				throw new Error(
@@ -418,7 +421,7 @@ describe('DeBridge integration', () => {
 		})
 
 		it('quoteBuyEntries returns amountIn, durationMs and fee in native currency', async () => {
-			const result = await zapService.quoteEnter(userWallet, {
+			const result = await deBridgeService.quoteEnter(userWallet, {
 				presetId: 1,
 				config: MOCK_CONFIG,
 				paymentCurrency: USDC_ARBITRUM,
@@ -436,12 +439,15 @@ describe('DeBridge integration', () => {
 		it('quoteSwap returns amountOut, durationMs and fee in native currency', async () => {
 			const recipient = toBaseChainAddress(userAccount.address)
 
-			const result = await zapService.quoteSwapCrosschain(userWallet, {
-				currencyIn: USDC_ARBITRUM,
-				currencyOut: ETH_BASE,
-				amountIn: 100_000000n,
-				recipient,
-			})
+			const result = await deBridgeService.quoteSwapCrosschain(
+				userWallet,
+				{
+					currencyIn: USDC_ARBITRUM,
+					currencyOut: ETH_BASE,
+					amountIn: 100_000000n,
+					recipient,
+				},
+			)
 
 			expect(result.amountOut.amount).toBeGreaterThan(0n)
 			expect(result.amountOut.currency.chainAddress.address).toBe(
@@ -517,7 +523,7 @@ describe('DeBridge integration', () => {
 	})
 
 	describe('swapOnchain USDC to ETH on Base', () => {
-		let zapService: ZapService
+		let deBridgeService: DeBridgeService
 		let baseClient: PublicClient<HttpTransport, Chain>
 
 		beforeAll(async () => {
@@ -551,18 +557,21 @@ describe('DeBridge integration', () => {
 				},
 			})
 
-			zapService = moduleRef.get(ZapService)
+			deBridgeService = moduleRef.get(DeBridgeService)
 		})
 
 		it('quoteSwapOnchain returns amountOut and blockchainFee in native currency', async () => {
 			const recipient = toBaseChainAddress(userAccount.address)
 
-			const result = await zapService.quoteSwapSamechain(userWallet, {
-				currencyIn: USDC_BASE,
-				currencyOut: ETH_BASE,
-				amountIn: 100_000000n,
-				recipient,
-			})
+			const result = await deBridgeService.quoteSwapSamechain(
+				userWallet,
+				{
+					currencyIn: USDC_BASE,
+					currencyOut: ETH_BASE,
+					amountIn: 100_000000n,
+					recipient,
+				},
+			)
 
 			expect(result.amountOut.amount).toBeGreaterThan(0n)
 			expect(result.amountOut.currency.chainAddress.address).toBe(
@@ -584,15 +593,13 @@ describe('DeBridge integration', () => {
 				address: receiverAccount.address,
 			})
 
-			const result: SamechainSwapResult = await zapService.swapSamechain(
-				userWallet,
-				{
+			const result: SamechainSwapResult =
+				await deBridgeService.swapSamechain(userWallet, {
 					currencyIn: USDC_BASE,
 					currencyOut: ETH_BASE,
 					amountIn: 100_000000n,
 					recipient,
-				},
-			)
+				})
 
 			const receiverBalanceAfter = await baseClient.getBalance({
 				address: receiverAccount.address,
