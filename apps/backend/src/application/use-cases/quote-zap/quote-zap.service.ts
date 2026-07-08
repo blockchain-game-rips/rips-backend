@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { AvailablePresetNotFoundError } from '../../../domain/errors/preset-not-found.error'
+import {
+	findAvailablePreset,
+	resolveConfig,
+} from '../../../domain/services/preset-utils'
 import { ZapQuoteEnterResult } from '../../../domain/value-objects/zap'
 import { CurrencyService } from '../../interfaces/currency.service'
 import { ZapService } from '../../interfaces/zap.service'
@@ -32,20 +35,9 @@ export class QuoteZapService extends QuoteZapUseCase {
 			this.currencyService.fromAccount(paymentCurrencyChainAddress),
 		])
 
-		const availablePreset = availablePresets.find(
-			(s) => s.preset.id === presetId,
-		)
+		const availablePreset = findAvailablePreset(availablePresets, presetId)
 
-		if (!availablePreset) {
-			throw new AvailablePresetNotFoundError(
-				`Preset with id ${presetId} not found in available presets`,
-			)
-		}
-
-		const config =
-			availablePreset.fillingRip !== null
-				? availablePreset.fillingRip.config
-				: availablePreset.preset.currentConfig
+		const config = resolveConfig(availablePreset)
 
 		return this.zapService.quoteEnterCrosschain(user.wallet, {
 			presetId: availablePreset.preset.id,

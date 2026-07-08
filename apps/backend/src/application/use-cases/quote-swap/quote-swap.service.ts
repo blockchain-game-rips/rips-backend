@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { EIP155 } from '../../../constants'
+import { resolveChainAddress } from '../../../domain/services/wallet-utils'
 import { ZapQuoteSwapResult } from '../../../domain/value-objects/zap'
 import { ZapService } from '../../interfaces/zap.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
@@ -22,10 +22,7 @@ export class QuoteSwapService extends QuoteSwapUseCase {
 	}: QuoteSwapInput): Promise<ZapQuoteSwapResult> {
 		const user = await this.getUserUseCase.execute({ telegramId })
 
-		const recipient = {
-			chain: currencyOut.chainAddress.chain,
-			address: user.wallet.namespaceToAddress[EIP155],
-		}
+		const recipient = resolveChainAddress(user.wallet, currencyOut)
 
 		return this.zapService.quoteSwapCrosschain(user.wallet, {
 			currencyIn,

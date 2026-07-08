@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { EIP155 } from '../../../constants'
+import { resolveChainAddress } from '../../../domain/services/wallet-utils'
 import { PendingZap } from '../../../domain/value-objects/zap'
 import { ZapService } from '../../interfaces/zap.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
@@ -24,10 +24,7 @@ export class SwapService extends SwapUseCase {
 	}: SwapInput): Promise<PendingZap> {
 		const user = await this.getUserUseCase.execute({ telegramId })
 
-		const recipient = {
-			chain: currencyOut.chainAddress.chain,
-			address: user.wallet.namespaceToAddress[EIP155],
-		}
+		const recipient = resolveChainAddress(user.wallet, currencyOut)
 
 		const pendingZap = await this.zapService.swapCrosschain(user.wallet, {
 			currencyIn,
