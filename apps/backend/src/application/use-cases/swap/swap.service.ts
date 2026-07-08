@@ -29,7 +29,7 @@ export class SwapService extends SwapUseCase {
 			address: user.wallet.namespaceToAddress[EIP155],
 		}
 
-		const pendingZap = await this.zapService.swap(user.wallet, {
+		const pendingZap = await this.zapService.swapCrosschain(user.wallet, {
 			currencyIn,
 			currencyOut,
 			amountIn,

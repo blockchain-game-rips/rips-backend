@@ -1,6 +1,6 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { ZapQuoteBuyResult } from '../../../domain/value-objects/zap'
+import { ZapQuoteEnterResult } from '../../../domain/value-objects/zap'
 import {
 	CurrencyAmountDto,
 	toPricedCurrencyAmountDto,
@@ -16,7 +16,7 @@ const quoteZapResponseSchema = z.object({
 export class QuoteZapResponseDto extends createZodDto(quoteZapResponseSchema) {}
 
 export function toQuoteZapResponseDto(
-	quote: ZapQuoteBuyResult,
+	quote: ZapQuoteEnterResult,
 ): QuoteZapResponseDto {
 	return {
 		amountIn: toPricedCurrencyAmountDto(quote.amountIn),

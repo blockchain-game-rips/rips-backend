@@ -36,7 +36,7 @@ export type ZapSwapResult = ZapResult<{
 	amountOut: CurrencyAmount
 }>
 
-export type ZapQuoteBuyResult = {
+export type ZapQuoteEnterResult = {
 	amountIn: CurrencyAmount
 	durationMs: number
 	fee: CurrencyAmount
@@ -50,12 +50,12 @@ export type ZapQuoteSwapResult = {
 	transactionQuote: TransactionQuote
 }
 
-export type OnchainSwapResult = {
+export type SamechainSwapResult = {
 	transaction: Transaction
 	amountOut: CurrencyAmount
 }
 
-export type OnchainSwapQuoteResult = {
+export type SamechainSwapQuoteResult = {
 	amountOut: CurrencyAmount
 	transactionQuote: TransactionQuote
 }

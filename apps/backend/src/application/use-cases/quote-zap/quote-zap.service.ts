@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { AvailablePresetNotFoundError } from '../../../domain/errors/preset-not-found.error'
-import { ZapQuoteBuyResult } from '../../../domain/value-objects/zap'
+import { ZapQuoteEnterResult } from '../../../domain/value-objects/zap'
 import { CurrencyService } from '../../interfaces/currency.service'
 import { ZapService } from '../../interfaces/zap.service'
 import { GetAvailablePresetsUseCase } from '../get-available-presets/get-available-presets.use-case'
@@ -18,7 +18,7 @@ export class QuoteZapService extends QuoteZapUseCase {
 		super()
 	}
 
-	async execute(input: QuoteZapInput): Promise<ZapQuoteBuyResult> {
+	async execute(input: QuoteZapInput): Promise<ZapQuoteEnterResult> {
 		const {
 			telegramId,
 			presetId,
@@ -47,7 +47,7 @@ export class QuoteZapService extends QuoteZapUseCase {
 				? availablePreset.fillingRip.config
 				: availablePreset.preset.currentConfig
 
-		return this.zapService.quoteBuyEntries(user.wallet, {
+		return this.zapService.quoteEnter(user.wallet, {
 			presetId: availablePreset.preset.id,
 			config,
 			paymentCurrency,

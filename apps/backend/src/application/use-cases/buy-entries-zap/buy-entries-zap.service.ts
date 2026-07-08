@@ -61,7 +61,7 @@ export class BuyEntriesZapService extends BuyEntriesZapUseCase {
 
 		const entryCurrency = config.entryPrice.currency
 
-		const pendingZap = await this.zapService.buyEntries(user.wallet, {
+		const pendingZap = await this.zapService.enter(user.wallet, {
 			paymentCurrency,
 			presetId: availablePreset.preset.id,
 			config,

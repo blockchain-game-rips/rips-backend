@@ -20,11 +20,11 @@ import {
 } from '../../domain/value-objects/evm-address'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
-	OnchainSwapQuoteResult,
-	OnchainSwapResult,
 	PendingZap,
+	SamechainSwapQuoteResult,
+	SamechainSwapResult,
 	ZapBuyResult,
-	ZapQuoteBuyResult,
+	ZapQuoteEnterResult,
 	ZapQuoteSwapResult,
 	ZapSwapResult,
 } from '../../domain/value-objects/zap'
@@ -191,7 +191,7 @@ export class DeBridgeService implements ZapService {
 		return { currency, amount: actualFulfillAmount }
 	}
 
-	async quoteSwap(
+	async quoteSwapCrosschain(
 		wallet: Wallet,
 		args: {
 			currencyIn: Currency
@@ -224,7 +224,7 @@ export class DeBridgeService implements ZapService {
 		}
 	}
 
-	async quoteBuyEntries(
+	async quoteEnter(
 		wallet: Wallet,
 		args: {
 			presetId: number
@@ -232,7 +232,7 @@ export class DeBridgeService implements ZapService {
 			paymentCurrency: Currency
 			entryCount: number
 		},
-	): Promise<ZapQuoteBuyResult> {
+	): Promise<ZapQuoteEnterResult> {
 		const { config, paymentCurrency, entryCount, presetId } = args
 		const userAddress = evmAddressFromWallet(wallet)
 
@@ -259,7 +259,7 @@ export class DeBridgeService implements ZapService {
 		}
 	}
 
-	async buyEntries(
+	async enter(
 		wallet: Wallet,
 		args: {
 			paymentCurrency: Currency
@@ -308,7 +308,7 @@ export class DeBridgeService implements ZapService {
 		}
 	}
 
-	async quoteSwapOnchain(
+	async quoteSwapSamechain(
 		wallet: Wallet,
 		args: {
 			currencyIn: Currency
@@ -316,7 +316,7 @@ export class DeBridgeService implements ZapService {
 			amountIn: bigint
 			recipient: ChainAddress
 		},
-	): Promise<OnchainSwapQuoteResult> {
+	): Promise<SamechainSwapQuoteResult> {
 		const { currencyIn, currencyOut, amountIn, recipient } = args
 		const userAddress = evmAddressFromWallet(wallet)
 		const chainId = evmChainIdFromCurrency(currencyIn)
@@ -352,7 +352,7 @@ export class DeBridgeService implements ZapService {
 		}
 	}
 
-	async swapOnchain(
+	async swapSamechain(
 		wallet: Wallet,
 		args: {
 			currencyIn: Currency
@@ -360,7 +360,7 @@ export class DeBridgeService implements ZapService {
 			amountIn: bigint
 			recipient: ChainAddress
 		},
-	): Promise<OnchainSwapResult> {
+	): Promise<SamechainSwapResult> {
 		const { currencyIn, currencyOut, amountIn, recipient } = args
 		const userAddress = evmAddressFromWallet(wallet)
 		const chainId = evmChainIdFromCurrency(currencyIn)
@@ -406,7 +406,7 @@ export class DeBridgeService implements ZapService {
 		}
 	}
 
-	async swap(
+	async swapCrosschain(
 		wallet: Wallet,
 		args: {
 			currencyIn: Currency

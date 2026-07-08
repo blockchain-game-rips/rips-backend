@@ -27,7 +27,7 @@ export class QuoteSwapService extends QuoteSwapUseCase {
 			address: user.wallet.namespaceToAddress[EIP155],
 		}
 
-		return this.zapService.quoteSwap(user.wallet, {
+		return this.zapService.quoteSwapCrosschain(user.wallet, {
 			currencyIn,
 			currencyOut,
 			amountIn,

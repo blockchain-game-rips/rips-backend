@@ -3,17 +3,17 @@ import { Currency } from '../../domain/entities/currency'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
-	OnchainSwapQuoteResult,
-	OnchainSwapResult,
 	PendingZap,
+	SamechainSwapQuoteResult,
+	SamechainSwapResult,
 	ZapBuyResult,
-	ZapQuoteBuyResult,
+	ZapQuoteEnterResult,
 	ZapQuoteSwapResult,
 	ZapSwapResult,
 } from '../../domain/value-objects/zap'
 
 export abstract class ZapService {
-	abstract quoteBuyEntries(
+	abstract quoteEnter(
 		wallet: Wallet,
 		args: {
 			presetId: number
@@ -21,9 +21,9 @@ export abstract class ZapService {
 			paymentCurrency: Currency
 			entryCount: number
 		},
-	): Promise<ZapQuoteBuyResult>
+	): Promise<ZapQuoteEnterResult>
 
-	abstract buyEntries(
+	abstract enter(
 		wallet: Wallet,
 		args: {
 			paymentCurrency: Currency
@@ -33,7 +33,7 @@ export abstract class ZapService {
 		},
 	): Promise<PendingZap>
 
-	abstract quoteSwap(
+	abstract quoteSwapCrosschain(
 		wallet: Wallet,
 		args: {
 			currencyIn: Currency
@@ -43,7 +43,7 @@ export abstract class ZapService {
 		},
 	): Promise<ZapQuoteSwapResult>
 
-	abstract swap(
+	abstract swapCrosschain(
 		wallet: Wallet,
 		args: {
 			currencyIn: Currency
@@ -53,7 +53,7 @@ export abstract class ZapService {
 		},
 	): Promise<PendingZap>
 
-	abstract quoteSwapOnchain(
+	abstract quoteSwapSamechain(
 		wallet: Wallet,
 		args: {
 			currencyIn: Currency
@@ -61,9 +61,9 @@ export abstract class ZapService {
 			amountIn: bigint
 			recipient: ChainAddress
 		},
-	): Promise<OnchainSwapQuoteResult>
+	): Promise<SamechainSwapQuoteResult>
 
-	abstract swapOnchain(
+	abstract swapSamechain(
 		wallet: Wallet,
 		args: {
 			currencyIn: Currency
@@ -71,7 +71,7 @@ export abstract class ZapService {
 			amountIn: bigint
 			recipient: ChainAddress
 		},
-	): Promise<OnchainSwapResult>
+	): Promise<SamechainSwapResult>
 
 	abstract getBuyResult(zapId: string): Promise<ZapBuyResult | null>
 
