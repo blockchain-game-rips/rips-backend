@@ -29,9 +29,7 @@ export class EvmRpcMetricsService {
 				const end = callDuration.startTimer({ chain, method })
 
 				try {
-					const result = await originalRequest(
-						args as Parameters<typeof originalRequest>[0],
-					)
+					const result = await originalRequest(args)
 					end()
 					callsTotal.inc({ chain, method, outcome: 'success' })
 					return result
