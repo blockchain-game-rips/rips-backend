@@ -10,7 +10,6 @@ import { toTransactionDto, TransactionDto } from '../../shared/transaction.dto'
 const getSwapResultResponseSchema = z.object({
 	pending: z.object({}).nullable(),
 	cancelled: z.object({}).nullable(),
-	failed: z.object({ refund: CurrencyAmountDto.schema }).nullable(),
 	success: z
 		.object({
 			dstTransaction: TransactionDto.schema,
@@ -23,7 +22,7 @@ export class GetSwapResultResponseDto extends createZodDto(
 	getSwapResultResponseSchema,
 ) {}
 
-const base = { pending: null, cancelled: null, failed: null, success: null }
+const base = { pending: null, cancelled: null, success: null }
 
 export const pendingSwapResultDto: GetSwapResultResponseDto = {
 	...base,
@@ -33,17 +32,6 @@ export const pendingSwapResultDto: GetSwapResultResponseDto = {
 export const cancelledSwapResultDto: GetSwapResultResponseDto = {
 	...base,
 	cancelled: {},
-}
-
-export function toFailedSwapResultDto(
-	refund: ZapSwapResult & { status: 'failed' },
-): GetSwapResultResponseDto {
-	return {
-		...base,
-		failed: {
-			refund: toPricedCurrencyAmountDto(refund.refund),
-		},
-	}
 }
 
 export function toSuccessSwapResultDto(

@@ -25,16 +25,14 @@ export type ZapResultSuccess<T> = {
 	result: T
 }
 
-export type ZapResult<T> =
+export type ZapBuyResult =
 	| ZapResultCancelled
 	| ZapResultFailed
-	| ZapResultSuccess<T>
+	| ZapResultSuccess<Purchase>
 
-export type ZapBuyResult = ZapResult<Purchase>
-
-export type ZapSwapResult = ZapResult<{
-	amountOut: CurrencyAmount
-}>
+export type ZapSwapResult =
+	| ZapResultCancelled
+	| ZapResultSuccess<{ amountOut: CurrencyAmount }>
 
 export type ZapQuoteEnterResult = {
 	amountIn: CurrencyAmount

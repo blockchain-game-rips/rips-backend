@@ -37,7 +37,6 @@ import {
 	cancelledSwapResultDto,
 	GetSwapResultResponseDto,
 	pendingSwapResultDto,
-	toFailedSwapResultDto,
 	toSuccessSwapResultDto,
 } from './get-swap-result/get-swap-result.response'
 import {
@@ -218,10 +217,6 @@ export class WalletsController {
 		if (result === null) return pendingSwapResultDto
 
 		if (result.status === 'cancelled') return cancelledSwapResultDto
-
-		if (result.status === 'failed') {
-			return toFailedSwapResultDto(result)
-		}
 
 		return toSuccessSwapResultDto(result)
 	}
