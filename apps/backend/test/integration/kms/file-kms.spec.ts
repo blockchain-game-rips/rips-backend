@@ -6,16 +6,24 @@ import {
 	createPublicClient,
 	createWalletClient,
 	http,
+	isHex,
 	keccak256,
 	parseEther,
 	parseSignature,
 	serializeTransaction,
+	type Hex,
 	type TransactionSerializableEIP1559,
 } from 'viem'
+import { generatePrivateKey, privateKeyToAddress } from 'viem/accounts'
 import { base } from 'viem/chains'
+import { EvmAddress } from '../../../src/domain/value-objects/evm-address'
+import { toKmsKeyId } from '../../../src/domain/value-objects/kms-key-id'
 import { FileKmsService } from '../../../src/infrastructure/kms/file-kms.service'
 
 const FUNDED_BALANCE = parseEther('1')
+const SEND_AMOUNT = parseEther('0.1')
+const TRANSFER_GAS = 21000n
+const RECIPIENT = '0x000000000000000000000000000000000000dEaD' as const
 
 describe('FileKmsService integration', () => {
 	const anvilInstance: Anvil = useAnvil({
@@ -38,9 +46,39 @@ describe('FileKmsService integration', () => {
 		expect(evmAddress).toMatch(/^0x[0-9a-fA-F]{40}$/)
 	})
 
+	it('imports a supplied private key under its own address', async () => {
+		const privateKey: Hex = generatePrivateKey()
+		const expectedAddress = privateKeyToAddress(privateKey)
+
+		const { kmsKeyId, evmAddress } =
+			await kmsService.importEvmKey(privateKey)
+
+		expect(evmAddress.toLowerCase()).toBe(expectedAddress.toLowerCase())
+		expect(kmsKeyId).toBe(evmAddress)
+	})
+
+	it('signs with an imported key so the tx is accepted on-chain', async () => {
+		const privateKey: Hex = generatePrivateKey()
+		const { kmsKeyId, evmAddress } =
+			await kmsService.importEvmKey(privateKey)
+
+		const receipt = await signAndSend(kmsKeyId, evmAddress)
+
+		expect(receipt.status).toBe('success')
+		expect(receipt.from.toLowerCase()).toBe(evmAddress.toLowerCase())
+	})
+
 	it('signs a transaction and sends it on-chain', async () => {
 		const { kmsKeyId, evmAddress } = await kmsService.createEvmKey()
 
+		const receipt = await signAndSend(kmsKeyId, evmAddress)
+
+		expect(receipt.status).toBe('success')
+		expect(receipt.from.toLowerCase()).toBe(evmAddress.toLowerCase())
+		expect(receipt.to?.toLowerCase()).toBe(RECIPIENT.toLowerCase())
+	})
+
+	async function signAndSend(kmsKeyId: string, evmAddress: EvmAddress) {
 		const rpcUrl = `http://127.0.0.1:${anvilInstance.port}`
 
 		const publicClient = createPublicClient({
@@ -55,9 +93,6 @@ describe('FileKmsService integration', () => {
 
 		await setNativeBalance(publicClient, evmAddress, FUNDED_BALANCE)
 
-		const recipient = '0x000000000000000000000000000000000000dEaD' as const
-		const sendAmount = parseEther('0.1')
-
 		const nonce = await publicClient.getTransactionCount({
 			address: evmAddress,
 		})
@@ -66,10 +101,10 @@ describe('FileKmsService integration', () => {
 
 		const tx: TransactionSerializableEIP1559 = {
 			chainId: base.id,
-			to: recipient,
-			value: sendAmount,
+			to: RECIPIENT,
+			value: SEND_AMOUNT,
 			nonce,
-			gas: 21000n,
+			gas: TRANSFER_GAS,
 			maxFeePerGas,
 			maxPriorityFeePerGas,
 		}
@@ -78,23 +113,22 @@ describe('FileKmsService integration', () => {
 		const hash = keccak256(serializedUnsigned)
 
 		const signatureHex = await kmsService.signTransaction(
-			kmsKeyId,
+			toKmsKeyId(kmsKeyId),
 			hash,
 			evmAddress,
 		)
-		const signature = parseSignature(signatureHex as `0x${string}`)
+
+		if (!isHex(signatureHex)) {
+			throw new Error(`signTransaction returned non-hex: ${signatureHex}`)
+		}
+
+		const signature = parseSignature(signatureHex)
 		const serializedSigned = serializeTransaction(tx, signature)
 
 		const txHash = await walletClient.sendRawTransaction({
 			serializedTransaction: serializedSigned,
 		})
 
-		const receipt = await publicClient.waitForTransactionReceipt({
-			hash: txHash,
-		})
-
-		expect(receipt.status).toBe('success')
-		expect(receipt.from.toLowerCase()).toBe(evmAddress.toLowerCase())
-		expect(receipt.to?.toLowerCase()).toBe(recipient.toLowerCase())
-	})
+		return publicClient.waitForTransactionReceipt({ hash: txHash })
+	}
 })
