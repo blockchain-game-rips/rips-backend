@@ -44,6 +44,7 @@ const REPO_ROOT = join(__dirname, '..')
 const BACKEND_DIR = join(REPO_ROOT, 'apps/backend')
 
 const BACKEND_ENV_FILE = join(REPO_ROOT, '.env.backend.local')
+const INDEXER_ENV_FILE = join(REPO_ROOT, '.env.indexer.local')
 
 const DEV_CONFIG_FILE = join(REPO_ROOT, 'dev-config.local.yaml')
 const CARD_DEFINITIONS_FILE = join(BACKEND_DIR, 'test/fixtures/cards.json')
@@ -59,6 +60,10 @@ const EXECUTOR_COUNT = 2
 const ACCOUNT_BALANCE = parseEther('10')
 
 const ADMIN_API_KEY = 'local-admin-key'
+
+const INDEXER_CONTRACT_DEPLOYED_AT = '0'
+const INDEXER_GQL_PORT = '4350'
+const INDEXER_GATEWAY_URL = ''
 
 const teardown: Array<() => Promise<void> | void> = []
 
@@ -113,6 +118,8 @@ async function main() {
 	await app.close()
 
 	writeBackendEnv(backendDb.getConnectionUri(), indexer.databaseUrl)
+
+	writeIndexerEnv(indexer.databaseUrl, rpcUrl)
 
 	printReady(rpcUrl)
 
@@ -274,6 +281,22 @@ function writeBackendEnv(
 	writeEnvFile(BACKEND_ENV_FILE, env)
 }
 
+function writeIndexerEnv(indexerDatabaseUrl: string, rpcUrl: string): void {
+	const dbUrl = new URL(indexerDatabaseUrl)
+
+	const env = {
+		DB_NAME: dbUrl.pathname.replace(/^\//, ''),
+		DB_PORT: dbUrl.port,
+		GQL_PORT: INDEXER_GQL_PORT,
+		GATEWAY_URL: INDEXER_GATEWAY_URL,
+		CONTRACT_ADDRESS: deployments.rips,
+		CONTRACT_DEPLOYED_AT: INDEXER_CONTRACT_DEPLOYED_AT,
+		RPC_ENDPOINT: rpcUrl,
+	}
+
+	writeEnvFile(INDEXER_ENV_FILE, env)
+}
+
 function writeEnvFile(path: string, env: Record<string, string>): void {
 	const contents = Object.entries(env)
 		.map(([key, value]) => `${key}=${value}`)
@@ -287,6 +310,7 @@ function printReady(rpcUrl: string): void {
 	console.log(`  Anvil RPC:        ${rpcUrl}`)
 	console.log(`  Deployer:         ${DEPLOYER_ADDRESS}`)
 	console.log(`  Backend env:      ${BACKEND_ENV_FILE}`)
+	console.log(`  Indexer env:      ${INDEXER_ENV_FILE}`)
 	console.log(
 		'\nRun the backend (yarn dev:backend) in another terminal, then press Ctrl-C here to tear everything down.\n',
 	)

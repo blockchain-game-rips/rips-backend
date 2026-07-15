@@ -48,6 +48,7 @@ coverage/
 .env.production.local
 .env.local
 .env.backend.local
+.env.indexer.local
 dev-config.local.yaml
 
 # temp directory
