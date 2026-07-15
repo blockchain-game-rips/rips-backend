@@ -15,6 +15,7 @@
 		"indexer": "yarn workspace indexer",
 		"dev:up": "yarn workspace indexer build && NODE_ENV=development ts-node scripts/dev-up.ts",
 		"dev:backend": "yarn workspace backend build && node --env-file=.env.backend.local apps/backend/dist/src/main.js",
+		"dev:fill-random": "NODE_ENV=development ts-node scripts/dev-fill-random.ts",
 		"sync-indexer-prisma-schema": "yarn workspace indexer build && ts-node scripts/sync-indexer-prisma-schema.ts"
 	},
 	"resolutions": {
