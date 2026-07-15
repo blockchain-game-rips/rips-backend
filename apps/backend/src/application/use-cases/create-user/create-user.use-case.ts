@@ -1,3 +1,4 @@
+import { Hex } from 'viem'
 import { User } from '../../../domain/entities/user'
 import { UserAlreadyExistsError } from '../../../domain/errors/user-already-exists.error'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
@@ -8,6 +9,7 @@ export { UserAlreadyExistsError }
 export type CreateUserInput = {
 	telegramId: TelegramId
 	referrerAddress?: EvmAddress
+	privateKey?: Hex
 }
 
 export abstract class CreateUserUseCase {

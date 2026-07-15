@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { Hex } from 'viem'
 import { User } from '../../../domain/entities/user'
-import { KmsService } from '../../interfaces/kms.service'
+import { KmsKeyResult, KmsService } from '../../interfaces/kms.service'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
 import {
 	CreateUserInput,
@@ -31,7 +32,9 @@ export class CreateUserService extends CreateUserUseCase {
 		}
 
 		const walletStart = Date.now()
-		const { kmsKeyId, evmAddress } = await this.kmsService.createEvmKey()
+		const { kmsKeyId, evmAddress } = await this.provisionWallet(
+			input.privateKey,
+		)
 		const walletDurationMs = Date.now() - walletStart
 
 		const user = await this.userRepository.create(
@@ -62,5 +65,13 @@ export class CreateUserService extends CreateUserUseCase {
 		)
 
 		return user
+	}
+
+	private async provisionWallet(privateKey?: Hex): Promise<KmsKeyResult> {
+		if (privateKey !== undefined) {
+			return this.kmsService.importEvmKey(privateKey)
+		}
+
+		return this.kmsService.createEvmKey()
 	}
 }
