@@ -20,6 +20,7 @@ import {
 	GetUserParamsDto,
 	TELEGRAM_ID_PARAM,
 } from './get-user/get-user.request'
+import { ImportUserBodyDto } from './import-user/import-user.request'
 import { SetReferrerBodyDto } from './set-referrer/set-referrer.request'
 import { toUserDto, UserDto } from './shared/user.dto'
 
@@ -47,6 +48,18 @@ export class UsersController {
 		const user = await this.createUserUseCase.execute({
 			telegramId: body.telegramId,
 			referrerAddress: body.referrerAddress,
+		})
+
+		return toUserDto(user)
+	}
+
+	@Post('import')
+	@ZodResponse({ type: UserDto })
+	async importUser(@Body() body: ImportUserBodyDto): Promise<UserDto> {
+		const user = await this.createUserUseCase.execute({
+			telegramId: body.telegramId,
+			referrerAddress: body.referrerAddress,
+			privateKey: body.privateKey,
 		})
 
 		return toUserDto(user)
