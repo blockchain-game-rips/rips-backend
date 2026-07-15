@@ -1,3 +1,4 @@
+import { Hex } from 'viem'
 import { EvmAddress } from '../../domain/value-objects/evm-address'
 import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
 
@@ -8,6 +9,7 @@ export interface KmsKeyResult {
 
 export abstract class KmsService {
 	abstract createEvmKey(): Promise<KmsKeyResult>
+	abstract importEvmKey(privateKey: Hex): Promise<KmsKeyResult>
 	abstract signTransaction(
 		kmsKeyId: KmsKeyId,
 		hash: string,

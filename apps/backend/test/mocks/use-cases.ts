@@ -41,6 +41,10 @@ export function makeMockKmsService(): jest.Mocked<KmsService> {
 			kmsKeyId: KMS_KEY_ID,
 			evmAddress: EVM_ADDRESS,
 		}),
+		importEvmKey: jest.fn().mockResolvedValue({
+			kmsKeyId: KMS_KEY_ID,
+			evmAddress: EVM_ADDRESS,
+		}),
 		signTransaction: jest.fn(),
 	}
 }

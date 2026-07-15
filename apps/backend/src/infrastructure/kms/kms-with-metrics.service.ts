@@ -1,3 +1,4 @@
+import { Hex } from 'viem'
 import {
 	KmsKeyResult,
 	KmsService,
@@ -19,6 +20,16 @@ export abstract class KmsWithMetrics extends KmsService {
 		return this.metrics.trackCreate(provider, () => this.doCreateEvmKey())
 	}
 
+	async importEvmKey(privateKey: Hex): Promise<KmsKeyResult> {
+		const provider = this.constructor.name
+
+		if (!this.metrics) return this.doImportEvmKey(privateKey)
+
+		return this.metrics.trackCreate(provider, () =>
+			this.doImportEvmKey(privateKey),
+		)
+	}
+
 	async signTransaction(
 		kmsKeyId: KmsKeyId,
 		hash: string,
@@ -35,6 +46,8 @@ export abstract class KmsWithMetrics extends KmsService {
 	}
 
 	protected abstract doCreateEvmKey(): Promise<KmsKeyResult>
+
+	protected abstract doImportEvmKey(privateKey: Hex): Promise<KmsKeyResult>
 
 	protected abstract doSignTransaction(
 		kmsKeyId: KmsKeyId,

@@ -35,7 +35,14 @@ export class FileKmsService extends KmsWithMetrics {
 	}
 
 	protected async doCreateEvmKey(): Promise<KmsKeyResult> {
-		const privateKey = generatePrivateKey()
+		return this.storeKey(generatePrivateKey())
+	}
+
+	protected async doImportEvmKey(privateKey: Hex): Promise<KmsKeyResult> {
+		return this.storeKey(privateKey)
+	}
+
+	private storeKey(privateKey: Hex): KmsKeyResult {
 		const account = privateKeyToAccount(privateKey)
 		const address = toEvmAddress(account.address)
 

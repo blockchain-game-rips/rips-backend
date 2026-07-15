@@ -71,6 +71,11 @@ export class GcKmsService extends KmsService {
 		return { kmsKeyId: toKmsKeyId(versionName), evmAddress }
 	}
 
+	async importEvmKey(_privateKey: Hex): Promise<KmsKeyResult> {
+		// TODO: implement key import for GC KMS
+		throw new Error('importEvmKey is not supported for GC KMS')
+	}
+
 	async signTransaction(
 		kmsKeyId: KmsKeyId,
 		hash: Hex,

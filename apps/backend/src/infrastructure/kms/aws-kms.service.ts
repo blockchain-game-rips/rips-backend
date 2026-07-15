@@ -47,6 +47,11 @@ export class AwsKmsService extends KmsService {
 		return { kmsKeyId, evmAddress }
 	}
 
+	async importEvmKey(_privateKey: Hex): Promise<KmsKeyResult> {
+		// TODO: implement key import for AWS KMS
+		throw new Error('importEvmKey is not supported for AWS KMS')
+	}
+
 	async signTransaction(
 		_kmsKeyId: KmsKeyId,
 		_hash: Hex,
