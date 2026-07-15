@@ -2,7 +2,7 @@ import { INestApplication, Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { Test, TestingModuleBuilder } from '@nestjs/testing'
 import {
-	ANVIL_MNEMONIC,
+	ANVIL_ACCOUNT_0_PRIVATE_KEY,
 	ANVIL_STATE_PATH,
 	Anvil,
 	deployments,
@@ -12,7 +12,7 @@ import {
 	useIndexer,
 	type Indexer,
 } from '@rips/test-harness'
-import { mkdtempSync } from 'fs'
+import { mkdtempSync, writeFileSync } from 'fs'
 import { Logger } from 'nestjs-pino'
 import { ZodValidationPipe } from 'nestjs-zod'
 import { tmpdir } from 'os'
@@ -26,6 +26,7 @@ import {
 	type HttpTransport,
 	type PublicClient,
 } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 import { AppModule } from '../../src/app.module'
 import { KmsService } from '../../src/application/interfaces/kms.service'
 import { PRESET_TO_TIER_BIASES } from '../../src/application/interfaces/tokens'
@@ -36,7 +37,7 @@ import { toEvmAddress } from '../../src/domain/value-objects/evm-address'
 import { toKmsKeyId } from '../../src/domain/value-objects/kms-key-id'
 import { EVM_CLIENT_CONFIG } from '../../src/infrastructure/evm/evm-client/types'
 import { evmAddressFromWallet } from '../../src/infrastructure/evm/helpers'
-import { MnemonicKmsService } from '../../src/infrastructure/kms/mnemonic-kms.service'
+import { FileKmsService } from '../../src/infrastructure/kms/file-kms.service'
 import { WARMUP_CURRENCY_IDS } from '../../src/infrastructure/price-provider/price-provider-warmup.service'
 import { ProvisionService } from '../../src/infrastructure/provision/provision.service'
 import { RIPS_CONTRACT } from '../../src/infrastructure/rips/rips.constants'
@@ -48,10 +49,8 @@ import { TestConfigModule } from './test-config.module'
 @Module({})
 class NoopScheduleModule {}
 
-const KMS_MNEMONIC = ANVIL_MNEMONIC
-
 const DEPLOYER_ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
-const DEPLOYER_KMS_KEY_ID = '0'
+const DEPLOYER_KMS_KEY_ID = DEPLOYER_ADDRESS
 
 const EXECUTOR_COUNT = 2
 const EXECUTOR_BALANCE = parseEther('10')
@@ -77,7 +76,8 @@ export function useRipsApp(
 ): RipsApp {
 	const result = {} as RipsApp
 
-	const keyIndexDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
+	const kmsStoreDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
+	const kmsStoreFile = join(kmsStoreDir, 'kms-store.json')
 
 	usePostgres()
 	const anvil = useAnvil({
@@ -100,11 +100,8 @@ export function useRipsApp(
 			transport: http(rpcUrl),
 		})
 
-		process.env.KMS_MNEMONIC = KMS_MNEMONIC
-		process.env.KMS_LAST_KEY_INDEX_FILE = join(
-			keyIndexDir,
-			'last-key-index.txt',
-		)
+		seedKmsStore(kmsStoreFile)
+		process.env.KMS_STORE_FILE = kmsStoreFile
 
 		const testEvmClientConfig = {
 			rpcSettings: {
@@ -123,7 +120,7 @@ export function useRipsApp(
 			.overrideModule(ScheduleModule)
 			.useModule(NoopScheduleModule)
 			.overrideProvider(KmsService)
-			.useClass(MnemonicKmsService)
+			.useClass(FileKmsService)
 			.overrideProvider(EVM_CLIENT_CONFIG)
 			.useValue(testEvmClientConfig)
 			.overrideProvider(RIPS_CONTRACT)
@@ -172,6 +169,22 @@ export function useRipsApp(
 	})
 
 	return result
+}
+
+function seedKmsStore(storeFile: string): void {
+	const deployer = privateKeyToAccount(ANVIL_ACCOUNT_0_PRIVATE_KEY)
+
+	const store = {
+		keys: {
+			[deployer.address]: {
+				privateKey: ANVIL_ACCOUNT_0_PRIVATE_KEY,
+				address: deployer.address,
+				createdAt: new Date().toISOString(),
+			},
+		},
+	}
+
+	writeFileSync(storeFile, JSON.stringify(store, null, 2), 'utf-8')
 }
 
 async function setupExecutors(

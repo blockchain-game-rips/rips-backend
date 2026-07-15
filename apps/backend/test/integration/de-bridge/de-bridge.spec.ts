@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing'
 import {
 	ANVIL_ACCOUNT_1_PRIVATE_KEY,
 	ANVIL_ACCOUNT_2_PRIVATE_KEY,
-	ANVIL_MNEMONIC,
 	ANVIL_STATE_PATH,
 	deployments,
 	setNativeBalance,
@@ -143,13 +142,9 @@ async function buildTestModule(
 	>,
 	extraProviders: { token: unknown; value: unknown }[] = [],
 ): Promise<TestingModule> {
-	const keyIndexDir = mkdtempSync(join(tmpdir(), 'kms-'))
+	const kmsStoreDir = mkdtempSync(join(tmpdir(), 'kms-'))
 
-	process.env.KMS_MNEMONIC = ANVIL_MNEMONIC
-	process.env.KMS_LAST_KEY_INDEX_FILE = join(
-		keyIndexDir,
-		'last-key-index.txt',
-	)
+	process.env.KMS_STORE_FILE = join(kmsStoreDir, 'kms-store.json')
 
 	let builder = Test.createTestingModule({
 		imports: [CacheModule.register({ isGlobal: true }), DeBridgeModule],

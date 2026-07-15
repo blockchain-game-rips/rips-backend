@@ -1,9 +1,4 @@
-import {
-	ANVIL_MNEMONIC,
-	Anvil,
-	setNativeBalance,
-	useAnvil,
-} from '@rips/test-harness'
+import { Anvil, setNativeBalance, useAnvil } from '@rips/test-harness'
 import { mkdtempSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
@@ -18,34 +13,28 @@ import {
 	type TransactionSerializableEIP1559,
 } from 'viem'
 import { base } from 'viem/chains'
-import { MnemonicKmsService } from '../../../src/infrastructure/kms/mnemonic-kms.service'
-
-const TEST_MNEMONIC = ANVIL_MNEMONIC
+import { FileKmsService } from '../../../src/infrastructure/kms/file-kms.service'
 
 const FUNDED_BALANCE = parseEther('1')
 
-describe('MnemonicKmsService integration', () => {
+describe('FileKmsService integration', () => {
 	const anvilInstance: Anvil = useAnvil({
 		chainId: base.id,
 	}).anvils[0]
-	let kmsService: MnemonicKmsService
+	let kmsService: FileKmsService
 
 	beforeAll(() => {
-		const keyIndexDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
+		const kmsStoreDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
 
-		process.env.KMS_MNEMONIC = TEST_MNEMONIC
-		process.env.KMS_LAST_KEY_INDEX_FILE = join(
-			keyIndexDir,
-			'last-key-index.txt',
-		)
+		process.env.KMS_STORE_FILE = join(kmsStoreDir, 'kms-store.json')
 
-		kmsService = new MnemonicKmsService()
+		kmsService = new FileKmsService()
 	})
 
 	it('creates an EVM key and returns a valid checksummed address', async () => {
 		const { kmsKeyId, evmAddress } = await kmsService.createEvmKey()
 
-		expect(kmsKeyId).toMatch(/^\d+$/)
+		expect(kmsKeyId).toBe(evmAddress)
 		expect(evmAddress).toMatch(/^0x[0-9a-fA-F]{40}$/)
 	})
 

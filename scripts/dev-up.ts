@@ -4,7 +4,6 @@ import { NestFactory } from '@nestjs/core'
 import {
 	Anvil,
 	ANVIL_ACCOUNT_0_PRIVATE_KEY,
-	ANVIL_MNEMONIC,
 	ANVIL_STATE_PATH,
 	deployments,
 	ensureIndexerSync,
@@ -150,16 +149,12 @@ function configureProvisionEnv(
 	databaseUrl: string,
 	indexerDatabaseUrl: string,
 ): void {
-	const keyIndexDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
+	const kmsStoreDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
 
 	process.env.DATABASE_URL = databaseUrl
 	process.env.INDEXER_DATABASE_URL = indexerDatabaseUrl
 
-	process.env.KMS_MNEMONIC = ANVIL_MNEMONIC
-	process.env.KMS_LAST_KEY_INDEX_FILE = join(
-		keyIndexDir,
-		'last-key-index.txt',
-	)
+	process.env.KMS_STORE_FILE = join(kmsStoreDir, 'kms-store.json')
 
 	process.env.RIPS_CHAIN_ID = String(BASE_CHAIN_ID)
 	process.env.RIPS_CONTRACT_ADDRESS = deployments.rips
@@ -273,8 +268,7 @@ function writeBackendEnv(
 		CONFIG_PATH: DEV_CONFIG_FILE,
 		RIPS_CHAIN_ID: String(BASE_CHAIN_ID),
 		RIPS_CONTRACT_ADDRESS: deployments.rips,
-		KMS_MNEMONIC: ANVIL_MNEMONIC,
-		KMS_LAST_KEY_INDEX_FILE: process.env.KMS_LAST_KEY_INDEX_FILE ?? '',
+		KMS_STORE_FILE: process.env.KMS_STORE_FILE ?? '',
 		ADMIN_API_KEY,
 	}
 
