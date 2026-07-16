@@ -15,6 +15,7 @@ import { PresetTierCountMismatchError } from '../../domain/errors/preset-tier-co
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
 import { UserAlreadyExistsError } from '../../domain/errors/user-already-exists.error'
 import { UserNotFoundError } from '../../domain/errors/user-not-found.error'
+import { WalletAlreadyExistsError } from '../../domain/errors/wallet-already-exists.error'
 import { ContextError } from '../../utils/common'
 
 type ErrorConstructor = new (...args: never[]) => ContextError
@@ -23,6 +24,7 @@ const ERROR_STATUS_MAP: Map<ErrorConstructor, HttpStatus> = new Map([
 	[UserNotFoundError, HttpStatus.NOT_FOUND],
 	[AvailablePresetNotFoundError, HttpStatus.NOT_FOUND],
 	[UserAlreadyExistsError, HttpStatus.CONFLICT],
+	[WalletAlreadyExistsError, HttpStatus.CONFLICT],
 	[InsufficientBalanceError, HttpStatus.UNPROCESSABLE_ENTITY],
 	[CurrenciesMismatchError, HttpStatus.BAD_REQUEST],
 	[TransactionFailedError, HttpStatus.BAD_GATEWAY],

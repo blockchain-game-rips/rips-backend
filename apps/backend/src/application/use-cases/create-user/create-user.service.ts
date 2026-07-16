@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { Hex } from 'viem'
 import { User } from '../../../domain/entities/user'
-import { KmsKeyResult, KmsService } from '../../interfaces/kms.service'
+import { WalletAlreadyExistsError } from '../../../domain/errors/wallet-already-exists.error'
+import {
+	createPrivateKey,
+	evmAddressFromPrivateKey,
+} from '../../../domain/services/evm'
+import { EncryptionService } from '../../interfaces/encryption.service'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
 import {
 	CreateUserInput,
@@ -15,7 +19,7 @@ export class CreateUserService extends CreateUserUseCase {
 
 	constructor(
 		private readonly userRepository: UserRepository,
-		private readonly kmsService: KmsService,
+		private readonly encryptionService: EncryptionService,
 	) {
 		super()
 	}
@@ -31,25 +35,31 @@ export class CreateUserService extends CreateUserUseCase {
 			)
 		}
 
-		const walletStart = Date.now()
-		const { kmsKeyId, evmAddress } = await this.provisionWallet(
-			input.privateKey,
-		)
-		const walletDurationMs = Date.now() - walletStart
+		const privateKey = input.privateKey ?? createPrivateKey()
+		const address = evmAddressFromPrivateKey(privateKey)
+
+		const existingWallet =
+			await this.userRepository.findByEvmAddress(address)
+
+		if (existingWallet) {
+			throw new WalletAlreadyExistsError(
+				`Wallet already exists: ${address}`,
+			)
+		}
+
+		const encryptedKey = await this.encryptionService.encrypt(privateKey)
 
 		const user = await this.userRepository.create(
 			input.telegramId,
-			evmAddress,
-			kmsKeyId,
+			address,
+			encryptedKey,
 			input.referrerAddress,
 		)
 
 		this.logger.log(
 			{
 				userId: user.id.toString(),
-				walletAddress: evmAddress,
-				kmsProvider: kmsKeyId,
-				durationMs: walletDurationMs,
+				walletAddress: address,
 			},
 			'Wallet provisioned',
 		)
@@ -65,13 +75,5 @@ export class CreateUserService extends CreateUserUseCase {
 		)
 
 		return user
-	}
-
-	private async provisionWallet(privateKey?: Hex): Promise<KmsKeyResult> {
-		if (privateKey !== undefined) {
-			return this.kmsService.importEvmKey(privateKey)
-		}
-
-		return this.kmsService.createEvmKey()
 	}
 }
