@@ -16,7 +16,7 @@ const KEK_VERSION = 'file-v1'
 
 const IV_LENGTH = 12
 const AUTH_TAG_LENGTH = 16
-const KEK_LENGTH = 32
+export const KEK_LENGTH = 32
 
 @Injectable()
 export class FileEncryptionService extends EncryptionService {

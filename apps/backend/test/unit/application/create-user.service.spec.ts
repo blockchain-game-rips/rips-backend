@@ -1,24 +1,23 @@
 import { CreateUserService } from '../../../src/application/use-cases/create-user/create-user.service'
 import { UserAlreadyExistsError } from '../../../src/application/use-cases/create-user/create-user.use-case'
-import { EVM_ADDRESS, MOCK_USER, TELEGRAM_ID } from '../../fixtures/entities'
+import { ENCRYPTED_KEY, MOCK_USER, TELEGRAM_ID } from '../../fixtures/entities'
 import {
-	makeMockKmsService,
+	makeMockEncryptionService,
 	makeMockUserRepository,
 } from '../../mocks/use-cases'
 
-const KMS_KEY_ID = 'kms-key-123'
-
 describe('CreateUserService', () => {
 	const repo = makeMockUserRepository()
-	const kms = makeMockKmsService()
-	const service = new CreateUserService(repo, kms)
+	const encryption = makeMockEncryptionService()
+	const service = new CreateUserService(repo, encryption)
 
 	beforeEach(() => {
 		jest.clearAllMocks()
 	})
 
-	it('should create user with KMS key and return it', async () => {
+	it('should create user with a generated wallet and return it', async () => {
 		repo.findByTelegramId.mockResolvedValue(null)
+		repo.findByEvmAddress.mockResolvedValue(null)
 		repo.create.mockResolvedValue(MOCK_USER)
 
 		const result = await service.execute({
@@ -26,11 +25,11 @@ describe('CreateUserService', () => {
 			referrerAddress: undefined,
 		})
 
-		expect(kms.createEvmKey).toHaveBeenCalledTimes(1)
+		expect(encryption.encrypt).toHaveBeenCalledTimes(1)
 		expect(repo.create).toHaveBeenCalledWith(
 			TELEGRAM_ID,
-			EVM_ADDRESS,
-			KMS_KEY_ID,
+			expect.any(String),
+			ENCRYPTED_KEY,
 			undefined,
 		)
 		expect(result).toEqual(MOCK_USER)
@@ -46,7 +45,7 @@ describe('CreateUserService', () => {
 			}),
 		).rejects.toThrow(UserAlreadyExistsError)
 
-		expect(kms.createEvmKey).not.toHaveBeenCalled()
+		expect(encryption.encrypt).not.toHaveBeenCalled()
 		expect(repo.create).not.toHaveBeenCalled()
 	})
 })

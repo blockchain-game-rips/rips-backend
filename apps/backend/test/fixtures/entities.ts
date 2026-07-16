@@ -1,4 +1,5 @@
 import { getAddress, parseEther } from 'viem'
+import { EncryptedKey } from '../../src/application/interfaces/encryption.service'
 import { EIP155 } from '../../src/constants'
 import { Currency } from '../../src/domain/entities/currency'
 import { User } from '../../src/domain/entities/user'
@@ -14,6 +15,11 @@ export const EVM_ADDRESS = getAddress(
 	'0x1234567890abcdef1234567890abcdef12345678',
 )
 export const NATIVE_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+export const ENCRYPTED_KEY: EncryptedKey = {
+	encryptedPrivateKey: new Uint8Array([1, 2, 3]),
+	kekVersion: 'test-v1',
+}
 
 export const ENTRY_COST = parseEther('0.005')
 

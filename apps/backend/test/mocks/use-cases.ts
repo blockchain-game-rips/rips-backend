@@ -1,5 +1,5 @@
 import { CurrencyService } from '../../src/application/interfaces/currency.service'
-import { KmsService } from '../../src/application/interfaces/kms.service'
+import { EncryptionService } from '../../src/application/interfaces/encryption.service'
 import { UserRepository } from '../../src/application/interfaces/repositories/user.repository'
 import { WalletService } from '../../src/application/interfaces/wallet.service'
 import { BuyEntriesPurchaseUseCase } from '../../src/application/use-cases/buy-entries-purchase/buy-entries-purchase.use-case'
@@ -14,9 +14,7 @@ import { QuoteWithdrawUseCase } from '../../src/application/use-cases/quote-with
 import { RevealEntryPayoutsUseCase } from '../../src/application/use-cases/reveal-entry-payouts/reveal-entry-payouts.use-case'
 import { SwapUseCase } from '../../src/application/use-cases/swap/swap.use-case'
 import { WithdrawUseCase } from '../../src/application/use-cases/withdraw.ts/withdraw.use-case'
-import { EVM_ADDRESS } from '../fixtures/entities'
-
-const KMS_KEY_ID = 'kms-key-123'
+import { ENCRYPTED_KEY } from '../fixtures/entities'
 
 export function makeMockUserRepository(): jest.Mocked<UserRepository> {
 	return {
@@ -35,17 +33,10 @@ export function makeMockWalletService(): jest.Mocked<WalletService> {
 	}
 }
 
-export function makeMockKmsService(): jest.Mocked<KmsService> {
+export function makeMockEncryptionService(): jest.Mocked<EncryptionService> {
 	return {
-		createEvmKey: jest.fn().mockResolvedValue({
-			kmsKeyId: KMS_KEY_ID,
-			evmAddress: EVM_ADDRESS,
-		}),
-		importEvmKey: jest.fn().mockResolvedValue({
-			kmsKeyId: KMS_KEY_ID,
-			evmAddress: EVM_ADDRESS,
-		}),
-		signTransaction: jest.fn(),
+		encrypt: jest.fn().mockResolvedValue(ENCRYPTED_KEY),
+		decrypt: jest.fn(),
 	}
 }
 

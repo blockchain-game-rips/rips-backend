@@ -14,6 +14,7 @@ import {
 	StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql'
 import { execSync } from 'child_process'
+import { randomBytes } from 'crypto'
 import { mkdtempSync, readFileSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
@@ -21,9 +22,9 @@ import { parseEther, toHex } from 'viem'
 import { privateKeyToAddress } from 'viem/accounts'
 import { AppConfigModule } from '../apps/backend/src/configuration/app-config.module'
 import { Executor } from '../apps/backend/src/domain/entities/executor'
-import { toEvmAddress } from '../apps/backend/src/domain/value-objects/evm-address'
-import { toKmsKeyId } from '../apps/backend/src/domain/value-objects/kms-key-id'
-import { evmAddressFromWallet } from '../apps/backend/src/infrastructure/evm/helpers'
+import { evmAddressFromWallet } from '../apps/backend/src/domain/services/evm'
+import { toPrivateKey } from '../apps/backend/src/domain/value-objects/private-key'
+import { KEK_LENGTH } from '../apps/backend/src/infrastructure/encryption/file-encryption.service'
 import { ProvisionModule } from '../apps/backend/src/infrastructure/provision/provision.module'
 import { ProvisionService } from '../apps/backend/src/infrastructure/provision/provision.service'
 import { SeedCardDefinitionsService } from '../apps/backend/src/infrastructure/seed/seed-card-definitions.service'
@@ -53,7 +54,6 @@ const POSTGRES_IMAGE = 'postgres:16'
 const BASE_CHAIN_ID = 8453
 
 const DEPLOYER_ADDRESS = privateKeyToAddress(ANVIL_ACCOUNT_0_PRIVATE_KEY)
-const DEPLOYER_KMS_KEY_ID = DEPLOYER_ADDRESS
 
 const EXECUTOR_COUNT = 2
 const ACCOUNT_BALANCE = parseEther('10')
@@ -149,15 +149,15 @@ function configureProvisionEnv(
 	databaseUrl: string,
 	indexerDatabaseUrl: string,
 ): void {
-	const kmsStoreDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
-	const kmsStoreFile = join(kmsStoreDir, 'kms-store.json')
+	const kekDir = mkdtempSync(join(tmpdir(), 'rips-kek-'))
+	const kekFile = join(kekDir, 'kek.hex')
 
-	seedKmsStore(kmsStoreFile)
+	writeKekFile(kekFile)
 
 	process.env.DATABASE_URL = databaseUrl
 	process.env.INDEXER_DATABASE_URL = indexerDatabaseUrl
 
-	process.env.KMS_STORE_FILE = kmsStoreFile
+	process.env.KEK_FILE = kekFile
 
 	process.env.RIPS_CHAIN_ID = String(BASE_CHAIN_ID)
 	process.env.RIPS_CONTRACT_ADDRESS = deployments.rips
@@ -165,18 +165,8 @@ function configureProvisionEnv(
 	process.env.CONFIG_PATH = DEV_CONFIG_FILE
 }
 
-function seedKmsStore(storeFile: string): void {
-	const store = {
-		keys: {
-			[DEPLOYER_ADDRESS]: {
-				privateKey: ANVIL_ACCOUNT_0_PRIVATE_KEY,
-				address: DEPLOYER_ADDRESS,
-				createdAt: new Date().toISOString(),
-			},
-		},
-	}
-
-	writeFileSync(storeFile, JSON.stringify(store, null, 2), 'utf-8')
+function writeKekFile(kekFile: string): void {
+	writeFileSync(kekFile, randomBytes(KEK_LENGTH).toString('hex'), 'utf-8')
 }
 
 type AppContext = Awaited<
@@ -193,8 +183,7 @@ async function provision(app: AppContext, rpcUrl: string): Promise<void> {
 	const provisionService = app.get(ProvisionService)
 
 	await provisionService.seedAdminWallet(
-		toEvmAddress(DEPLOYER_ADDRESS),
-		toKmsKeyId(DEPLOYER_KMS_KEY_ID),
+		toPrivateKey(ANVIL_ACCOUNT_0_PRIVATE_KEY),
 	)
 
 	await fundAccount(rpcUrl, DEPLOYER_ADDRESS)
@@ -285,7 +274,7 @@ function writeBackendEnv(
 		CONFIG_PATH: DEV_CONFIG_FILE,
 		RIPS_CHAIN_ID: String(BASE_CHAIN_ID),
 		RIPS_CONTRACT_ADDRESS: deployments.rips,
-		KMS_STORE_FILE: process.env.KMS_STORE_FILE ?? '',
+		KEK_FILE: process.env.KEK_FILE ?? '',
 		ADMIN_API_KEY,
 	}
 

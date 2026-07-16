@@ -12,11 +12,8 @@ import {
 	useIndexer,
 	type Indexer,
 } from '@rips/test-harness'
-import { mkdtempSync, writeFileSync } from 'fs'
 import { Logger } from 'nestjs-pino'
 import { ZodValidationPipe } from 'nestjs-zod'
-import { tmpdir } from 'os'
-import { join } from 'path'
 import {
 	createPublicClient,
 	defineChain,
@@ -26,31 +23,25 @@ import {
 	type HttpTransport,
 	type PublicClient,
 } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
 import { AppModule } from '../../src/app.module'
-import { KmsService } from '../../src/application/interfaces/kms.service'
 import { PRESET_TO_TIER_BIASES } from '../../src/application/interfaces/tokens'
 import { AppConfigModule } from '../../src/configuration/app-config.module'
 import { EIP155 } from '../../src/constants'
 import { Executor } from '../../src/domain/entities/executor'
-import { toEvmAddress } from '../../src/domain/value-objects/evm-address'
-import { toKmsKeyId } from '../../src/domain/value-objects/kms-key-id'
+import { evmAddressFromWallet } from '../../src/domain/services/evm'
+import { toPrivateKey } from '../../src/domain/value-objects/private-key'
 import { EVM_CLIENT_CONFIG } from '../../src/infrastructure/evm/evm-client/types'
-import { evmAddressFromWallet } from '../../src/infrastructure/evm/helpers'
-import { FileKmsService } from '../../src/infrastructure/kms/file-kms.service'
 import { WARMUP_CURRENCY_IDS } from '../../src/infrastructure/price-provider/price-provider-warmup.service'
 import { ProvisionService } from '../../src/infrastructure/provision/provision.service'
 import { RIPS_CONTRACT } from '../../src/infrastructure/rips/rips.constants'
 import { SeedModule } from '../../src/infrastructure/seed/seed.module'
 import { UseCaseExceptionFilter } from '../../src/presentation/filters/use-case-exception.filter'
+import { provisionKekFile } from './kek'
 import { usePostgres } from './postgres'
 import { TestConfigModule } from './test-config.module'
 
 @Module({})
 class NoopScheduleModule {}
-
-const DEPLOYER_ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
-const DEPLOYER_KMS_KEY_ID = DEPLOYER_ADDRESS
 
 const EXECUTOR_COUNT = 2
 const EXECUTOR_BALANCE = parseEther('10')
@@ -76,9 +67,6 @@ export function useRipsApp(
 ): RipsApp {
 	const result = {} as RipsApp
 
-	const kmsStoreDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
-	const kmsStoreFile = join(kmsStoreDir, 'kms-store.json')
-
 	usePostgres()
 	const anvil = useAnvil({
 		chainId: chain.id,
@@ -100,8 +88,7 @@ export function useRipsApp(
 			transport: http(rpcUrl),
 		})
 
-		seedKmsStore(kmsStoreFile)
-		process.env.KMS_STORE_FILE = kmsStoreFile
+		provisionKekFile()
 
 		const testEvmClientConfig = {
 			rpcSettings: {
@@ -119,8 +106,6 @@ export function useRipsApp(
 			.useModule(TestConfigModule)
 			.overrideModule(ScheduleModule)
 			.useModule(NoopScheduleModule)
-			.overrideProvider(KmsService)
-			.useClass(FileKmsService)
 			.overrideProvider(EVM_CLIENT_CONFIG)
 			.useValue(testEvmClientConfig)
 			.overrideProvider(RIPS_CONTRACT)
@@ -153,8 +138,7 @@ export function useRipsApp(
 		const provisionService = result.app.get(ProvisionService)
 
 		await provisionService.seedAdminWallet(
-			toEvmAddress(DEPLOYER_ADDRESS),
-			toKmsKeyId(DEPLOYER_KMS_KEY_ID),
+			toPrivateKey(ANVIL_ACCOUNT_0_PRIVATE_KEY),
 		)
 
 		const executors = await provisionService.ensureExecutors(EXECUTOR_COUNT)
@@ -169,22 +153,6 @@ export function useRipsApp(
 	})
 
 	return result
-}
-
-function seedKmsStore(storeFile: string): void {
-	const deployer = privateKeyToAccount(ANVIL_ACCOUNT_0_PRIVATE_KEY)
-
-	const store = {
-		keys: {
-			[deployer.address]: {
-				privateKey: ANVIL_ACCOUNT_0_PRIVATE_KEY,
-				address: deployer.address,
-				createdAt: new Date().toISOString(),
-			},
-		},
-	}
-
-	writeFileSync(storeFile, JSON.stringify(store, null, 2), 'utf-8')
 }
 
 async function setupExecutors(

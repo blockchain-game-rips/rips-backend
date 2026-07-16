@@ -9,9 +9,6 @@ import {
 	setTokenBalance,
 	useAnvil,
 } from '@rips/test-harness'
-import { mkdtempSync } from 'fs'
-import { tmpdir } from 'os'
-import { join } from 'path'
 import {
 	Chain,
 	createPublicClient,
@@ -54,6 +51,7 @@ import {
 	mockGetOrder,
 } from '../../mocks/mock-de-bridge-api.service'
 import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
+import { provisionKekFile } from '../../utils/kek'
 
 const ARBITRUM_CHAIN_ID = 42161
 const BASE_CHAIN_ID = 8453
@@ -142,9 +140,7 @@ async function buildTestModule(
 	>,
 	extraProviders: { token: unknown; value: unknown }[] = [],
 ): Promise<TestingModule> {
-	const kmsStoreDir = mkdtempSync(join(tmpdir(), 'kms-'))
-
-	process.env.KMS_STORE_FILE = join(kmsStoreDir, 'kms-store.json')
+	provisionKekFile()
 
 	let builder = Test.createTestingModule({
 		imports: [CacheModule.register({ isGlobal: true }), DeBridgeModule],
