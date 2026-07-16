@@ -53,7 +53,7 @@ const POSTGRES_IMAGE = 'postgres:16'
 const BASE_CHAIN_ID = 8453
 
 const DEPLOYER_ADDRESS = privateKeyToAddress(ANVIL_ACCOUNT_0_PRIVATE_KEY)
-const DEPLOYER_KMS_KEY_ID = '0'
+const DEPLOYER_KMS_KEY_ID = DEPLOYER_ADDRESS
 
 const EXECUTOR_COUNT = 2
 const ACCOUNT_BALANCE = parseEther('10')
@@ -150,16 +150,33 @@ function configureProvisionEnv(
 	indexerDatabaseUrl: string,
 ): void {
 	const kmsStoreDir = mkdtempSync(join(tmpdir(), 'rips-kms-'))
+	const kmsStoreFile = join(kmsStoreDir, 'kms-store.json')
+
+	seedKmsStore(kmsStoreFile)
 
 	process.env.DATABASE_URL = databaseUrl
 	process.env.INDEXER_DATABASE_URL = indexerDatabaseUrl
 
-	process.env.KMS_STORE_FILE = join(kmsStoreDir, 'kms-store.json')
+	process.env.KMS_STORE_FILE = kmsStoreFile
 
 	process.env.RIPS_CHAIN_ID = String(BASE_CHAIN_ID)
 	process.env.RIPS_CONTRACT_ADDRESS = deployments.rips
 
 	process.env.CONFIG_PATH = DEV_CONFIG_FILE
+}
+
+function seedKmsStore(storeFile: string): void {
+	const store = {
+		keys: {
+			[DEPLOYER_ADDRESS]: {
+				privateKey: ANVIL_ACCOUNT_0_PRIVATE_KEY,
+				address: DEPLOYER_ADDRESS,
+				createdAt: new Date().toISOString(),
+			},
+		},
+	}
+
+	writeFileSync(storeFile, JSON.stringify(store, null, 2), 'utf-8')
 }
 
 type AppContext = Awaited<
