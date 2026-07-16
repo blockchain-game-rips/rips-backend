@@ -1,35 +1,35 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { KmsService } from '../../application/interfaces/kms.service'
+import { EncryptionService } from '../../application/interfaces/encryption.service'
 import { AdminWalletRepository } from '../../application/interfaces/repositories/admin-wallet.repository'
 import { ExecutorRepository } from '../../application/interfaces/repositories/executor.repository'
 import { RipsAdminService } from '../../application/interfaces/rips-admin.service'
 import { Executor } from '../../domain/entities/executor'
 import {
-	EvmAddress,
-	toEvmAddress,
-} from '../../domain/value-objects/evm-address'
-import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
+	createPrivateKey,
+	evmAddressFromPrivateKey,
+	evmAddressFromWallet,
+} from '../../domain/services/evm'
+import { PrivateKey } from '../../domain/value-objects/private-key'
 import { AdminWallet } from '../../domain/value-objects/wallet'
-import { evmAddressFromWallet } from '../evm/helpers'
 
 @Injectable()
 export class ProvisionService {
 	private readonly logger = new Logger(ProvisionService.name)
 
 	constructor(
-		private readonly kmsService: KmsService,
+		private readonly encryptionService: EncryptionService,
 		private readonly executorRepository: ExecutorRepository,
 		private readonly adminWalletRepository: AdminWalletRepository,
 		private readonly ripsAdminService: RipsAdminService,
 	) {}
 
-	async seedAdminWallet(
-		address: EvmAddress,
-		kmsKeyId: KmsKeyId,
-	): Promise<AdminWallet> {
+	async seedAdminWallet(privateKey: PrivateKey): Promise<AdminWallet> {
+		const address = evmAddressFromPrivateKey(privateKey)
+		const encryptedKey = await this.encryptionService.encrypt(privateKey)
+
 		const adminWallet = await this.adminWalletRepository.upsert(
 			address,
-			kmsKeyId,
+			encryptedKey,
 		)
 
 		this.logger.log(`Admin wallet seeded with address ${address}`)
@@ -54,18 +54,20 @@ export class ProvisionService {
 		const createdExecutors: Executor[] = []
 
 		for (let i = 0; i < missing; i++) {
-			const { kmsKeyId, evmAddress } =
-				await this.kmsService.createEvmKey()
+			const privateKey = createPrivateKey()
+			const address = evmAddressFromPrivateKey(privateKey)
+			const encryptedKey =
+				await this.encryptionService.encrypt(privateKey)
 
 			const executor = await this.executorRepository.create(
-				evmAddress,
-				kmsKeyId,
+				address,
+				encryptedKey,
 			)
 
 			createdExecutors.push(executor)
 
 			this.logger.log(
-				`Created executor ${executor.id} with address ${evmAddress}`,
+				`Created executor ${executor.id} with address ${address}`,
 			)
 		}
 
@@ -82,7 +84,7 @@ export class ProvisionService {
 		}
 
 		for (const executor of executors) {
-			const operator = toEvmAddress(evmAddressFromWallet(executor.wallet))
+			const operator = evmAddressFromWallet(executor.wallet)
 
 			await this.ripsAdminService.grantOperatorRole(adminWallet, {
 				operator,

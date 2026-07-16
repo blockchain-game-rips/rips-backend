@@ -12,6 +12,10 @@ import {
 } from 'viem'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
+import {
+	evmAddressFromWallet,
+	evmChainIdFromCurrency,
+} from '../../domain/services/evm'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import {
 	EvmAddress,
@@ -33,7 +37,6 @@ import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { GasPriceService } from '../evm/gas-price.service'
-import { evmAddressFromWallet, evmChainIdFromCurrency } from '../evm/helpers'
 import { Token } from '../evm/primitives/currencies/token'
 import { parsePurchase } from '../rips/parse-purchase'
 import { ripsAbi } from '../rips/rips-abi'

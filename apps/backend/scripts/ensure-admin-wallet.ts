@@ -1,13 +1,11 @@
 import { NestFactory } from '@nestjs/core'
-import { toEvmAddress } from '../src/domain/value-objects/evm-address'
-import { toKmsKeyId } from '../src/domain/value-objects/kms-key-id'
+import { toPrivateKey } from '../src/domain/value-objects/private-key'
 import { ProvisionModule } from '../src/infrastructure/provision/provision.module'
 import { ProvisionService } from '../src/infrastructure/provision/provision.service'
 import { getEnvSafe } from '../src/utils/common'
 
 async function main() {
-	const address = toEvmAddress(getEnvSafe('ADMIN_WALLET_ADDRESS'))
-	const kmsKeyId = toKmsKeyId(getEnvSafe('ADMIN_KMS_KEY_ID'))
+	const privateKeyRaw = getEnvSafe('ADMIN_PRIVATE_KEY')
 
 	const app = await NestFactory.createApplicationContext(ProvisionModule, {
 		logger: ['log', 'error', 'warn'],
@@ -15,7 +13,7 @@ async function main() {
 
 	const provisionService = app.get(ProvisionService)
 
-	await provisionService.seedAdminWallet(address, kmsKeyId)
+	await provisionService.seedAdminWallet(toPrivateKey(privateKeyRaw))
 
 	await app.close()
 }

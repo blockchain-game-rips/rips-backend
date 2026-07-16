@@ -1,12 +1,12 @@
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
-import { KmsKeyId } from '../../../domain/value-objects/kms-key-id'
 import { AdminWallet } from '../../../domain/value-objects/wallet'
+import { EncryptedKey } from '../encryption.service'
 
 export abstract class AdminWalletRepository {
 	abstract get(): Promise<AdminWallet | null>
 
 	abstract upsert(
 		address: EvmAddress,
-		kmsKeyId: KmsKeyId,
+		encryptedKey: EncryptedKey,
 	): Promise<AdminWallet>
 }

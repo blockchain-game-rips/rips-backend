@@ -1,10 +1,10 @@
 import { ChainNamespace } from '../../../domain/value-objects/chain-namespace'
-import { KmsKeyId } from '../../../domain/value-objects/kms-key-id'
 import { Wallet } from '../../../domain/value-objects/wallet'
+import { EncryptedKey } from '../encryption.service'
 
 export abstract class WalletRepository {
-	abstract getKmsKeyId(
+	abstract getEncryptedKey(
 		wallet: Wallet,
 		namespace: ChainNamespace,
-	): Promise<KmsKeyId>
+	): Promise<EncryptedKey>
 }

@@ -1,7 +1,7 @@
 import { User } from '../../../domain/entities/user'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
-import { KmsKeyId } from '../../../domain/value-objects/kms-key-id'
 import { TelegramId } from '../../../domain/value-objects/telegram-id'
+import { EncryptedKey } from '../encryption.service'
 
 export abstract class UserRepository {
 	abstract findByTelegramId(telegramId: TelegramId): Promise<User | null>
@@ -11,7 +11,7 @@ export abstract class UserRepository {
 	abstract create(
 		telegramId: TelegramId,
 		address: EvmAddress,
-		kmsKeyId: KmsKeyId,
+		encryptedKey: EncryptedKey,
 		referrerAddress: EvmAddress | undefined,
 	): Promise<User>
 

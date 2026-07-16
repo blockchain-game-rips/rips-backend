@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Address, erc20Abi } from 'viem'
+import { evmChainIdFromCurrency } from '../../domain/services/evm'
 import { EvmClientService } from './evm-client/evm-client.service'
-import { evmChainIdFromCurrency } from './helpers'
 import { EvmCurrency } from './primitives/currencies/evm-currency'
 import { Token } from './primitives/currencies/token'
 

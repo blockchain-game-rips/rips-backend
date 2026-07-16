@@ -6,6 +6,7 @@ import {
 	type Address,
 	type TransactionRequestEIP1559,
 } from 'viem'
+import { evmChainIdFromCurrency } from '../../domain/services/evm'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import {
 	Transaction,
@@ -15,7 +16,6 @@ import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmCurrencyService } from './evm-currency.service'
 import { EvmTransactionService } from './evm-transaction.service'
 import { GasPriceService } from './gas-price.service'
-import { evmChainIdFromCurrency } from './helpers'
 import { EvmCurrency } from './primitives/currencies/evm-currency'
 import { NativeCurrency } from './primitives/currencies/native-currency'
 import { Token } from './primitives/currencies/token'

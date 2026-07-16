@@ -18,12 +18,13 @@ model User {
 }
 
 model EvmWallet {
-    id        BigInt   @id @default(autoincrement())
-    address   String   @unique
-    kmsKeyId  String   @map("kms_key_id")
-    createdAt DateTime @default(now()) @map("created_at")
-    userId    BigInt   @unique @map("user_id")
-    user      User     @relation(fields: [userId], references: [id])
+    id                  BigInt   @id @default(autoincrement())
+    address             String   @unique
+    encryptedPrivateKey Bytes    @map("encrypted_private_key")
+    kekVersion          String   @map("kek_version")
+    createdAt           DateTime @default(now()) @map("created_at")
+    userId              BigInt   @unique @map("user_id")
+    user                User     @relation(fields: [userId], references: [id])
 
     @@map("evm_wallets")
 }
@@ -37,12 +38,13 @@ model Executor {
 }
 
 model ExecutorWallet {
-    id         BigInt   @id @default(autoincrement())
-    address    String   @unique
-    kmsKeyId   String   @map("kms_key_id")
-    createdAt  DateTime @default(now()) @map("created_at")
-    executorId BigInt   @unique @map("executor_id")
-    executor   Executor @relation(fields: [executorId], references: [id])
+    id                  BigInt   @id @default(autoincrement())
+    address             String   @unique
+    encryptedPrivateKey Bytes    @map("encrypted_private_key")
+    kekVersion          String   @map("kek_version")
+    createdAt           DateTime @default(now()) @map("created_at")
+    executorId          BigInt   @unique @map("executor_id")
+    executor            Executor @relation(fields: [executorId], references: [id])
 
     @@map("executor_wallets")
 }
@@ -98,11 +100,12 @@ model SyncedRip {
 }
 
 model AdminWallet {
-    id        BigInt   @id @default(autoincrement())
-    singleton String   @unique @default("admin")
-    address   String   @unique
-    kmsKeyId  String   @map("kms_key_id")
-    createdAt DateTime @default(now()) @map("created_at")
+    id                  BigInt   @id @default(autoincrement())
+    singleton           String   @unique @default("admin")
+    address             String   @unique
+    encryptedPrivateKey Bytes    @map("encrypted_private_key")
+    kekVersion          String   @map("kek_version")
+    createdAt           DateTime @default(now()) @map("created_at")
 
     @@map("admin_wallets")
 }

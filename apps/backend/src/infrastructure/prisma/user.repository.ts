@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Prisma } from '../../../generated/prisma'
+import { EncryptedKey } from '../../application/interfaces/encryption.service'
 import { UserRepository } from '../../application/interfaces/repositories/user.repository'
 import { EIP155 } from '../../constants'
 import { User } from '../../domain/entities/user'
@@ -7,7 +8,6 @@ import {
 	EvmAddress,
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
-import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
 import {
 	TelegramId,
 	toTelegramId,
@@ -45,14 +45,20 @@ export class PrismaUserRepository extends UserRepository {
 	async create(
 		telegramId: TelegramId,
 		address: EvmAddress,
-		kmsKeyId: KmsKeyId,
+		encryptedKey: EncryptedKey,
 		referrerAddress: EvmAddress | undefined,
 	): Promise<User> {
 		const record = await this.prisma.user.create({
 			data: {
 				telegramId,
 				referrerAddress,
-				evmWallet: { create: { address, kmsKeyId } },
+				evmWallet: {
+					create: {
+						address,
+						encryptedPrivateKey: encryptedKey.encryptedPrivateKey,
+						kekVersion: encryptedKey.kekVersion,
+					},
+				},
 			},
 			include: { evmWallet: true },
 		})

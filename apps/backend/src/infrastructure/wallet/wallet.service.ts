@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { WalletService } from '../../application/interfaces/wallet.service'
 import { Currency } from '../../domain/entities/currency'
+import { evmAddressFromWallet } from '../../domain/services/evm'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import {
 	Transaction,
@@ -9,7 +10,6 @@ import {
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmCurrencyReadService } from '../evm/evm-currency-read.service'
 import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
-import { evmAddressFromWallet } from '../evm/helpers'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
 
 @Injectable()

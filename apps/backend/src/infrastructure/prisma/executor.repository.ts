@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Prisma } from '../../../generated/prisma'
+import { EncryptedKey } from '../../application/interfaces/encryption.service'
 import { ExecutorRepository } from '../../application/interfaces/repositories/executor.repository'
 import { EIP155 } from '../../constants'
 import { Executor } from '../../domain/entities/executor'
@@ -7,7 +8,6 @@ import {
 	EvmAddress,
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
-import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
 import { PrismaService } from './prisma.service'
 
 @Injectable()
@@ -24,19 +24,24 @@ export class PrismaExecutorRepository extends ExecutorRepository {
 		return records.filter((r) => r.executorWallet !== null).map(toExecutor)
 	}
 
-	async create(address: EvmAddress, kmsKeyId: KmsKeyId): Promise<Executor> {
+	async create(
+		address: EvmAddress,
+		encryptedKey: EncryptedKey,
+	): Promise<Executor> {
 		const record = await this.prisma.executor.create({
 			data: {
-				executorWallet: { create: { address, kmsKeyId } },
+				executorWallet: {
+					create: {
+						address,
+						encryptedPrivateKey: encryptedKey.encryptedPrivateKey,
+						kekVersion: encryptedKey.kekVersion,
+					},
+				},
 			},
 			include: { executorWallet: true },
 		})
 
-		return toExecutor(
-			record as ExecutorRecord & {
-				executorWallet: NonNullable<ExecutorRecord['executorWallet']>
-			},
-		)
+		return toExecutor(record)
 	}
 }
 
@@ -44,11 +49,11 @@ type ExecutorRecord = Prisma.ExecutorGetPayload<{
 	include: { executorWallet: true }
 }>
 
-function toExecutor(
-	record: ExecutorRecord & {
-		executorWallet: NonNullable<ExecutorRecord['executorWallet']>
-	},
-): Executor {
+function toExecutor(record: ExecutorRecord): Executor {
+	if (!record.executorWallet) {
+		throw new Error(`Executor ${record.id} has no executorWallet`)
+	}
+
 	return {
 		id: record.id,
 		wallet: {

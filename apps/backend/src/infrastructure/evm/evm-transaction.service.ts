@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { TransactionReceipt, type TransactionRequestEIP1559 } from 'viem'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
+import { evmAddressFromWallet } from '../../domain/services/evm'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { SignService } from '../sign/sign.service'
 import { EvmClientService } from './evm-client/evm-client.service'
 import { EvmCurrencyService } from './evm-currency.service'
-import { evmAddressFromWallet } from './helpers'
 
 export type TransactionResult = {
 	transaction: Transaction

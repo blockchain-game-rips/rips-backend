@@ -1,48 +1,33 @@
 import { Injectable } from '@nestjs/common'
-import {
-	keccak256,
-	parseSignature,
-	serializeTransaction,
-	type TransactionSerializableEIP1559,
-	type TransactionSerialized,
-} from 'viem'
-import { KmsService } from '../../application/interfaces/kms.service'
+import { type Hex, type TransactionSerializableEIP1559 } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { EncryptionService } from '../../application/interfaces/encryption.service'
 import { WalletRepository } from '../../application/interfaces/repositories/wallet.repository'
 import { EIP155 } from '../../constants'
 import { toChainNamespace } from '../../domain/value-objects/chain-namespace'
-import { toEvmAddress } from '../../domain/value-objects/evm-address'
 import { Wallet } from '../../domain/value-objects/wallet'
 
 @Injectable()
 export class SignService {
 	constructor(
-		private readonly kmsService: KmsService,
+		private readonly encryptionService: EncryptionService,
 		private readonly walletRepository: WalletRepository,
 	) {}
 
 	async signTx(
 		wallet: Wallet,
 		tx: TransactionSerializableEIP1559,
-	): Promise<TransactionSerialized> {
+	): Promise<Hex> {
 		const namespace = toChainNamespace(EIP155)
-		const address = toEvmAddress(wallet.namespaceToAddress[namespace])
 
-		const kmsKeyId = await this.walletRepository.getKmsKeyId(
+		const encryptedKey = await this.walletRepository.getEncryptedKey(
 			wallet,
 			namespace,
 		)
 
-		const serializedUnsigned = serializeTransaction(tx)
-		const hash = keccak256(serializedUnsigned)
+		const privateKey = await this.encryptionService.decrypt(encryptedKey)
+		const account = privateKeyToAccount(privateKey)
 
-		const signatureHex = await this.kmsService.signTransaction(
-			kmsKeyId,
-			hash,
-			address,
-		)
-
-		const signature = parseSignature(signatureHex as `0x${string}`)
-
-		return serializeTransaction(tx, signature)
+		return account.signTransaction(tx)
 	}
 }

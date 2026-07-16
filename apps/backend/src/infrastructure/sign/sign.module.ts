@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
-import { KmsModule } from '../kms/kms.module'
+import { EncryptionModule } from '../encryption/encryption.module'
 import { PrismaModule } from '../prisma/prisma.module'
 import { SignService } from './sign.service'
 
 @Module({
-	imports: [KmsModule, PrismaModule],
+	imports: [EncryptionModule, PrismaModule],
 	providers: [SignService],
 	exports: [SignService],
 })

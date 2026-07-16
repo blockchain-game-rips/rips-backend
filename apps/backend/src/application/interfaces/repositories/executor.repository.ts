@@ -1,8 +1,11 @@
 import { Executor } from '../../../domain/entities/executor'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
-import { KmsKeyId } from '../../../domain/value-objects/kms-key-id'
+import { EncryptedKey } from '../encryption.service'
 
 export abstract class ExecutorRepository {
 	abstract getAll(): Promise<Executor[]>
-	abstract create(address: EvmAddress, kmsKeyId: KmsKeyId): Promise<Executor>
+	abstract create(
+		address: EvmAddress,
+		encryptedKey: EncryptedKey,
+	): Promise<Executor>
 }

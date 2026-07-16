@@ -9,6 +9,7 @@ import {
 import { RipsService } from '../../application/interfaces/rips.service'
 import { Config } from '../../domain/entities/config'
 import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
+import { evmAddressFromWallet } from '../../domain/services/evm'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import {
 	EvmAddress,
@@ -25,7 +26,6 @@ import { EvmClientService } from '../evm/evm-client/evm-client.service'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { GasPriceService } from '../evm/gas-price.service'
-import { evmAddressFromWallet } from '../evm/helpers'
 import { parsePurchase } from './parse-purchase'
 import { ripsAbi } from './rips-abi'
 import { RIPS_CONTRACT } from './rips.constants'
