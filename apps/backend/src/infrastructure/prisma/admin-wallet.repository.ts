@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common'
+import { EncryptedKey } from '../../application/interfaces/encryption.service'
 import { AdminWalletRepository } from '../../application/interfaces/repositories/admin-wallet.repository'
 import { EIP155 } from '../../constants'
 import {
 	EvmAddress,
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
-import { KmsKeyId } from '../../domain/value-objects/kms-key-id'
 import { AdminWallet } from '../../domain/value-objects/wallet'
 import { PrismaService } from './prisma.service'
 
@@ -27,12 +27,18 @@ export class PrismaAdminWalletRepository extends AdminWalletRepository {
 
 	async upsert(
 		address: EvmAddress,
-		kmsKeyId: KmsKeyId,
+		encryptedKey: EncryptedKey,
 	): Promise<AdminWallet> {
+		const data = {
+			address,
+			encryptedPrivateKey: encryptedKey.encryptedPrivateKey,
+			kekVersion: encryptedKey.kekVersion,
+		}
+
 		await this.prisma.adminWallet.upsert({
 			where: { singleton: 'admin' },
-			update: {},
-			create: { address, kmsKeyId },
+			update: data,
+			create: data,
 		})
 
 		return toAdminWallet(address)
