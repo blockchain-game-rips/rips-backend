@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
-import { GetBalanceUseCase } from '../../application/use-cases/get-balance/get-balance.use-case'
+import { GetBalancesUseCase } from '../../application/use-cases/get-balances/get-balances.use-case'
 import { GetSwapResultUseCase } from '../../application/use-cases/get-swap-result/get-swap-result.use-case'
 import { QuoteSwapSamechainUseCase } from '../../application/use-cases/quote-swap-samechain/quote-swap-samechain.use-case'
 import { QuoteSwapUseCase } from '../../application/use-cases/quote-swap/quote-swap.use-case'
@@ -64,7 +64,7 @@ import { SwapResponseDto, toSwapResponseDto } from './swap/swap.response'
 @UseInterceptors(PriceEnrichmentInterceptor)
 export class WalletsController {
 	constructor(
-		private readonly getBalanceUseCase: GetBalanceUseCase,
+		private readonly getBalancesUseCase: GetBalancesUseCase,
 		private readonly withdrawUseCase: WithdrawUseCase,
 		private readonly quoteWithdrawUseCase: QuoteWithdrawUseCase,
 		private readonly quoteSwapUseCase: QuoteSwapUseCase,
@@ -84,14 +84,10 @@ export class WalletsController {
 	): Promise<GetBalancesResponseDto> {
 		const telegramId = headers[TELEGRAM_ID_HEADER]
 
-		const currencyAmounts = await Promise.all(
-			query.chainAddress.map((chainAddress) =>
-				this.getBalanceUseCase.execute({
-					telegramId,
-					currencyChainAddress: chainAddress,
-				}),
-			),
-		)
+		const currencyAmounts = await this.getBalancesUseCase.execute({
+			telegramId,
+			currencyChainAddresses: query.chainAddress,
+		})
 
 		return toGetBalancesResponseDto(currencyAmounts)
 	}

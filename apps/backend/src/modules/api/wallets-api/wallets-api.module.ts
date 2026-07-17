@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { CurrencyModule } from '../../../infrastructure/currency/currency.module'
 import { WalletsController } from '../../../presentation/wallets/wallets.controller'
-import { GetBalanceModule } from '../../use-cases/get-balance.module'
+import { GetBalancesModule } from '../../use-cases/get-balances.module'
 import { GetSwapResultModule } from '../../use-cases/get-swap-result.module'
 import { QuoteSwapSamechainModule } from '../../use-cases/quote-swap-samechain.module'
 import { QuoteSwapModule } from '../../use-cases/quote-swap.module'
@@ -12,7 +12,7 @@ import { WithdrawModule } from '../../use-cases/withdraw.module'
 
 @Module({
 	imports: [
-		GetBalanceModule,
+		GetBalancesModule,
 		WithdrawModule,
 		QuoteWithdrawModule,
 		QuoteSwapModule,

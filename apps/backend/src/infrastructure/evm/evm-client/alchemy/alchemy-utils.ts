@@ -19,3 +19,13 @@ export function getAlchemyRpcUrl(chainId: number) {
 
 	return `https://${chainKey}.g.alchemy.com/v2/${apiKey}` as const
 }
+
+export function getAlchemyPortfolioUrl() {
+	const apiKey = getAlchemyApiKey()
+
+	return `https://api.g.alchemy.com/data/v1/${apiKey}/assets/tokens/by-address` as const
+}
+
+export function getAlchemyNetwork(chainId: number): string | undefined {
+	return CHAIN_ID_TO_CHAIN_KEY[chainId]
+}
