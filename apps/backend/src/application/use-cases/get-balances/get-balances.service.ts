@@ -92,11 +92,7 @@ export class GetBalancesService extends GetBalancesUseCase {
 		const chainBalances = balancesByChainId.get(chainId) ?? []
 		const match = this.matchBalance(currency, chainBalances)
 
-		if (match === undefined) {
-			return this.fallbackAmount(wallet, currency)
-		}
-
-		return { currency, amount: match.balance }
+		return { currency, amount: match?.balance ?? 0n }
 	}
 
 	private matchBalance(
