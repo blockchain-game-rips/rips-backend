@@ -8,6 +8,7 @@ import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { NATIVE_ADDRESS } from '../evm/primitives/currencies/constants'
 import { chainIdToGeckoChainId } from './constants'
 import { GeckoTerminalService } from './gecko-terminal.service'
+import { loadPriceSeed } from './price-seed'
 
 const PriceProviderError = createCustomError('PriceProviderError')
 
@@ -30,8 +31,28 @@ export class PriceProviderService
 		super()
 	}
 
-	onModuleInit() {
+	async onModuleInit() {
+		await this.loadSeed()
+
 		this.scheduleRefresh()
+	}
+
+	private async loadSeed(): Promise<void> {
+		const seed = loadPriceSeed(this.logger)
+
+		for (const [currencyId, price] of seed) {
+			try {
+				const currency = await this.currencyService.fromId(currencyId)
+				const cacheKey = await this.getLookupId(currency)
+
+				this.priceCache.set(cacheKey, price)
+				this.trackedCurrencies.set(cacheKey, currency)
+			} catch (error) {
+				this.logger.warn(
+					`Skipping seeded currency ${currencyId}: ${String(error)}`,
+				)
+			}
+		}
 	}
 
 	private scheduleRefresh() {
@@ -46,19 +67,38 @@ export class PriceProviderService
 
 	async getPrice(currency: Currency): Promise<number> {
 		const prices = await this.getPrices([currency])
-		return prices.get(currency.id)!
+
+		const price = prices.get(currency.id)
+
+		if (price === undefined) {
+			throw new PriceProviderError(
+				`Price not found for currency: ${currency.id}`,
+			)
+		}
+
+		return price
 	}
 
 	async getPrices(currencies: Currency[]): Promise<Map<CurrencyId, number>> {
-		const missing = currencies.filter((c) => !this.priceCache.has(c.id))
+		const cacheKeys = await Promise.all(
+			currencies.map((c) => this.getLookupId(c)),
+		)
+
+		const missing = currencies.filter(
+			(_, i) => !this.priceCache.has(cacheKeys[i]),
+		)
 
 		if (missing.length > 0) {
-			await this.fetchAndCache(currencies)
+			await this.fetchAndCache(missing)
 		}
 
 		const result = new Map<CurrencyId, number>()
-		for (const currency of currencies) {
-			result.set(currency.id, this.priceCache.get(currency.id)!)
+		for (let i = 0; i < currencies.length; i++) {
+			const price = this.priceCache.get(cacheKeys[i])
+
+			if (price !== undefined) {
+				result.set(currencies[i].id, price)
+			}
 		}
 		return result
 	}
@@ -86,6 +126,7 @@ export class PriceProviderService
 
 			for (let j = 0; j < chainCurrencies.length; j++) {
 				const currency = chainCurrencies[j]
+				const cacheKey = lookupIds[j]
 				const address = addresses[j]
 
 				const found = addressesAndPrices.find(
@@ -98,8 +139,8 @@ export class PriceProviderService
 					)
 				}
 
-				this.priceCache.set(currency.id, found.price)
-				this.trackedCurrencies.set(currency.id, currency)
+				this.priceCache.set(cacheKey, found.price)
+				this.trackedCurrencies.set(cacheKey, currency)
 			}
 		}
 	}
