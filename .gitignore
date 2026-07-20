@@ -65,8 +65,10 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Claude
-CLAUDE.md
 .claude/
+
+# Issue tracker (local markdown)
+.scratch/
 
 # Yarn Berry (node-modules linker)
 .yarn/*
