@@ -6,7 +6,11 @@
         "deleteOutDir": true,
         "assets": [
             { "include": "../generated/prisma/**/*", "outDir": "./dist/generated" },
-            { "include": "../generated/prisma-indexer/**/*", "outDir": "./dist/generated" }
+            { "include": "../generated/prisma-indexer/**/*", "outDir": "./dist/generated" },
+            {
+                "include": "infrastructure/price-provider/price-cache.seed.json",
+                "outDir": "./dist/src"
+            }
         ]
     }
 }
