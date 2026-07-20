@@ -1,7 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common'
 import { PriceProvider } from '../../application/interfaces/price-service'
 import { CurrencyId } from '../../domain/value-objects/currency-id'
-import { EvmModule } from '../evm/evm.module'
+import { EvmCurrencyReadModule } from '../evm/evm-currency-read.module'
 import { GeckoTerminalService } from './gecko-terminal.service'
 import {
 	PriceProviderWarmupService,
@@ -15,7 +15,7 @@ export class PriceOracleModule {
 		return {
 			module: PriceOracleModule,
 			global: true,
-			imports: [EvmModule],
+			imports: [EvmCurrencyReadModule],
 			providers: [
 				GeckoTerminalService,
 				{ provide: PriceProvider, useClass: PriceProviderService },

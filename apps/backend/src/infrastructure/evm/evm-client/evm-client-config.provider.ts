@@ -47,8 +47,8 @@ function transformCustomChains(customChains: CustomChain[]): Chain[] {
 
 export const evmClientConfigProvider = {
 	provide: EVM_CLIENT_CONFIG,
-	useFactory: (configService: ConfigService): ResolvedEvmClientConfig => {
-		const config = configService.get<ChainClientConfig>(
+	useFactory: (configService?: ConfigService): ResolvedEvmClientConfig => {
+		const config = configService?.get<ChainClientConfig>(
 			CHAIN_CLIENT_CONFIG_KEY,
 		)
 
@@ -61,5 +61,5 @@ export const evmClientConfigProvider = {
 				: undefined,
 		}
 	},
-	inject: [ConfigService],
+	inject: [{ token: ConfigService, optional: true }],
 }
