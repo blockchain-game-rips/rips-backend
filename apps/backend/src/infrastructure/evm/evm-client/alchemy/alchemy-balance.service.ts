@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { Address, getAddress, hexToBigInt, isHex } from 'viem'
+import { Address, getAddress, hexToBigInt, isAddressEqual, isHex } from 'viem'
 import { z } from 'zod'
+import { Currency } from '../../../../domain/entities/currency'
+import { CurrencyId } from '../../../../domain/value-objects/currency-id'
+import { NATIVE_ADDRESS } from '../../primitives/currencies/constants'
 import { getAlchemyNetwork, getAlchemyPortfolioUrl } from './alchemy-utils'
 
 const REQUEST_TIMEOUT_MS = 8_000
@@ -13,6 +16,11 @@ export type AlchemyRawBalance = {
 export type AlchemyBalancesResult = {
 	balancesByChainId: Map<number, AlchemyRawBalance[]>
 	unsupportedChainIds: Set<number>
+}
+
+export type AlchemyCurrencyBalances = {
+	balances: Map<CurrencyId, bigint>
+	uncoveredCurrencies: Currency[]
 }
 
 const alchemyResponseSchema = z.object({
@@ -69,6 +77,58 @@ export class AlchemyBalanceService {
 
 			return { balancesByChainId: new Map(), unsupportedChainIds }
 		}
+	}
+
+	async balancesFor(
+		address: Address,
+		currencies: Currency[],
+	): Promise<AlchemyCurrencyBalances> {
+		const chainIds = [
+			...new Set(
+				currencies.map((currency) =>
+					Number(currency.chainAddress.chain.reference),
+				),
+			),
+		].sort((a, b) => a - b)
+
+		const { balancesByChainId, unsupportedChainIds } =
+			await this.fetchBalances(address, chainIds)
+
+		const balances = new Map<CurrencyId, bigint>()
+		const uncoveredCurrencies: Currency[] = []
+
+		for (const currency of currencies) {
+			const chainId = Number(currency.chainAddress.chain.reference)
+
+			if (unsupportedChainIds.has(chainId)) {
+				uncoveredCurrencies.push(currency)
+				continue
+			}
+
+			const chainBalances = balancesByChainId.get(chainId) ?? []
+			const match = this.matchBalance(currency, chainBalances)
+
+			balances.set(currency.id, match?.balance ?? 0n)
+		}
+
+		return { balances, uncoveredCurrencies }
+	}
+
+	private matchBalance(
+		currency: Currency,
+		balances: AlchemyRawBalance[],
+	): AlchemyRawBalance | undefined {
+		const currencyAddress = getAddress(currency.chainAddress.address)
+		const isNative = isAddressEqual(currencyAddress, NATIVE_ADDRESS)
+
+		return balances.find((balance) => {
+			if (isNative) return balance.tokenAddress === null
+
+			return (
+				balance.tokenAddress !== null &&
+				isAddressEqual(balance.tokenAddress, currencyAddress)
+			)
+		})
 	}
 
 	private resolveNetworks(chainIds: number[]): {

@@ -17,9 +17,16 @@ export const CardConfigSchema = z.object({
 
 export type CardConfig = z.infer<typeof CardConfigSchema>
 
+export const USE_ALCHEMY_BALANCES_KEY = 'useAlchemyBalances'
+
+export const DEFAULT_USE_ALCHEMY_BALANCES = true
+
 export const ConfigSchema = z.object({
 	[CHAIN_CLIENT_CONFIG_KEY]: ChainClientConfigSchema,
 	[CARD_CONFIG_KEY]: CardConfigSchema,
+	[USE_ALCHEMY_BALANCES_KEY]: z
+		.boolean()
+		.default(DEFAULT_USE_ALCHEMY_BALANCES),
 })
 
 export function loadConfig() {

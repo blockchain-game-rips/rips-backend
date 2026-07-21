@@ -29,6 +29,7 @@ export function makeMockUserRepository(): jest.Mocked<UserRepository> {
 export function makeMockWalletReadService(): jest.Mocked<WalletReadService> {
 	return {
 		balanceOf: jest.fn(),
+		balancesOf: jest.fn(),
 	}
 }
 
