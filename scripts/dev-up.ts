@@ -247,6 +247,7 @@ async function seedCards(app: AppContext): Promise<void> {
 
 function writeConfigFile(rpcUrl: string): void {
 	const config = [
+		'useAlchemyBalances: false',
 		'chainClientConfig:',
 		'  rpcSettings:',
 		`    "${BASE_CHAIN_ID}":`,
