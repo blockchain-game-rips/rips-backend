@@ -1,33 +1,21 @@
 import { Injectable } from '@nestjs/common'
-import { WalletService } from '../../application/interfaces/wallet.service'
+import { WalletWriteService } from '../../application/interfaces/wallet-write.service'
 import { Currency } from '../../domain/entities/currency'
-import { evmAddressFromWallet } from '../../domain/services/evm'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import {
 	Transaction,
 	TransactionQuote,
 } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
-import { EvmCurrencyReadService } from '../evm/evm-currency-read.service'
 import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
 
 @Injectable()
-export class WalletServiceImpl extends WalletService {
+export class WalletWriteServiceImpl extends WalletWriteService {
 	constructor(
-		private readonly evmCurrencyReadService: EvmCurrencyReadService,
 		private readonly evmCurrencyWriteService: EvmCurrencyWriteService,
 	) {
 		super()
-	}
-
-	balanceOf(wallet: Wallet, currency: Currency): Promise<bigint> {
-		if (currency instanceof EvmCurrency) {
-			const userAddress = evmAddressFromWallet(wallet)
-			return this.evmCurrencyReadService.balanceOf(currency, userAddress)
-		}
-
-		throw new Error(`Unsupported currency: ${currency.id}`)
 	}
 
 	transfer(

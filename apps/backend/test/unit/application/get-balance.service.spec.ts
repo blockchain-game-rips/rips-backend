@@ -11,12 +11,12 @@ import {
 } from '../../fixtures/entities'
 import {
 	makeMockGetUserUseCase,
-	makeMockWalletService,
+	makeMockWalletReadService,
 } from '../../mocks/use-cases'
 
 describe('GetBalanceService', () => {
 	const getUserUseCase = makeMockGetUserUseCase()
-	const walletService = makeMockWalletService()
+	const walletReadService = makeMockWalletReadService()
 	const currencyService: jest.Mocked<CurrencyService> = {
 		fromAccount: jest.fn(),
 	}
@@ -26,7 +26,7 @@ describe('GetBalanceService', () => {
 	} as never
 	const service = new GetBalanceService(
 		getUserUseCase,
-		walletService,
+		walletReadService,
 		currencyService,
 		cacheManager,
 	)
@@ -39,7 +39,7 @@ describe('GetBalanceService', () => {
 		const balance = 1000000000000000000n
 
 		getUserUseCase.execute.mockResolvedValue(MOCK_USER)
-		walletService.balanceOf.mockResolvedValue(balance)
+		walletReadService.balanceOf.mockResolvedValue(balance)
 		currencyService.fromAccount.mockResolvedValue(MOCK_CURRENCY)
 
 		const result: CurrencyAmount = await service.execute({
@@ -48,7 +48,7 @@ describe('GetBalanceService', () => {
 		})
 
 		expect(result).toEqual({ currency: MOCK_CURRENCY, amount: balance })
-		expect(walletService.balanceOf).toHaveBeenCalledWith(
+		expect(walletReadService.balanceOf).toHaveBeenCalledWith(
 			MOCK_WALLET,
 			MOCK_CURRENCY,
 		)

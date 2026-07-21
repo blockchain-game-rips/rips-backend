@@ -6,9 +6,7 @@ import {
 } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 
-export abstract class WalletService {
-	abstract balanceOf(wallet: Wallet, currency: Currency): Promise<bigint>
-
+export abstract class WalletWriteService {
 	abstract transfer(
 		wallet: Wallet,
 		args: {

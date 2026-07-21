@@ -12,7 +12,7 @@ import {
 } from '../../../infrastructure/evm/evm-client/alchemy/alchemy-balance.service'
 import { NATIVE_ADDRESS } from '../../../infrastructure/evm/primitives/currencies/constants'
 import { CurrencyService } from '../../interfaces/currency.service'
-import { WalletService } from '../../interfaces/wallet.service'
+import { WalletReadService } from '../../interfaces/wallet-read.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import { GetBalancesInput, GetBalancesUseCase } from './get-balances.use-case'
 
@@ -22,7 +22,7 @@ const BALANCES_TTL_MS = 5000
 export class GetBalancesService extends GetBalancesUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
-		private readonly walletService: WalletService,
+		private readonly walletReadService: WalletReadService,
 		private readonly currencyService: CurrencyService,
 		private readonly alchemyBalanceService: AlchemyBalanceService,
 		@Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
@@ -116,7 +116,7 @@ export class GetBalancesService extends GetBalancesUseCase {
 		wallet: Wallet,
 		currency: Currency,
 	): Promise<CurrencyAmount> {
-		const amount = await this.walletService.balanceOf(wallet, currency)
+		const amount = await this.walletReadService.balanceOf(wallet, currency)
 
 		return { currency, amount }
 	}

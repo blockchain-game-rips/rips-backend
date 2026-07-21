@@ -1,7 +1,8 @@
 import { CurrencyService } from '../../src/application/interfaces/currency.service'
 import { EncryptionService } from '../../src/application/interfaces/encryption.service'
 import { UserRepository } from '../../src/application/interfaces/repositories/user.repository'
-import { WalletService } from '../../src/application/interfaces/wallet.service'
+import { WalletReadService } from '../../src/application/interfaces/wallet-read.service'
+import { WalletWriteService } from '../../src/application/interfaces/wallet-write.service'
 import { BuyEntriesPurchaseUseCase } from '../../src/application/use-cases/buy-entries-purchase/buy-entries-purchase.use-case'
 import { BuyEntriesZapUseCase } from '../../src/application/use-cases/buy-entries-zap/buy-entries-zap.use-case'
 import { CreateUserUseCase } from '../../src/application/use-cases/create-user/create-user.use-case'
@@ -25,9 +26,14 @@ export function makeMockUserRepository(): jest.Mocked<UserRepository> {
 	}
 }
 
-export function makeMockWalletService(): jest.Mocked<WalletService> {
+export function makeMockWalletReadService(): jest.Mocked<WalletReadService> {
 	return {
 		balanceOf: jest.fn(),
+	}
+}
+
+export function makeMockWalletWriteService(): jest.Mocked<WalletWriteService> {
+	return {
 		transfer: jest.fn(),
 		quoteTransfer: jest.fn(),
 	}

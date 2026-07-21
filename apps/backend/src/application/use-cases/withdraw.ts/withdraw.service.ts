@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { CurrenciesMismatchError } from '../../../domain/errors/currencies-mismatch.error'
 import { InsufficientBalanceError } from '../../../domain/errors/insufficient-balance.error'
 import { Transaction } from '../../../domain/value-objects/transaction'
-import { WalletService } from '../../interfaces/wallet.service'
+import { WalletReadService } from '../../interfaces/wallet-read.service'
+import { WalletWriteService } from '../../interfaces/wallet-write.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import { WithdrawInput, WithdrawUseCase } from './withdraw.use-case'
 
@@ -10,7 +11,8 @@ import { WithdrawInput, WithdrawUseCase } from './withdraw.use-case'
 export class WithdrawService implements WithdrawUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
-		private readonly walletService: WalletService,
+		private readonly walletReadService: WalletReadService,
+		private readonly walletWriteService: WalletWriteService,
 	) {}
 
 	async execute(input: WithdrawInput): Promise<Transaction> {
@@ -24,7 +26,7 @@ export class WithdrawService implements WithdrawUseCase {
 
 		const user = await this.getUserUseCase.execute({ telegramId })
 
-		const userBalance = await this.walletService.balanceOf(
+		const userBalance = await this.walletReadService.balanceOf(
 			user.wallet,
 			amountIn.currency,
 		)
@@ -40,7 +42,7 @@ export class WithdrawService implements WithdrawUseCase {
 			address: recipientAddress,
 		}
 
-		return this.walletService.transfer(user.wallet, {
+		return this.walletWriteService.transfer(user.wallet, {
 			currency: amountIn.currency,
 			to: recipient,
 			amount: amountIn.amount,

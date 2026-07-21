@@ -5,7 +5,7 @@ import { AdminWalletNotFoundError } from '../../../domain/errors/admin-wallet-no
 import { CurrencyAmount } from '../../../domain/value-objects/currency-amount'
 import { CurrencyService } from '../../interfaces/currency.service'
 import { AdminWalletRepository } from '../../interfaces/repositories/admin-wallet.repository'
-import { WalletService } from '../../interfaces/wallet.service'
+import { WalletReadService } from '../../interfaces/wallet-read.service'
 import {
 	GetAdminWalletResult,
 	GetAdminWalletUseCase,
@@ -24,7 +24,7 @@ export class GetAdminWalletService extends GetAdminWalletUseCase {
 	constructor(
 		private readonly adminWalletRepository: AdminWalletRepository,
 		private readonly currencyService: CurrencyService,
-		private readonly walletService: WalletService,
+		private readonly walletReadService: WalletReadService,
 	) {
 		super()
 	}
@@ -39,7 +39,7 @@ export class GetAdminWalletService extends GetAdminWalletUseCase {
 		const currency = await this.currencyService.fromAccount(
 			BASE_ETH_CHAIN_ADDRESS,
 		)
-		const amount = await this.walletService.balanceOf(wallet, currency)
+		const amount = await this.walletReadService.balanceOf(wallet, currency)
 		const balance: CurrencyAmount = { currency, amount }
 
 		return { wallet, balance }

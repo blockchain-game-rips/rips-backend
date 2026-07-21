@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { CurrenciesMismatchError } from '../../../domain/errors/currencies-mismatch.error'
 import { TransactionQuote } from '../../../domain/value-objects/transaction'
-import { WalletService } from '../../interfaces/wallet.service'
+import { WalletWriteService } from '../../interfaces/wallet-write.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import {
 	QuoteWithdrawInput,
@@ -12,7 +12,7 @@ import {
 export class QuoteWithdrawService extends QuoteWithdrawUseCase {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
-		private readonly walletService: WalletService,
+		private readonly walletWriteService: WalletWriteService,
 	) {
 		super()
 	}
@@ -33,7 +33,7 @@ export class QuoteWithdrawService extends QuoteWithdrawUseCase {
 			address: recipientAddress,
 		}
 
-		return this.walletService.quoteTransfer(user.wallet, {
+		return this.walletWriteService.quoteTransfer(user.wallet, {
 			currency: amountIn.currency,
 			to: recipient,
 			amount: amountIn.amount,
