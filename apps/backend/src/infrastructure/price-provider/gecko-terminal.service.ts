@@ -3,7 +3,7 @@ import ky, { HTTPError } from 'ky'
 import { Address } from 'viem'
 import { geckoTerminalChains } from './constants'
 
-interface GeckoTerminalTokenData {
+export interface GeckoTerminalTokenData {
 	id: string
 	type: string
 	attributes: {
@@ -61,10 +61,10 @@ export class GeckoTerminalService {
 		return Number(tokenData.attributes.price_usd)
 	}
 
-	async getTokenPrices(
+	async getTokensData(
 		addresses: string[],
 		network: string,
-	): Promise<{ address: string; price: number }[]> {
+	): Promise<GeckoTerminalTokenData[]> {
 		this.validateChain(network)
 
 		const allTokens: GeckoTerminalTokenData[] = []
@@ -80,7 +80,16 @@ export class GeckoTerminalService {
 			allTokens.push(...data)
 		}
 
-		return allTokens.map((token) => ({
+		return allTokens
+	}
+
+	async getTokenPrices(
+		addresses: string[],
+		network: string,
+	): Promise<{ address: string; price: number }[]> {
+		const tokens = await this.getTokensData(addresses, network)
+
+		return tokens.map((token) => ({
 			address: token.attributes.address,
 			price: Number(token.attributes.price_usd),
 		}))

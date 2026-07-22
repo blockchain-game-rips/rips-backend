@@ -1,14 +1,21 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { PriceProvider } from '../../application/interfaces/price-service'
 import { Currency } from '../../domain/entities/currency'
-import { parseCurrencyId } from '../../domain/services/currency-id-utils'
+import { composeChainId } from '../../domain/services/chain-id-utils'
+import {
+	composeCurrencyId,
+	parseCurrencyId,
+} from '../../domain/services/currency-id-utils'
+import { toChainNamespace } from '../../domain/value-objects/chain-namespace'
 import { CurrencyId } from '../../domain/value-objects/currency-id'
 import { createCustomError, wait } from '../../utils/common'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
-import { NATIVE_ADDRESS } from '../evm/primitives/currencies/constants'
-import { chainIdToGeckoChainId } from './constants'
+import {
+	TOKEN_PRICE_SEED_SOURCE,
+	TokenPriceSeedSource,
+} from '../token-registry/token-registry.interfaces'
 import { GeckoTerminalService } from './gecko-terminal.service'
-import { loadPriceSeed } from './price-seed'
+import { geckoNetworkOf, priceableAddress } from './token-fetcher'
 
 const PriceProviderError = createCustomError('PriceProviderError')
 
@@ -27,6 +34,8 @@ export class PriceProviderService
 	constructor(
 		readonly currencyService: EvmCurrencyService,
 		readonly geckoTerminalService: GeckoTerminalService,
+		@Inject(TOKEN_PRICE_SEED_SOURCE)
+		private readonly priceSeedSource: TokenPriceSeedSource,
 	) {
 		super()
 	}
@@ -38,12 +47,12 @@ export class PriceProviderService
 	}
 
 	private async loadSeed(): Promise<void> {
-		const seed = loadPriceSeed(this.logger)
+		const seed = this.priceSeedSource.seedPrices()
 
 		for (const [currencyId, price] of seed) {
 			try {
 				const currency = await this.currencyService.fromId(currencyId)
-				const cacheKey = await this.getLookupId(currency)
+				const cacheKey = this.getLookupId(currency)
 
 				this.priceCache.set(cacheKey, price)
 				this.trackedCurrencies.set(cacheKey, currency)
@@ -80,9 +89,7 @@ export class PriceProviderService
 	}
 
 	async getPrices(currencies: Currency[]): Promise<Map<CurrencyId, number>> {
-		const cacheKeys = await Promise.all(
-			currencies.map((c) => this.getLookupId(c)),
-		)
+		const cacheKeys = currencies.map((c) => this.getLookupId(c))
 
 		const missing = currencies.filter(
 			(_, i) => !this.priceCache.has(cacheKeys[i]),
@@ -104,16 +111,14 @@ export class PriceProviderService
 	}
 
 	private async fetchAndCache(currencies: Currency[]): Promise<void> {
-		const byChain = await this.groupByGeckoChain(currencies)
+		const byChain = this.groupByGeckoChain(currencies)
 		const chains = Array.from(byChain.entries())
 
 		for (let i = 0; i < chains.length; i++) {
 			if (i > 0) await wait(INTER_CHAIN_REQUEST_DELAY_MS)
 
 			const [geckoChainId, chainCurrencies] = chains[i]
-			const lookupIds = await Promise.all(
-				chainCurrencies.map((c) => this.getLookupId(c)),
-			)
+			const lookupIds = chainCurrencies.map((c) => this.getLookupId(c))
 			const addresses = lookupIds.map(
 				(id) => this.parseLookupId(id).address,
 			)
@@ -153,19 +158,19 @@ export class PriceProviderService
 		await this.fetchAndCache(currencies)
 	}
 
-	private async getLookupId(currency: Currency): Promise<CurrencyId> {
+	private getLookupId(currency: Currency): CurrencyId {
 		const { address, chainId: caip2ChainId } = parseCurrencyId(currency.id)
 
-		if (address.toLowerCase() === NATIVE_ADDRESS.toLowerCase()) {
-			const numericChainId = Number(caip2ChainId.split(':')[1])
+		const numericChainId = Number(caip2ChainId.split(':')[1])
+		const wrappedAddress = priceableAddress(numericChainId, address)
 
-			const wrapped =
-				await this.currencyService.getWrappedNative(numericChainId)
-
-			return wrapped.id
-		}
-
-		return currency.id
+		return composeCurrencyId(
+			composeChainId(
+				toChainNamespace(caip2ChainId.split(':')[0]),
+				caip2ChainId.split(':')[1],
+			),
+			wrappedAddress,
+		)
 	}
 
 	private parseLookupId(id: CurrencyId): {
@@ -176,37 +181,21 @@ export class PriceProviderService
 
 		const numericChainId = Number(caip2ChainId.split(':')[1])
 
-		const geckoChainId = this.getGeckoChainId(numericChainId)
-
-		return { address, geckoChainId }
+		return { address, geckoChainId: geckoNetworkOf(numericChainId) }
 	}
 
-	private async groupByGeckoChain(
-		currencies: Currency[],
-	): Promise<Map<string, Currency[]>> {
+	private groupByGeckoChain(currencies: Currency[]): Map<string, Currency[]> {
 		const byChain = new Map<string, Currency[]>()
 
 		for (const currency of currencies) {
-			const lookupId = await this.getLookupId(currency)
+			const lookupId = this.getLookupId(currency)
 			const { geckoChainId } = this.parseLookupId(lookupId)
 
-			if (!byChain.has(geckoChainId)) byChain.set(geckoChainId, [])
-			byChain.get(geckoChainId)!.push(currency)
+			const group = byChain.get(geckoChainId) ?? []
+			group.push(currency)
+			byChain.set(geckoChainId, group)
 		}
 
 		return byChain
-	}
-
-	private getGeckoChainId(chainId: number): string {
-		const key = String(chainId) as keyof typeof chainIdToGeckoChainId
-		const geckoId = chainIdToGeckoChainId[key]
-
-		if (!geckoId) {
-			throw new PriceProviderError(
-				`Unsupported chainId for PriceProvider: ${chainId}`,
-			)
-		}
-
-		return geckoId
 	}
 }

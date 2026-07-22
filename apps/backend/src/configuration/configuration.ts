@@ -21,12 +21,27 @@ export const USE_ALCHEMY_BALANCES_KEY = 'useAlchemyBalances'
 
 export const DEFAULT_USE_ALCHEMY_BALANCES = true
 
+export const SUPPORTED_TOKENS_KEY = 'supportedTokens'
+
+const supportedTokenSchema = z.object({
+	chain: z.object({
+		namespace: z.string(),
+		reference: z.string(),
+	}),
+	address: z.string(),
+})
+
+export const SupportedTokensSchema = z.array(supportedTokenSchema).default([])
+
+export type SupportedTokensConfig = z.infer<typeof SupportedTokensSchema>
+
 export const ConfigSchema = z.object({
 	[CHAIN_CLIENT_CONFIG_KEY]: ChainClientConfigSchema,
 	[CARD_CONFIG_KEY]: CardConfigSchema,
 	[USE_ALCHEMY_BALANCES_KEY]: z
 		.boolean()
 		.default(DEFAULT_USE_ALCHEMY_BALANCES),
+	[SUPPORTED_TOKENS_KEY]: SupportedTokensSchema,
 })
 
 export function loadConfig() {

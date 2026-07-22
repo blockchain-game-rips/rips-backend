@@ -1,0 +1,78 @@
+import fs from 'fs'
+import path from 'path'
+import z from 'zod'
+import { ChainAddress } from '../src/domain/value-objects/chain-address'
+import { toChainNamespace } from '../src/domain/value-objects/chain-namespace'
+import { GeckoTerminalService } from '../src/infrastructure/price-provider/gecko-terminal.service'
+import { fetchTokensData } from '../src/infrastructure/price-provider/token-fetcher'
+import { EnrichedToken } from '../src/infrastructure/token-registry/enriched-token'
+
+/**
+ * raw-input.json -> enriched-output.json
+ *
+ * Standalone: no Nest, no registry, no EvmCurrencyService. Fetches metadata and
+ * price for each raw token via gecko. Loud all-or-nothing — any failure aborts
+ * the whole run, leaving the last committed artifact untouched.
+ */
+
+const REGISTRY_DIR = path.join(
+	__dirname,
+	'../src/infrastructure/token-registry',
+)
+const RAW_INPUT_PATH = path.join(REGISTRY_DIR, 'raw-input.json')
+const ENRICHED_OUTPUT_PATH = path.join(REGISTRY_DIR, 'enriched-registry.json')
+
+const rawInputSchema = z.array(
+	z.object({
+		chain: z.object({
+			namespace: z.string(),
+			reference: z.string(),
+		}),
+		address: z.string(),
+	}),
+)
+
+function loadRawInput(): ChainAddress[] {
+	const raw: unknown = JSON.parse(fs.readFileSync(RAW_INPUT_PATH, 'utf-8'))
+
+	return rawInputSchema.parse(raw).map((entry) => ({
+		chain: {
+			namespace: toChainNamespace(entry.chain.namespace),
+			reference: entry.chain.reference,
+		},
+		address: entry.address,
+	}))
+}
+
+async function main() {
+	const gecko = new GeckoTerminalService()
+	const rawTokens = loadRawInput()
+
+	const dataByToken = await fetchTokensData(gecko, rawTokens)
+
+	const enriched: EnrichedToken[] = rawTokens.map((chainAddress) => {
+		const data = dataByToken.get(chainAddress)
+
+		if (!data) {
+			throw new Error(
+				`No enriched data for ${chainAddress.chain.reference}:${chainAddress.address}`,
+			)
+		}
+
+		return {
+			chain: chainAddress.chain,
+			address: chainAddress.address,
+			metadata: data.metadata,
+			lastKnownPrice: data.price,
+		}
+	})
+
+	fs.writeFileSync(
+		ENRICHED_OUTPUT_PATH,
+		`${JSON.stringify(enriched, null, '\t')}\n`,
+	)
+
+	console.log(`Enriched ${enriched.length} tokens -> ${ENRICHED_OUTPUT_PATH}`)
+}
+
+void main()

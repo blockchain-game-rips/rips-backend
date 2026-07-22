@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import {
 	Address,
 	erc20Abi,
@@ -21,12 +21,13 @@ import {
 	CurrencyId,
 	tokenIdSchema,
 } from '../../domain/value-objects/currency-id'
+import {
+	TOKEN_METADATA_SOURCE,
+	TokenMetadataSource,
+} from '../token-registry/token-registry.interfaces'
 import { EvmClientService } from './evm-client/evm-client.service'
 import {
-	ETH_METADATA,
-	KNOWN_TOKENS,
 	NATIVE_ADDRESS,
-	NATIVE_CURRENCIES,
 	WRAPPED_TOKENS,
 } from './primitives/currencies/constants'
 import { EvmCurrency } from './primitives/currencies/evm-currency'
@@ -36,7 +37,11 @@ import { WrappedNative } from './primitives/currencies/wrapped-native'
 
 @Injectable()
 export class EvmCurrencyService {
-	constructor(private readonly evmClientService: EvmClientService) {}
+	constructor(
+		private readonly evmClientService: EvmClientService,
+		@Inject(TOKEN_METADATA_SOURCE)
+		private readonly metadataSource: TokenMetadataSource,
+	) {}
 
 	/* ======== STATE ======== */
 
@@ -75,7 +80,7 @@ export class EvmCurrencyService {
 			checksumAddress,
 		)
 
-		const knownMetadata = KNOWN_TOKENS.get(currencyId)
+		const knownMetadata = this.metadataSource.metadataOf(currencyId)
 
 		const metadata =
 			knownMetadata ??
@@ -89,10 +94,16 @@ export class EvmCurrencyService {
 	}
 
 	getNative(chainId: number): NativeCurrency {
-		const currency = new NativeCurrency(
-			chainId,
-			NATIVE_CURRENCIES[chainId] ?? ETH_METADATA,
-		)
+		const { nativeCurrency } = this.evmClientService.getChain(chainId)
+
+		const metadata: CurrencyMetadata = {
+			symbol: nativeCurrency.symbol,
+			name: nativeCurrency.name,
+			decimals: nativeCurrency.decimals,
+		}
+
+		const currency = new NativeCurrency(chainId, metadata)
+
 		return this.getOrCache(currency)
 	}
 

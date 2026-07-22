@@ -1,0 +1,444 @@
+[
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "1"
+		},
+		"address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+		"metadata": {
+			"symbol": "WBTC",
+			"name": "Wrapped BTC",
+			"decimals": 8
+		},
+		"lastKnownPrice": 65489.1922656772
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "1"
+		},
+		"address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+		"metadata": {
+			"symbol": "WETH",
+			"name": "Wrapped Ether",
+			"decimals": 18
+		},
+		"lastKnownPrice": 1919.19
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "1"
+		},
+		"address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+		"metadata": {
+			"symbol": "USDC",
+			"name": "USD Coin",
+			"decimals": 6
+		},
+		"lastKnownPrice": 1.0005051373
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "1"
+		},
+		"address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+		"metadata": {
+			"symbol": "USDT",
+			"name": "Tether USD",
+			"decimals": 6
+		},
+		"lastKnownPrice": 1.0008359781
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "56"
+		},
+		"address": "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
+		"metadata": {
+			"symbol": "WBTC",
+			"name": "Wrapped BTC",
+			"decimals": 8
+		},
+		"lastKnownPrice": 65683.2637022291
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "56"
+		},
+		"address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+		"metadata": {
+			"symbol": "WBNB",
+			"name": "Wrapped BNB",
+			"decimals": 18
+		},
+		"lastKnownPrice": 570.06
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "56"
+		},
+		"address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+		"metadata": {
+			"symbol": "USDC",
+			"name": "USD Coin",
+			"decimals": 18
+		},
+		"lastKnownPrice": 0.9997278167
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "56"
+		},
+		"address": "0x55d398326f99059fF775485246999027B3197955",
+		"metadata": {
+			"symbol": "USDT",
+			"name": "Tether USD",
+			"decimals": 18
+		},
+		"lastKnownPrice": 1.0007558297
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "137"
+		},
+		"address": "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
+		"metadata": {
+			"symbol": "WBTC",
+			"name": "(PoS) Wrapped BTC",
+			"decimals": 8
+		},
+		"lastKnownPrice": 65599.5711203011
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "137"
+		},
+		"address": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+		"metadata": {
+			"symbol": "WPOL",
+			"name": "Wrapped POL",
+			"decimals": 18
+		},
+		"lastKnownPrice": 0.07945932804
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "137"
+		},
+		"address": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+		"metadata": {
+			"symbol": "USDC",
+			"name": "USD Coin",
+			"decimals": 6
+		},
+		"lastKnownPrice": 1.0006389661
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "137"
+		},
+		"address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+		"metadata": {
+			"symbol": "USDT",
+			"name": "(PoS) Tether USD",
+			"decimals": 6
+		},
+		"lastKnownPrice": 1.0028065591
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "42161"
+		},
+		"address": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+		"metadata": {
+			"symbol": "WBTC",
+			"name": "Wrapped BTC",
+			"decimals": 8
+		},
+		"lastKnownPrice": 65538.0149207718
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "42161"
+		},
+		"address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+		"metadata": {
+			"symbol": "WETH",
+			"name": "Wrapped Ether",
+			"decimals": 18
+		},
+		"lastKnownPrice": 1918.76
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "42161"
+		},
+		"address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+		"metadata": {
+			"symbol": "USDC",
+			"name": "USD Coin",
+			"decimals": 6
+		},
+		"lastKnownPrice": 1.0004588607
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "42161"
+		},
+		"address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+		"metadata": {
+			"symbol": "USDT",
+			"name": "Tether USD",
+			"decimals": 6
+		},
+		"lastKnownPrice": 0.9988587465
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "43114"
+		},
+		"address": "0x50b7545627a5162F82A992c33b87aDc75187B218",
+		"metadata": {
+			"symbol": "WBTC.e",
+			"name": "Wrapped BTC",
+			"decimals": 8
+		},
+		"lastKnownPrice": 65476.7289586087
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "43114"
+		},
+		"address": "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+		"metadata": {
+			"symbol": "WAVAX",
+			"name": "Wrapped AVAX",
+			"decimals": 18
+		},
+		"lastKnownPrice": 6.5
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "43114"
+		},
+		"address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+		"metadata": {
+			"symbol": "USDC",
+			"name": "USD Coin",
+			"decimals": 6
+		},
+		"lastKnownPrice": 0.9990687682
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "43114"
+		},
+		"address": "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+		"metadata": {
+			"symbol": "USDt",
+			"name": "TetherToken",
+			"decimals": 6
+		},
+		"lastKnownPrice": 0.9990318571
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "10"
+		},
+		"address": "0x68f180fcCe6836688e9084f035309E29Bf0A2095",
+		"metadata": {
+			"symbol": "WBTC",
+			"name": "Wrapped BTC",
+			"decimals": 8
+		},
+		"lastKnownPrice": 65451.5614018453
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "10"
+		},
+		"address": "0x4200000000000000000000000000000000000006",
+		"metadata": {
+			"symbol": "WETH",
+			"name": "Wrapped Ether",
+			"decimals": 18
+		},
+		"lastKnownPrice": 1918.76
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "10"
+		},
+		"address": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+		"metadata": {
+			"symbol": "USDC",
+			"name": "USD Coin",
+			"decimals": 6
+		},
+		"lastKnownPrice": 1.0002496949
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "10"
+		},
+		"address": "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
+		"metadata": {
+			"symbol": "USDT",
+			"name": "Tether USD",
+			"decimals": 6
+		},
+		"lastKnownPrice": 0.9999069079
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "8453"
+		},
+		"address": "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
+		"metadata": {
+			"symbol": "WBTC",
+			"name": "Wrapped BTC",
+			"decimals": 8
+		},
+		"lastKnownPrice": 65405.0378385497
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "8453"
+		},
+		"address": "0x4200000000000000000000000000000000000006",
+		"metadata": {
+			"symbol": "WETH",
+			"name": "Wrapped Ether",
+			"decimals": 18
+		},
+		"lastKnownPrice": 1918.72
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "8453"
+		},
+		"address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+		"metadata": {
+			"symbol": "USDC",
+			"name": "USD Coin",
+			"decimals": 6
+		},
+		"lastKnownPrice": 0.9971964014
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "1"
+		},
+		"address": "0x0000000000000000000000000000000000000000",
+		"metadata": {
+			"symbol": "ETH",
+			"name": "Ether",
+			"decimals": 18
+		},
+		"lastKnownPrice": 1919.19
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "10"
+		},
+		"address": "0x0000000000000000000000000000000000000000",
+		"metadata": {
+			"symbol": "ETH",
+			"name": "Ether",
+			"decimals": 18
+		},
+		"lastKnownPrice": 1918.76
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "56"
+		},
+		"address": "0x0000000000000000000000000000000000000000",
+		"metadata": {
+			"symbol": "BNB",
+			"name": "BNB",
+			"decimals": 18
+		},
+		"lastKnownPrice": 570.06
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "137"
+		},
+		"address": "0x0000000000000000000000000000000000000000",
+		"metadata": {
+			"symbol": "POL",
+			"name": "POL",
+			"decimals": 18
+		},
+		"lastKnownPrice": 0.07945932804
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "8453"
+		},
+		"address": "0x0000000000000000000000000000000000000000",
+		"metadata": {
+			"symbol": "ETH",
+			"name": "Ether",
+			"decimals": 18
+		},
+		"lastKnownPrice": 1918.72
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "42161"
+		},
+		"address": "0x0000000000000000000000000000000000000000",
+		"metadata": {
+			"symbol": "ETH",
+			"name": "Ether",
+			"decimals": 18
+		},
+		"lastKnownPrice": 1918.76
+	},
+	{
+		"chain": {
+			"namespace": "eip155",
+			"reference": "43114"
+		},
+		"address": "0x0000000000000000000000000000000000000000",
+		"metadata": {
+			"symbol": "AVAX",
+			"name": "Avalanche",
+			"decimals": 18
+		},
+		"lastKnownPrice": 6.5
+	}
+]
