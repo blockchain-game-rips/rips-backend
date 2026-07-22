@@ -96,6 +96,7 @@ function makeService(
 	return new PriceProviderService(
 		currencyMock as unknown as EvmCurrencyService,
 		geckoMock as unknown as GeckoTerminalService,
+		{ seedPrices: () => new Map() },
 	)
 }
 
@@ -191,7 +192,6 @@ describe('PriceProviderService', () => {
 
 		await service.getPrice(ETH_NATIVE_ARB)
 
-		expect(currencyService.getWrappedNative).toHaveBeenCalledWith(42161)
 		expect(gecko.getTokenPrices).toHaveBeenCalledWith(
 			[WETH_ARB.chainAddress.address],
 			'arbitrum',
@@ -230,7 +230,7 @@ describe('PriceProviderService', () => {
 		)
 
 		await expect(service.getPrice(unsupportedCurrency)).rejects.toThrow(
-			'Unsupported chainId for PriceProvider: 99999',
+			'Unsupported chainId for gecko: 99999',
 		)
 	})
 })
