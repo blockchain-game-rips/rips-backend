@@ -8,7 +8,7 @@
             { "include": "../generated/prisma/**/*", "outDir": "./dist/generated" },
             { "include": "../generated/prisma-indexer/**/*", "outDir": "./dist/generated" },
             {
-                "include": "infrastructure/price-provider/price-cache.seed.json",
+                "include": "infrastructure/token-registry/enriched-registry.json",
                 "outDir": "./dist/src"
             }
         ]

@@ -17,7 +17,7 @@
 		"test:unit": "jest --selectProjects=unit",
 		"executor:ensure": "ts-node -r tsconfig-paths/register scripts/ensure-executors.ts",
 		"cards:seed": "ts-node -r tsconfig-paths/register scripts/seed-card-definitions.ts",
-		"price:snapshot": "ts-node -r tsconfig-paths/register scripts/snapshot-price-seed.ts",
+		"registry:enrich": "ts-node -r tsconfig-paths/register scripts/enrich-token-registry.ts",
 		"admin:ensure": "ts-node scripts/ensure-admin-wallet.ts",
 		"gen-config-schema": "ts-node -r tsconfig-paths/register utils/generate-configuration-schema.ts"
 	},
