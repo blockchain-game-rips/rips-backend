@@ -16,6 +16,7 @@ import {
 import { execSync } from 'child_process'
 import { randomBytes } from 'crypto'
 import { mkdtempSync, readFileSync, writeFileSync } from 'fs'
+import * as yaml from 'js-yaml'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { parseEther, toHex } from 'viem'
@@ -24,6 +25,7 @@ import { AppConfigModule } from '../apps/backend/src/configuration/app-config.mo
 import { Executor } from '../apps/backend/src/domain/entities/executor'
 import { evmAddressFromWallet } from '../apps/backend/src/domain/services/evm'
 import { toPrivateKey } from '../apps/backend/src/domain/value-objects/private-key'
+import { CurrencyRegistryModule } from '../apps/backend/src/infrastructure/currency-registry/currency-registry.module'
 import { KEK_LENGTH } from '../apps/backend/src/infrastructure/encryption/file-encryption.service'
 import { ProvisionModule } from '../apps/backend/src/infrastructure/provision/provision.module'
 import { ProvisionService } from '../apps/backend/src/infrastructure/provision/provision.service'
@@ -34,6 +36,7 @@ import { SeedModule } from '../apps/backend/src/infrastructure/seed/seed.module'
 	imports: [
 		AppConfigModule,
 		CacheModule.register({ isGlobal: true }),
+		CurrencyRegistryModule,
 		ProvisionModule,
 		SeedModule,
 	],
@@ -52,6 +55,26 @@ const CARD_DEFINITIONS_FILE = join(BACKEND_DIR, 'test/fixtures/cards.json')
 const POSTGRES_IMAGE = 'postgres:16'
 
 const BASE_CHAIN_ID = 8453
+const ETHEREUM_CHAIN_ID = 1
+
+const EVM_NAMESPACE = 'eip155'
+const NATIVE_CURRENCY_ADDRESS = '0x0000000000000000000000000000000000000000'
+const ETHEREUM_USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+const ETHEREUM_USDT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+
+const evmCurrency = (reference: number, address: string) => ({
+	chain: { namespace: EVM_NAMESPACE, reference: String(reference) },
+	address,
+})
+
+const SUPPORTED_CURRENCIES = [
+	evmCurrency(ETHEREUM_CHAIN_ID, ETHEREUM_USDC_ADDRESS),
+	evmCurrency(ETHEREUM_CHAIN_ID, ETHEREUM_USDT_ADDRESS),
+	evmCurrency(ETHEREUM_CHAIN_ID, NATIVE_CURRENCY_ADDRESS),
+	evmCurrency(BASE_CHAIN_ID, NATIVE_CURRENCY_ADDRESS),
+]
+
+const PRESET_BIAS = 2
 
 const DEPLOYER_ADDRESS = privateKeyToAddress(ANVIL_ACCOUNT_0_PRIVATE_KEY)
 
@@ -246,22 +269,26 @@ async function seedCards(app: AppContext): Promise<void> {
 }
 
 function writeConfigFile(rpcUrl: string): void {
-	const config = [
-		'useAlchemyBalances: false',
-		'chainClientConfig:',
-		'  rpcSettings:',
-		`    "${BASE_CHAIN_ID}":`,
-		'      rpcUrls:',
-		`        - ${rpcUrl}`,
-		'      disableDefaultRpcUrl: true',
-		'cardConfig:',
-		'  presetsBiases:',
-		'    "1": [2, 2, 2]',
-		'    "2": [2, 2, 2]',
-		'',
-	].join('\n')
+	const config = {
+		useAlchemyBalances: false,
+		chainClientConfig: {
+			rpcSettings: {
+				[BASE_CHAIN_ID]: {
+					rpcUrls: [rpcUrl],
+					disableDefaultRpcUrl: true,
+				},
+			},
+		},
+		cardConfig: {
+			presetsBiases: {
+				'1': [PRESET_BIAS, PRESET_BIAS, PRESET_BIAS],
+				'2': [PRESET_BIAS, PRESET_BIAS, PRESET_BIAS],
+			},
+		},
+		supportedCurrencies: SUPPORTED_CURRENCIES,
+	}
 
-	writeFileSync(DEV_CONFIG_FILE, config, 'utf-8')
+	writeFileSync(DEV_CONFIG_FILE, yaml.dump(config), 'utf-8')
 }
 
 function writeBackendEnv(
