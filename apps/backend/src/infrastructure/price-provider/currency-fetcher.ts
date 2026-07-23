@@ -21,7 +21,7 @@ const INTER_NETWORK_DELAY_MS = 1000 * 12
  * maps — no cache, no seed, no EvmCurrencyService, no Nest.
  */
 
-export interface EnrichedTokenData {
+export interface EnrichedCurrencyData {
 	metadata: CurrencyMetadata
 	price: number
 }
@@ -98,10 +98,10 @@ function metadataFrom(
  * wrapped address for the lookup), with a delay between networks to respect
  * rate limits. Fails loud if any requested token is missing from the response.
  */
-export async function fetchTokensData(
+export async function fetchCurrenciesData(
 	gecko: GeckoTerminalService,
 	chainAddresses: ChainAddress[],
-): Promise<Map<ChainAddress, EnrichedTokenData>> {
+): Promise<Map<ChainAddress, EnrichedCurrencyData>> {
 	const byNetwork = new Map<string, ChainAddress[]>()
 
 	for (const chainAddress of chainAddresses) {
@@ -112,7 +112,7 @@ export async function fetchTokensData(
 		byNetwork.set(network, group)
 	}
 
-	const result = new Map<ChainAddress, EnrichedTokenData>()
+	const result = new Map<ChainAddress, EnrichedCurrencyData>()
 	const networks = Array.from(byNetwork.entries())
 
 	for (let i = 0; i < networks.length; i++) {

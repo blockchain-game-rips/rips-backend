@@ -3,21 +3,21 @@ import path from 'path'
 import z from 'zod'
 import { ChainAddress } from '../src/domain/value-objects/chain-address'
 import { toChainNamespace } from '../src/domain/value-objects/chain-namespace'
+import { EnrichedCurrency } from '../src/infrastructure/currency-registry/enriched-currency'
+import { fetchCurrenciesData } from '../src/infrastructure/price-provider/currency-fetcher'
 import { GeckoTerminalService } from '../src/infrastructure/price-provider/gecko-terminal.service'
-import { fetchTokensData } from '../src/infrastructure/price-provider/token-fetcher'
-import { EnrichedToken } from '../src/infrastructure/token-registry/enriched-token'
 
 /**
  * raw-input.json -> enriched-output.json
  *
  * Standalone: no Nest, no registry, no EvmCurrencyService. Fetches metadata and
- * price for each raw token via gecko. Loud all-or-nothing — any failure aborts
- * the whole run, leaving the last committed artifact untouched.
+ * price for each raw currency via gecko. Loud all-or-nothing — any failure
+ * aborts the whole run, leaving the last committed artifact untouched.
  */
 
 const REGISTRY_DIR = path.join(
 	__dirname,
-	'../src/infrastructure/token-registry',
+	'../src/infrastructure/currency-registry',
 )
 const RAW_INPUT_PATH = path.join(REGISTRY_DIR, 'raw-input.json')
 const ENRICHED_OUTPUT_PATH = path.join(REGISTRY_DIR, 'enriched-registry.json')
@@ -46,12 +46,12 @@ function loadRawInput(): ChainAddress[] {
 
 async function main() {
 	const gecko = new GeckoTerminalService()
-	const rawTokens = loadRawInput()
+	const rawCurrencies = loadRawInput()
 
-	const dataByToken = await fetchTokensData(gecko, rawTokens)
+	const dataByCurrency = await fetchCurrenciesData(gecko, rawCurrencies)
 
-	const enriched: EnrichedToken[] = rawTokens.map((chainAddress) => {
-		const data = dataByToken.get(chainAddress)
+	const enriched: EnrichedCurrency[] = rawCurrencies.map((chainAddress) => {
+		const data = dataByCurrency.get(chainAddress)
 
 		if (!data) {
 			throw new Error(
@@ -72,7 +72,9 @@ async function main() {
 		`${JSON.stringify(enriched, null, '\t')}\n`,
 	)
 
-	console.log(`Enriched ${enriched.length} tokens -> ${ENRICHED_OUTPUT_PATH}`)
+	console.log(
+		`Enriched ${enriched.length} currencies -> ${ENRICHED_OUTPUT_PATH}`,
+	)
 }
 
 void main()

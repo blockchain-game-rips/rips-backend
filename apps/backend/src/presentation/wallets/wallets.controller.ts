@@ -124,8 +124,8 @@ export class WalletsController {
 		@Body() body: QuoteSwapBodyDto,
 	): Promise<QuoteSwapResponseDto> {
 		const [currencyIn, currencyOut] = await Promise.all([
-			this.currencyService.fromAccount(body.tokenInChainAddress),
-			this.currencyService.fromAccount(body.tokenOutChainAddress),
+			this.currencyService.fromAccount(body.currencyInChainAddress),
+			this.currencyService.fromAccount(body.currencyOutChainAddress),
 		])
 
 		const result = await this.quoteSwapUseCase.execute({
@@ -145,8 +145,8 @@ export class WalletsController {
 		@Body() body: QuoteSwapBodyDto,
 	): Promise<QuoteSwapSamechainResponseDto> {
 		const [currencyIn, currencyOut] = await Promise.all([
-			this.currencyService.fromAccount(body.tokenInChainAddress),
-			this.currencyService.fromAccount(body.tokenOutChainAddress),
+			this.currencyService.fromAccount(body.currencyInChainAddress),
+			this.currencyService.fromAccount(body.currencyOutChainAddress),
 		])
 
 		const result = await this.quoteSwapSamechainUseCase.execute({
@@ -166,8 +166,8 @@ export class WalletsController {
 		@Body() body: SwapBodyDto,
 	): Promise<SwapResponseDto> {
 		const [currencyIn, currencyOut] = await Promise.all([
-			this.currencyService.fromAccount(body.tokenInChainAddress),
-			this.currencyService.fromAccount(body.tokenOutChainAddress),
+			this.currencyService.fromAccount(body.currencyInChainAddress),
+			this.currencyService.fromAccount(body.currencyOutChainAddress),
 		])
 
 		const pendingZap = await this.swapUseCase.execute({
@@ -187,8 +187,8 @@ export class WalletsController {
 		@Body() body: SwapBodyDto,
 	): Promise<SwapSamechainResponseDto> {
 		const [currencyIn, currencyOut] = await Promise.all([
-			this.currencyService.fromAccount(body.tokenInChainAddress),
-			this.currencyService.fromAccount(body.tokenOutChainAddress),
+			this.currencyService.fromAccount(body.currencyInChainAddress),
+			this.currencyService.fromAccount(body.currencyOutChainAddress),
 		])
 
 		const result = await this.swapSamechainUseCase.execute({

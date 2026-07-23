@@ -3,8 +3,8 @@ import { z } from 'zod'
 import { chainAddressInputSchema } from '../../shared/chain-address.dto'
 
 const quoteSwapBodySchema = z.object({
-	tokenInChainAddress: chainAddressInputSchema,
-	tokenOutChainAddress: chainAddressInputSchema,
+	currencyInChainAddress: chainAddressInputSchema,
+	currencyOutChainAddress: chainAddressInputSchema,
 	amountIn: z
 		.string()
 		.regex(/^\d+$/)

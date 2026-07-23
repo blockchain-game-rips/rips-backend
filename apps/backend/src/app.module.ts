@@ -2,12 +2,12 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { AppConfigModule } from './configuration/app-config.module'
+import { CurrencyRegistryModule } from './infrastructure/currency-registry/currency-registry.module'
 import { LoggingModule } from './infrastructure/logging/logging.module'
 import { MetricsModule } from './infrastructure/metrics/metrics.module'
 import { PriceOracleModule } from './infrastructure/price-provider/price-provider.module'
 import { PrismaModule } from './infrastructure/prisma/prisma.module'
 import { ProvisionModule } from './infrastructure/provision/provision.module'
-import { TokenRegistryModule } from './infrastructure/token-registry/token-registry.module'
 import { AdminApiModule } from './modules/api/admin-api/admin-api.module'
 import { CurrencyApiModule } from './modules/api/currency-api/currency-api.module'
 import { NotificationsApiModule } from './modules/api/notifications-api/notifications-api.module'
@@ -27,7 +27,7 @@ import { SyncCompletedRipsModule } from './modules/sync-completed-rips/sync-comp
 		ScheduleModule.forRoot(),
 		PrismaModule,
 		ProvisionModule,
-		TokenRegistryModule,
+		CurrencyRegistryModule,
 		PriceOracleModule.forRoot(),
 		AdminApiModule,
 		CurrencyApiModule,

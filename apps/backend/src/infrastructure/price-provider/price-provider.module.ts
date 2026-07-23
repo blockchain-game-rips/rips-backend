@@ -1,10 +1,10 @@
 import { DynamicModule, Module } from '@nestjs/common'
 import { PriceProvider } from '../../application/interfaces/price-service'
-import { EvmCurrencyReadModule } from '../evm/evm-currency-read.module'
 import {
-	TOKEN_PRICE_SEED_SOURCE,
-	TokenPriceSeedSource,
-} from '../token-registry/token-registry.interfaces'
+	CURRENCY_PRICE_SEED_SOURCE,
+	CurrencyPriceSeedSource,
+} from '../currency-registry/currency-registry.interfaces'
+import { EvmCurrencyReadModule } from '../evm/evm-currency-read.module'
 import { GeckoTerminalService } from './gecko-terminal.service'
 import {
 	PriceProviderWarmupService,
@@ -24,9 +24,9 @@ export class PriceOracleModule {
 				{ provide: PriceProvider, useClass: PriceProviderService },
 				{
 					provide: WARMUP_CURRENCY_IDS,
-					useFactory: (seedSource: TokenPriceSeedSource) =>
+					useFactory: (seedSource: CurrencyPriceSeedSource) =>
 						Array.from(seedSource.seedPrices().keys()),
-					inject: [TOKEN_PRICE_SEED_SOURCE],
+					inject: [CURRENCY_PRICE_SEED_SOURCE],
 				},
 				PriceProviderWarmupService,
 			],

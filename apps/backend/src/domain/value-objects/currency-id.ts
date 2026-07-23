@@ -5,13 +5,13 @@ const namespacePattern = '[-a-z0-9]{3,8}'
 const referencePattern = '[-_a-zA-Z0-9]{1,32}'
 const accountPattern = '[-.%a-zA-Z0-9]{1,128}'
 
-const tokenIdRegex = new RegExp(
+const currencyIdRegex = new RegExp(
 	`^${namespacePattern}:${referencePattern}:${accountPattern}$`,
 )
 
-export const tokenIdSchema = z
-	.string()
-	.regex(tokenIdRegex) as z.ZodType<CurrencyId>
+export const currencyIdSchema = z.custom<CurrencyId>(
+	(value) => typeof value === 'string' && currencyIdRegex.test(value),
+)
 
 type Account = string
 /**

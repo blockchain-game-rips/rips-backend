@@ -5,12 +5,12 @@ import { composeCurrencyId } from '../../domain/services/currency-id-utils'
 import { Chain } from '../../domain/value-objects/chain'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { CurrencyId } from '../../domain/value-objects/currency-id'
-import { EnrichedToken } from './enriched-token'
 import {
-	SupportedTokens,
-	TokenMetadataSource,
-	TokenPriceSeedSource,
-} from './token-registry.interfaces'
+	CurrencyMetadataSource,
+	CurrencyPriceSeedSource,
+	SupportedCurrencies,
+} from './currency-registry.interfaces'
+import { EnrichedCurrency } from './enriched-currency'
 
 function currencyIdOf(chain: Chain, address: string): CurrencyId {
 	return composeCurrencyId(
@@ -24,25 +24,28 @@ function labelOf(entry: ChainAddress): string {
 }
 
 /**
- * Single source of truth for tokens the system knows. Loaded once from the
+ * Single source of truth for currencies the system knows. Loaded once from the
  * committed enriched artifact. Exposes narrow, segregated projections so no
  * consumer sees fields it shouldn't (e.g. price provider never sees metadata).
  */
-export class TokenRegistry
-	implements TokenMetadataSource, TokenPriceSeedSource, SupportedTokens
+export class CurrencyRegistry
+	implements
+		CurrencyMetadataSource,
+		CurrencyPriceSeedSource,
+		SupportedCurrencies
 {
-	private readonly byId: Map<CurrencyId, EnrichedToken>
-	private readonly supportedTokens: ChainAddress[]
+	private readonly byId: Map<CurrencyId, EnrichedCurrency>
+	private readonly supportedCurrencies: ChainAddress[]
 
-	constructor(tokens: EnrichedToken[], allowList: ChainAddress[]) {
+	constructor(currencies: EnrichedCurrency[], allowList: ChainAddress[]) {
 		this.byId = new Map(
-			tokens.map((token) => [
-				currencyIdOf(token.chain, token.address),
-				token,
+			currencies.map((currency) => [
+				currencyIdOf(currency.chain, currency.address),
+				currency,
 			]),
 		)
 
-		this.supportedTokens = this.resolveAllowList(allowList)
+		this.supportedCurrencies = this.resolveAllowList(allowList)
 	}
 
 	metadataOf(id: CurrencyId): CurrencyMetadata | undefined {
@@ -52,19 +55,19 @@ export class TokenRegistry
 	seedPrices(): Map<CurrencyId, number> {
 		const prices = new Map<CurrencyId, number>()
 
-		for (const [id, token] of this.byId) {
-			prices.set(id, token.lastKnownPrice)
+		for (const [id, currency] of this.byId) {
+			prices.set(id, currency.lastKnownPrice)
 		}
 
 		return prices
 	}
 
 	supported(): ChainAddress[] {
-		return this.supportedTokens
+		return this.supportedCurrencies
 	}
 
 	/**
-	 * Fails fast at startup if any allowlisted token is absent from the
+	 * Fails fast at startup if any allowlisted currency is absent from the
 	 * registry, so a request-path read can never throw.
 	 */
 	private resolveAllowList(allowList: ChainAddress[]): ChainAddress[] {
@@ -76,7 +79,7 @@ export class TokenRegistry
 			const list = unknown.map(labelOf).join(', ')
 
 			throw new Error(
-				`Allowlisted tokens not in the enriched registry: ${list}`,
+				`Allowlisted currencies not in the enriched registry: ${list}`,
 			)
 		}
 

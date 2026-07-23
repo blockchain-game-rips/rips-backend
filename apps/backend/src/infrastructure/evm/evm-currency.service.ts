@@ -19,12 +19,12 @@ import {
 } from '../../domain/services/currency-id-utils'
 import {
 	CurrencyId,
-	tokenIdSchema,
+	currencyIdSchema,
 } from '../../domain/value-objects/currency-id'
 import {
-	TOKEN_METADATA_SOURCE,
-	TokenMetadataSource,
-} from '../token-registry/token-registry.interfaces'
+	CURRENCY_METADATA_SOURCE,
+	CurrencyMetadataSource,
+} from '../currency-registry/currency-registry.interfaces'
 import { EvmClientService } from './evm-client/evm-client.service'
 import {
 	NATIVE_ADDRESS,
@@ -39,8 +39,8 @@ import { WrappedNative } from './primitives/currencies/wrapped-native'
 export class EvmCurrencyService {
 	constructor(
 		private readonly evmClientService: EvmClientService,
-		@Inject(TOKEN_METADATA_SOURCE)
-		private readonly metadataSource: TokenMetadataSource,
+		@Inject(CURRENCY_METADATA_SOURCE)
+		private readonly metadataSource: CurrencyMetadataSource,
 	) {}
 
 	/* ======== STATE ======== */
@@ -107,8 +107,8 @@ export class EvmCurrencyService {
 		return this.getOrCache(currency)
 	}
 
-	isValidTokenId(id: string): boolean {
-		const result = tokenIdSchema.safeParse(id)
+	isValidCurrencyId(id: string): boolean {
+		const result = currencyIdSchema.safeParse(id)
 		if (!result.success) {
 			return false
 		}
@@ -120,8 +120,8 @@ export class EvmCurrencyService {
 	async fromId(
 		id: CurrencyId,
 	): Promise<NativeCurrency | Token | WrappedNative> {
-		if (!this.isValidTokenId(id)) {
-			throw new Error('Invalid token id')
+		if (!this.isValidCurrencyId(id)) {
+			throw new Error('Invalid currency id')
 		}
 
 		const { chainId, address } = parseCurrencyId(id)

@@ -4,13 +4,13 @@ import { Chain } from '../../domain/value-objects/chain'
 import { toChainNamespace } from '../../domain/value-objects/chain-namespace'
 
 /**
- * A single row of the enriched token registry artifact.
+ * A single row of the enriched currency registry artifact.
  *
- * Infrastructure type — never leaves the token-registry module. Consumers
+ * Infrastructure type — never leaves the currency-registry module. Consumers
  * receive domain-typed projections (CurrencyMetadata, Map<CurrencyId, number>,
  * Currency) instead.
  */
-export interface EnrichedToken {
+export interface EnrichedCurrency {
 	chain: Chain
 	address: string
 	metadata: CurrencyMetadata
@@ -28,11 +28,11 @@ const currencyMetadataSchema = z.object({
 	decimals: z.number().int().nonnegative(),
 })
 
-export const enrichedTokenSchema: z.ZodType<EnrichedToken> = z.object({
+export const enrichedCurrencySchema: z.ZodType<EnrichedCurrency> = z.object({
 	chain: chainSchema,
 	address: z.string(),
 	metadata: currencyMetadataSchema,
 	lastKnownPrice: z.number().nonnegative(),
 })
 
-export const enrichedRegistrySchema = z.array(enrichedTokenSchema)
+export const enrichedRegistrySchema = z.array(enrichedCurrencySchema)

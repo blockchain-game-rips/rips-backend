@@ -3,7 +3,7 @@ import { NATIVE_ADDRESS } from '../../../src/infrastructure/evm/primitives/curre
 import {
 	geckoNetworkOf,
 	priceableAddress,
-} from '../../../src/infrastructure/price-provider/token-fetcher'
+} from '../../../src/infrastructure/price-provider/currency-fetcher'
 
 const MAINNET_CHAIN_ID = 1
 const UNSUPPORTED_CHAIN_ID = 999999

@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { EnrichedToken, enrichedRegistrySchema } from './enriched-token'
+import { EnrichedCurrency, enrichedRegistrySchema } from './enriched-currency'
 
 export const ENRICHED_REGISTRY_PATH = path.join(
 	__dirname,
@@ -14,7 +14,7 @@ export const ENRICHED_REGISTRY_PATH = path.join(
  */
 export function loadEnrichedRegistry(
 	filePath: string = ENRICHED_REGISTRY_PATH,
-): EnrichedToken[] {
+): EnrichedCurrency[] {
 	if (!fs.existsSync(filePath)) {
 		throw new Error(`Enriched registry file not found at ${filePath}`)
 	}

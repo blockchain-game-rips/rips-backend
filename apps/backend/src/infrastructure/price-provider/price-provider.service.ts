@@ -9,13 +9,13 @@ import {
 import { toChainNamespace } from '../../domain/value-objects/chain-namespace'
 import { CurrencyId } from '../../domain/value-objects/currency-id'
 import { createCustomError, wait } from '../../utils/common'
-import { EvmCurrencyService } from '../evm/evm-currency.service'
 import {
-	TOKEN_PRICE_SEED_SOURCE,
-	TokenPriceSeedSource,
-} from '../token-registry/token-registry.interfaces'
+	CURRENCY_PRICE_SEED_SOURCE,
+	CurrencyPriceSeedSource,
+} from '../currency-registry/currency-registry.interfaces'
+import { EvmCurrencyService } from '../evm/evm-currency.service'
+import { geckoNetworkOf, priceableAddress } from './currency-fetcher'
 import { GeckoTerminalService } from './gecko-terminal.service'
-import { geckoNetworkOf, priceableAddress } from './token-fetcher'
 
 const PriceProviderError = createCustomError('PriceProviderError')
 
@@ -34,8 +34,8 @@ export class PriceProviderService
 	constructor(
 		readonly currencyService: EvmCurrencyService,
 		readonly geckoTerminalService: GeckoTerminalService,
-		@Inject(TOKEN_PRICE_SEED_SOURCE)
-		private readonly priceSeedSource: TokenPriceSeedSource,
+		@Inject(CURRENCY_PRICE_SEED_SOURCE)
+		private readonly priceSeedSource: CurrencyPriceSeedSource,
 	) {
 		super()
 	}
