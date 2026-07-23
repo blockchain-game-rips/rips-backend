@@ -5,6 +5,7 @@ import { UsersController } from '../../../src/presentation/users/users.controlle
 import { EVM_ADDRESS, MOCK_USER, TELEGRAM_ID } from '../../fixtures/entities'
 import {
 	makeMockCreateUserUseCase,
+	makeMockExportKeyUseCase,
 	makeMockGetUserUseCase,
 	makeMockSetReferrerUseCase,
 } from '../../mocks/use-cases'
@@ -13,7 +14,13 @@ describe('UsersController', () => {
 	const getUser = makeMockGetUserUseCase()
 	const createUser = makeMockCreateUserUseCase()
 	const setReferrer = makeMockSetReferrerUseCase()
-	const controller = new UsersController(getUser, createUser, setReferrer)
+	const exportKey = makeMockExportKeyUseCase()
+	const controller = new UsersController(
+		getUser,
+		createUser,
+		setReferrer,
+		exportKey,
+	)
 
 	beforeEach(() => {
 		jest.clearAllMocks()

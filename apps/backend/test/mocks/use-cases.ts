@@ -6,6 +6,7 @@ import { WalletWriteService } from '../../src/application/interfaces/wallet-writ
 import { BuyEntriesPurchaseUseCase } from '../../src/application/use-cases/buy-entries-purchase/buy-entries-purchase.use-case'
 import { BuyEntriesZapUseCase } from '../../src/application/use-cases/buy-entries-zap/buy-entries-zap.use-case'
 import { CreateUserUseCase } from '../../src/application/use-cases/create-user/create-user.use-case'
+import { ExportKeyUseCase } from '../../src/application/use-cases/export-key/export-key.use-case'
 import { GetBalanceUseCase } from '../../src/application/use-cases/get-balance/get-balance.use-case'
 import { GetSwapResultUseCase } from '../../src/application/use-cases/get-swap-result/get-swap-result.use-case'
 import { GetUnrevealedPayoutsUseCase } from '../../src/application/use-cases/get-unrevealed-payouts/get-unrevealed-payouts.use-case'
@@ -56,6 +57,10 @@ export function makeMockCreateUserUseCase(): jest.Mocked<CreateUserUseCase> {
 }
 
 export function makeMockSetReferrerUseCase(): jest.Mocked<GetUserUseCase> {
+	return { execute: jest.fn() }
+}
+
+export function makeMockExportKeyUseCase(): jest.Mocked<ExportKeyUseCase> {
 	return { execute: jest.fn() }
 }
 
