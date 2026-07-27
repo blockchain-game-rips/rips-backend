@@ -64,7 +64,7 @@ export class SyncCompletedRipsService extends SyncCompletedRipsUseCase {
 
 		const totalEntries = rip.actions.purchases.reduce(
 			(sum, p) => sum + p.entryCount,
-			0n,
+			0,
 		)
 
 		this.logger.log(
@@ -153,7 +153,7 @@ export class SyncCompletedRipsService extends SyncCompletedRipsUseCase {
 
 		for (const purchase of purchases) {
 			for (let i = 0; i < purchase.entryCount; i++) {
-				const entryNumber = Number(purchase.startEntryIndex) + i + 1
+				const entryNumber = purchase.startEntryIndex + i + 1
 
 				const payout = resolvePayout(
 					entryNumber,

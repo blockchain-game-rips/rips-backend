@@ -18,6 +18,6 @@ export type ClaimAction = {
 
 export type PurchaseAction = {
 	userAddress: EvmAddress
-	entryCount: bigint
-	startEntryIndex: bigint
+	entryCount: number
+	startEntryIndex: number
 }

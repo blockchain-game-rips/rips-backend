@@ -7,8 +7,8 @@ import { configSchema, toConfigDto } from './config.dto'
 
 const purchaseActionSchema = z.object({
 	userAddress: z.string(),
-	entryCount: z.string(),
-	startEntryIndex: z.string(),
+	entryCount: z.number(),
+	startEntryIndex: z.number(),
 })
 
 const claimActionSchema = z.object({
@@ -49,8 +49,8 @@ function toActionsDto(actions: Rip['actions']): z.infer<typeof actionsSchema> {
 	return {
 		purchases: actions.purchases.map((p) => ({
 			userAddress: p.userAddress,
-			entryCount: p.entryCount.toString(),
-			startEntryIndex: p.startEntryIndex.toString(),
+			entryCount: p.entryCount,
+			startEntryIndex: p.startEntryIndex,
 		})),
 		claims: actions.claims.map((c) => ({
 			userAddress: c.userAddress,

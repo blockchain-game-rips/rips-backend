@@ -44,6 +44,16 @@ function toBigInt(value: Prisma.Decimal): bigint {
 	return BigInt(value.toFixed(0))
 }
 
+function toNumber(value: Prisma.Decimal): number {
+	const asNumber = Number(toBigInt(value))
+
+	if (!Number.isSafeInteger(asNumber)) {
+		throw new Error(`Expected a safe integer, got ${value.toString()}`)
+	}
+
+	return asNumber
+}
+
 export function fromConfigRaw(
 	configRaw: ConfigRaw,
 	currency: Currency,
@@ -90,8 +100,8 @@ function resolveActions(ripRaw: RipRaw): AddressesActions {
 	return {
 		purchases: ripRaw.entry_purchase.map((p) => ({
 			userAddress: toEvmAddress(p.user),
-			entryCount: toBigInt(p.entry_count),
-			startEntryIndex: toBigInt(p.start_entry_index),
+			entryCount: toNumber(p.entry_count),
+			startEntryIndex: toNumber(p.start_entry_index),
 		})),
 		claims: ripRaw.payout_claim.map((c) => ({
 			userAddress: toEvmAddress(c.user),
