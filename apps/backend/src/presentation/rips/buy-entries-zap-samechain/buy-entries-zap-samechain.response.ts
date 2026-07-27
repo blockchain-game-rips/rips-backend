@@ -7,6 +7,7 @@ const buyEntriesZapSamechainResponseSchema = z.object({
 	transaction: TransactionDto.schema,
 	entryCount: z.number(),
 	ripId: z.number(),
+	startEntryIndex: z.number(),
 })
 
 export class BuyEntriesZapSamechainResponseDto extends createZodDto(
@@ -20,5 +21,6 @@ export function toBuyEntriesZapSamechainResponseDto(
 		transaction: toTransactionDto(result.transaction),
 		entryCount: result.purchase.entryCount,
 		ripId: result.purchase.ripId,
+		startEntryIndex: result.purchase.startEntryIndex,
 	}
 }

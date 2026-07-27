@@ -48,6 +48,7 @@ describe('Buy entries E2E', () => {
 		expect(res.body.transaction.id).toMatch(/^0x[0-9a-fA-F]{64}$/)
 		expect(res.body.ripId).toBeGreaterThan(0)
 		expect(res.body.entryCount).toBe(ENTRY_COUNT)
+		expect(res.body.startEntryIndex).toBeGreaterThanOrEqual(0)
 		expect(typeof res.body.transaction.cost.amount).toBe('string')
 	})
 })

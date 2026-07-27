@@ -26,5 +26,6 @@ export function parsePurchase(
 	return {
 		ripId: Number(log.args.ripId),
 		entryCount: Number(log.args.entryCount),
+		startEntryIndex: Number(log.args.startEntryIndex),
 	}
 }
