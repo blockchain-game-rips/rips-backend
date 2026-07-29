@@ -3,10 +3,12 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"test": "yarn build && jest",
-		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"build": "rm -rf lib && tsc -p tsconfig.build.json",
-		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+		"test": "yarn build && jest",
+		"fmt": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+		"lint": "eslint src test",
+		"lint:fix": "eslint src test --fix",
+		"typecheck": "tsc --noEmit -p tsconfig.json",
 		"generate": "squid-typeorm-codegen && squid-evm-typegen ./src/abi ../../packages/abi/src/rips.json --multicall",
 		"migration:generate:local": "ts-node test/utils/generate-migrations.ts"
 	},

@@ -6,6 +6,10 @@
     "types": "./dist/index.d.ts",
     "scripts": {
         "build": "tsc",
+        "fmt": "prettier --write \"src/**/*.ts\"",
+        "lint": "eslint src",
+        "lint:fix": "eslint src --fix",
+        "typecheck": "tsc --noEmit -p tsconfig.json",
         "check-sync": "node scripts/check-sync.mjs"
     }
 }

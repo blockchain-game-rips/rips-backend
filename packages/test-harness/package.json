@@ -8,6 +8,15 @@
         ".": "./src/index.ts",
         "./state": "./src/state/index.ts"
     },
+    "scripts": {
+        "fmt": "prettier --write \"src/**/*.ts\"",
+        "lint": "eslint src",
+        "lint:fix": "eslint src --fix",
+        "typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "devDependencies": {
+        "@types/jest": "^29.5.14"
+    },
     "dependencies": {
         "@testcontainers/postgresql": "^11.13.0",
         "get-port": "5",
