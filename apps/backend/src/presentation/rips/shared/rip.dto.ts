@@ -4,11 +4,12 @@ import { Rip, RipStatus } from '../../../domain/entities/rip'
 import { CurrencyDto } from '../../shared/currency.dto'
 import { PricedCurrency } from '../../shared/pricing/priced-currency'
 import { configSchema, toConfigDto } from './config.dto'
+import { startEntryIndexSchema } from './purchase.dto'
 
 const purchaseActionSchema = z.object({
 	userAddress: z.string(),
 	entryCount: z.number(),
-	startEntryIndex: z.number(),
+	startEntryIndex: startEntryIndexSchema,
 })
 
 const claimActionSchema = z.object({

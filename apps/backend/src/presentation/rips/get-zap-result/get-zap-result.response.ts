@@ -6,6 +6,7 @@ import {
 	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
 import { toTransactionDto, TransactionDto } from '../../shared/transaction.dto'
+import { purchaseSchema, toPurchaseDto } from '../shared/purchase.dto'
 
 const getZapResultResponseSchema = z.object({
 	pending: z.object({}).nullable(),
@@ -14,9 +15,7 @@ const getZapResultResponseSchema = z.object({
 	success: z
 		.object({
 			dstTransaction: TransactionDto.schema,
-			entryCount: z.number(),
-			ripId: z.number(),
-			startEntryIndex: z.number(),
+			...purchaseSchema.shape,
 		})
 		.nullable(),
 })
@@ -51,9 +50,7 @@ export function toGetZapResultResponseDto(
 		...base,
 		success: {
 			dstTransaction: toTransactionDto(result.dstTransaction),
-			entryCount: result.result.entryCount,
-			ripId: result.result.ripId,
-			startEntryIndex: result.result.startEntryIndex,
+			...toPurchaseDto(result.result),
 		},
 	}
 }
