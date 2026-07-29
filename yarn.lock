@@ -2906,6 +2906,10 @@ __metadata:
 "@rips/abi@workspace:*, @rips/abi@workspace:packages/abi":
   version: 0.0.0-use.local
   resolution: "@rips/abi@workspace:packages/abi"
+  dependencies:
+    eslint: "npm:^9.18.0"
+    prettier: "npm:^3.4.2"
+    typescript: "npm:^5.7.3"
   languageName: unknown
   linkType: soft
 
@@ -2915,8 +2919,11 @@ __metadata:
   dependencies:
     "@testcontainers/postgresql": "npm:^11.13.0"
     "@types/jest": "npm:^29.5.14"
+    eslint: "npm:^9.18.0"
     get-port: "npm:5"
+    prettier: "npm:^3.4.2"
     typeorm: "npm:^0.3.20"
+    typescript: "npm:^5.7.3"
     viem: "npm:^2.47.5"
   languageName: unknown
   linkType: soft
@@ -11633,9 +11640,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "rips-monorepo@workspace:."
   dependencies:
+    "@eslint/js": "npm:^9.18.0"
+    eslint: "npm:^9.18.0"
+    eslint-plugin-unused-imports: "npm:^4.4.1"
     lefthook: "npm:^2.1.9"
     prettier: "npm:^3.8.4"
     prettier-plugin-organize-imports: "npm:^4.3.0"
+    typescript-eslint: "npm:^8.20.0"
   languageName: unknown
   linkType: soft
 
