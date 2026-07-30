@@ -34,6 +34,7 @@ import {
 
 const PRESET_ID = 1
 const ENTRIES_PER_USER = 4
+const ENTRIES_REVEALED_ONE_AT_A_TIME = 1
 
 const KEEPER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
 
@@ -181,7 +182,7 @@ describe('Rip settlement flow E2E', () => {
 		)
 	})
 
-	it('get-unrevealed-payouts returns 4 entries for each user', async () => {
+	it('get-payouts returns 4 entries for each user', async () => {
 		const res1 = await request(ctx.app.getHttpServer())
 			.get('/rips/payouts')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
@@ -203,7 +204,9 @@ describe('Rip settlement flow E2E', () => {
 			.send({ revealAll: false })
 			.expect(200)
 
-		expect(revealOneRes.body.payouts).toHaveLength(1)
+		expect(revealOneRes.body.payouts).toHaveLength(
+			ENTRIES_REVEALED_ONE_AT_A_TIME,
+		)
 
 		const revealAllRes = await request(ctx.app.getHttpServer())
 			.patch('/rips/payouts')
@@ -216,17 +219,72 @@ describe('Rip settlement flow E2E', () => {
 
 	it('user 1 has 3 unrevealed entries remaining, user 2 has 0', async () => {
 		const res1 = await request(ctx.app.getHttpServer())
-			.get('/rips/payouts')
+			.get('/rips/payouts?revealed=false')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.expect(200)
 
 		const res2 = await request(ctx.app.getHttpServer())
-			.get('/rips/payouts')
+			.get('/rips/payouts?revealed=false')
 			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.expect(200)
 
 		expect(res1.body.payouts).toHaveLength(ENTRIES_PER_USER - 1)
 		expect(res2.body.payouts).toHaveLength(0)
+	})
+
+	it('revealed filter returns the mirror image of unrevealed', async () => {
+		const res1 = await request(ctx.app.getHttpServer())
+			.get('/rips/payouts?revealed=true')
+			.set('x-telegram-id', TELEGRAM_ID_USER_1)
+			.expect(200)
+
+		const res2 = await request(ctx.app.getHttpServer())
+			.get('/rips/payouts?revealed=true')
+			.set('x-telegram-id', TELEGRAM_ID_USER_2)
+			.expect(200)
+
+		expect(res1.body.payouts).toHaveLength(ENTRIES_REVEALED_ONE_AT_A_TIME)
+		expect(res2.body.payouts).toHaveLength(ENTRIES_PER_USER)
+	})
+
+	it('unfiltered call returns all payouts regardless of reveal state', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/payouts')
+			.set('x-telegram-id', TELEGRAM_ID_USER_1)
+			.expect(200)
+
+		expect(res.body.payouts).toHaveLength(ENTRIES_PER_USER)
+		expect(
+			res.body.payouts.filter((p: { revealed: boolean }) => p.revealed),
+		).toHaveLength(ENTRIES_REVEALED_ONE_AT_A_TIME)
+	})
+
+	it('ripId filter returns both reveal states for that rip', async () => {
+		const allRes = await request(ctx.app.getHttpServer())
+			.get('/rips/payouts')
+			.set('x-telegram-id', TELEGRAM_ID_USER_1)
+			.expect(200)
+
+		const ripId: number = allRes.body.payouts[0].ripId
+
+		const ripRes = await request(ctx.app.getHttpServer())
+			.get(`/rips/payouts?ripId=${ripId}`)
+			.set('x-telegram-id', TELEGRAM_ID_USER_1)
+			.expect(200)
+
+		expect(ripRes.body.payouts.length).toBeGreaterThan(0)
+		expect(
+			ripRes.body.payouts.every(
+				(p: { ripId: number }) => p.ripId === ripId,
+			),
+		).toBe(true)
+	})
+
+	it('rejects a malformed ripId', async () => {
+		await request(ctx.app.getHttpServer())
+			.get('/rips/payouts?ripId=abc')
+			.set('x-telegram-id', TELEGRAM_ID_USER_1)
+			.expect(400)
 	})
 
 	async function getPresetConfig(): Promise<{

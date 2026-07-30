@@ -1,5 +1,6 @@
 import { CurrencyService } from '../../src/application/interfaces/currency.service'
 import { EncryptionService } from '../../src/application/interfaces/encryption.service'
+import { EntryPayoutRepository } from '../../src/application/interfaces/repositories/entry-payout.repository'
 import { UserRepository } from '../../src/application/interfaces/repositories/user.repository'
 import { WalletReadService } from '../../src/application/interfaces/wallet-read.service'
 import { WalletWriteService } from '../../src/application/interfaces/wallet-write.service'
@@ -8,8 +9,8 @@ import { BuyEntriesZapUseCase } from '../../src/application/use-cases/buy-entrie
 import { CreateUserUseCase } from '../../src/application/use-cases/create-user/create-user.use-case'
 import { ExportKeyUseCase } from '../../src/application/use-cases/export-key/export-key.use-case'
 import { GetBalanceUseCase } from '../../src/application/use-cases/get-balance/get-balance.use-case'
+import { GetPayoutsUseCase } from '../../src/application/use-cases/get-payouts/get-payouts.use-case'
 import { GetSwapResultUseCase } from '../../src/application/use-cases/get-swap-result/get-swap-result.use-case'
-import { GetUnrevealedPayoutsUseCase } from '../../src/application/use-cases/get-unrevealed-payouts/get-unrevealed-payouts.use-case'
 import { GetUserUseCase } from '../../src/application/use-cases/get-user/get-user.use-case'
 import { QuoteSwapUseCase } from '../../src/application/use-cases/quote-swap/quote-swap.use-case'
 import { QuoteWithdrawUseCase } from '../../src/application/use-cases/quote-withdraw/quote-withdraw.use-case'
@@ -24,6 +25,16 @@ export function makeMockUserRepository(): jest.Mocked<UserRepository> {
 		findByEvmAddress: jest.fn(),
 		create: jest.fn(),
 		setReferrer: jest.fn(),
+	}
+}
+
+export function makeMockEntryPayoutRepository(): jest.Mocked<EntryPayoutRepository> {
+	return {
+		find: jest.fn(),
+		revealAndGet: jest.fn(),
+		revealAllAndGet: jest.fn(),
+		getCardCollections: jest.fn(),
+		getCardDefinitions: jest.fn(),
 	}
 }
 
@@ -72,7 +83,7 @@ export function makeMockRevealEntryPayoutsUseCase(): jest.Mocked<RevealEntryPayo
 	return { execute: jest.fn() }
 }
 
-export function makeMockGetUnrevealedPayoutsUseCase(): jest.Mocked<GetUnrevealedPayoutsUseCase> {
+export function makeMockGetPayoutsUseCase(): jest.Mocked<GetPayoutsUseCase> {
 	return { execute: jest.fn() }
 }
 

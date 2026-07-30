@@ -7,6 +7,7 @@ import {
 	EvmAddress,
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
+import { PayoutFilter } from '../../domain/value-objects/payout-filter'
 import { PrismaService } from './prisma.service'
 
 @Injectable()
@@ -15,10 +16,13 @@ export class PrismaEntryPayoutRepository extends EntryPayoutRepository {
 		super()
 	}
 
-	async getUnrevealed(userAddress: EvmAddress): Promise<EntryPayout[]> {
+	async find(
+		userAddress: EvmAddress,
+		{ ripId, revealed }: PayoutFilter,
+	): Promise<EntryPayout[]> {
 		const records = await this.prisma.entryPayout.findMany({
-			where: { userAddress, revealed: false },
-			orderBy: { entryNumber: 'asc' },
+			where: { userAddress, ripId, revealed },
+			orderBy: [{ ripId: 'asc' }, { entryNumber: 'asc' }],
 			include: { cardDefinition: true },
 		})
 

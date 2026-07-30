@@ -8,9 +8,9 @@ import { GetCardCollectionModule } from '../../use-cases/get-card-collection.mod
 import { GetCardDefinitionsModule } from '../../use-cases/get-card-definitions.module'
 import { GetCompletedRipsModule } from '../../use-cases/get-completed-rips.module'
 import { GetOngoingRipsModule } from '../../use-cases/get-ongoing-rips.module'
+import { GetPayoutsModule } from '../../use-cases/get-payouts.module'
 import { GetRipsStateModule } from '../../use-cases/get-rips-state.module'
 import { GetRipsModule } from '../../use-cases/get-rips.module'
-import { GetUnrevealedPayoutsModule } from '../../use-cases/get-unrevealed-payouts.module'
 import { GetZapResultModule } from '../../use-cases/get-zap-result.module'
 import { QuotePurchaseModule } from '../../use-cases/quote-purchase.module'
 import { QuoteZapSamechainModule } from '../../use-cases/quote-zap-samechain.module'
@@ -27,7 +27,7 @@ import { RevealEntryPayoutsModule } from '../../use-cases/reveal-entry-payouts.m
 		BuyEntriesPurchaseModule,
 		BuyEntriesZapModule,
 		BuyEntriesZapSamechainModule,
-		GetUnrevealedPayoutsModule,
+		GetPayoutsModule,
 		RevealEntryPayoutsModule,
 		QuotePurchaseModule,
 		QuoteZapModule,

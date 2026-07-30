@@ -17,9 +17,9 @@ import { GetCardCollectionUseCase } from '../../application/use-cases/get-card-c
 import { GetCardDefinitionsUseCase } from '../../application/use-cases/get-card-definitions/get-card-definitions.use-case'
 import { GetCompletedRipsUseCase } from '../../application/use-cases/get-completed-rips/get-completed-rips.use-case'
 import { GetOngoingRipsUseCase } from '../../application/use-cases/get-ongoing-rips/get-ongoing-rips.use-case'
+import { GetPayoutsUseCase } from '../../application/use-cases/get-payouts/get-payouts.use-case'
 import { GetRipsStateUseCase } from '../../application/use-cases/get-rips-state/get-rips-state.use-case'
 import { GetRipsUseCase } from '../../application/use-cases/get-rips/get-rips.use-case'
-import { GetUnrevealedPayoutsUseCase } from '../../application/use-cases/get-unrevealed-payouts/get-unrevealed-payouts.use-case'
 import { GetZapResultUseCase } from '../../application/use-cases/get-zap-result/get-zap-result.use-case'
 import { QuotePurchaseUseCase } from '../../application/use-cases/quote-purchase/quote-purchase.use-case'
 import { QuoteZapSamechainUseCase } from '../../application/use-cases/quote-zap-samechain/quote-zap-samechain.use-case'
@@ -55,6 +55,7 @@ import {
 import { GetCompletedRipsQueryDto } from './get-completed-rips/get-completed-rips.request'
 import { GetCompletedRipsResponseDto } from './get-completed-rips/get-completed-rips.response'
 import { GetOngoingRipsResponseDto } from './get-ongoing-rips/get-ongoing-rips.response'
+import { GetPayoutsQueryDto } from './get-payouts/get-payouts.request'
 import { GetPayoutsResponseDto } from './get-payouts/get-payouts.response'
 import { GetPresetsResponseDto } from './get-presets/get-presets.response'
 import { GetRipsStateResponseDto } from './get-rips-state/get-rips-state.response'
@@ -100,7 +101,7 @@ export class RipsController {
 		private readonly getZapResultUseCase: GetZapResultUseCase,
 		private readonly getOngoingRipsUseCase: GetOngoingRipsUseCase,
 		private readonly getCompletedRipsUseCase: GetCompletedRipsUseCase,
-		private readonly getUnrevealedPayoutsUseCase: GetUnrevealedPayoutsUseCase,
+		private readonly getPayoutsUseCase: GetPayoutsUseCase,
 		private readonly revealEntryPayoutsUseCase: RevealEntryPayoutsUseCase,
 		private readonly getRipsUseCase: GetRipsUseCase,
 		private readonly getCardCollectionUseCase: GetCardCollectionUseCase,
@@ -238,9 +239,11 @@ export class RipsController {
 	@ZodResponse({ type: GetPayoutsResponseDto })
 	async getPayouts(
 		@Headers() headers: TelegramIdHeaderDto,
+		@Query() query: GetPayoutsQueryDto,
 	): Promise<GetPayoutsResponseDto> {
-		const payouts = await this.getUnrevealedPayoutsUseCase.execute({
+		const payouts = await this.getPayoutsUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
+			filter: { ripId: query.ripId, revealed: query.revealed },
 		})
 
 		return {

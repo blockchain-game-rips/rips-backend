@@ -2,9 +2,13 @@ import { Card } from '../../../domain/value-objects/card'
 import { CardCollection } from '../../../domain/value-objects/card-collection'
 import { EntryPayout } from '../../../domain/value-objects/entry-payout'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
+import { PayoutFilter } from '../../../domain/value-objects/payout-filter'
 
 export abstract class EntryPayoutRepository {
-	abstract getUnrevealed(userAddress: EvmAddress): Promise<EntryPayout[]>
+	abstract find(
+		userAddress: EvmAddress,
+		filter: PayoutFilter,
+	): Promise<EntryPayout[]>
 
 	/**
 	 * @returns return null when there is no payout to reveal
