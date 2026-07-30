@@ -8,6 +8,7 @@ import {
 	Query,
 	UseInterceptors,
 } from '@nestjs/common'
+import { ApiOperation } from '@nestjs/swagger'
 import { ZodResponse } from 'nestjs-zod'
 import { BuyEntriesPurchaseUseCase } from '../../application/use-cases/buy-entries-purchase/buy-entries-purchase.use-case'
 import { BuyEntriesZapSamechainUseCase } from '../../application/use-cases/buy-entries-zap-samechain/buy-entries-zap-samechain.use-case'
@@ -236,6 +237,10 @@ export class RipsController {
 	}
 
 	@Get('payouts')
+	@ApiOperation({
+		description:
+			"Narrows a user's entry payouts. An omitted field applies no constraint.",
+	})
 	@ZodResponse({ type: GetPayoutsResponseDto })
 	async getPayouts(
 		@Headers() headers: TelegramIdHeaderDto,
