@@ -21,7 +21,8 @@
 		"cards:seed": "ts-node -r tsconfig-paths/register scripts/seed-card-definitions.ts",
 		"registry:enrich": "ts-node -r tsconfig-paths/register scripts/enrich-currency-registry.ts",
 		"admin:ensure": "ts-node scripts/ensure-admin-wallet.ts",
-		"gen-config-schema": "ts-node -r tsconfig-paths/register utils/generate-configuration-schema.ts"
+		"gen-config-schema": "ts-node -r tsconfig-paths/register utils/generate-configuration-schema.ts",
+		"gen-openapi": "ts-node -r tsconfig-paths/register scripts/generate-openapi.ts"
 	},
 	"dependencies": {
 		"@aws-sdk/client-kms": "^3.1010.0",
