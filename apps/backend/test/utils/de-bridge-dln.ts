@@ -135,7 +135,6 @@ export async function fulfillDlnOrder(args: {
 	const { order, orderId } = parseCreatedOrderLog(srcTxReceipt)
 
 	const dstChain = dstPublicClient.chain
-	const rpcUrl = dstPublicClient.transport.url
 
 	const dlnDestination = DLN_DESTINATION_ADDRESSES[dstChain.id]
 
