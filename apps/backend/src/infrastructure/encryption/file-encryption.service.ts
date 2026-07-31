@@ -28,7 +28,7 @@ export class FileEncryptionService extends EncryptionService {
 		this.kek = this.loadKek()
 	}
 
-	async encrypt(privateKey: PrivateKey): Promise<EncryptedKey> {
+	encrypt(privateKey: PrivateKey): Promise<EncryptedKey> {
 		const iv = randomBytes(IV_LENGTH)
 		const cipher = createCipheriv(ALGORITHM, this.kek, iv)
 
@@ -44,10 +44,10 @@ export class FileEncryptionService extends EncryptionService {
 		const encryptedPrivateKey = new Uint8Array(payload.length)
 		encryptedPrivateKey.set(payload)
 
-		return { encryptedPrivateKey, kekVersion: KEK_VERSION }
+		return Promise.resolve({ encryptedPrivateKey, kekVersion: KEK_VERSION })
 	}
 
-	async decrypt(encryptedKey: EncryptedKey): Promise<PrivateKey> {
+	decrypt(encryptedKey: EncryptedKey): Promise<PrivateKey> {
 		const payload = encryptedKey.encryptedPrivateKey
 
 		const iv = payload.subarray(0, IV_LENGTH)
@@ -62,7 +62,7 @@ export class FileEncryptionService extends EncryptionService {
 			decipher.final(),
 		]).toString('utf-8')
 
-		return toPrivateKey(plaintext)
+		return Promise.resolve(toPrivateKey(plaintext))
 	}
 
 	private loadKek(): Buffer {
