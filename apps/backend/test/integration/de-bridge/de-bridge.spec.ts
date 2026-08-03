@@ -37,6 +37,7 @@ import {
 	PendingZap,
 	SamechainSwapResult,
 } from '../../../src/domain/value-objects/zap'
+import { CurrencyRegistryModule } from '../../../src/infrastructure/currency-registry/currency-registry.module'
 import { DeBridgeApiService } from '../../../src/infrastructure/de-bridge/de-bridge-api.service'
 import { DeBridgeModule } from '../../../src/infrastructure/de-bridge/de-bridge.module'
 import { DeBridgeService } from '../../../src/infrastructure/de-bridge/de-bridge.service'
@@ -143,7 +144,11 @@ async function buildTestModule(
 	provisionKekFile()
 
 	let builder = Test.createTestingModule({
-		imports: [CacheModule.register({ isGlobal: true }), DeBridgeModule],
+		imports: [
+			CacheModule.register({ isGlobal: true }),
+			CurrencyRegistryModule,
+			DeBridgeModule,
+		],
 	})
 		.overrideProvider(RIPS_CONTRACT)
 		.useValue({
