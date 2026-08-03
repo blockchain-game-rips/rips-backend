@@ -10,6 +10,10 @@ import {
 import { ChainAddress } from '../../../src/domain/value-objects/chain-address'
 import { toChainNamespace } from '../../../src/domain/value-objects/chain-namespace'
 import { CurrencyId } from '../../../src/domain/value-objects/currency-id'
+import {
+	CURRENCY_PRICE_SEED_SOURCE,
+	CurrencyPriceSeedSource,
+} from '../../../src/infrastructure/currency-registry/currency-registry.interfaces'
 import { EvmCurrencyService } from '../../../src/infrastructure/evm/evm-currency.service'
 import { GeckoTerminalService } from '../../../src/infrastructure/price-provider/gecko-terminal.service'
 import { PriceProviderService } from '../../../src/infrastructure/price-provider/price-provider.service'
@@ -58,6 +62,12 @@ function makeMockEvmCurrencyService(): jest.Mocked<
 	}
 }
 
+function makeMockPriceSeedSource(): CurrencyPriceSeedSource {
+	return {
+		seedPrices: () => new Map<CurrencyId, number>(),
+	}
+}
+
 describe('PriceProviderService', () => {
 	let service: PriceProviderService
 
@@ -70,6 +80,10 @@ describe('PriceProviderService', () => {
 				{
 					provide: EvmCurrencyService,
 					useValue: makeMockEvmCurrencyService(),
+				},
+				{
+					provide: CURRENCY_PRICE_SEED_SOURCE,
+					useValue: makeMockPriceSeedSource(),
 				},
 			],
 		}).compile()
