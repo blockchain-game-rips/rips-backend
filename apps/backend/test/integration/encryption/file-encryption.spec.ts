@@ -40,6 +40,6 @@ describe('FileEncryptionService integration', () => {
 			encryptedKey.encryptedPrivateKey.length - 1
 		] ^= 1
 
-		await expect(encryptionService.decrypt(encryptedKey)).rejects.toThrow()
+		expect(() => encryptionService.decrypt(encryptedKey)).toThrow()
 	})
 })
