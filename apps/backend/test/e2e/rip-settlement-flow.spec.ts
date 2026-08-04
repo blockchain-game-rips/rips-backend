@@ -9,11 +9,12 @@ import request from 'supertest'
 import { getAddress, parseEventLogs } from 'viem'
 import { NotificationType } from '../../generated/prisma'
 import { KeeperUseCase } from '../../src/application/use-cases/keeper/keeper.use-case'
-import { SyncCompletedRipsUseCase } from '../../src/application/use-cases/sync-completed-rips/sync-completed-rips.use-case'
+import { SyncSettlingRipsUseCase } from '../../src/application/use-cases/sync-settling-rips/sync-settling-rips.use-case'
 import { EvmAddress } from '../../src/domain/value-objects/evm-address'
 import { PrismaService } from '../../src/infrastructure/prisma/prisma.service'
 import { ripsAbi } from '../../src/infrastructure/rips/rips-abi'
 import { SeedCardDefinitionsService } from '../../src/infrastructure/seed/seed-card-definitions.service'
+import { MAX_LIMIT } from '../../src/presentation/rips/get-finished-rips/get-finished-rips.request'
 import cardsConfig from '../fixtures/cards.json'
 import {
 	BALANCE_BUFFER_MULTIPLIER,
@@ -53,6 +54,8 @@ describe('Rip settlement flow E2E', () => {
 	let user1Address: EvmAddress
 	let user2Address: EvmAddress
 	let vrfRequestId: bigint
+
+	let balancesBeforeClaim: bigint[]
 
 	let refundRipId: number
 	let refundUser1Address: EvmAddress
@@ -152,18 +155,48 @@ describe('Rip settlement flow E2E', () => {
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
 	})
 
-	it('keeper claims payouts and records them in the database', async () => {
+	it('keeper claims payouts on chain', async () => {
 		await clearCache(ctx)
 
-		const [user1BalanceBeforeClaim, user2BalanceBeforeClaim] =
-			await getBalances([user1Address, user2Address], ctx.publicClient)
+		balancesBeforeClaim = await getBalances(
+			[user1Address, user2Address],
+			ctx.publicClient,
+		)
 
 		await ctx.app.get(KeeperUseCase).execute()
 
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
 		await clearCache(ctx)
+	})
 
-		await ctx.app.get(SyncCompletedRipsUseCase).execute()
+	it('reports the claimed-but-unsynced rip as CLAIM_SETTLING in ongoing', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/ongoing')
+			.expect(200)
+
+		const settlingRip = res.body.rips.find(
+			(rip: { id: number }) => rip.id === ripId,
+		)
+
+		expect(settlingRip).toBeDefined()
+		expect(settlingRip.status).toBe('CLAIM_SETTLING')
+	})
+
+	it('omits the settling rip from the finished feed', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.expect(200)
+
+		expect(
+			res.body.rips.some((rip: { id: number }) => rip.id === ripId),
+		).toBe(false)
+	})
+
+	it('records the payouts once the sync worker handles the rip', async () => {
+		const [user1BalanceBeforeClaim, user2BalanceBeforeClaim] =
+			balancesBeforeClaim
+
+		await ctx.app.get(SyncSettlingRipsUseCase).execute()
 
 		const user1OnChainPayout = await getPayoutClaimedByUser(user1Address)
 		const user2OnChainPayout = await getPayoutClaimedByUser(user2Address)
@@ -180,6 +213,72 @@ describe('Rip settlement flow E2E', () => {
 		expect(user2BalanceAfterClaim - user2BalanceBeforeClaim).toBe(
 			user2OnChainPayout ?? 0n,
 		)
+	})
+
+	it('moves the synced rip out of ongoing and into finished as CLAIMED', async () => {
+		await clearCache(ctx)
+
+		const ongoingRes = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/ongoing')
+			.expect(200)
+
+		expect(
+			ongoingRes.body.rips.some(
+				(rip: { id: number }) => rip.id === ripId,
+			),
+		).toBe(false)
+
+		const finishedRes = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.expect(200)
+
+		const finishedRip = finishedRes.body.rips.find(
+			(rip: { id: number }) => rip.id === ripId,
+		)
+
+		expect(finishedRip).toBeDefined()
+		expect(finishedRip.status).toBe('CLAIMED')
+	})
+
+	it('rejects a malformed cursor on the finished feed', async () => {
+		await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({ cursor: 'not-a-cursor' })
+			.expect(400)
+	})
+
+	it('rejects a limit above the maximum', async () => {
+		await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({ limit: MAX_LIMIT + 1 })
+			.expect(400)
+	})
+
+	it('pages the finished feed with the returned cursor', async () => {
+		const firstPage = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({ limit: 1 })
+			.expect(200)
+
+		expect(firstPage.body.rips).toHaveLength(1)
+
+		if (firstPage.body.nextCursor == null) {
+			return
+		}
+
+		const secondPage = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({ limit: 1, cursor: firstPage.body.nextCursor })
+			.expect(200)
+
+		const firstIds = firstPage.body.rips.map(
+			(rip: { id: number }) => rip.id,
+		)
+		const secondIds = secondPage.body.rips.map(
+			(rip: { id: number }) => rip.id,
+		)
+
+		expect(secondIds).not.toEqual(expect.arrayContaining(firstIds))
 	})
 
 	it('get-payouts returns 4 entries for each user', async () => {
@@ -370,7 +469,7 @@ describe('Rip settlement flow E2E', () => {
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
 		await clearCache(ctx)
 
-		await ctx.app.get(SyncCompletedRipsUseCase).execute()
+		await ctx.app.get(SyncSettlingRipsUseCase).execute()
 
 		const balanceAfterRefund = (
 			await getBalances([refundUser1Address], ctx.publicClient)

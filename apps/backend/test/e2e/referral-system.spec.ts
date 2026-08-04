@@ -7,7 +7,7 @@ import {
 import request from 'supertest'
 import { parseEventLogs } from 'viem'
 import { KeeperUseCase } from '../../src/application/use-cases/keeper/keeper.use-case'
-import { SyncCompletedRipsUseCase } from '../../src/application/use-cases/sync-completed-rips/sync-completed-rips.use-case'
+import { SyncSettlingRipsUseCase } from '../../src/application/use-cases/sync-settling-rips/sync-settling-rips.use-case'
 import {
 	EvmAddress,
 	toEvmAddress,
@@ -138,7 +138,7 @@ describe('Referral system E2E', () => {
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
 		await clearCache(ctx)
 
-		await ctx.app.get(SyncCompletedRipsUseCase).execute()
+		await ctx.app.get(SyncSettlingRipsUseCase).execute()
 
 		const rawLogs = await getRipsLogs(ctx)
 
