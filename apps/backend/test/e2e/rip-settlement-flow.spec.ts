@@ -52,6 +52,12 @@ const ENTRIES_PER_REFUND_USER = 1
 
 const NEVER_PARTICIPATED_ADDRESS = '0x000000000000000000000000000000000000dEaD'
 
+// Each user in this flow enters exactly one rip, so their finished counts are
+// exact rather than lower bounds.
+const NO_RIPS = 0
+const CLAIMED_RIPS_PER_PARTICIPANT = 1
+const REFUNDED_RIPS_PER_PARTICIPANT = 1
+
 describe('Rip settlement flow E2E', () => {
 	const RIPS_ADDRESS = getAddress(deployments.rips)
 
@@ -208,6 +214,17 @@ describe('Rip settlement flow E2E', () => {
 		expect(
 			res.body.rips.some((rip: { id: number }) => rip.id === ripId),
 		).toBe(false)
+	})
+
+	// Counted only once the backend has settled the rip, not once the chain
+	// has finished with it. The sync worker has not run yet.
+	it('leaves the settling rip out of a participant count', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished/counts')
+			.query({ userAddress: user1Address })
+			.expect(200)
+
+		expect(res.body).toEqual({ claimed: NO_RIPS, refunded: NO_RIPS })
 	})
 
 	it('records the payouts once the sync worker handles the rip', async () => {
@@ -603,5 +620,38 @@ describe('Rip settlement flow E2E', () => {
 		const ids = res.body.rips.map((rip: { id: number }) => rip.id)
 
 		expect(ids).toContain(ripId)
+	})
+
+	it('counts a claim-rip participant against the claimed total', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished/counts')
+			.query({ userAddress: user1Address })
+			.expect(200)
+
+		expect(res.body).toEqual({
+			claimed: CLAIMED_RIPS_PER_PARTICIPANT,
+			refunded: NO_RIPS,
+		})
+	})
+
+	it('counts a refund-rip participant against the refunded total', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished/counts')
+			.query({ userAddress: refundUser1Address })
+			.expect(200)
+
+		expect(res.body).toEqual({
+			claimed: NO_RIPS,
+			refunded: REFUNDED_RIPS_PER_PARTICIPANT,
+		})
+	})
+
+	it('counts nothing for an address that entered nothing', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished/counts')
+			.query({ userAddress: NEVER_PARTICIPATED_ADDRESS })
+			.expect(200)
+
+		expect(res.body).toEqual({ claimed: NO_RIPS, refunded: NO_RIPS })
 	})
 })
