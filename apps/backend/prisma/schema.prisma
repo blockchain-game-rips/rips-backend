@@ -96,6 +96,7 @@ model SyncedRip {
     ripId  Int      @id @map("rip_id")
     syncedAt DateTime @default(now()) @map("synced_at")
 
+    @@index([syncedAt(sort: Desc), ripId(sort: Desc)], map: "synced_rips_synced_at_rip_id_desc_idx")
     @@map("synced_rips")
 }
 
