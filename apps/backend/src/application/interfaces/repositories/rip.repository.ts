@@ -4,15 +4,21 @@ import {
 	Rip,
 	SettlingRip,
 } from '../../../domain/entities/rip'
+import { EvmAddress } from '../../../domain/value-objects/evm-address'
 
 export type FinishedCursor = {
 	syncedAt: Date
 	ripId: number
 }
 
+/**
+ * Narrows the finished feed. An omitted userAddress applies no constraint;
+ * when given, only rips that address bought entries in are returned.
+ */
 export type GetFinishedRipsArgs = {
 	limit: number
 	cursor?: FinishedCursor
+	userAddress?: EvmAddress
 }
 
 export type FinishedPage = {

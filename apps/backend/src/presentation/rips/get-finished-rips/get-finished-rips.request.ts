@@ -1,5 +1,6 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
+import { evmAddressSchema } from '../../shared/evm-address.schema'
 
 const DEFAULT_LIMIT = 20
 
@@ -14,6 +15,7 @@ const getFinishedRipsQuerySchema = z.object({
 		.optional()
 		.default(DEFAULT_LIMIT),
 	cursor: z.string().optional(),
+	userAddress: evmAddressSchema.optional(),
 })
 
 export class GetFinishedRipsQueryDto extends createZodDto(

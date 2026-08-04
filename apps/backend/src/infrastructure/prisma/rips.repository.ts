@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { Prisma } from '../../../generated/prisma'
 import { PresetRepository } from '../../application/interfaces/repositories/preset.repository'
 import {
 	FinishedCursor,
@@ -15,6 +16,7 @@ import {
 	SettlingStatus,
 } from '../../domain/entities/rip'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { EvmAddress } from '../../domain/value-objects/evm-address'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { IndexerPrismaService } from '../indexer/indexer-prisma.service'
 import {
@@ -201,12 +203,41 @@ export class PrismaRipRepository extends RipRepository {
 		return [...presetRips, ...settlingRips]
 	}
 
+	private async findParticipatedRipIds(
+		userAddress: EvmAddress,
+	): Promise<number[]> {
+		const lowerCaseUserAddress = userAddress.toLowerCase()
+
+		const rows = await this.indexer.entry_purchase.findMany({
+			where: { user: lowerCaseUserAddress },
+			distinct: ['rip_id'],
+			select: { rip_id: true },
+		})
+
+		return rows
+			.map((row) => row.rip_id)
+			.filter((ripId): ripId is string => ripId != null)
+			.map(Number)
+	}
+
 	async getFinishedRips({
 		limit,
 		cursor,
+		userAddress,
 	}: GetFinishedRipsArgs): Promise<FinishedPage> {
-		const syncedPage = await this.prisma.syncedRip.findMany({
-			where: cursor && {
+		const participatedRipIds =
+			userAddress != null
+				? await this.findParticipatedRipIds(userAddress)
+				: null
+
+		if (participatedRipIds != null && participatedRipIds.length === 0) {
+			return { rips: [], nextCursor: null }
+		}
+
+		const filters: Prisma.SyncedRipWhereInput[] = []
+
+		if (cursor != null) {
+			filters.push({
 				OR: [
 					{ syncedAt: { lt: cursor.syncedAt } },
 					{
@@ -214,7 +245,15 @@ export class PrismaRipRepository extends RipRepository {
 						ripId: { lt: cursor.ripId },
 					},
 				],
-			},
+			})
+		}
+
+		if (participatedRipIds != null) {
+			filters.push({ ripId: { in: participatedRipIds } })
+		}
+
+		const syncedPage = await this.prisma.syncedRip.findMany({
+			where: { AND: filters },
 			orderBy: [{ syncedAt: 'desc' }, { ripId: 'desc' }],
 			take: limit,
 			select: { ripId: true, syncedAt: true },

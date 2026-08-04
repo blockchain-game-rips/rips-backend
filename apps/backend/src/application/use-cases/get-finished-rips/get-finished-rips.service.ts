@@ -15,7 +15,12 @@ export class GetFinishedRipsService extends GetFinishedRipsUseCase {
 	execute({
 		limit,
 		cursor,
+		userAddress,
 	}: GetFinishedRipsInput): Promise<GetFinishedRipsResult> {
-		return this.ripRepository.getFinishedRips({ limit, cursor })
+		return this.ripRepository.getFinishedRips({
+			limit,
+			cursor,
+			userAddress,
+		})
 	}
 }
