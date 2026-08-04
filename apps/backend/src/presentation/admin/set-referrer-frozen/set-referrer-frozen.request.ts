@@ -1,13 +1,9 @@
 import { createZodDto } from 'nestjs-zod'
-import { isAddress } from 'viem'
 import { z } from 'zod'
-import { toEvmAddress } from '../../../domain/value-objects/evm-address'
+import { evmAddressSchema } from '../../shared/evm-address.schema'
 
 const setReferrerFrozenParamsSchema = z.object({
-	address: z
-		.string()
-		.refine(isAddress, 'Invalid EVM address')
-		.transform(toEvmAddress),
+	address: evmAddressSchema,
 })
 
 const setReferrerFrozenBodySchema = z.object({

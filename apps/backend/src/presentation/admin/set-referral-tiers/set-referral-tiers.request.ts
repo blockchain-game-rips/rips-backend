@@ -1,13 +1,9 @@
 import { createZodDto } from 'nestjs-zod'
-import { isAddress } from 'viem'
 import { z } from 'zod'
-import { toEvmAddress } from '../../../domain/value-objects/evm-address'
+import { evmAddressSchema } from '../../shared/evm-address.schema'
 
 const setReferralTiersParamsSchema = z.object({
-	currency: z
-		.string()
-		.refine(isAddress, 'Invalid EVM address')
-		.transform(toEvmAddress),
+	currency: evmAddressSchema,
 })
 
 const referralTierSchema = z.object({
