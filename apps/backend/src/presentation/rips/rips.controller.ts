@@ -301,6 +301,10 @@ export class RipsController {
 	}
 
 	@Get('rips/finished')
+	@ApiOperation({
+		description:
+			'Rips the backend has settled, most recently settled first. The order is by settlement time, not by rip id, so a rip that finished on chain earlier can appear later in the feed.',
+	})
 	@ZodResponse({ type: GetFinishedRipsResponseDto })
 	async getFinishedRips(
 		@Query() query: GetFinishedRipsQueryDto,
