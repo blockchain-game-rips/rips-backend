@@ -6,6 +6,7 @@ import { BuyEntriesZapModule } from '../../use-cases/buy-entries-zap.module'
 import { GetAvailablePresetsModule } from '../../use-cases/get-available-presets.module'
 import { GetCardCollectionModule } from '../../use-cases/get-card-collection.module'
 import { GetCardDefinitionsModule } from '../../use-cases/get-card-definitions.module'
+import { GetFinishedRipCountsModule } from '../../use-cases/get-finished-rip-counts.module'
 import { GetFinishedRipsModule } from '../../use-cases/get-finished-rips.module'
 import { GetOngoingRipsModule } from '../../use-cases/get-ongoing-rips.module'
 import { GetPayoutsModule } from '../../use-cases/get-payouts.module'
@@ -24,6 +25,7 @@ import { RevealEntryPayoutsModule } from '../../use-cases/reveal-entry-payouts.m
 		GetRipsStateModule,
 		GetOngoingRipsModule,
 		GetFinishedRipsModule,
+		GetFinishedRipCountsModule,
 		BuyEntriesPurchaseModule,
 		BuyEntriesZapModule,
 		BuyEntriesZapSamechainModule,

@@ -4,6 +4,7 @@ import { PresetRepository } from '../../application/interfaces/repositories/pres
 import {
 	FinishedCursor,
 	FinishedPage,
+	FinishedRipCounts,
 	GetFinishedRipsArgs,
 	RipRepository,
 } from '../../application/interfaces/repositories/rip.repository'
@@ -37,6 +38,12 @@ const SETTLING_STATUS_BY_ON_CHAIN_STATUS: Record<
 	CLAIMED: RipStatus.CLAIM_SETTLING,
 	REFUNDED: RipStatus.REFUND_SETTLING,
 }
+
+const CLAIMED_STATUS: OnChainTerminalStatus = 'CLAIMED'
+
+const REFUNDED_STATUS: OnChainTerminalStatus = 'REFUNDED'
+
+const NO_FINISHED_RIPS = 0
 
 function toSettlingStatus(onChainStatus: string): SettlingStatus | null {
 	return isOnChainTerminalStatus(onChainStatus)
@@ -218,6 +225,53 @@ export class PrismaRipRepository extends RipRepository {
 			.map((row) => row.rip_id)
 			.filter((ripId): ripId is string => ripId != null)
 			.map(Number)
+	}
+
+	private async findSyncedParticipatedRipIds(
+		userAddress: EvmAddress,
+	): Promise<number[]> {
+		const participatedRipIds =
+			await this.findParticipatedRipIds(userAddress)
+
+		if (participatedRipIds.length === 0) {
+			return []
+		}
+
+		const syncedRows = await this.prisma.syncedRip.findMany({
+			where: { ripId: { in: participatedRipIds } },
+			select: { ripId: true },
+		})
+
+		return syncedRows.map((row) => row.ripId)
+	}
+
+	async countFinishedRips(
+		userAddress: EvmAddress,
+	): Promise<FinishedRipCounts> {
+		const syncedRipIds =
+			await this.findSyncedParticipatedRipIds(userAddress)
+
+		if (syncedRipIds.length === 0) {
+			return { claimed: NO_FINISHED_RIPS, refunded: NO_FINISHED_RIPS }
+		}
+
+		const grouped = await this.indexer.rip.groupBy({
+			by: ['status'],
+			where: {
+				id: { in: syncedRipIds.map(String) },
+				status: { in: [...ON_CHAIN_TERMINAL_STATUSES] },
+			},
+			_count: { _all: true },
+		})
+
+		const countByStatus = new Map(
+			grouped.map((group) => [group.status, group._count._all]),
+		)
+
+		return {
+			claimed: countByStatus.get(CLAIMED_STATUS) ?? NO_FINISHED_RIPS,
+			refunded: countByStatus.get(REFUNDED_STATUS) ?? NO_FINISHED_RIPS,
+		}
 	}
 
 	async getFinishedRips({

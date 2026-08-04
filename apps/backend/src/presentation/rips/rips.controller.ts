@@ -16,6 +16,7 @@ import { BuyEntriesZapUseCase } from '../../application/use-cases/buy-entries-za
 import { GetAvailablePresetsUseCase } from '../../application/use-cases/get-available-presets/get-available-presets.use-case'
 import { GetCardCollectionUseCase } from '../../application/use-cases/get-card-collection/get-card-collection.use-case'
 import { GetCardDefinitionsUseCase } from '../../application/use-cases/get-card-definitions/get-card-definitions.use-case'
+import { GetFinishedRipCountsUseCase } from '../../application/use-cases/get-finished-rip-counts/get-finished-rip-counts.use-case'
 import { GetFinishedRipsUseCase } from '../../application/use-cases/get-finished-rips/get-finished-rips.use-case'
 import { GetOngoingRipsUseCase } from '../../application/use-cases/get-ongoing-rips/get-ongoing-rips.use-case'
 import { GetPayoutsUseCase } from '../../application/use-cases/get-payouts/get-payouts.use-case'
@@ -53,6 +54,8 @@ import {
 	GetCardDefinitionsResponseDto,
 	toGetCardDefinitionsResponseDto,
 } from './get-card-definitions/get-card-definitions.response'
+import { GetFinishedRipCountsQueryDto } from './get-finished-rip-counts/get-finished-rip-counts.request'
+import { GetFinishedRipCountsResponseDto } from './get-finished-rip-counts/get-finished-rip-counts.response'
 import {
 	decodeFinishedCursor,
 	encodeFinishedCursor,
@@ -106,6 +109,7 @@ export class RipsController {
 		private readonly getZapResultUseCase: GetZapResultUseCase,
 		private readonly getOngoingRipsUseCase: GetOngoingRipsUseCase,
 		private readonly getFinishedRipsUseCase: GetFinishedRipsUseCase,
+		private readonly getFinishedRipCountsUseCase: GetFinishedRipCountsUseCase,
 		private readonly getPayoutsUseCase: GetPayoutsUseCase,
 		private readonly revealEntryPayoutsUseCase: RevealEntryPayoutsUseCase,
 		private readonly getRipsUseCase: GetRipsUseCase,
@@ -325,6 +329,20 @@ export class RipsController {
 					? encodeFinishedCursor(result.nextCursor)
 					: null,
 		}
+	}
+
+	@Get('rips/finished/counts')
+	@ApiOperation({
+		description:
+			'How many finished rips the given address took part in, split into claimed and refunded. Counts distinct rips over the same set the finished feed returns, so a rip the chain has finished with is only counted once the backend has settled it.',
+	})
+	@ZodResponse({ type: GetFinishedRipCountsResponseDto })
+	async getFinishedRipCounts(
+		@Query() query: GetFinishedRipCountsQueryDto,
+	): Promise<GetFinishedRipCountsResponseDto> {
+		return this.getFinishedRipCountsUseCase.execute({
+			userAddress: query.userAddress,
+		})
 	}
 
 	@Get('card-collection')
