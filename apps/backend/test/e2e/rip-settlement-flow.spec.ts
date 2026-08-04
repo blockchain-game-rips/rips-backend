@@ -35,6 +35,9 @@ import {
 
 const PRESET_ID = 1
 const ENTRIES_PER_USER = 4
+const ENTRIES_PER_USER_FIRST_PURCHASE = 2
+const ENTRIES_PER_USER_SECOND_PURCHASE =
+	ENTRIES_PER_USER - ENTRIES_PER_USER_FIRST_PURCHASE
 const ENTRIES_REVEALED_ONE_AT_A_TIME = 1
 
 const KEEPER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
@@ -46,6 +49,8 @@ const REFUND_TELEGRAM_ID_USER_1 = '777888999'
 const REFUND_TELEGRAM_ID_USER_2 = '101112131'
 
 const ENTRIES_PER_REFUND_USER = 1
+
+const NEVER_PARTICIPATED_ADDRESS = '0x000000000000000000000000000000000000dEaD'
 
 describe('Rip settlement flow E2E', () => {
 	const RIPS_ADDRESS = getAddress(deployments.rips)
@@ -106,15 +111,28 @@ describe('Rip settlement flow E2E', () => {
 			paymentCurrencyChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 		})
 
+		// Split across two purchases so the participation lookup has to
+		// collapse duplicate rows for the same user and rip.
 		const res1 = await request(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
-			.send(buyEntriesBody(ENTRIES_PER_USER))
+			.send(buyEntriesBody(ENTRIES_PER_USER_FIRST_PURCHASE))
 			.expect(201)
 
 		ripId = res1.body.ripId
 
-		expect(res1.body.entryCount).toBe(ENTRIES_PER_USER)
+		expect(res1.body.entryCount).toBe(ENTRIES_PER_USER_FIRST_PURCHASE)
+
+		const res1SecondPurchase = await request(ctx.app.getHttpServer())
+			.post('/rips/entries/purchase')
+			.set('x-telegram-id', TELEGRAM_ID_USER_1)
+			.send(buyEntriesBody(ENTRIES_PER_USER_SECOND_PURCHASE))
+			.expect(201)
+
+		expect(res1SecondPurchase.body.ripId).toBe(ripId)
+		expect(res1SecondPurchase.body.entryCount).toBe(
+			ENTRIES_PER_USER_SECOND_PURCHASE,
+		)
 
 		const res2 = await request(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
@@ -493,5 +511,97 @@ describe('Rip settlement flow E2E', () => {
 
 		expect(syncedRips).toHaveLength(1)
 		expect(syncedRips[0].ripId).toBe(refundRipId)
+	})
+
+	it('narrows the finished feed to the rips a user entered', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({ userAddress: user1Address })
+			.expect(200)
+
+		const ids = res.body.rips.map((rip: { id: number }) => rip.id)
+
+		expect(ids).toContain(ripId)
+		expect(ids).not.toContain(refundRipId)
+	})
+
+	it('narrows the finished feed to a refund-rip participant', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({ userAddress: refundUser1Address })
+			.expect(200)
+
+		const ids = res.body.rips.map((rip: { id: number }) => rip.id)
+
+		expect(ids).toContain(refundRipId)
+		expect(ids).not.toContain(ripId)
+	})
+
+	it('returns every finished rip when no user address is given', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.expect(200)
+
+		const ids = res.body.rips.map((rip: { id: number }) => rip.id)
+
+		expect(ids).toContain(ripId)
+		expect(ids).toContain(refundRipId)
+	})
+
+	it('returns an empty page for an address that entered nothing', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({ userAddress: NEVER_PARTICIPATED_ADDRESS })
+			.expect(200)
+
+		expect(res.body.rips).toHaveLength(0)
+		expect(res.body.nextCursor).toBeNull()
+	})
+
+	// User 1 bought entries in two separate purchases, so a participation
+	// lookup that failed to collapse them would page as if there were more
+	// rips than exist and hand back a cursor promising a further page.
+	it('pages a filtered feed without inventing a page that is not there', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({ userAddress: user1Address, limit: 1 })
+			.expect(200)
+
+		expect(res.body.rips).toHaveLength(1)
+		expect(res.body.rips[0].id).toBe(ripId)
+
+		if (res.body.nextCursor == null) {
+			return
+		}
+
+		const secondPage = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({
+				userAddress: user1Address,
+				limit: 1,
+				cursor: res.body.nextCursor,
+			})
+			.expect(200)
+
+		expect(secondPage.body.rips).toHaveLength(0)
+		expect(secondPage.body.nextCursor).toBeNull()
+	})
+
+	it('rejects a malformed user address on the finished feed', async () => {
+		await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({ userAddress: 'not-an-address' })
+			.expect(400)
+	})
+
+	it('matches a user address regardless of its casing', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/rips/rips/finished')
+			.query({ userAddress: user1Address.toLowerCase() })
+			.expect(200)
+
+		const ids = res.body.rips.map((rip: { id: number }) => rip.id)
+
+		expect(ids).toContain(ripId)
 	})
 })
