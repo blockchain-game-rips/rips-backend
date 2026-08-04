@@ -3,18 +3,19 @@ import { PresetRepository } from '../../application/interfaces/repositories/pres
 import { ReferralSystemRepository } from '../../application/interfaces/repositories/referral-system.repository'
 import { RipRepository } from '../../application/interfaces/repositories/rip.repository'
 import { EvmModule } from '../evm/evm.module'
+import { PrismaModule } from '../prisma/prisma.module'
+import { PrismaRipRepository } from '../prisma/rips.repository'
 import { RipsModule } from '../rips/rips.module'
 import { IndexerPrismaService } from './indexer-prisma.service'
 import { IndexerPresetRepository } from './preset.repository'
 import { IndexerReferralSystemRepository } from './referral-system.repository'
-import { IndexerRipRepository } from './rips.repository'
 
 @Module({
-	imports: [EvmModule, RipsModule],
+	imports: [EvmModule, RipsModule, PrismaModule],
 	providers: [
 		IndexerPrismaService,
 		{ provide: PresetRepository, useClass: IndexerPresetRepository },
-		{ provide: RipRepository, useClass: IndexerRipRepository },
+		{ provide: RipRepository, useClass: PrismaRipRepository },
 		{
 			provide: ReferralSystemRepository,
 			useClass: IndexerReferralSystemRepository,

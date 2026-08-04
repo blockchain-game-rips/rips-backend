@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { CompletedRip, RipStatus } from '../../../domain/entities/rip'
+import { RipStatus, SettlingRip } from '../../../domain/entities/rip'
 import { resolvePayout } from '../../../domain/services/payout-utils'
 import { PurchaseAction } from '../../../domain/value-objects/actions'
 import { EntryPayout } from '../../../domain/value-objects/entry-payout'
@@ -9,11 +9,11 @@ import { RipSyncRepository } from '../../interfaces/repositories/rip-sync.reposi
 import { RipRepository } from '../../interfaces/repositories/rip.repository'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
 import { PRESET_TO_TIER_BIASES } from '../../interfaces/tokens'
-import { SyncCompletedRipsUseCase } from './sync-completed-rips.use-case'
+import { SyncSettlingRipsUseCase } from './sync-settling-rips.use-case'
 
 @Injectable()
-export class SyncCompletedRipsService extends SyncCompletedRipsUseCase {
-	private readonly logger = new Logger(SyncCompletedRipsService.name)
+export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
+	private readonly logger = new Logger(SyncSettlingRipsService.name)
 
 	constructor(
 		private readonly ripRepository: RipRepository,
@@ -31,18 +31,18 @@ export class SyncCompletedRipsService extends SyncCompletedRipsUseCase {
 		const highestRipId =
 			(await this.ripSyncRepository.getHighestSyncedRipId()) ?? 0
 
-		const rip = await this.ripRepository.getNextCompletedRip(highestRipId)
+		const rip = await this.ripRepository.getNextSettlingRip(highestRipId)
 
 		if (!rip) return
 
-		if (rip.status === RipStatus.CLAIMED) {
+		if (rip.status === RipStatus.CLAIM_SETTLING) {
 			await this.syncClaimedRip(rip)
 		} else {
 			await this.syncRefundedRip(rip)
 		}
 	}
 
-	private async syncClaimedRip(rip: CompletedRip): Promise<void> {
+	private async syncClaimedRip(rip: SettlingRip): Promise<void> {
 		const payouts = await this.resolveRipPayouts(rip)
 
 		await this.ripSyncRepository.syncClaimedRip({
@@ -73,11 +73,11 @@ export class SyncCompletedRipsService extends SyncCompletedRipsUseCase {
 				totalEntries: totalEntries.toString(),
 				winnersCount: payouts.filter((p) => p.payoutAmount > 0n).length,
 			},
-			'Rip completed',
+			'Rip finished',
 		)
 	}
 
-	private async syncRefundedRip(rip: CompletedRip): Promise<void> {
+	private async syncRefundedRip(rip: SettlingRip): Promise<void> {
 		const userIds = await this.resolveParticipantUserIds(rip)
 
 		await this.ripSyncRepository.syncRefundedRip({
@@ -87,7 +87,7 @@ export class SyncCompletedRipsService extends SyncCompletedRipsUseCase {
 	}
 
 	private async resolveParticipantUserIds(
-		rip: CompletedRip,
+		rip: SettlingRip,
 	): Promise<bigint[]> {
 		const uniqueAddresses = [
 			...new Set(rip.actions.purchases.map((p) => p.userAddress)),
@@ -103,13 +103,13 @@ export class SyncCompletedRipsService extends SyncCompletedRipsUseCase {
 		return userIds
 	}
 
-	private hasRandoms(rip: CompletedRip): rip is CompletedRip & {
-		randoms: NonNullable<CompletedRip['randoms']>
+	private hasRandoms(rip: SettlingRip): rip is SettlingRip & {
+		randoms: NonNullable<SettlingRip['randoms']>
 	} {
 		return rip.randoms !== undefined
 	}
 
-	private async resolveRipPayouts(rip: CompletedRip): Promise<EntryPayout[]> {
+	private async resolveRipPayouts(rip: SettlingRip): Promise<EntryPayout[]> {
 		if (!this.hasRandoms(rip))
 			throw new Error(`Rip ${rip.id} is missing randoms`)
 
@@ -139,8 +139,8 @@ export class SyncCompletedRipsService extends SyncCompletedRipsUseCase {
 	}
 
 	private async resolveUserPayouts(
-		rip: CompletedRip & {
-			randoms: NonNullable<CompletedRip['randoms']>
+		rip: SettlingRip & {
+			randoms: NonNullable<SettlingRip['randoms']>
 		},
 		address: EvmAddress,
 		purchases: PurchaseAction[],

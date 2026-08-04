@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common'
 import { OngoingRip } from '../../../domain/entities/rip'
-import { PresetRepository } from '../../interfaces/repositories/preset.repository'
+import { RipRepository } from '../../interfaces/repositories/rip.repository'
 import { GetOngoingRipsUseCase } from './get-ongoing-rips.use-case'
 
 @Injectable()
 export class GetOngoingRipsService extends GetOngoingRipsUseCase {
-	constructor(private readonly presetRepository: PresetRepository) {
+	constructor(private readonly ripRepository: RipRepository) {
 		super()
 	}
 
-	async execute(): Promise<OngoingRip[]> {
-		const presetsWithRips =
-			await this.presetRepository.getPresetsWithOngoingRips()
-
-		return presetsWithRips.flatMap(({ ongoingRips }) => ongoingRips)
+	execute(): Promise<OngoingRip[]> {
+		return this.ripRepository.getOngoingRips()
 	}
 }

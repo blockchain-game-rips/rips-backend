@@ -7,6 +7,11 @@ import { AddressesActions } from '../../domain/value-objects/actions'
 import { toEvmAddress } from '../../domain/value-objects/evm-address'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 
+// The indexer's own vocabulary for a rip the chain has finished with. It is
+// deliberately not FINISHED_STATUSES: that domain set means "backend-handled",
+// and a settling rip still reads CLAIMED/REFUNDED in this column.
+export const ON_CHAIN_TERMINAL_STATUSES = ['CLAIMED', 'REFUNDED'] as const
+
 export const ripInclude = {
 	config: {
 		include: {

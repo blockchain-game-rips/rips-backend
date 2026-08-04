@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { SyncCompletedRipsUseCase } from '../../application/use-cases/sync-completed-rips/sync-completed-rips.use-case'
+import { SyncSettlingRipsUseCase } from '../../application/use-cases/sync-settling-rips/sync-settling-rips.use-case'
 import { WorkerMetricsService } from '../../infrastructure/metrics/worker-metrics.service'
 
-const WORKER_NAME = 'sync-completed-rips'
+const WORKER_NAME = 'sync-settling-rips'
 
 @Injectable()
-export class SyncCompletedRipsWorker {
-	private readonly logger = new Logger(SyncCompletedRipsWorker.name)
+export class SyncSettlingRipsWorker {
+	private readonly logger = new Logger(SyncSettlingRipsWorker.name)
 
 	constructor(
-		private readonly syncCompletedRipsUseCase: SyncCompletedRipsUseCase,
+		private readonly syncSettlingRipsUseCase: SyncSettlingRipsUseCase,
 		private readonly workerMetrics: WorkerMetricsService,
 	) {}
 
@@ -19,7 +19,7 @@ export class SyncCompletedRipsWorker {
 		const endRun = this.workerMetrics.startRun(WORKER_NAME)
 
 		try {
-			await this.syncCompletedRipsUseCase.execute()
+			await this.syncSettlingRipsUseCase.execute()
 			endRun('success')
 		} catch (error) {
 			endRun('failure')

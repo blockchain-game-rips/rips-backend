@@ -1,22 +1,21 @@
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
 import { getAddress } from 'viem'
 import { Prisma } from '../../../generated/prisma-indexer'
 import { PresetRepository } from '../../application/interfaces/repositories/preset.repository'
 import { Preset } from '../../domain/entities/preset'
-import {
-	COMPLETED_STATUSES,
-	isOngoingRip,
-	OngoingRip,
-} from '../../domain/entities/rip'
+import { isOngoingRip, OngoingRip } from '../../domain/entities/rip'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { PresetWithOngoingRips } from '../../domain/value-objects/preset-with-ongoing-rips'
-import { withCache } from '../cache/with-cache'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { RIPS_CONTRACT } from '../rips/rips.constants'
 import { IndexerPrismaService } from './indexer-prisma.service'
-import { INDEXER_TTL_MS } from './indexer.constants'
-import { fromConfigRaw, PresetConfigRaw, ripInclude, toRip } from './utils'
+import {
+	fromConfigRaw,
+	ON_CHAIN_TERMINAL_STATUSES,
+	PresetConfigRaw,
+	ripInclude,
+	toRip,
+} from './utils'
 
 const presetInclude = {
 	config: {
@@ -25,7 +24,7 @@ const presetInclude = {
 		},
 	},
 	rip: {
-		where: { status: { notIn: COMPLETED_STATUSES.map(String) } },
+		where: { status: { notIn: [...ON_CHAIN_TERMINAL_STATUSES] } },
 		include: ripInclude,
 	},
 } satisfies Prisma.presetInclude
@@ -38,7 +37,6 @@ export class IndexerPresetRepository extends PresetRepository {
 		private readonly indexer: IndexerPrismaService,
 		private readonly evmCurrencyService: EvmCurrencyService,
 		@Inject(RIPS_CONTRACT) contract: ChainAddress,
-		@Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
 	) {
 		super()
 		this.chainId = Number(contract.chain.reference)
@@ -68,12 +66,9 @@ export class IndexerPresetRepository extends PresetRepository {
 	}
 
 	async getPresetsWithOngoingRips(): Promise<PresetWithOngoingRips[]> {
-		const presets = await withCache(
-			this.cacheManager,
-			'indexer-presets-with-ongoing-rips',
-			INDEXER_TTL_MS,
-			() => this.indexer.preset.findMany({ include: presetInclude }),
-		)
+		const presets = await this.indexer.preset.findMany({
+			include: presetInclude,
+		})
 
 		return Promise.all(
 			presets.map(async (presetRaw) => {

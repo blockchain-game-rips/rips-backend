@@ -16,7 +16,7 @@ import { BuyEntriesZapUseCase } from '../../application/use-cases/buy-entries-za
 import { GetAvailablePresetsUseCase } from '../../application/use-cases/get-available-presets/get-available-presets.use-case'
 import { GetCardCollectionUseCase } from '../../application/use-cases/get-card-collection/get-card-collection.use-case'
 import { GetCardDefinitionsUseCase } from '../../application/use-cases/get-card-definitions/get-card-definitions.use-case'
-import { GetCompletedRipsUseCase } from '../../application/use-cases/get-completed-rips/get-completed-rips.use-case'
+import { GetFinishedRipsUseCase } from '../../application/use-cases/get-finished-rips/get-finished-rips.use-case'
 import { GetOngoingRipsUseCase } from '../../application/use-cases/get-ongoing-rips/get-ongoing-rips.use-case'
 import { GetPayoutsUseCase } from '../../application/use-cases/get-payouts/get-payouts.use-case'
 import { GetRipsStateUseCase } from '../../application/use-cases/get-rips-state/get-rips-state.use-case'
@@ -53,8 +53,12 @@ import {
 	GetCardDefinitionsResponseDto,
 	toGetCardDefinitionsResponseDto,
 } from './get-card-definitions/get-card-definitions.response'
-import { GetCompletedRipsQueryDto } from './get-completed-rips/get-completed-rips.request'
-import { GetCompletedRipsResponseDto } from './get-completed-rips/get-completed-rips.response'
+import {
+	decodeFinishedCursor,
+	encodeFinishedCursor,
+} from './get-finished-rips/finished-cursor'
+import { GetFinishedRipsQueryDto } from './get-finished-rips/get-finished-rips.request'
+import { GetFinishedRipsResponseDto } from './get-finished-rips/get-finished-rips.response'
 import { GetOngoingRipsResponseDto } from './get-ongoing-rips/get-ongoing-rips.response'
 import { GetPayoutsQueryDto } from './get-payouts/get-payouts.request'
 import { GetPayoutsResponseDto } from './get-payouts/get-payouts.response'
@@ -101,7 +105,7 @@ export class RipsController {
 		private readonly quoteZapSamechainUseCase: QuoteZapSamechainUseCase,
 		private readonly getZapResultUseCase: GetZapResultUseCase,
 		private readonly getOngoingRipsUseCase: GetOngoingRipsUseCase,
-		private readonly getCompletedRipsUseCase: GetCompletedRipsUseCase,
+		private readonly getFinishedRipsUseCase: GetFinishedRipsUseCase,
 		private readonly getPayoutsUseCase: GetPayoutsUseCase,
 		private readonly revealEntryPayoutsUseCase: RevealEntryPayoutsUseCase,
 		private readonly getRipsUseCase: GetRipsUseCase,
@@ -296,19 +300,25 @@ export class RipsController {
 		}
 	}
 
-	@Get('rips/completed')
-	@ZodResponse({ type: GetCompletedRipsResponseDto })
-	async getCompletedRips(
-		@Query() query: GetCompletedRipsQueryDto,
-	): Promise<GetCompletedRipsResponseDto> {
-		const result = await this.getCompletedRipsUseCase.execute({
+	@Get('rips/finished')
+	@ZodResponse({ type: GetFinishedRipsResponseDto })
+	async getFinishedRips(
+		@Query() query: GetFinishedRipsQueryDto,
+	): Promise<GetFinishedRipsResponseDto> {
+		const result = await this.getFinishedRipsUseCase.execute({
 			limit: query.limit,
-			cursor: query.cursor,
+			cursor:
+				query.cursor != null
+					? decodeFinishedCursor(query.cursor)
+					: undefined,
 		})
 
 		return {
 			rips: result.rips.map(toRipDto),
-			nextCursor: result.nextCursor,
+			nextCursor:
+				result.nextCursor != null
+					? encodeFinishedCursor(result.nextCursor)
+					: null,
 		}
 	}
 

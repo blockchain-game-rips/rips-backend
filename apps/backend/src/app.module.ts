@@ -16,7 +16,7 @@ import { RipsApiModule } from './modules/api/rips-api/rips-api.module'
 import { UsersApiModule } from './modules/api/users-api/users-api.module'
 import { WalletsApiModule } from './modules/api/wallets-api/wallets-api.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
-import { SyncCompletedRipsModule } from './modules/sync-completed-rips/sync-completed-rips.module'
+import { SyncSettlingRipsModule } from './modules/sync-settling-rips/sync-settling-rips.module'
 
 @Module({
 	imports: [
@@ -36,7 +36,7 @@ import { SyncCompletedRipsModule } from './modules/sync-completed-rips/sync-comp
 		RipsApiModule,
 		ReferralSystemApiModule,
 		KeeperModule,
-		SyncCompletedRipsModule,
+		SyncSettlingRipsModule,
 		NotificationsApiModule,
 	],
 })

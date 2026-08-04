@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config'
 import { EntryPayoutRepository } from '../../application/interfaces/repositories/entry-payout.repository'
 import { PRESET_TO_TIER_BIASES } from '../../application/interfaces/tokens'
 import { GetAvailablePresetsUseCase } from '../../application/use-cases/get-available-presets/get-available-presets.use-case'
-import { SyncCompletedRipsService } from '../../application/use-cases/sync-completed-rips/sync-completed-rips.service'
-import { SyncCompletedRipsUseCase } from '../../application/use-cases/sync-completed-rips/sync-completed-rips.use-case'
+import { SyncSettlingRipsService } from '../../application/use-cases/sync-settling-rips/sync-settling-rips.service'
+import { SyncSettlingRipsUseCase } from '../../application/use-cases/sync-settling-rips/sync-settling-rips.use-case'
 import { CARD_CONFIG_KEY, CardConfig } from '../../configuration/configuration'
 import { isProd } from '../../constants'
 import { IndexerModule } from '../../infrastructure/indexer/indexer.module'
@@ -63,11 +63,11 @@ const presetToTierBiasesProvider: Provider = {
 	imports: [IndexerModule, PrismaModule, GetAvailablePresetsModule],
 	providers: [
 		{
-			provide: SyncCompletedRipsUseCase,
-			useClass: SyncCompletedRipsService,
+			provide: SyncSettlingRipsUseCase,
+			useClass: SyncSettlingRipsService,
 		},
 		presetToTierBiasesProvider,
 	],
-	exports: [SyncCompletedRipsUseCase],
+	exports: [SyncSettlingRipsUseCase],
 })
-export class SyncCompletedRipsModule {}
+export class SyncSettlingRipsModule {}
