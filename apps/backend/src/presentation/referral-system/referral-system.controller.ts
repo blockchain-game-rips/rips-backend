@@ -6,6 +6,7 @@ import {
 	Post,
 	UseInterceptors,
 } from '@nestjs/common'
+import { ApiOperation } from '@nestjs/swagger'
 import { ZodResponse } from 'nestjs-zod'
 import { GetReferrerTierTablesUseCase } from '../../application/use-cases/get-referrer-tier-tables/get-referrer-tier-tables.use-case'
 import { GetReferrerUseCase } from '../../application/use-cases/get-referrer/get-referrer.use-case'
@@ -39,6 +40,10 @@ export class ReferralSystemController {
 	) {}
 
 	@Get('referrers')
+	@ApiOperation({
+		description:
+			'Returns the referral state of the calling user. An address with no on-chain referral activity yet is not an error: the response is a zero state, with empty rewards and period, and the fee falling back to the global default referral fee.',
+	})
 	@ZodResponse({ type: GetReferrerResponseDto })
 	async getReferrer(
 		@Headers() headers: TelegramIdHeaderDto,
