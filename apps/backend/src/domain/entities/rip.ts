@@ -8,8 +8,10 @@ export enum RipStatus {
 	SEALED = 'SEALED',
 	VRF_REQUESTED = 'VRF_REQUESTED',
 	CLAIMING = 'CLAIMING',
+	CLAIM_SETTLING = 'CLAIM_SETTLING',
 	CLAIMED = 'CLAIMED',
 	REFUNDING = 'REFUNDING',
+	REFUND_SETTLING = 'REFUND_SETTLING',
 	REFUNDED = 'REFUNDED',
 }
 
@@ -29,17 +31,30 @@ export type OngoingStatus =
 	| RipStatus.SEALED
 	| RipStatus.VRF_REQUESTED
 	| RipStatus.CLAIMING
+	| RipStatus.CLAIM_SETTLING
 	| RipStatus.REFUNDING
+	| RipStatus.REFUND_SETTLING
 
 export type OngoingRip = Rip & { status: OngoingStatus }
 
-export type CompletedStatus = RipStatus.CLAIMED | RipStatus.REFUNDED
+export type SettlingStatus =
+	| RipStatus.CLAIM_SETTLING
+	| RipStatus.REFUND_SETTLING
 
-export type CompletedRip = Rip & { status: CompletedStatus }
+export type SettlingRip = Rip & { status: SettlingStatus }
 
-export const COMPLETED_STATUSES: readonly RipStatus[] = [
+export type FinishedStatus = RipStatus.CLAIMED | RipStatus.REFUNDED
+
+export type FinishedRip = Rip & { status: FinishedStatus }
+
+export const FINISHED_STATUSES: readonly RipStatus[] = [
 	RipStatus.CLAIMED,
 	RipStatus.REFUNDED,
+]
+
+export const SETTLING_STATUSES: readonly RipStatus[] = [
+	RipStatus.CLAIM_SETTLING,
+	RipStatus.REFUND_SETTLING,
 ]
 
 export const ONGOING_STATUSES: readonly RipStatus[] = [
@@ -47,15 +62,23 @@ export const ONGOING_STATUSES: readonly RipStatus[] = [
 	RipStatus.SEALED,
 	RipStatus.VRF_REQUESTED,
 	RipStatus.CLAIMING,
+	RipStatus.CLAIM_SETTLING,
 	RipStatus.REFUNDING,
+	RipStatus.REFUND_SETTLING,
 ]
 
-const completedStatusSet: ReadonlySet<RipStatus> = new Set(COMPLETED_STATUSES)
+const finishedStatusSet: ReadonlySet<RipStatus> = new Set(FINISHED_STATUSES)
+
+const settlingStatusSet: ReadonlySet<RipStatus> = new Set(SETTLING_STATUSES)
 
 const ongoingStatusSet: ReadonlySet<RipStatus> = new Set(ONGOING_STATUSES)
 
-export function isCompletedRip(rip: Rip): rip is CompletedRip {
-	return completedStatusSet.has(rip.status)
+export function isFinishedRip(rip: Rip): rip is FinishedRip {
+	return finishedStatusSet.has(rip.status)
+}
+
+export function isSettlingRip(rip: Rip): rip is SettlingRip {
+	return settlingStatusSet.has(rip.status)
 }
 
 export function isOngoingRip(rip: Rip): rip is OngoingRip {
