@@ -33,6 +33,7 @@ import { RIPS_CONTRACT } from './rips.constants'
 const CLAIM_START_INDEX = 0n
 const CLAIM_MAX_RANGES = 100n
 const BUY_ENTRIES_GAS = 800_000n
+const WITHDRAW_REWARD_GAS = 300_000n
 
 @Injectable()
 export class RipsServiceIpml implements RipsService {
@@ -126,6 +127,18 @@ export class RipsServiceIpml implements RipsService {
 			blockchainFee: {
 				currency: nativeCurrency,
 				amount: BUY_ENTRIES_GAS * gasPrice,
+			},
+		}
+	}
+
+	async quoteWithdrawReward(): Promise<TransactionQuote> {
+		const gasPrice = await this.gasPriceService.getGasPrice(this.chainId)
+		const nativeCurrency = this.evmCurrencyService.getNative(this.chainId)
+
+		return {
+			blockchainFee: {
+				currency: nativeCurrency,
+				amount: WITHDRAW_REWARD_GAS * gasPrice,
 			},
 		}
 	}

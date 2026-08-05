@@ -35,6 +35,8 @@ export abstract class RipsService {
 		args: { presetId: number; config: Config; entryCount: number },
 	): Promise<PurchaseReceipt>
 
+	abstract quoteWithdrawReward(): Promise<TransactionQuote>
+
 	abstract withdrawReward(
 		wallet: Wallet,
 		args: { currencyAddress: EvmAddress },
