@@ -1,14 +1,9 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { toEvmAddress } from '../../../domain/value-objects/evm-address'
-
-const EVM_ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/
+import { evmAddressSchema } from '../../shared/evm-address.schema'
 
 const withdrawRewardBodySchema = z.object({
-	currencyAddress: z
-		.string()
-		.regex(EVM_ADDRESS_REGEX)
-		.transform(toEvmAddress),
+	currencyAddress: evmAddressSchema,
 })
 
 export class WithdrawRewardBodyDto extends createZodDto(

@@ -1,10 +1,8 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { toEvmAddress } from '../../../domain/value-objects/evm-address'
 import { toPrivateKey } from '../../../domain/value-objects/private-key'
 import { toTelegramId } from '../../../domain/value-objects/telegram-id'
-
-const EVM_ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/
+import { evmAddressSchema } from '../../shared/evm-address.schema'
 
 const importUserBodySchema = z.object({
 	telegramId: z.string().transform((v) => toTelegramId(BigInt(v))),
@@ -17,11 +15,7 @@ const importUserBodySchema = z.object({
 			return z.NEVER
 		}
 	}),
-	referrerAddress: z
-		.string()
-		.regex(EVM_ADDRESS_REGEX)
-		.transform(toEvmAddress)
-		.optional(),
+	referrerAddress: evmAddressSchema.optional(),
 })
 
 export class ImportUserBodyDto extends createZodDto(importUserBodySchema) {}
