@@ -4,20 +4,32 @@ import { configSchema, toConfigDto } from './config.dto'
 import { ripSchema, toRipDto } from './rip.dto'
 
 export const PresetAvailability = {
-	/** A rip is filling right now, so entering joins it. */
 	LIVE: 'LIVE',
-	/** No rip is filling, so entering creates one from the current config. */
 	READY: 'READY',
 } as const
 
 const livePresetSchema = z.object({
-	availability: z.literal(PresetAvailability.LIVE),
-	preset: z.object({ id: z.number() }),
+	availability: z
+		.literal(PresetAvailability.LIVE)
+		.describe('A rip is filling right now, so entering joins it.'),
+	preset: z.object({
+		id: z.number(),
+		currentConfig: configSchema
+			.nullable()
+			.describe(
+				'Config the next rip is created from, or null if the preset ' +
+					'was deleted and the filling rip is its last.',
+			),
+	}),
 	fillingRip: ripSchema,
 })
 
 const readyPresetSchema = z.object({
-	availability: z.literal(PresetAvailability.READY),
+	availability: z
+		.literal(PresetAvailability.READY)
+		.describe(
+			'No rip is filling, so entering creates one from the current config.',
+		),
 	preset: z.object({ id: z.number(), currentConfig: configSchema }),
 	fillingRip: z.null(),
 })
@@ -44,9 +56,15 @@ export function toAvailablePresetDto(
 		}
 	}
 
+	const { currentConfig } = availablePreset.preset
+
 	return {
 		availability: PresetAvailability.LIVE,
-		preset: { id: availablePreset.preset.id },
+		preset: {
+			id: availablePreset.preset.id,
+			currentConfig:
+				currentConfig !== null ? toConfigDto(currentConfig) : null,
+		},
 		fillingRip: toRipDto(availablePreset.fillingRip),
 	}
 }
