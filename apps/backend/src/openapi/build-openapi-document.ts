@@ -1,7 +1,6 @@
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger'
 import { cleanupOpenApiDoc } from 'nestjs-zod'
-import { AvailablePresetDto } from '../presentation/rips/shared/available-preset.dto'
 import { ConfigDto } from '../presentation/rips/shared/config.dto'
 import { PayoutDto } from '../presentation/rips/shared/payout.dto'
 import { RipDto } from '../presentation/rips/shared/rip.dto'
@@ -20,7 +19,6 @@ const extraModels = [
 	TelegramIdHeaderDto,
 	ConfigDto,
 	RipDto,
-	AvailablePresetDto,
 	UserDto,
 	PayoutDto,
 ]
