@@ -4,10 +4,12 @@ import { CurrencyAmount } from '../../domain/value-objects/currency-amount'
 import { CurrencyDto, toCurrencyDto } from './currency.dto'
 import { PricedCurrency } from './pricing/priced-currency'
 
-const currencyAmountSchema = z.object({
-	currency: CurrencyDto.schema,
-	amount: z.string(),
-})
+const currencyAmountSchema = z
+	.object({
+		currency: CurrencyDto.schema,
+		amount: z.string(),
+	})
+	.meta({ id: 'CurrencyAmountDto' })
 
 export class CurrencyAmountDto extends createZodDto(currencyAmountSchema) {}
 

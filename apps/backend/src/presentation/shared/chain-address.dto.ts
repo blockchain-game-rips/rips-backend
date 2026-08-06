@@ -5,13 +5,15 @@ import { EIP155 } from '../../constants'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { toChainNamespace } from '../../domain/value-objects/chain-namespace'
 
-const chainAddressSchema = z.object({
-	address: z.string(),
-	chain: z.object({
-		reference: z.string(),
-		namespace: z.string(),
-	}),
-})
+const chainAddressSchema = z
+	.object({
+		address: z.string(),
+		chain: z.object({
+			reference: z.string(),
+			namespace: z.string(),
+		}),
+	})
+	.meta({ id: 'ChainAddressDto' })
 
 type RawChainAddress = {
 	namespace: string

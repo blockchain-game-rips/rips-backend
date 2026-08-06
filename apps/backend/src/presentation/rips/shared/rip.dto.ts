@@ -33,16 +33,18 @@ const randomsSchema = z.object({
 	b: z.string(),
 })
 
-export const ripSchema = z.object({
-	id: z.number(),
-	presetId: z.number(),
-	currency: CurrencyDto.schema,
-	config: configSchema,
-	actions: actionsSchema,
-	status: z.enum(RipStatus),
-	startTime: z.string(),
-	randoms: randomsSchema.optional(),
-})
+export const ripSchema = z
+	.object({
+		id: z.number(),
+		presetId: z.number(),
+		currency: CurrencyDto.schema,
+		config: configSchema,
+		actions: actionsSchema,
+		status: z.enum(RipStatus),
+		startTime: z.string(),
+		randoms: randomsSchema.optional(),
+	})
+	.meta({ id: 'RipDto' })
 
 export class RipDto extends createZodDto(ripSchema) {}
 

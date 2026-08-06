@@ -12,13 +12,15 @@ export const payoutTierSchema = z.object({
 	maxPayout: z.string(),
 })
 
-export const configSchema = z.object({
-	entryCap: z.number(),
-	feeBps: z.number(),
-	entryPrice: CurrencyAmountDto.schema,
-	durationSeconds: z.number(),
-	payoutDistribution: z.array(payoutTierSchema),
-})
+export const configSchema = z
+	.object({
+		entryCap: z.number(),
+		feeBps: z.number(),
+		entryPrice: CurrencyAmountDto.schema,
+		durationSeconds: z.number(),
+		payoutDistribution: z.array(payoutTierSchema),
+	})
+	.meta({ id: 'ConfigDto' })
 
 export class ConfigDto extends createZodDto(configSchema) {}
 

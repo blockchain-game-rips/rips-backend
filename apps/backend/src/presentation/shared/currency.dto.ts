@@ -3,14 +3,16 @@ import { z } from 'zod'
 import { Currency } from '../../domain/entities/currency'
 import { ChainAddressDto, toChainAddressDto } from './chain-address.dto'
 
-const currencySchema = z.object({
-	id: z.string(),
-	priceUsd: z.number(),
-	chainAddress: ChainAddressDto.schema,
-	symbol: z.string(),
-	name: z.string(),
-	decimals: z.number(),
-})
+const currencySchema = z
+	.object({
+		id: z.string(),
+		priceUsd: z.number(),
+		chainAddress: ChainAddressDto.schema,
+		symbol: z.string(),
+		name: z.string(),
+		decimals: z.number(),
+	})
+	.meta({ id: 'CurrencyDto' })
 
 export class CurrencyDto extends createZodDto(currencySchema) {}
 

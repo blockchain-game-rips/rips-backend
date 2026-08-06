@@ -3,10 +3,12 @@ import { z } from 'zod'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { CurrencyAmountDto, toCurrencyAmountDto } from './currency-amount.dto'
 
-const transactionSchema = z.object({
-	id: z.string(),
-	cost: CurrencyAmountDto.schema.optional(),
-})
+const transactionSchema = z
+	.object({
+		id: z.string(),
+		cost: CurrencyAmountDto.schema.optional(),
+	})
+	.meta({ id: 'TransactionDto' })
 
 export class TransactionDto extends createZodDto(transactionSchema) {}
 

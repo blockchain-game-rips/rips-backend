@@ -9,13 +9,15 @@ const cardSchema = z.object({
 	imageUrl: z.string(),
 })
 
-const payoutSchema = z.object({
-	ripId: z.number(),
-	entryNumber: z.number(),
-	payoutAmount: z.string(),
-	revealed: z.boolean(),
-	card: cardSchema,
-})
+const payoutSchema = z
+	.object({
+		ripId: z.number(),
+		entryNumber: z.number(),
+		payoutAmount: z.string(),
+		revealed: z.boolean(),
+		card: cardSchema,
+	})
+	.meta({ id: 'PayoutDto' })
 
 export class PayoutDto extends createZodDto(payoutSchema) {}
 
