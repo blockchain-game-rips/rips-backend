@@ -18,3 +18,18 @@ Currency — every Token is a Currency, but the native currency is not a Token.
 Only use "token" when the thing is genuinely an ERC-20 (e.g. at the
 GeckoTerminal boundary, which only ever prices ERC-20s). Do not use "token" as
 a synonym for "currency".
+
+## Available preset
+
+A preset a user can enter right now. A preset is available in one of two ways,
+never both and never neither:
+
+- **Live** — a rip is filling, so entering joins that rip.
+- **Ready** — no rip is filling, so entering creates one from the preset's
+  current config.
+
+A preset with neither a filling rip nor a current config is not available at
+all, and is never offered.
+
+Note that "live" is narrower than "ongoing": a preset whose only rip is sealed
+or claiming is not live, because that rip can no longer be joined.
