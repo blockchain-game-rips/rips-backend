@@ -44,13 +44,24 @@ describe('toAvailablePresetDto', () => {
 		expect(dto.fillingRip).not.toBeNull()
 	})
 
-	it('omits the current config when a rip is already filling', () => {
+	it('carries the config a live preset creates its next rip from', () => {
 		const dto = toAvailablePresetDto({
 			preset: { id: PRESET_ID, currentConfig: CONFIG },
 			fillingRip: FILLING_RIP,
 		})
 
-		expect(dto.preset).not.toHaveProperty('currentConfig')
+		expect(dto.preset.currentConfig).toMatchObject({
+			entryCap: ENTRY_CAP,
+		})
+	})
+
+	it('reports no current config on a live preset that was deleted', () => {
+		const dto = toAvailablePresetDto({
+			preset: { id: PRESET_ID, currentConfig: null },
+			fillingRip: FILLING_RIP,
+		})
+
+		expect(dto.preset.currentConfig).toBeNull()
 	})
 
 	it('tags a preset without a filling rip as ready', () => {
@@ -92,7 +103,7 @@ describe('availablePresetSchema', () => {
 	it('rejects a live preset that carries no filling rip', () => {
 		const result = availablePresetSchema.safeParse({
 			availability: PresetAvailability.LIVE,
-			preset: { id: PRESET_ID },
+			preset: { id: PRESET_ID, currentConfig: null },
 			fillingRip: null,
 		})
 
@@ -103,6 +114,16 @@ describe('availablePresetSchema', () => {
 		const result = availablePresetSchema.safeParse({
 			availability: PresetAvailability.READY,
 			preset: { id: PRESET_ID, currentConfig: CONFIG },
+			fillingRip: FILLING_RIP,
+		})
+
+		expect(result.success).toBe(false)
+	})
+
+	it('rejects a live preset that leaves the current config unstated', () => {
+		const result = availablePresetSchema.safeParse({
+			availability: PresetAvailability.LIVE,
+			preset: { id: PRESET_ID },
 			fillingRip: FILLING_RIP,
 		})
 
