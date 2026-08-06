@@ -1,27 +1,9 @@
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger'
 import { cleanupOpenApiDoc } from 'nestjs-zod'
-import { ConfigDto } from '../presentation/rips/shared/config.dto'
-import { PayoutDto } from '../presentation/rips/shared/payout.dto'
-import { RipDto } from '../presentation/rips/shared/rip.dto'
-import { ChainAddressDto } from '../presentation/shared/chain-address.dto'
-import { CurrencyAmountDto } from '../presentation/shared/currency-amount.dto'
-import { CurrencyDto } from '../presentation/shared/currency.dto'
 import { TelegramIdHeaderDto } from '../presentation/shared/telegram-id.header'
-import { TransactionDto } from '../presentation/shared/transaction.dto'
-import { UserDto } from '../presentation/users/shared/user.dto'
 
-const extraModels = [
-	ChainAddressDto,
-	CurrencyDto,
-	CurrencyAmountDto,
-	TransactionDto,
-	TelegramIdHeaderDto,
-	ConfigDto,
-	RipDto,
-	UserDto,
-	PayoutDto,
-]
+const extraModels = [TelegramIdHeaderDto]
 
 export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
 	const config = new DocumentBuilder()
