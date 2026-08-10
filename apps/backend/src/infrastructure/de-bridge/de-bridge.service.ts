@@ -5,9 +5,9 @@ import {
 	encodeAbiParameters,
 	encodeFunctionData,
 	getAddress,
-	Hash,
 	Hex,
 	maxUint256,
+	TransactionReceipt,
 	TransactionRequestEIP1559,
 } from 'viem'
 import { Config } from '../../domain/entities/config'
@@ -21,6 +21,7 @@ import {
 	EvmAddress,
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
+import { toTransactionHash } from '../../domain/value-objects/transaction-hash'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
 	PendingZap,
@@ -45,6 +46,11 @@ import { fulfilledOrderAbi } from './abi'
 import { DeBridgeApiService } from './de-bridge-api.service'
 import { CreateTxResponse } from './schemas/create-tx.schema'
 import { Order } from './schemas/order-status.schema'
+
+type DstReceipt = {
+	receipt: TransactionReceipt
+	chainId: number
+}
 
 const FULFILLED_STATES = new Set(['Fulfilled', 'SentUnlock', 'ClaimedUnlock'])
 const CANCELLED_STATES = new Set([
@@ -79,14 +85,17 @@ export class DeBridgeService {
 			return resolved === 'cancelled' ? { status: 'cancelled' } : null
 		}
 
-		const { receipt, orderId } = resolved
+		const { receipt, chainId, orderId } = resolved
 		const purchase = parsePurchase(receipt, this.ripsContractAddress)
 
 		if (purchase !== null) {
 			return {
 				status: 'success',
 				result: purchase,
-				dstTransaction: { id: receipt.transactionHash },
+				dstTransaction: this.evmCurrencyService.toTransaction(
+					receipt,
+					chainId,
+				),
 			}
 		}
 
@@ -102,29 +111,27 @@ export class DeBridgeService {
 			return resolved === 'cancelled' ? { status: 'cancelled' } : null
 		}
 
-		const { receipt, orderId } = resolved
+		const { receipt, chainId, orderId } = resolved
 		const amountOut = await this.parseCurrencyAmountOut(receipt, orderId)
 
 		return {
 			status: 'success',
 			result: { amountOut },
-			dstTransaction: { id: receipt.transactionHash },
+			dstTransaction: this.evmCurrencyService.toTransaction(
+				receipt,
+				chainId,
+			),
 		}
 	}
 
-	private async resolveOrderReceipt(zapId: string): Promise<
-		| {
-				receipt: Awaited<ReturnType<typeof this.getDstReceipt>>
-				orderId: string
-		  }
-		| 'cancelled'
-		| null
-	> {
+	private async resolveOrderReceipt(
+		zapId: string,
+	): Promise<(DstReceipt & { orderId: string }) | 'cancelled' | null> {
 		const order = await this.deBridgeApiService.getOrder(zapId)
 
 		if (FULFILLED_STATES.has(order.state)) {
-			const receipt = await this.getDstReceipt(order, zapId)
-			return { receipt, orderId: zapId }
+			const { receipt, chainId } = await this.getDstReceipt(order, zapId)
+			return { receipt, chainId, orderId: zapId }
 		}
 
 		if (CANCELLED_STATES.has(order.state)) {
@@ -134,7 +141,10 @@ export class DeBridgeService {
 		return null
 	}
 
-	private async getDstReceipt(order: Order, orderId: string) {
+	private async getDstReceipt(
+		order: Order,
+		orderId: string,
+	): Promise<DstReceipt> {
 		const dstTxHash =
 			order.fulfilledDstEventMetadata?.transactionHash.stringValue
 
@@ -152,13 +162,17 @@ export class DeBridgeService {
 			)
 		}
 
-		return this.evmClientService
-			.getClient(Number(dstChainId))
-			.getTransactionReceipt({ hash: dstTxHash as Hash })
+		const chainId = Number(dstChainId)
+
+		const receipt = await this.evmClientService
+			.getClient(chainId)
+			.getTransactionReceipt({ hash: toTransactionHash(dstTxHash) })
+
+		return { receipt, chainId }
 	}
 
 	private async parseCurrencyAmountOut(
-		receipt: Awaited<ReturnType<typeof this.getDstReceipt>>,
+		receipt: TransactionReceipt,
 		orderId: string,
 	) {
 		const fulfilledLog = receipt.logs

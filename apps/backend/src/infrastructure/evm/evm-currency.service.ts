@@ -6,6 +6,7 @@ import {
 	getContract,
 	isAddress,
 	isAddressEqual,
+	TransactionReceipt,
 } from 'viem'
 import { EIP155 } from '../../constants'
 import { CurrencyMetadata } from '../../domain/entities/currency'
@@ -21,6 +22,8 @@ import {
 	CurrencyId,
 	currencyIdSchema,
 } from '../../domain/value-objects/currency-id'
+import { toEvmAddress } from '../../domain/value-objects/evm-address'
+import { Transaction } from '../../domain/value-objects/transaction'
 import {
 	CURRENCY_METADATA_SOURCE,
 	CurrencyMetadataSource,
@@ -91,6 +94,20 @@ export class EvmCurrencyService {
 			: new Token(checksumAddress, chainId, metadata)
 
 		return this.getOrCache(currency)
+	}
+
+	toTransaction(receipt: TransactionReceipt, chainId: number): Transaction {
+		const nativeCurrency = this.getNative(chainId)
+
+		return {
+			chain: nativeCurrency.chainAddress.chain,
+			id: receipt.transactionHash,
+			senderAddress: toEvmAddress(receipt.from),
+			cost: {
+				currency: nativeCurrency,
+				amount: receipt.gasUsed * receipt.effectiveGasPrice,
+			},
+		}
 	}
 
 	getNative(chainId: number): NativeCurrency {

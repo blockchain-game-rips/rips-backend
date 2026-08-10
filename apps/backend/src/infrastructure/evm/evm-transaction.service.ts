@@ -27,7 +27,6 @@ export class EvmTransactionService {
 		chainId: number,
 	): Promise<TransactionResult> {
 		const client = this.evmClientService.getClient(chainId)
-		const nativeCurrency = this.evmCurrencyService.getNative(chainId)
 		const senderAddress = evmAddressFromWallet(wallet)
 
 		const tx = await client
@@ -55,16 +54,11 @@ export class EvmTransactionService {
 			throw new TransactionFailedError(`Transaction reverted: ${txHash}`)
 		}
 
-		const gasCost = receipt.gasUsed * receipt.effectiveGasPrice
-
 		return {
-			transaction: {
-				id: txHash,
-				cost: {
-					currency: nativeCurrency,
-					amount: gasCost,
-				},
-			},
+			transaction: this.evmCurrencyService.toTransaction(
+				receipt,
+				chainId,
+			),
 			receipt,
 		}
 	}
