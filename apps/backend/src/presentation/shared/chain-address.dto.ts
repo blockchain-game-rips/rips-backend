@@ -2,16 +2,30 @@ import { createZodDto } from 'nestjs-zod'
 import { getAddress, isAddress } from 'viem'
 import { z } from 'zod'
 import { EIP155 } from '../../constants'
+import { Chain } from '../../domain/value-objects/chain'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { toChainNamespace } from '../../domain/value-objects/chain-namespace'
+
+const chainSchema = z
+	.object({
+		reference: z.string(),
+		namespace: z.string(),
+	})
+	.meta({ id: 'ChainDto' })
+
+export class ChainDto extends createZodDto(chainSchema) {}
+
+export function toChainDto(chain: Chain): ChainDto {
+	return {
+		reference: chain.reference,
+		namespace: chain.namespace,
+	}
+}
 
 const chainAddressSchema = z
 	.object({
 		address: z.string(),
-		chain: z.object({
-			reference: z.string(),
-			namespace: z.string(),
-		}),
+		chain: chainSchema,
 	})
 	.meta({ id: 'ChainAddressDto' })
 
@@ -81,9 +95,6 @@ export class ChainAddressDto extends createZodDto(chainAddressSchema) {}
 export function toChainAddressDto(chainAddress: ChainAddress): ChainAddressDto {
 	return {
 		address: chainAddress.address,
-		chain: {
-			reference: chainAddress.chain.reference,
-			namespace: chainAddress.chain.namespace,
-		},
+		chain: toChainDto(chainAddress.chain),
 	}
 }
