@@ -361,7 +361,13 @@ describe('DeBridge integration', () => {
 
 			const ripId = 2 // ripId 1 is finished in previous test
 
-			expect(result.dstTransaction).toBeDefined()
+			expect(result.dstTransaction.id).toBeTruthy()
+			expect(result.dstTransaction.senderAddress).toBeTruthy()
+			expect(result.dstTransaction.chain.reference).toBe(
+				String(baseClient.chain.id),
+			)
+			expect(result.dstTransaction.cost.amount).toBeGreaterThan(0n)
+
 			expect(result.result.ripId).toBe(ripId)
 			expect(result.result.entryCount).toBe(5)
 			expect(
