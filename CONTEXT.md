@@ -19,6 +19,17 @@ Only use "token" when the thing is genuinely an ERC-20 (e.g. at the
 GeckoTerminal boundary, which only ever prices ERC-20s). Do not use "token" as
 a synonym for "currency".
 
+## Transaction
+
+A single on-chain transaction, scoped to exactly one chain. Every transaction
+has a cost — the gas it burned, denominated in that chain's native currency —
+and a sender, the address that paid it.
+
+Cost is intrinsic: a transaction always has one. The open question is never
+*whether* there is a cost but *who bore it*, which is what the sender answers.
+A cross-chain destination transaction is sent by a third-party solver, not by
+the user, so its cost is real but not the user's to pay.
+
 ## Available preset
 
 A preset a user can enter right now. A preset is available in one of two ways,
