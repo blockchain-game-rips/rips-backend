@@ -25,7 +25,7 @@ import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmClientService } from '../evm/evm-client/evm-client.service'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
-import { GasPriceService } from '../evm/gas-price.service'
+import { TransactionFeeService } from '../evm/transaction-fee.service'
 import { parsePurchase } from './parse-purchase'
 import { ripsAbi } from './rips-abi'
 import { RIPS_CONTRACT } from './rips.constants'
@@ -44,7 +44,7 @@ export class RipsServiceIpml implements RipsService {
 		private readonly evmTransactionService: EvmTransactionService,
 		private readonly evmClientService: EvmClientService,
 		private readonly evmCurrencyService: EvmCurrencyService,
-		private readonly gasPriceService: GasPriceService,
+		private readonly transactionFeeService: TransactionFeeService,
 
 		@Inject(RIPS_CONTRACT) contract: ChainAddress,
 	) {
@@ -120,26 +120,20 @@ export class RipsServiceIpml implements RipsService {
 	}
 
 	async quoteBuyEntries(): Promise<TransactionQuote> {
-		const gasPrice = await this.gasPriceService.getGasPrice(this.chainId)
-		const nativeCurrency = this.evmCurrencyService.getNative(this.chainId)
-
 		return {
-			blockchainFee: {
-				currency: nativeCurrency,
-				amount: BUY_ENTRIES_GAS * gasPrice,
-			},
+			blockchainFee: await this.transactionFeeService.estimateFee(
+				BUY_ENTRIES_GAS,
+				this.chainId,
+			),
 		}
 	}
 
 	async quoteWithdrawReward(): Promise<TransactionQuote> {
-		const gasPrice = await this.gasPriceService.getGasPrice(this.chainId)
-		const nativeCurrency = this.evmCurrencyService.getNative(this.chainId)
-
 		return {
-			blockchainFee: {
-				currency: nativeCurrency,
-				amount: WITHDRAW_REWARD_GAS * gasPrice,
-			},
+			blockchainFee: await this.transactionFeeService.estimateFee(
+				WITHDRAW_REWARD_GAS,
+				this.chainId,
+			),
 		}
 	}
 
