@@ -1,5 +1,6 @@
 import { isAddress } from 'viem'
 import * as z from 'zod'
+import { HexSchema } from '../../schemas/hex.schema'
 
 export const SameChainSwapTokenSchema = z.object({
 	address: z.string(),
@@ -11,7 +12,7 @@ export const SameChainSwapTokenSchema = z.object({
 
 export const SameChainSwapTxSchema = z.object({
 	to: z.string().refine(isAddress),
-	data: z.string().refine((s): s is `0x${string}` => s.startsWith('0x')),
+	data: HexSchema,
 	value: z.string(),
 })
 
