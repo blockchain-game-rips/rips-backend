@@ -13,12 +13,11 @@ import {
 	TransactionQuote,
 } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
-import { EvmCurrencyService } from './evm-currency.service'
 import { EvmTransactionService } from './evm-transaction.service'
-import { GasPriceService } from './gas-price.service'
 import { EvmCurrency } from './primitives/currencies/evm-currency'
 import { NativeCurrency } from './primitives/currencies/native-currency'
 import { Token } from './primitives/currencies/token'
+import { TransactionFeeService } from './transaction-fee.service'
 
 const NATIVE_TRANSFER_GAS = 21_000n
 const TOKEN_TRANSFER_GAS = 200_000n
@@ -27,8 +26,7 @@ const TOKEN_TRANSFER_GAS = 200_000n
 export class EvmCurrencyWriteService {
 	constructor(
 		private readonly evmTransactionService: EvmTransactionService,
-		private readonly evmCurrencyService: EvmCurrencyService,
-		private readonly gasPriceService: GasPriceService,
+		private readonly transactionFeeService: TransactionFeeService,
 	) {}
 
 	async transfer(
@@ -92,20 +90,17 @@ export class EvmCurrencyWriteService {
 		amount: bigint
 	}): Promise<TransactionQuote> {
 		const chainId = evmChainIdFromCurrency(args.currency)
-		const gasPrice = await this.gasPriceService.getGasPrice(chainId)
 
 		const gasUnits =
 			args.currency instanceof NativeCurrency
 				? NATIVE_TRANSFER_GAS
 				: TOKEN_TRANSFER_GAS
 
-		const nativeCurrency = this.evmCurrencyService.getNative(chainId)
-
 		return {
-			blockchainFee: {
-				currency: nativeCurrency,
-				amount: gasUnits * gasPrice,
-			},
+			blockchainFee: await this.transactionFeeService.estimateFee(
+				gasUnits,
+				chainId,
+			),
 		}
 	}
 

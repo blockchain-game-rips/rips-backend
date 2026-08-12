@@ -6,7 +6,6 @@ import {
 	encodeFunctionData,
 	getAddress,
 	Hex,
-	maxUint256,
 	TransactionReceipt,
 	TransactionRequestEIP1559,
 } from 'viem'
@@ -33,12 +32,10 @@ import {
 	ZapSwapResult,
 } from '../../domain/value-objects/zap'
 import { EvmClientService } from '../evm/evm-client/evm-client.service'
-import { EvmCurrencyReadService } from '../evm/evm-currency-read.service'
-import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
-import { GasPriceService } from '../evm/gas-price.service'
-import { Token } from '../evm/primitives/currencies/token'
+import { TokenApprovalService } from '../evm/token-approval.service'
+import { TransactionFeeService } from '../evm/transaction-fee.service'
 import { parsePurchase } from '../rips/parse-purchase'
 import { ripsAbi } from '../rips/rips-abi'
 import { RIPS_CONTRACT } from '../rips/rips.constants'
@@ -69,11 +66,10 @@ export class DeBridgeService {
 		@Inject(RIPS_CONTRACT) ripsContract: ChainAddress,
 		private readonly evmClientService: EvmClientService,
 		private readonly evmCurrencyService: EvmCurrencyService,
-		private readonly evmCurrencyReadService: EvmCurrencyReadService,
-		private readonly evmCurrencyWriteService: EvmCurrencyWriteService,
 		private readonly evmTransactionService: EvmTransactionService,
+		private readonly tokenApprovalService: TokenApprovalService,
 		private readonly deBridgeApiService: DeBridgeApiService,
-		private readonly gasPriceService: GasPriceService,
+		private readonly transactionFeeService: TransactionFeeService,
 	) {
 		this.ripsContractAddress = toEvmAddress(ripsContract.address)
 	}
@@ -298,32 +294,6 @@ export class DeBridgeService {
 		return this.sendZap(wallet, createTxResponse, paymentCurrency)
 	}
 
-	async approveIfNeeded(args: {
-		wallet: Wallet
-		paymentCurrency: Currency
-		amountIn: bigint
-		spender: Address
-		userAddress: Address
-	}) {
-		const { wallet, paymentCurrency, amountIn, spender, userAddress } = args
-
-		if (paymentCurrency instanceof Token) {
-			const allowance = await this.evmCurrencyReadService.allowance(
-				paymentCurrency,
-				userAddress,
-				spender,
-			)
-
-			if (allowance < amountIn) {
-				await this.evmCurrencyWriteService.approve(wallet, {
-					token: paymentCurrency,
-					spender,
-					amount: maxUint256,
-				})
-			}
-		}
-	}
-
 	async quoteSwapSamechain(
 		wallet: Wallet,
 		args: {
@@ -348,11 +318,9 @@ export class DeBridgeService {
 			},
 		)
 
-		const nativeCurrency = this.evmCurrencyService.getNative(chainId)
 		const gasLimit = BigInt(
 			swapResponse.estimatedTransactionFee.details.gasLimit,
 		)
-		const gasPrice = await this.gasPriceService.getGasPrice(chainId)
 
 		return {
 			amountOut: {
@@ -360,10 +328,10 @@ export class DeBridgeService {
 				amount: BigInt(swapResponse.tokenOut.amount),
 			},
 			transactionQuote: {
-				blockchainFee: {
-					currency: nativeCurrency,
-					amount: gasLimit * gasPrice,
-				},
+				blockchainFee: await this.transactionFeeService.estimateFee(
+					gasLimit,
+					chainId,
+				),
 			},
 		}
 	}
@@ -392,12 +360,12 @@ export class DeBridgeService {
 			},
 		)
 
-		await this.approveIfNeeded({
+		await this.tokenApprovalService.approveIfNeeded({
 			wallet,
-			paymentCurrency: currencyIn,
-			amountIn,
+			currency: currencyIn,
+			amount: amountIn,
 			spender: getAddress(swapResponse.tx.to),
-			userAddress,
+			owner: userAddress,
 		})
 
 		const txRequest: TransactionRequestEIP1559 = {
@@ -456,12 +424,12 @@ export class DeBridgeService {
 			createTxResponse.estimation.srcChainTokenIn.amount,
 		)
 
-		await this.approveIfNeeded({
+		await this.tokenApprovalService.approveIfNeeded({
 			wallet,
-			paymentCurrency: currencyIn,
-			amountIn,
+			currency: currencyIn,
+			amount: amountIn,
 			spender: getAddress(createTxResponse.tx.to),
-			userAddress,
+			owner: userAddress,
 		})
 
 		const { transaction } =
@@ -498,18 +466,16 @@ export class DeBridgeService {
 		createTxResponse: CreateTxResponse,
 	) {
 		const srcChainId = createTxResponse.estimation.srcChainTokenIn.chainId
-		const nativeCurrency = this.evmCurrencyService.getNative(srcChainId)
 
 		const gasLimit = BigInt(
 			createTxResponse.estimatedTransactionFee.details.gasLimit,
 		)
-		const gasPrice = await this.gasPriceService.getGasPrice(srcChainId)
 
 		return {
-			blockchainFee: {
-				currency: nativeCurrency,
-				amount: gasLimit * gasPrice,
-			},
+			blockchainFee: await this.transactionFeeService.estimateFee(
+				gasLimit,
+				srcChainId,
+			),
 		}
 	}
 
