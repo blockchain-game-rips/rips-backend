@@ -175,7 +175,7 @@ export class RipsServiceIpml implements RipsService {
 
 		if (!purchase) {
 			throw new TransactionFailedError(
-				`EntriesPurchased event not found in transaction: ${transaction.id}`,
+				`RipEntered event not found in transaction: ${transaction.id}`,
 			)
 		}
 
