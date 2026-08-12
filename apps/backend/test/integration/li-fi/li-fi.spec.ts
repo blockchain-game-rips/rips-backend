@@ -139,7 +139,18 @@ async function buildTestModule(
 		.compile()
 }
 
-describe('LiFi integration', () => {
+type SamechainContext = {
+	liFiService: LiFiService
+	baseClient: PublicClient<HttpTransport, Chain>
+}
+
+/**
+ * Each test drives a live LI.FI quote against a forked chain, so every one of
+ * them gets its own anvil and its own funded wallet. This keeps a failure
+ * contained to the test that caused it rather than leaving state behind for
+ * the next one.
+ */
+function useSamechainContext(): SamechainContext {
 	const { anvils } = useAnvil([
 		{
 			chainId: BASE_CHAIN_ID,
@@ -148,46 +159,62 @@ describe('LiFi integration', () => {
 		},
 	])
 
-	describe('enter samechain with USDC on Base', () => {
-		let liFiService: LiFiService
-		let baseClient: PublicClient<HttpTransport, Chain>
-		let baseRpcUrl: string
+	let liFiService: LiFiService
+	let baseClient: PublicClient<HttpTransport, Chain>
 
-		beforeAll(async () => {
-			const [baseAnvil] = anvils
+	const context: SamechainContext = {
+		get liFiService() {
+			return liFiService
+		},
+		get baseClient() {
+			return baseClient
+		},
+	}
 
-			baseRpcUrl = `http://127.0.0.1:${baseAnvil.port}`
+	beforeAll(async () => {
+		const [baseAnvil] = anvils
 
-			baseClient = createPublicClient({
-				chain: baseChain,
-				transport: http(baseRpcUrl),
-			})
+		const baseRpcUrl = `http://127.0.0.1:${baseAnvil.port}`
 
-			await Promise.all([
-				setTokenBalance(
-					userAccount.address,
-					USDC_BASE_ADDRESS,
-					INITIAL_USDC_BALANCE,
-					baseClient,
-				),
-				setNativeBalance(
-					baseClient,
-					userAccount.address,
-					INITIAL_ETH_BALANCE,
-				),
-			])
-
-			const moduleRef = await buildTestModule({
-				[BASE_CHAIN_ID]: {
-					rpcUrls: [baseRpcUrl],
-					disableDefaultRpcUrl: true,
-				},
-			})
-
-			liFiService = moduleRef.get(LiFiService)
+		baseClient = createPublicClient({
+			chain: baseChain,
+			transport: http(baseRpcUrl),
 		})
 
-		it('quoteEnterSamechain returns amountIn in the payment currency and a native fee', async () => {
+		await Promise.all([
+			setTokenBalance(
+				userAccount.address,
+				USDC_BASE_ADDRESS,
+				INITIAL_USDC_BALANCE,
+				baseClient,
+			),
+			setNativeBalance(
+				baseClient,
+				userAccount.address,
+				INITIAL_ETH_BALANCE,
+			),
+		])
+
+		const moduleRef = await buildTestModule({
+			[BASE_CHAIN_ID]: {
+				rpcUrls: [baseRpcUrl],
+				disableDefaultRpcUrl: true,
+			},
+		})
+
+		liFiService = moduleRef.get(LiFiService)
+	})
+
+	return context
+}
+
+describe('LiFi integration', () => {
+	describe('quoteEnterSamechain with USDC on Base', () => {
+		const context = useSamechainContext()
+
+		it('returns amountIn in the payment currency and a native fee', async () => {
+			const { liFiService } = context
+
 			const result = await liFiService.quoteEnterSamechain(userWallet, {
 				presetId: PRESET_ID,
 				config: MOCK_CONFIG,
@@ -210,10 +237,16 @@ describe('LiFi integration', () => {
 				String(BASE_CHAIN_ID),
 			)
 		})
+	})
+
+	describe('enterSamechain with USDC on Base', () => {
+		const context = useSamechainContext()
 
 		it(
 			'swaps USDC and buys entries for the user',
 			async () => {
+				const { liFiService, baseClient } = context
+
 				const entryCount = 2
 
 				const enterArgs = {
@@ -294,10 +327,16 @@ describe('LiFi integration', () => {
 			},
 			ENTER_TIMEOUT_MS,
 		)
+	})
+
+	describe('enterSamechain beyond the cap', () => {
+		const context = useSamechainContext()
 
 		it(
 			'refunds the entries it could not sell beyond the cap',
 			async () => {
+				const { liFiService, baseClient } = context
+
 				const ripId = await baseClient.readContract({
 					address: ripsContractAddress,
 					abi: ripsAbi,
