@@ -16,10 +16,14 @@ import {
 	ZapSwapResult,
 } from '../../domain/value-objects/zap'
 import { DeBridgeService } from '../de-bridge/de-bridge.service'
+import { LiFiService } from '../li-fi/li-fi.service'
 
 @Injectable()
 export class ZapServiceImpl implements ZapService {
-	constructor(private readonly deBridgeService: DeBridgeService) {}
+	constructor(
+		private readonly deBridgeService: DeBridgeService,
+		private readonly liFiService: LiFiService,
+	) {}
 
 	quoteEnterCrosschain(
 		wallet: Wallet,
@@ -46,29 +50,27 @@ export class ZapServiceImpl implements ZapService {
 	}
 
 	quoteEnterSamechain(
-		_wallet: Wallet,
-		_args: {
+		wallet: Wallet,
+		args: {
 			presetId: number
 			config: Config
 			paymentCurrency: Currency
 			entryCount: number
 		},
 	): Promise<SamechainEnterQuoteResult> {
-		// TODO: implement samechain enter
-		throw new Error('quoteEnterSamechain is not implemented')
+		return this.liFiService.quoteEnterSamechain(wallet, args)
 	}
 
 	enterSamechain(
-		_wallet: Wallet,
-		_args: {
+		wallet: Wallet,
+		args: {
 			paymentCurrency: Currency
 			presetId: number
 			config: Config
 			entryCount: number
 		},
 	): Promise<SamechainEnterResult> {
-		// TODO: implement samechain enter
-		throw new Error('enterSamechain is not implemented')
+		return this.liFiService.enterSamechain(wallet, args)
 	}
 
 	quoteSwapCrosschain(

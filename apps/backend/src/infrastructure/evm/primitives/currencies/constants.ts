@@ -4,6 +4,9 @@ import * as chains from 'viem/chains'
 export const NATIVE_ADDRESS: Address =
 	'0x0000000000000000000000000000000000000000'
 
+export const LIFI_NATIVE_ADDRESS: Address =
+	'0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+
 const WRAPPED_TOKENS_RAW: Record<number, Address> = {
 	[chains.mainnet.id]: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
 	[chains.arbitrum.id]: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
