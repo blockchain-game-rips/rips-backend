@@ -36,7 +36,10 @@ import { Token } from '../../../src/infrastructure/evm/primitives/currencies/tok
 import { LiFiModule } from '../../../src/infrastructure/li-fi/li-fi.module'
 import { LiFiService } from '../../../src/infrastructure/li-fi/li-fi.service'
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
-import { RIPS_CONTRACT } from '../../../src/infrastructure/rips/rips.constants'
+import {
+	RIPS_CONDUIT_CONTRACT,
+	RIPS_CONTRACT,
+} from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
 import { provisionKekFile } from '../../utils/kek'
 
@@ -63,6 +66,7 @@ const INITIAL_USDC_BALANCE = parseUnits('20000', USDC_DECIMALS)
 const INITIAL_ETH_BALANCE = parseEther('0.05')
 
 const ripsContractAddress = getAddress(deployments.rips)
+const ripsConduitContractAddress = getAddress(deployments.conduit)
 
 const baseChain = defineChain({
 	id: BASE_CHAIN_ID,
@@ -131,6 +135,11 @@ async function buildTestModule(
 		.useValue({
 			chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
 			address: ripsContractAddress,
+		})
+		.overrideProvider(RIPS_CONDUIT_CONTRACT)
+		.useValue({
+			chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
+			address: ripsConduitContractAddress,
 		})
 		.overrideProvider(EVM_CLIENT_CONFIG)
 		.useValue({ rpcSettings })

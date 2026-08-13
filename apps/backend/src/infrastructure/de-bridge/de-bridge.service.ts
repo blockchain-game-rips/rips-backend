@@ -37,8 +37,8 @@ import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { TokenApprovalService } from '../evm/token-approval.service'
 import { TransactionFeeService } from '../evm/transaction-fee.service'
 import { parsePurchase } from '../rips/parse-purchase'
-import { ripsAbi } from '../rips/rips-abi'
-import { RIPS_CONTRACT } from '../rips/rips.constants'
+import { ripsConduitAbi } from '../rips/rips-conduit-abi'
+import { RIPS_CONDUIT_CONTRACT, RIPS_CONTRACT } from '../rips/rips.constants'
 import { fulfilledOrderAbi } from './abi'
 import { DeBridgeApiService } from './de-bridge-api.service'
 import { CreateTxResponse } from './schemas/create-tx.schema'
@@ -61,9 +61,11 @@ const DEFAULT_GAS_LIMIT = 2_000_000n
 @Injectable()
 export class DeBridgeService {
 	private readonly ripsContractAddress: EvmAddress
+	private readonly ripsConduitContractAddress: EvmAddress
 
 	constructor(
 		@Inject(RIPS_CONTRACT) ripsContract: ChainAddress,
+		@Inject(RIPS_CONDUIT_CONTRACT) ripsConduitContract: ChainAddress,
 		private readonly evmClientService: EvmClientService,
 		private readonly evmCurrencyService: EvmCurrencyService,
 		private readonly evmTransactionService: EvmTransactionService,
@@ -72,6 +74,9 @@ export class DeBridgeService {
 		private readonly transactionFeeService: TransactionFeeService,
 	) {
 		this.ripsContractAddress = toEvmAddress(ripsContract.address)
+		this.ripsConduitContractAddress = toEvmAddress(
+			ripsConduitContract.address,
+		)
 	}
 
 	async getBuyResult(zapId: string): Promise<ZapBuyResult | null> {
@@ -538,7 +543,7 @@ export class DeBridgeService {
 		const { presetId, entryCount, userAddress } = args
 
 		const hookCalldata = encodeFunctionData({
-			abi: ripsAbi,
+			abi: ripsConduitAbi,
 			functionName: 'enterRip',
 			args: [presetId, entryCount, userAddress],
 		})
@@ -556,7 +561,7 @@ export class DeBridgeService {
 			],
 			[
 				{
-					to: this.ripsContractAddress,
+					to: this.ripsConduitContractAddress,
 					txGas: DEFAULT_GAS_LIMIT,
 					callData: hookCalldata,
 				},

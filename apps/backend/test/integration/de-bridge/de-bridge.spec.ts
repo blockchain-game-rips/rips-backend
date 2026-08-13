@@ -45,7 +45,10 @@ import { EVM_CLIENT_CONFIG } from '../../../src/infrastructure/evm/evm-client/ty
 import { NativeCurrency } from '../../../src/infrastructure/evm/primitives/currencies/native-currency'
 import { Token } from '../../../src/infrastructure/evm/primitives/currencies/token'
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
-import { RIPS_CONTRACT } from '../../../src/infrastructure/rips/rips.constants'
+import {
+	RIPS_CONDUIT_CONTRACT,
+	RIPS_CONTRACT,
+} from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
 import {
 	createMockDeBridgeApiService,
@@ -65,6 +68,7 @@ const INITIAL_USDC_BALANCE = parseUnits('20000', USDC_DECIMALS)
 const INITIAL_ETH_BALANCE = parseEther('0.01')
 
 const ripsContractAddress = getAddress(deployments.rips)
+const ripsConduitContractAddress = getAddress(deployments.conduit)
 
 const baseChain = defineChain({
 	id: BASE_CHAIN_ID,
@@ -154,6 +158,11 @@ async function buildTestModule(
 		.useValue({
 			chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
 			address: ripsContractAddress,
+		})
+		.overrideProvider(RIPS_CONDUIT_CONTRACT)
+		.useValue({
+			chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
+			address: ripsConduitContractAddress,
 		})
 		.overrideProvider(EVM_CLIENT_CONFIG)
 		.useValue({ rpcSettings })

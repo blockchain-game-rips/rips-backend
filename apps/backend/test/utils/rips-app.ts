@@ -33,7 +33,10 @@ import { toPrivateKey } from '../../src/domain/value-objects/private-key'
 import { EVM_CLIENT_CONFIG } from '../../src/infrastructure/evm/evm-client/types'
 import { WARMUP_CURRENCY_IDS } from '../../src/infrastructure/price-provider/price-provider-warmup.service'
 import { ProvisionService } from '../../src/infrastructure/provision/provision.service'
-import { RIPS_CONTRACT } from '../../src/infrastructure/rips/rips.constants'
+import {
+	RIPS_CONDUIT_CONTRACT,
+	RIPS_CONTRACT,
+} from '../../src/infrastructure/rips/rips.constants'
 import { SeedModule } from '../../src/infrastructure/seed/seed.module'
 import { UseCaseExceptionFilter } from '../../src/presentation/filters/use-case-exception.filter'
 import { provisionKekFile } from './kek'
@@ -112,6 +115,11 @@ export function useRipsApp(
 			.useValue({
 				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
 				address: deployments.rips,
+			})
+			.overrideProvider(RIPS_CONDUIT_CONTRACT)
+			.useValue({
+				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
+				address: deployments.conduit,
 			})
 			.overrideProvider(PRESET_TO_TIER_BIASES)
 			.useValue(
