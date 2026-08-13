@@ -1938,6 +1938,11 @@ export const ripsAbi = [
 	},
 	{
 		type: 'error',
+		name: 'InvalidPayoutCount',
+		inputs: [],
+	},
+	{
+		type: 'error',
 		name: 'InvalidPayoutRange',
 		inputs: [],
 	},
@@ -1974,11 +1979,6 @@ export const ripsAbi = [
 	{
 		type: 'error',
 		name: 'NothingToWithdraw',
-		inputs: [],
-	},
-	{
-		type: 'error',
-		name: 'PayoutCountMismatch',
 		inputs: [],
 	},
 	{
