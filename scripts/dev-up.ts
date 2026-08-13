@@ -184,6 +184,7 @@ function configureProvisionEnv(
 
 	process.env.RIPS_CHAIN_ID = String(BASE_CHAIN_ID)
 	process.env.RIPS_CONTRACT_ADDRESS = deployments.rips
+	process.env.RIPS_CONDUIT_CONTRACT_ADDRESS = deployments.conduit
 
 	process.env.CONFIG_PATH = DEV_CONFIG_FILE
 }
@@ -302,6 +303,7 @@ function writeBackendEnv(
 		CONFIG_PATH: DEV_CONFIG_FILE,
 		RIPS_CHAIN_ID: String(BASE_CHAIN_ID),
 		RIPS_CONTRACT_ADDRESS: deployments.rips,
+		RIPS_CONDUIT_CONTRACT_ADDRESS: deployments.conduit,
 		KEK_FILE: process.env.KEK_FILE ?? '',
 		ADMIN_API_KEY,
 	}
