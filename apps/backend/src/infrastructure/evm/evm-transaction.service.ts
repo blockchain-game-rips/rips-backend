@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import {
 	Chain,
 	FallbackTransport,
@@ -41,6 +41,8 @@ export type SendTransactionResult =
 
 @Injectable()
 export class EvmTransactionService {
+	private readonly logger = new Logger(EvmTransactionService.name)
+
 	constructor(
 		private readonly evmClientService: EvmClientService,
 		private readonly evmCurrencyService: EvmCurrencyService,
@@ -56,6 +58,35 @@ export class EvmTransactionService {
 		request: TransactionRequestEIP1559,
 		chainId: number,
 	): Promise<SendTransactionResult> {
+		const context = {
+			chainId,
+			from: evmAddressFromWallet(wallet),
+			walletKind: wallet.kind,
+			to: request.to,
+			data: request.data,
+		}
+
+		const fail = (
+			phase: SendPhase,
+			cause: unknown,
+			txHash?: Hash,
+		): SendFailure => {
+			const failure = classifySendFailure(phase, cause, txHash)
+
+			this.logger.error(
+				{
+					...context,
+					status: failure.status,
+					phase,
+					txHash,
+					err: cause,
+				},
+				'Transaction send failed',
+			)
+
+			return failure
+		}
+
 		let client: ChainClient
 		let signedTx: Hex
 
@@ -70,7 +101,7 @@ export class EvmTransactionService {
 
 			signedTx = await this.signService.signTx(wallet, preparedTx)
 		} catch (cause) {
-			return classifySendFailure(SendPhase.Preparation, cause)
+			return fail(SendPhase.Preparation, cause)
 		}
 
 		let txHash: Hash
@@ -80,7 +111,7 @@ export class EvmTransactionService {
 				serializedTransaction: signedTx,
 			})
 		} catch (cause) {
-			return classifySendFailure(SendPhase.Broadcast, cause)
+			return fail(SendPhase.Broadcast, cause)
 		}
 
 		try {
@@ -93,11 +124,23 @@ export class EvmTransactionService {
 				chainId,
 			)
 
-			return receipt.status === 'reverted'
-				? { status: 'reverted', transaction, receipt }
-				: { status: 'succeeded', transaction, receipt }
+			if (receipt.status === 'reverted') {
+				this.logger.warn(
+					{
+						...context,
+						status: 'reverted',
+						txHash,
+						gasUsed: receipt.gasUsed.toString(),
+					},
+					'Transaction reverted',
+				)
+
+				return { status: 'reverted', transaction, receipt }
+			}
+
+			return { status: 'succeeded', transaction, receipt }
 		} catch (cause) {
-			return classifySendFailure(SendPhase.Receipt, cause, txHash)
+			return fail(SendPhase.Receipt, cause, txHash)
 		}
 	}
 }
