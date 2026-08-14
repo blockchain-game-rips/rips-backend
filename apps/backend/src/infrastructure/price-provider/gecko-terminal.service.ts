@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import ky, { HTTPError } from 'ky'
 import { Address } from 'viem'
-import { geckoTerminalChains } from './constants'
+import { chainIdToGeckoChainId } from './constants'
 
 export interface GeckoTerminalTokenData {
 	id: string
@@ -96,8 +96,9 @@ export class GeckoTerminalService {
 	}
 
 	validateChain(chain: string) {
-		const some = geckoTerminalChains.some((c) => c.id === chain)
-		if (!some) throw new Error(`Chain ${chain} not found`)
+		const isSupported = Object.values(chainIdToGeckoChainId).includes(chain)
+
+		if (!isSupported) throw new Error(`Chain ${chain} not found`)
 	}
 
 	async getNetworks(): Promise<GeckoTerminalChain[]> {
