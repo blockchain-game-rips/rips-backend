@@ -225,6 +225,24 @@ export class Anvil {
 	}
 }
 
+/**
+ * Prints anvil's own logs when the wrapped call fails. A revert reason only
+ * lives in those logs, and anvil is stopped once the suite ends, so a failing
+ * call has to report them before teardown.
+ *
+ * Requires the anvil to run with `printTraces` for the logs to carry traces.
+ */
+export async function withTraces<T>(
+	anvil: Anvil,
+	run: () => Promise<T>,
+): Promise<T> {
+	return run().catch((error: unknown) => {
+		console.log(anvil.logs)
+
+		throw error
+	})
+}
+
 /* ======== storage helpers ======== */
 
 export async function setTokenBalance(

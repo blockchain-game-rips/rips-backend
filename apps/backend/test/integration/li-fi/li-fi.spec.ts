@@ -1,12 +1,14 @@
 import { CacheModule } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 import {
+	Anvil,
 	ANVIL_ACCOUNT_1_PRIVATE_KEY,
 	ANVIL_STATE_PATH,
 	deployments,
 	setNativeBalance,
 	setTokenBalance,
 	useAnvil,
+	withTraces,
 } from '@rips/test-harness'
 import {
 	Chain,
@@ -151,6 +153,7 @@ async function buildTestModule(
 type SamechainContext = {
 	liFiService: LiFiService
 	baseClient: PublicClient<HttpTransport, Chain>
+	anvil: Anvil
 }
 
 /**
@@ -177,6 +180,11 @@ function useSamechainContext(): SamechainContext {
 		},
 		get baseClient() {
 			return baseClient
+		},
+		get anvil() {
+			const [baseAnvil] = anvils
+
+			return baseAnvil
 		},
 	}
 
@@ -281,9 +289,8 @@ describe('LiFi integration', () => {
 					enterArgs,
 				)
 
-				const result = await liFiService.enterSamechain(
-					userWallet,
-					enterArgs,
+				const result = await withTraces(context.anvil, () =>
+					liFiService.enterSamechain(userWallet, enterArgs),
 				)
 
 				expect(result.purchase.entryCount).toBe(entryCount)
@@ -369,12 +376,14 @@ describe('LiFi integration', () => {
 					address: userAccount.address,
 				})
 
-				const result = await liFiService.enterSamechain(userWallet, {
-					presetId: PRESET_ID,
-					config: MOCK_CONFIG,
-					paymentCurrency: USDC_BASE,
-					entryCount,
-				})
+				const result = await withTraces(context.anvil, () =>
+					liFiService.enterSamechain(userWallet, {
+						presetId: PRESET_ID,
+						config: MOCK_CONFIG,
+						paymentCurrency: USDC_BASE,
+						entryCount,
+					}),
+				)
 
 				// The swap buys the entry currency for every entry asked for, but the
 				// rip only sells what is left under its cap. enterRip refunds the
