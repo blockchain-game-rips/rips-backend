@@ -31,6 +31,7 @@ export type ContractCallsQuoteArgs = {
 	currencyOut: Currency
 	amountOut: bigint
 	slippage: number
+	denyExchanges?: string[]
 	call: {
 		targetAddress: Address
 		callData: Hex
@@ -64,6 +65,7 @@ export class LiFiApiService {
 			currencyOut.chainAddress.address,
 			amountOut.toString(),
 			slippage.toString(),
+			(args.denyExchanges ?? []).join(','),
 			call.targetAddress,
 			call.callData,
 			call.gasLimit.toString(),
@@ -84,6 +86,7 @@ export class LiFiApiService {
 			currencyOut,
 			amountOut,
 			slippage,
+			denyExchanges,
 			call,
 		} = args
 
@@ -107,6 +110,7 @@ export class LiFiApiService {
 					toToken,
 					toAmount: amountOutValue,
 					slippage,
+					...(denyExchanges?.length ? { denyExchanges } : {}),
 					contractCalls: [
 						{
 							fromAmount: amountOutValue,

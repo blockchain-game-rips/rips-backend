@@ -34,6 +34,13 @@ import { ContractCallsQuote } from './schemas/contract-calls.schema'
 export const SLIPPAGE = 0.005
 export const ENTER_RIP_GAS_LIMIT = 800_000n
 
+/**
+ * OKX resolves its own route at execution time and sometimes lands on a
+ * Tessera pool that reverts with "T8: Insufficient Liquidity". The route is
+ * not visible in the quote, so the aggregator itself has to be excluded.
+ */
+export const DENIED_EXCHANGES = ['okx']
+
 const SEND_GAS_COST_TYPE = 'SEND'
 
 type EnterArgs = {
@@ -143,6 +150,7 @@ export class LiFiService {
 			currencyOut: entryCurrency,
 			amountOut,
 			slippage: SLIPPAGE,
+			denyExchanges: DENIED_EXCHANGES,
 			call: {
 				targetAddress: this.ripsContractAddress,
 				callData: this.buildEnterRipCallData({
