@@ -3,6 +3,8 @@ import {
 	Controller,
 	Get,
 	Headers,
+	HttpCode,
+	HttpStatus,
 	Post,
 	Query,
 	UseInterceptors,
@@ -160,6 +162,7 @@ export class WalletsController {
 	}
 
 	@Post('swap/crosschain')
+	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: SwapResponseDto })
 	async swapCrosschain(
 		@Headers() headers: TelegramIdHeaderDto,
@@ -181,6 +184,7 @@ export class WalletsController {
 	}
 
 	@Post('swap/samechain')
+	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: SwapSamechainResponseDto })
 	async swapSamechain(
 		@Headers() headers: TelegramIdHeaderDto,

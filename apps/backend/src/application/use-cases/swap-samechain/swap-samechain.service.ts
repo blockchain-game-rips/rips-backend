@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { resolveChainAddress } from '../../../domain/services/wallet-utils'
+import { attemptTransactionId } from '../../../domain/value-objects/transaction-attempt'
 import { SamechainSwapResult } from '../../../domain/value-objects/zap'
 import { ZapService } from '../../interfaces/zap.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
@@ -39,7 +40,8 @@ export class SwapSamechainService extends SwapSamechainUseCase {
 		this.logger.log(
 			{
 				userId: user.id.toString(),
-				txHash: result.transaction.id,
+				swapStatus: result.swap.status,
+				txHash: attemptTransactionId(result.swap),
 				chain: currencyIn.chainAddress.chain.reference,
 				fromAmount: amountIn.toString(),
 				fromToken: currencyIn.chainAddress.address,

@@ -1,18 +1,17 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { PendingZap } from '../../../domain/value-objects/zap'
+import { CrosschainEnterStartResult } from '../../../domain/value-objects/zap'
+import { pendingZapSchema, toPendingZapDto } from '../../shared/pending-zap.dto'
 import {
-	CurrencyAmountDto,
-	toPricedCurrencyAmountDto,
-} from '../../shared/currency-amount.dto'
-import { toTransactionDto, TransactionDto } from '../../shared/transaction.dto'
+	approvalAttemptSchema,
+	toApprovalAttemptDto,
+	toTransactionAttemptWithDto,
+	transactionAttemptSchema,
+} from '../../shared/transaction-attempt.dto'
 
 const buyEntriesZapResponseSchema = z.object({
-	zapId: z.string(),
-	srcTransaction: TransactionDto.schema,
-	amountIn: CurrencyAmountDto.schema,
-	fee: CurrencyAmountDto.schema,
-	durationMs: z.number(),
+	approval: approvalAttemptSchema(),
+	zap: transactionAttemptSchema(pendingZapSchema),
 })
 
 export class BuyEntriesZapResponseDto extends createZodDto(
@@ -20,13 +19,10 @@ export class BuyEntriesZapResponseDto extends createZodDto(
 ) {}
 
 export function toBuyEntriesZapResponseDto(
-	pendingZap: PendingZap,
+	result: CrosschainEnterStartResult,
 ): BuyEntriesZapResponseDto {
 	return {
-		zapId: pendingZap.zapId,
-		srcTransaction: toTransactionDto(pendingZap.srcTransaction),
-		amountIn: toPricedCurrencyAmountDto(pendingZap.amountIn),
-		fee: toPricedCurrencyAmountDto(pendingZap.fee),
-		durationMs: pendingZap.durationMs,
+		approval: toApprovalAttemptDto(result.approval),
+		zap: toTransactionAttemptWithDto(result.zap, toPendingZapDto),
 	}
 }

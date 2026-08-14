@@ -3,6 +3,8 @@ import {
 	Controller,
 	Get,
 	Headers,
+	HttpCode,
+	HttpStatus,
 	Patch,
 	Post,
 	Query,
@@ -169,6 +171,7 @@ export class RipsController {
 	}
 
 	@Post('entries/zap/crosschain')
+	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: BuyEntriesZapResponseDto })
 	async buyEntriesZapCrosschain(
 		@Headers() headers: TelegramIdHeaderDto,
@@ -185,6 +188,7 @@ export class RipsController {
 	}
 
 	@Post('entries/zap/samechain')
+	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: BuyEntriesZapSamechainResponseDto })
 	async buyEntriesZapSamechain(
 		@Headers() headers: TelegramIdHeaderDto,

@@ -20,10 +20,13 @@ import {
 	EvmAddress,
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
+import { NOT_SENT } from '../../domain/value-objects/transaction-attempt'
 import { toTransactionHash } from '../../domain/value-objects/transaction-hash'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
-	PendingZap,
+	CrosschainEnterStartResult,
+	CrosschainSwapStartResult,
+	CrosschainZapStartResult,
 	SamechainSwapQuoteResult,
 	SamechainSwapResult,
 	ZapBuyResult,
@@ -36,6 +39,7 @@ import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { TokenApprovalService } from '../evm/token-approval.service'
 import { TransactionFeeService } from '../evm/transaction-fee.service'
+import { toUnsuccessfulAttempt } from '../evm/utils/to-transaction-attempt'
 import { parsePurchase } from '../rips/parse-purchase'
 import { ripsConduitAbi } from '../rips/rips-conduit-abi'
 import { RIPS_CONDUIT_CONTRACT, RIPS_CONTRACT } from '../rips/rips.constants'
@@ -284,7 +288,7 @@ export class DeBridgeService {
 			config: Config
 			entryCount: number
 		},
-	): Promise<PendingZap> {
+	): Promise<CrosschainEnterStartResult> {
 		const { config, paymentCurrency, entryCount, presetId } = args
 		const userAddress = evmAddressFromWallet(wallet)
 
@@ -365,7 +369,7 @@ export class DeBridgeService {
 			},
 		)
 
-		await this.tokenApprovalService.approveIfNeeded({
+		const approval = await this.tokenApprovalService.approveIfNeeded({
 			wallet,
 			currency: currencyIn,
 			amount: amountIn,
@@ -373,24 +377,37 @@ export class DeBridgeService {
 			owner: userAddress,
 		})
 
+		if (approval && approval.status !== 'succeeded') {
+			return { approval, swap: NOT_SENT }
+		}
+
 		const txRequest: TransactionRequestEIP1559 = {
 			to: swapResponse.tx.to,
 			data: swapResponse.tx.data,
 			value: BigInt(swapResponse.tx.value),
 		}
 
-		const { transaction } =
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				txRequest,
-				chainId,
-			)
+		const result = await this.evmTransactionService.sendTransaction(
+			wallet,
+			txRequest,
+			chainId,
+		)
+
+		if (result.status !== 'succeeded') {
+			return { approval, swap: toUnsuccessfulAttempt(result) }
+		}
 
 		return {
-			transaction,
-			amountOut: {
-				currency: currencyOut,
-				amount: BigInt(swapResponse.tokenOut.amount),
+			approval,
+			swap: {
+				status: 'succeeded',
+				transaction: result.transaction,
+				result: {
+					amountOut: {
+						currency: currencyOut,
+						amount: BigInt(swapResponse.tokenOut.amount),
+					},
+				},
 			},
 		}
 	}
@@ -403,7 +420,7 @@ export class DeBridgeService {
 			amountIn: bigint
 			recipient: ChainAddress
 		},
-	): Promise<PendingZap> {
+	): Promise<CrosschainSwapStartResult> {
 		const { currencyIn, currencyOut, amountIn, recipient } = args
 		const userAddress = evmAddressFromWallet(wallet)
 
@@ -422,14 +439,14 @@ export class DeBridgeService {
 		wallet: Wallet,
 		createTxResponse: CreateTxResponse,
 		currencyIn: Currency,
-	): Promise<PendingZap> {
+	): Promise<CrosschainZapStartResult> {
 		const userAddress = evmAddressFromWallet(wallet)
 		const srcChainId = evmChainIdFromCurrency(currencyIn)
 		const amountIn = BigInt(
 			createTxResponse.estimation.srcChainTokenIn.amount,
 		)
 
-		await this.tokenApprovalService.approveIfNeeded({
+		const approval = await this.tokenApprovalService.approveIfNeeded({
 			wallet,
 			currency: currencyIn,
 			amount: amountIn,
@@ -437,18 +454,33 @@ export class DeBridgeService {
 			owner: userAddress,
 		})
 
-		const { transaction } =
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				this.txRequestFromCreateTxResponse(createTxResponse),
-				srcChainId,
-			)
+		if (approval && approval.status !== 'succeeded') {
+			return { approval, zap: NOT_SENT }
+		}
+
+		const result = await this.evmTransactionService.sendTransaction(
+			wallet,
+			this.txRequestFromCreateTxResponse(createTxResponse),
+			srcChainId,
+		)
+
+		if (result.status !== 'succeeded') {
+			return { approval, zap: toUnsuccessfulAttempt(result) }
+		}
 
 		return {
-			srcTransaction: transaction,
-			zapId: createTxResponse.orderId,
-			amountIn: { currency: currencyIn, amount: amountIn },
-			...this.durationAndFeeFromCreateTxResponse(createTxResponse),
+			approval,
+			zap: {
+				status: 'succeeded',
+				transaction: result.transaction,
+				result: {
+					zapId: createTxResponse.orderId,
+					amountIn: { currency: currencyIn, amount: amountIn },
+					...this.durationAndFeeFromCreateTxResponse(
+						createTxResponse,
+					),
+				},
+			},
 		}
 	}
 

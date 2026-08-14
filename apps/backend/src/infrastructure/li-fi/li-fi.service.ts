@@ -7,7 +7,6 @@ import {
 } from 'viem'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
-import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
 import {
 	evmAddressFromWallet,
 	evmChainIdFromCurrency,
@@ -17,6 +16,7 @@ import {
 	EvmAddress,
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
+import { NOT_SENT } from '../../domain/value-objects/transaction-attempt'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
 	SamechainEnterQuoteResult,
@@ -25,6 +25,7 @@ import {
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { TokenApprovalService } from '../evm/token-approval.service'
 import { TransactionFeeService } from '../evm/transaction-fee.service'
+import { toUnsuccessfulAttempt } from '../evm/utils/to-transaction-attempt'
 import { parsePurchase } from '../rips/parse-purchase'
 import { ripsAbi } from '../rips/rips-abi'
 import { RIPS_CONTRACT } from '../rips/rips.constants'
@@ -94,13 +95,17 @@ export class LiFiService {
 		const chainId = evmChainIdFromCurrency(paymentCurrency)
 		const userAddress = evmAddressFromWallet(wallet)
 
-		await this.tokenApprovalService.approveIfNeeded({
+		const approval = await this.tokenApprovalService.approveIfNeeded({
 			wallet,
 			currency: paymentCurrency,
 			amount: BigInt(quote.action.fromAmount),
 			spender: getAddress(quote.estimate.approvalAddress),
 			owner: userAddress,
 		})
+
+		if (approval && approval.status !== 'succeeded') {
+			return { approval, enter: NOT_SENT }
+		}
 
 		const { gasLimit } = quote.transactionRequest
 
@@ -119,22 +124,38 @@ export class LiFiService {
 			gas: BigInt(gasLimit),
 		}
 
-		const { transaction, receipt } =
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				request,
-				chainId,
-			)
+		const result = await this.evmTransactionService.sendTransaction(
+			wallet,
+			request,
+			chainId,
+		)
 
-		const purchase = parsePurchase(receipt, this.ripsContractAddress)
-
-		if (!purchase) {
-			throw new TransactionFailedError(
-				`RipEntered event not found in transaction: ${transaction.id}`,
-			)
+		if (result.status !== 'succeeded') {
+			return { approval, enter: toUnsuccessfulAttempt(result) }
 		}
 
-		return { transaction, purchase }
+		const purchase = parsePurchase(result.receipt, this.ripsContractAddress)
+
+		// The transaction succeeded but we cannot say what was bought, so the
+		// outcome is genuinely unknown rather than a server failure.
+		if (!purchase) {
+			return {
+				approval,
+				enter: {
+					status: 'unknown',
+					transactionId: result.transaction.id,
+				},
+			}
+		}
+
+		return {
+			approval,
+			enter: {
+				status: 'succeeded',
+				transaction: result.transaction,
+				result: { purchase },
+			},
+		}
 	}
 
 	private fetchEnterQuote(wallet: Wallet, args: EnterArgs) {

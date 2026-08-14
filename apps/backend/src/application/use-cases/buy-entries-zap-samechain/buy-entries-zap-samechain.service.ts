@@ -4,6 +4,7 @@ import {
 	findAvailablePreset,
 	resolveConfig,
 } from '../../../domain/services/preset-utils'
+import { attemptTransactionId } from '../../../domain/value-objects/transaction-attempt'
 import { SamechainEnterResult } from '../../../domain/value-objects/zap'
 import { CurrencyService } from '../../interfaces/currency.service'
 import { ZapService } from '../../interfaces/zap.service'
@@ -65,7 +66,8 @@ export class BuyEntriesZapSamechainService extends BuyEntriesZapSamechainUseCase
 		this.logger.log(
 			{
 				userId: user.id.toString(),
-				txHash: result.transaction.id,
+				enterStatus: result.enter.status,
+				txHash: attemptTransactionId(result.enter),
 				chain: paymentCurrency.chainAddress.chain.reference,
 				fromToken: paymentCurrency.chainAddress.address,
 				toToken: entryCurrency.chainAddress.address,

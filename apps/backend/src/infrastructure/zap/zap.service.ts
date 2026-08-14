@@ -5,7 +5,8 @@ import { Currency } from '../../domain/entities/currency'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { Wallet } from '../../domain/value-objects/wallet'
 import {
-	PendingZap,
+	CrosschainEnterStartResult,
+	CrosschainSwapStartResult,
 	SamechainEnterQuoteResult,
 	SamechainEnterResult,
 	SamechainSwapQuoteResult,
@@ -45,7 +46,7 @@ export class ZapServiceImpl implements ZapService {
 			config: Config
 			entryCount: number
 		},
-	): Promise<PendingZap> {
+	): Promise<CrosschainEnterStartResult> {
 		return this.deBridgeService.enterCrosschain(wallet, args)
 	}
 
@@ -93,7 +94,7 @@ export class ZapServiceImpl implements ZapService {
 			amountIn: bigint
 			recipient: ChainAddress
 		},
-	): Promise<PendingZap> {
+	): Promise<CrosschainSwapStartResult> {
 		return this.deBridgeService.swapCrosschain(wallet, args)
 	}
 

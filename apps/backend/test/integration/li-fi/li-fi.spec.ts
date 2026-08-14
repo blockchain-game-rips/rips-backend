@@ -43,6 +43,7 @@ import {
 	RIPS_CONTRACT,
 } from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
+import { expectSucceeded } from '../../utils/attempts'
 import { provisionKekFile } from '../../utils/kek'
 
 const BASE_CHAIN_ID = 8453
@@ -289,14 +290,16 @@ describe('LiFi integration', () => {
 					enterArgs,
 				)
 
-				const result = await withTraces(context.anvil, () =>
-					liFiService.enterSamechain(userWallet, enterArgs),
+				const { transaction, result } = expectSucceeded(
+					(
+						await withTraces(context.anvil, () =>
+							liFiService.enterSamechain(userWallet, enterArgs),
+						)
+					).enter,
 				)
 
 				expect(result.purchase.entryCount).toBe(entryCount)
-				expect(result.transaction.chain.reference).toBe(
-					String(BASE_CHAIN_ID),
-				)
+				expect(transaction.chain.reference).toBe(String(BASE_CHAIN_ID))
 
 				const usdcBalanceAfter = await baseClient.readContract({
 					address: USDC_BASE_ADDRESS,
@@ -376,13 +379,17 @@ describe('LiFi integration', () => {
 					address: userAccount.address,
 				})
 
-				const result = await withTraces(context.anvil, () =>
-					liFiService.enterSamechain(userWallet, {
-						presetId: PRESET_ID,
-						config: MOCK_CONFIG,
-						paymentCurrency: USDC_BASE,
-						entryCount,
-					}),
+				const { result } = expectSucceeded(
+					(
+						await withTraces(context.anvil, () =>
+							liFiService.enterSamechain(userWallet, {
+								presetId: PRESET_ID,
+								config: MOCK_CONFIG,
+								paymentCurrency: USDC_BASE,
+								entryCount,
+							}),
+						)
+					).enter,
 				)
 
 				// The swap buys the entry currency for every entry asked for, but the

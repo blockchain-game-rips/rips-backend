@@ -5,11 +5,18 @@ import {
 	CurrencyAmountDto,
 	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
-import { toTransactionDto, TransactionDto } from '../../shared/transaction.dto'
+import {
+	approvalAttemptSchema,
+	toApprovalAttemptDto,
+	toTransactionAttemptWithDto,
+	transactionAttemptSchema,
+} from '../../shared/transaction-attempt.dto'
 
 const swapSamechainResponseSchema = z.object({
-	transaction: TransactionDto.schema,
-	amountOut: CurrencyAmountDto.schema,
+	approval: approvalAttemptSchema(),
+	swap: transactionAttemptSchema(
+		z.object({ amountOut: CurrencyAmountDto.schema }),
+	),
 })
 
 export class SwapSamechainResponseDto extends createZodDto(
@@ -20,7 +27,9 @@ export function toSwapSamechainResponseDto(
 	result: SamechainSwapResult,
 ): SwapSamechainResponseDto {
 	return {
-		transaction: toTransactionDto(result.transaction),
-		amountOut: toPricedCurrencyAmountDto(result.amountOut),
+		approval: toApprovalAttemptDto(result.approval),
+		swap: toTransactionAttemptWithDto(result.swap, ({ amountOut }) => ({
+			amountOut: toPricedCurrencyAmountDto(amountOut),
+		})),
 	}
 }

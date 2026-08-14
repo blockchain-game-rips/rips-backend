@@ -12,12 +12,15 @@ import {
 	Transaction,
 	TransactionQuote,
 } from '../../domain/value-objects/transaction'
+import { TransactionAttempt } from '../../domain/value-objects/transaction-attempt'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from './evm-transaction.service'
 import { EvmCurrency } from './primitives/currencies/evm-currency'
 import { NativeCurrency } from './primitives/currencies/native-currency'
 import { Token } from './primitives/currencies/token'
 import { TransactionFeeService } from './transaction-fee.service'
+import { requireSucceeded } from './utils/require-succeeded-transaction'
+import { toTransactionAttempt } from './utils/to-transaction-attempt'
 
 const NATIVE_TRANSFER_GAS = 21_000n
 const TOKEN_TRANSFER_GAS = 200_000n
@@ -47,20 +50,19 @@ export class EvmCurrencyWriteService {
 			amount,
 		})
 
-		const { transaction } =
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				request,
-				chainId,
-			)
+		const result = await this.evmTransactionService.sendTransaction(
+			wallet,
+			request,
+			chainId,
+		)
 
-		return transaction
+		return requireSucceeded(result, 'Transfer').transaction
 	}
 
 	async approve(
 		wallet: Wallet,
 		args: { token: Token; spender: Address; amount: bigint },
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		const { token, spender, amount } = args
 
 		const chainId = evmChainIdFromCurrency(token)
@@ -74,14 +76,13 @@ export class EvmCurrencyWriteService {
 			}),
 		}
 
-		const { transaction } =
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				request,
-				chainId,
-			)
+		const result = await this.evmTransactionService.sendTransaction(
+			wallet,
+			request,
+			chainId,
+		)
 
-		return transaction
+		return toTransactionAttempt(result)
 	}
 
 	async quoteTransfer(args: {

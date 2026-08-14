@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Address, maxUint256 } from 'viem'
 import { Currency } from '../../domain/entities/currency'
+import { TransactionAttempt } from '../../domain/value-objects/transaction-attempt'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmCurrencyReadService } from './evm-currency-read.service'
 import { EvmCurrencyWriteService } from './evm-currency-write.service'
@@ -19,10 +20,10 @@ export class TokenApprovalService {
 		amount: bigint
 		spender: Address
 		owner: Address
-	}): Promise<void> {
+	}): Promise<TransactionAttempt | undefined> {
 		const { wallet, currency, amount, spender, owner } = args
 
-		if (!(currency instanceof Token)) return
+		if (!(currency instanceof Token)) return undefined
 
 		const allowance = await this.evmCurrencyReadService.allowance(
 			currency,
@@ -30,9 +31,9 @@ export class TokenApprovalService {
 			spender,
 		)
 
-		if (allowance >= amount) return
+		if (allowance >= amount) return undefined
 
-		await this.evmCurrencyWriteService.approve(wallet, {
+		return this.evmCurrencyWriteService.approve(wallet, {
 			token: currency,
 			spender,
 			amount: maxUint256,

@@ -1,12 +1,17 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
 import { SamechainEnterResult } from '../../../domain/value-objects/zap'
-import { toTransactionDto, TransactionDto } from '../../shared/transaction.dto'
+import {
+	approvalAttemptSchema,
+	toApprovalAttemptDto,
+	toTransactionAttemptWithDto,
+	transactionAttemptSchema,
+} from '../../shared/transaction-attempt.dto'
 import { purchaseSchema, toPurchaseDto } from '../shared/purchase.dto'
 
 const buyEntriesZapSamechainResponseSchema = z.object({
-	transaction: TransactionDto.schema,
-	...purchaseSchema.shape,
+	approval: approvalAttemptSchema(),
+	enter: transactionAttemptSchema(purchaseSchema),
 })
 
 export class BuyEntriesZapSamechainResponseDto extends createZodDto(
@@ -17,7 +22,9 @@ export function toBuyEntriesZapSamechainResponseDto(
 	result: SamechainEnterResult,
 ): BuyEntriesZapSamechainResponseDto {
 	return {
-		transaction: toTransactionDto(result.transaction),
-		...toPurchaseDto(result.purchase),
+		approval: toApprovalAttemptDto(result.approval),
+		enter: toTransactionAttemptWithDto(result.enter, ({ purchase }) =>
+			toPurchaseDto(purchase),
+		),
 	}
 }

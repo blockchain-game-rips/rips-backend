@@ -4,7 +4,8 @@ import {
 	findAvailablePreset,
 	resolveConfig,
 } from '../../../domain/services/preset-utils'
-import { PendingZap } from '../../../domain/value-objects/zap'
+import { attemptTransactionId } from '../../../domain/value-objects/transaction-attempt'
+import { CrosschainEnterStartResult } from '../../../domain/value-objects/zap'
 import { CurrencyService } from '../../interfaces/currency.service'
 import { ZapService } from '../../interfaces/zap.service'
 import { GetAvailablePresetsUseCase } from '../get-available-presets/get-available-presets.use-case'
@@ -27,7 +28,9 @@ export class BuyEntriesZapService extends BuyEntriesZapUseCase {
 		super()
 	}
 
-	async execute(input: BuyEntriesZapInput): Promise<PendingZap> {
+	async execute(
+		input: BuyEntriesZapInput,
+	): Promise<CrosschainEnterStartResult> {
 		const {
 			telegramId,
 			presetId,
@@ -53,7 +56,7 @@ export class BuyEntriesZapService extends BuyEntriesZapUseCase {
 
 		const entryCurrency = config.entryPrice.currency
 
-		const pendingZap = await this.zapService.enterCrosschain(user.wallet, {
+		const result = await this.zapService.enterCrosschain(user.wallet, {
 			paymentCurrency,
 			presetId: availablePreset.preset.id,
 			config,
@@ -63,16 +66,16 @@ export class BuyEntriesZapService extends BuyEntriesZapUseCase {
 		this.logger.log(
 			{
 				userId: user.id.toString(),
-				txHash: pendingZap.srcTransaction.id,
+				zapStatus: result.zap.status,
+				txHash: attemptTransactionId(result.zap),
 				fromChain: paymentCurrency.chainAddress.chain.reference,
 				toChain: entryCurrency.chainAddress.chain.reference,
-				fromAmount: pendingZap.amountIn.amount.toString(),
 				fromToken: paymentCurrency.chainAddress.address,
 				toToken: entryCurrency.chainAddress.address,
 			},
 			'Buy entries zap initiated',
 		)
 
-		return pendingZap
+		return result
 	}
 }

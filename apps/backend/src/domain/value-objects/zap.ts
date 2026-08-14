@@ -1,10 +1,13 @@
 import { CurrencyAmount } from './currency-amount'
 import { Purchase } from './purchase'
 import { Transaction, TransactionQuote } from './transaction'
+import {
+	TransactionAttempt,
+	TransactionAttemptWith,
+} from './transaction-attempt'
 
 export type PendingZap = {
 	zapId: string
-	srcTransaction: Transaction
 	amountIn: CurrencyAmount
 	fee: CurrencyAmount
 	durationMs: number
@@ -49,14 +52,27 @@ export type ZapQuoteSwapResult = {
 }
 
 export type SamechainSwapResult = {
-	transaction: Transaction
-	amountOut: CurrencyAmount
+	approval?: TransactionAttempt
+	swap: TransactionAttemptWith<{ amountOut: CurrencyAmount }>
 }
 
 export type SamechainEnterResult = {
-	transaction: Transaction
-	purchase: Purchase
+	approval?: TransactionAttempt
+	enter: TransactionAttemptWith<{ purchase: Purchase }>
 }
+
+/*
+ * The two crosschain starts share this structure but stay distinct names: the
+ * client's next poll differs, and the shapes may diverge later.
+ */
+export type CrosschainZapStartResult = {
+	approval?: TransactionAttempt
+	zap: TransactionAttemptWith<PendingZap>
+}
+
+export type CrosschainSwapStartResult = CrosschainZapStartResult
+
+export type CrosschainEnterStartResult = CrosschainZapStartResult
 
 export type SamechainEnterQuoteResult = {
 	amountIn: CurrencyAmount

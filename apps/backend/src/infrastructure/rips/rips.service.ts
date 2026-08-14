@@ -22,10 +22,10 @@ import {
 	TransactionQuote,
 } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
-import { EvmClientService } from '../evm/evm-client/evm-client.service'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { TransactionFeeService } from '../evm/transaction-fee.service'
+import { requireSucceeded } from '../evm/utils/require-succeeded-transaction'
 import { parsePurchase } from './parse-purchase'
 import { ripsAbi } from './rips-abi'
 import { RIPS_CONTRACT } from './rips.constants'
@@ -42,7 +42,6 @@ export class RipsServiceIpml implements RipsService {
 
 	constructor(
 		private readonly evmTransactionService: EvmTransactionService,
-		private readonly evmClientService: EvmClientService,
 		private readonly evmCurrencyService: EvmCurrencyService,
 		private readonly transactionFeeService: TransactionFeeService,
 
@@ -109,14 +108,13 @@ export class RipsServiceIpml implements RipsService {
 			to: this.contractAddress,
 		}
 
-		const { transaction } =
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				request,
-				chainId,
-			)
+		const result = await this.evmTransactionService.sendTransaction(
+			wallet,
+			request,
+			chainId,
+		)
 
-		return transaction
+		return requireSucceeded(result, 'Keeper transaction').transaction
 	}
 
 	async quoteBuyEntries(): Promise<TransactionQuote> {
@@ -158,12 +156,14 @@ export class RipsServiceIpml implements RipsService {
 			value: totalValue,
 		}
 
-		const { transaction, receipt } =
+		const { transaction, receipt } = requireSucceeded(
 			await this.evmTransactionService.sendTransaction(
 				wallet,
 				request,
 				chainId,
-			)
+			),
+			'Buy entries',
+		)
 
 		const purchase = parsePurchase(receipt, this.contractAddress)
 
@@ -194,12 +194,14 @@ export class RipsServiceIpml implements RipsService {
 			}),
 		}
 
-		const { transaction, receipt } =
+		const { transaction, receipt } = requireSucceeded(
 			await this.evmTransactionService.sendTransaction(
 				wallet,
 				request,
 				chainId,
-			)
+			),
+			'Withdraw reward',
+		)
 
 		const log = receipt.logs
 			.filter((l) => getAddress(l.address) === this.contractAddress)

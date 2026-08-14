@@ -11,6 +11,7 @@ import { ReferrerTier } from '../../domain/value-objects/referral-system'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
+import { requireSucceeded } from '../evm/utils/require-succeeded-transaction'
 import { ripsAbi } from './rips-abi'
 import { OPERATOR_ROLE, RIPS_CONTRACT } from './rips.constants'
 
@@ -153,13 +154,12 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 			to: this.contractAddress,
 		}
 
-		const { transaction } =
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				request,
-				this.chainId,
-			)
+		const result = await this.evmTransactionService.sendTransaction(
+			wallet,
+			request,
+			this.chainId,
+		)
 
-		return transaction
+		return requireSucceeded(result, 'Admin transaction').transaction
 	}
 }

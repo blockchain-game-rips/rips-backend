@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { resolveChainAddress } from '../../../domain/services/wallet-utils'
-import { PendingZap } from '../../../domain/value-objects/zap'
+import { attemptTransactionId } from '../../../domain/value-objects/transaction-attempt'
+import { CrosschainSwapStartResult } from '../../../domain/value-objects/zap'
 import { ZapService } from '../../interfaces/zap.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
 import { SwapInput, SwapUseCase } from './swap.use-case'
@@ -21,12 +22,12 @@ export class SwapService extends SwapUseCase {
 		currencyIn,
 		currencyOut,
 		amountIn,
-	}: SwapInput): Promise<PendingZap> {
+	}: SwapInput): Promise<CrosschainSwapStartResult> {
 		const user = await this.getUserUseCase.execute({ telegramId })
 
 		const recipient = resolveChainAddress(user.wallet, currencyOut)
 
-		const pendingZap = await this.zapService.swapCrosschain(user.wallet, {
+		const result = await this.zapService.swapCrosschain(user.wallet, {
 			currencyIn,
 			currencyOut,
 			amountIn,
@@ -36,7 +37,8 @@ export class SwapService extends SwapUseCase {
 		this.logger.log(
 			{
 				userId: user.id.toString(),
-				txHash: pendingZap.srcTransaction.id,
+				zapStatus: result.zap.status,
+				txHash: attemptTransactionId(result.zap),
 				fromChain: currencyIn.chainAddress.chain.reference,
 				toChain: currencyOut.chainAddress.chain.reference,
 				fromAmount: amountIn.toString(),
@@ -46,6 +48,6 @@ export class SwapService extends SwapUseCase {
 			'Swap initiated',
 		)
 
-		return pendingZap
+		return result
 	}
 }

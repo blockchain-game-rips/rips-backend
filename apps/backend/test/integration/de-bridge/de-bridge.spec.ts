@@ -32,6 +32,7 @@ import { EIP155 } from '../../../src/constants'
 import { Config } from '../../../src/domain/entities/config'
 import { ChainAddress } from '../../../src/domain/value-objects/chain-address'
 import { CurrencyAmount } from '../../../src/domain/value-objects/currency-amount'
+import { Transaction } from '../../../src/domain/value-objects/transaction'
 import { UserWallet } from '../../../src/domain/value-objects/wallet'
 import {
 	PendingZap,
@@ -54,6 +55,7 @@ import {
 	createMockDeBridgeApiService,
 	mockGetOrder,
 } from '../../mocks/mock-de-bridge-api.service'
+import { expectSucceeded } from '../../utils/attempts'
 import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
 import { provisionKekFile } from '../../utils/kek'
 
@@ -250,17 +252,18 @@ describe('DeBridge integration', () => {
 			const expectedRefundAmount =
 				MOCK_CONFIG.entryPrice.amount * BigInt(entryCount)
 
-			const pendingZap = await deBridgeService.enterCrosschain(
-				userWallet,
-				{
-					paymentCurrency: USDC_ARBITRUM,
-					presetId: wrongPresetId,
-					config: MOCK_CONFIG,
-					entryCount,
-				},
+			const { transaction, result: pendingZap } = expectSucceeded(
+				(
+					await deBridgeService.enterCrosschain(userWallet, {
+						paymentCurrency: USDC_ARBITRUM,
+						presetId: wrongPresetId,
+						config: MOCK_CONFIG,
+						entryCount,
+					})
+				).zap,
 			)
 
-			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
+			await fulfillOrderAndMockApi(transaction.id as Hash)
 
 			const result = await deBridgeService.getBuyResult(pendingZap.zapId)
 
@@ -290,24 +293,25 @@ describe('DeBridge integration', () => {
 			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
 			// Step 1: place order on Arbitrum with entry count over cap
-			const pendingZap = await deBridgeService.enterCrosschain(
-				userWallet,
-				{
-					paymentCurrency: USDC_ARBITRUM,
-					presetId: 1,
-					config: MOCK_CONFIG,
-					entryCount: overCapEntryCount,
-				},
+			const { transaction, result: pendingZap } = expectSucceeded(
+				(
+					await deBridgeService.enterCrosschain(userWallet, {
+						paymentCurrency: USDC_ARBITRUM,
+						presetId: 1,
+						config: MOCK_CONFIG,
+						entryCount: overCapEntryCount,
+					})
+				).zap,
 			)
 
-			await assertNativeSpentEqualsFeeAndGas(
-				nativeBalanceBefore,
+			await assertNativeSpentEqualsFeeAndGas(nativeBalanceBefore, {
+				transaction,
 				pendingZap,
-			)
+			})
 			await assertAmountInDeducted(usdcBalanceBefore, pendingZap)
 
 			// Step 2: fulfill order on Base and mock API response
-			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
+			await fulfillOrderAndMockApi(transaction.id as Hash)
 
 			// Step 3: get buy result
 			const result = await deBridgeService.getBuyResult(pendingZap.zapId)
@@ -341,24 +345,25 @@ describe('DeBridge integration', () => {
 			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
 			// Step 1: place order on Arbitrum
-			const pendingZap = await deBridgeService.enterCrosschain(
-				userWallet,
-				{
-					paymentCurrency: USDC_ARBITRUM,
-					presetId: 1,
-					config: MOCK_CONFIG,
-					entryCount: 5,
-				},
+			const { transaction, result: pendingZap } = expectSucceeded(
+				(
+					await deBridgeService.enterCrosschain(userWallet, {
+						paymentCurrency: USDC_ARBITRUM,
+						presetId: 1,
+						config: MOCK_CONFIG,
+						entryCount: 5,
+					})
+				).zap,
 			)
 
-			await assertNativeSpentEqualsFeeAndGas(
-				nativeBalanceBefore,
+			await assertNativeSpentEqualsFeeAndGas(nativeBalanceBefore, {
+				transaction,
 				pendingZap,
-			)
+			})
 			await assertAmountInDeducted(usdcBalanceBefore, pendingZap)
 
 			// Step 2: fulfill order on Base and mock API response
-			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
+			await fulfillOrderAndMockApi(transaction.id as Hash)
 
 			// Step 3: get buy result
 			const result = await deBridgeService.getBuyResult(pendingZap.zapId)
@@ -399,23 +404,24 @@ describe('DeBridge integration', () => {
 			const usdcBalanceBefore = await readUsdcBalance(userAccount.address)
 			const nativeBalanceBefore = await readArbitrumNativeBalance()
 
-			const pendingZap = await deBridgeService.swapCrosschain(
-				userWallet,
-				{
-					currencyIn: USDC_ARBITRUM,
-					currencyOut: ETH_BASE,
-					amountIn: 100_000000n,
-					recipient,
-				},
+			const { transaction, result: pendingZap } = expectSucceeded(
+				(
+					await deBridgeService.swapCrosschain(userWallet, {
+						currencyIn: USDC_ARBITRUM,
+						currencyOut: ETH_BASE,
+						amountIn: 100_000000n,
+						recipient,
+					})
+				).zap,
 			)
 
-			await assertNativeSpentEqualsFeeAndGas(
-				nativeBalanceBefore,
+			await assertNativeSpentEqualsFeeAndGas(nativeBalanceBefore, {
+				transaction,
 				pendingZap,
-			)
+			})
 			await assertAmountInDeducted(usdcBalanceBefore, pendingZap)
 
-			await fulfillOrderAndMockApi(pendingZap.srcTransaction.id as Hash)
+			await fulfillOrderAndMockApi(transaction.id as Hash)
 
 			const result = await deBridgeService.getSwapResult(pendingZap.zapId)
 
@@ -482,10 +488,12 @@ describe('DeBridge integration', () => {
 
 		async function assertNativeSpentEqualsFeeAndGas(
 			nativeBalanceBefore: bigint,
-			pendingZap: PendingZap,
+			zap: { transaction: Transaction; pendingZap: PendingZap },
 		): Promise<void> {
+			const { transaction, pendingZap } = zap
+
 			const nativeBalanceAfter = await readArbitrumNativeBalance()
-			const txCost = pendingZap.srcTransaction.cost?.amount ?? 0n
+			const txCost = transaction.cost?.amount ?? 0n
 			expect(nativeBalanceBefore - nativeBalanceAfter).toBe(
 				pendingZap.fee.amount + txCost,
 			)
@@ -616,7 +624,7 @@ describe('DeBridge integration', () => {
 				address: receiverAccount.address,
 			})
 
-			const result: SamechainSwapResult =
+			const swapResult: SamechainSwapResult =
 				await deBridgeService.swapSamechain(userWallet, {
 					currencyIn: USDC_BASE,
 					currencyOut: ETH_BASE,
@@ -624,11 +632,13 @@ describe('DeBridge integration', () => {
 					recipient,
 				})
 
+			const { transaction, result } = expectSucceeded(swapResult.swap)
+
 			const receiverBalanceAfter = await baseClient.getBalance({
 				address: receiverAccount.address,
 			})
 
-			expect(result.transaction.id).toMatch(/^0x[0-9a-fA-F]{64}$/)
+			expect(transaction.id).toMatch(/^0x[0-9a-fA-F]{64}$/)
 			expect(result.amountOut.amount).toBeGreaterThan(0n)
 			expect(result.amountOut.currency.chainAddress.address).toBe(
 				ETH_BASE.chainAddress.address,

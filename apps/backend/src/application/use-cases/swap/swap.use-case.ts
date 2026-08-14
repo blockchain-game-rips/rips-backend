@@ -1,6 +1,6 @@
 import { Currency } from '../../../domain/entities/currency'
 import { TelegramId } from '../../../domain/value-objects/telegram-id'
-import { PendingZap } from '../../../domain/value-objects/zap'
+import { CrosschainSwapStartResult } from '../../../domain/value-objects/zap'
 
 export type SwapInput = {
 	telegramId: TelegramId
@@ -10,5 +10,5 @@ export type SwapInput = {
 }
 
 export abstract class SwapUseCase {
-	abstract execute(input: SwapInput): Promise<PendingZap>
+	abstract execute(input: SwapInput): Promise<CrosschainSwapStartResult>
 }
