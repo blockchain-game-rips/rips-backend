@@ -1,28 +1,58 @@
+# Indexer image (multi-stage). Build from the repo root:
+#   docker build -f apps/indexer/Dockerfile -t indexer .
+
+# --- builder: full install + compile, discarded from the final image ---
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ libc6-compat linux-headers
 
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+COPY .yarnrc.yml package.json yarn.lock ./
+COPY .yarn/ ./.yarn/
 
-COPY tsconfig*.json ./
-COPY src ./src
+# Workspace manifests first, so the install layer caches until deps change.
+COPY apps/indexer/package.json apps/indexer/
+COPY apps/backend/package.json apps/backend/
+COPY packages/abi/package.json packages/abi/
+COPY packages/test-harness/package.json packages/test-harness/
 
-RUN yarn build
+RUN yarn install --immutable
 
-FROM node:22-alpine
+COPY tsconfig.base.json ./
+COPY packages/ ./packages/
+COPY apps/indexer/ ./apps/indexer/
+
+RUN yarn workspace @rips/abi run build
+
+# src/abi and src/model/generated are gitignored, so both are regenerated here.
+RUN yarn workspace indexer run generate
+
+RUN yarn workspace indexer run build
+
+# --- runner: production-only deps + compiled output ---
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ libc6-compat linux-headers
 
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile --production
+COPY .yarnrc.yml package.json yarn.lock ./
+COPY .yarn/ ./.yarn/
 
-COPY --from=builder /app/lib ./lib
-COPY db ./db
-COPY schema.graphql ./
+COPY apps/indexer/package.json apps/indexer/
+COPY packages/abi/package.json packages/abi/
+COPY packages/test-harness/package.json packages/test-harness/
 
-CMD ["node", "lib/main.js"]
+RUN yarn workspaces focus indexer --production
+
+COPY --from=builder /app/packages/abi/dist packages/abi/dist
+COPY --from=builder /app/apps/indexer/lib apps/indexer/lib
+
+COPY apps/indexer/db apps/indexer/db
+COPY apps/indexer/schema.graphql apps/indexer/
+
+WORKDIR /app/apps/indexer
+
+# TypeORM migrations create the squid schema before the processor starts.
+CMD ["sh", "-c", "npx squid-typeorm-migration apply && node lib/main.js"]
