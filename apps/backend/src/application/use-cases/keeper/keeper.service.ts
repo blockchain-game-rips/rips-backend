@@ -2,6 +2,10 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Executor } from '../../../domain/entities/executor'
 import { OngoingRip, Rip, RipStatus } from '../../../domain/entities/rip'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
+import {
+	attemptTransactionId,
+	TransactionAttempt,
+} from '../../../domain/value-objects/transaction-attempt'
 import { ExecutorRepository } from '../../interfaces/repositories/executor.repository'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
 import { RipsService } from '../../interfaces/rips.service'
@@ -120,41 +124,69 @@ export class KeeperService extends KeeperUseCase {
 		action: KeeperAction,
 	): Promise<void> {
 		switch (action.type) {
-			case 'requestVrf':
-				await this.ripsService.requestVrf(executor.wallet, {
+			case 'requestVrf': {
+				const attempt = await this.ripsService.requestVrf(
+					executor.wallet,
+					{ ripId: action.rip.id },
+				)
+
+				this.logAttempt(attempt, 'Randomness request', {
 					ripId: action.rip.id,
 				})
 				break
+			}
 
 			case 'claim': {
 				const user = await this.userRepository.findByEvmAddress(
 					action.userAddress,
 				)
 
-				const claimTx = await this.ripsService.claim(executor.wallet, {
+				const attempt = await this.ripsService.claim(executor.wallet, {
 					ripId: action.rip.id,
 					userAddress: action.userAddress,
 					referrerAddress: user?.referrerAddress ?? null,
 				})
 
-				this.logger.log(
-					{
-						userId: user?.id.toString(),
-						ripId: action.rip.id,
-						userAddress: action.userAddress,
-						txHash: claimTx.id,
-					},
-					'Payout claimed',
-				)
-				break
-			}
-
-			case 'refund':
-				await this.ripsService.refund(executor.wallet, {
+				this.logAttempt(attempt, 'Payout claim', {
+					userId: user?.id.toString(),
 					ripId: action.rip.id,
 					userAddress: action.userAddress,
 				})
 				break
+			}
+
+			case 'refund': {
+				const attempt = await this.ripsService.refund(executor.wallet, {
+					ripId: action.rip.id,
+					userAddress: action.userAddress,
+				})
+
+				this.logAttempt(attempt, 'Refund', {
+					ripId: action.rip.id,
+					userAddress: action.userAddress,
+				})
+				break
+			}
 		}
+	}
+
+	private logAttempt(
+		attempt: TransactionAttempt,
+		action: string,
+		context: Record<string, unknown>,
+	): void {
+		const details = {
+			...context,
+			status: attempt.status,
+			txHash: attemptTransactionId(attempt),
+		}
+
+		if (attempt.status === 'succeeded') {
+			this.logger.log(details, `${action} succeeded`)
+
+			return
+		}
+
+		this.logger.error(details, `${action} did not succeed`)
 	}
 }

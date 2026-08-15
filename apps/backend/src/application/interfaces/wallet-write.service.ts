@@ -1,9 +1,7 @@
 import { Currency } from '../../domain/entities/currency'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
-import {
-	Transaction,
-	TransactionQuote,
-} from '../../domain/value-objects/transaction'
+import { TransactionQuote } from '../../domain/value-objects/transaction'
+import { TransactionAttempt } from '../../domain/value-objects/transaction-attempt'
 import { Wallet } from '../../domain/value-objects/wallet'
 
 export abstract class WalletWriteService {
@@ -14,7 +12,7 @@ export abstract class WalletWriteService {
 			to: ChainAddress
 			amount: bigint
 		},
-	): Promise<Transaction>
+	): Promise<TransactionAttempt>
 
 	abstract quoteTransfer(
 		wallet: Wallet,

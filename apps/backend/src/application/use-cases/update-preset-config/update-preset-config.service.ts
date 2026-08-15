@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Config } from '../../../domain/entities/config'
 import { AdminWalletNotFoundError } from '../../../domain/errors/admin-wallet-not-found.error'
 import { PresetTierCountMismatchError } from '../../../domain/errors/preset-tier-count-mismatch.error'
-import { Transaction } from '../../../domain/value-objects/transaction'
+import { TransactionAttempt } from '../../../domain/value-objects/transaction-attempt'
 import { AdminWalletRepository } from '../../interfaces/repositories/admin-wallet.repository'
 import { PresetRepository } from '../../interfaces/repositories/preset.repository'
 import { RipsAdminService } from '../../interfaces/rips-admin.service'
@@ -21,7 +21,7 @@ export class UpdatePresetConfigService extends UpdatePresetConfigUseCase {
 	async execute(input: {
 		presetId: number
 		config: Omit<Config, 'id'>
-	}): Promise<Transaction> {
+	}): Promise<TransactionAttempt> {
 		const [adminWallet, presetsWithRips] = await Promise.all([
 			this.adminWalletRepository.get(),
 			this.presetRepository.getPresetsWithOngoingRips(),

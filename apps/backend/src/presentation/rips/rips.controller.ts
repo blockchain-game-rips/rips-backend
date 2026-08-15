@@ -141,19 +141,20 @@ export class RipsController {
 	}
 
 	@Post('entries/purchase')
+	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: BuyEntriesPurchaseResponseDto })
 	async buyEntriesPurchase(
 		@Headers() headers: TelegramIdHeaderDto,
 		@Body() body: BuyEntriesPurchaseBodyDto,
 	): Promise<BuyEntriesPurchaseResponseDto> {
-		const purchaseReceipt = await this.buyEntriesPurchaseUseCase.execute({
+		const attempt = await this.buyEntriesPurchaseUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
 			presetId: body.presetId,
 			entryCount: body.entryCount,
 			paymentCurrencyChainAddress: body.paymentCurrencyChainAddress,
 		})
 
-		return toBuyEntriesPurchaseResponseDto(purchaseReceipt)
+		return toBuyEntriesPurchaseResponseDto(attempt)
 	}
 
 	@Post('entries/quote-purchase')

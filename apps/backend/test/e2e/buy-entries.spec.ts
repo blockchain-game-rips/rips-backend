@@ -43,12 +43,15 @@ describe('Buy entries E2E', () => {
 				entryCount: ENTRY_COUNT,
 				paymentCurrencyChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 			})
-			.expect(201)
+			.expect(200)
 
-		expect(res.body.transaction.id).toMatch(/^0x[0-9a-fA-F]{64}$/)
-		expect(res.body.ripId).toBeGreaterThan(0)
-		expect(res.body.entryCount).toBe(ENTRY_COUNT)
-		expect(res.body.startEntryIndex).toBeGreaterThanOrEqual(0)
-		expect(typeof res.body.transaction.cost.amount).toBe('string')
+		const { purchase } = res.body
+
+		expect(purchase.status).toBe('succeeded')
+		expect(purchase.transaction.id).toMatch(/^0x[0-9a-fA-F]{64}$/)
+		expect(purchase.result.ripId).toBeGreaterThan(0)
+		expect(purchase.result.entryCount).toBe(ENTRY_COUNT)
+		expect(purchase.result.startEntryIndex).toBeGreaterThanOrEqual(0)
+		expect(typeof purchase.transaction.cost.amount).toBe('string')
 	})
 })

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { AdminWalletNotFoundError } from '../../../domain/errors/admin-wallet-not-found.error'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
-import { Transaction } from '../../../domain/value-objects/transaction'
+import { TransactionAttempt } from '../../../domain/value-objects/transaction-attempt'
 import { AdminWalletRepository } from '../../interfaces/repositories/admin-wallet.repository'
 import { RipsAdminService } from '../../interfaces/rips-admin.service'
 import { SetReferrerFrozenUseCase } from './set-referrer-frozen.use-case'
@@ -18,7 +18,7 @@ export class SetReferrerFrozenService extends SetReferrerFrozenUseCase {
 	async execute(input: {
 		referrer: EvmAddress
 		frozen: boolean
-	}): Promise<Transaction> {
+	}): Promise<TransactionAttempt> {
 		const adminWallet = await this.adminWalletRepository.get()
 
 		if (!adminWallet) {

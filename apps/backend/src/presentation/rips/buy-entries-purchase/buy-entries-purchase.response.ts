@@ -1,12 +1,15 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { PurchaseReceipt } from '../../../domain/value-objects/purchase-receipt'
-import { toTransactionDto, TransactionDto } from '../../shared/transaction.dto'
+import { Purchase } from '../../../domain/value-objects/purchase'
+import { TransactionAttemptWith } from '../../../domain/value-objects/transaction-attempt'
+import {
+	toTransactionAttemptWithDto,
+	transactionAttemptSchema,
+} from '../../shared/transaction-attempt.dto'
 import { purchaseSchema, toPurchaseDto } from '../shared/purchase.dto'
 
 const buyEntriesPurchaseResponseSchema = z.object({
-	transaction: TransactionDto.schema,
-	...purchaseSchema.shape,
+	purchase: transactionAttemptSchema(purchaseSchema),
 })
 
 export class BuyEntriesPurchaseResponseDto extends createZodDto(
@@ -14,10 +17,9 @@ export class BuyEntriesPurchaseResponseDto extends createZodDto(
 ) {}
 
 export function toBuyEntriesPurchaseResponseDto(
-	receipt: PurchaseReceipt,
+	attempt: TransactionAttemptWith<Purchase>,
 ): BuyEntriesPurchaseResponseDto {
 	return {
-		transaction: toTransactionDto(receipt.transaction),
-		...toPurchaseDto(receipt.purchase),
+		purchase: toTransactionAttemptWithDto(attempt, toPurchaseDto),
 	}
 }

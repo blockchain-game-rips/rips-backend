@@ -102,13 +102,13 @@ describe('Referral system E2E', () => {
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_REFERRER)
 			.send(buyEntriesBody(ENTRIES_PER_USER))
-			.expect(201)
+			.expect(200)
 
 		await request(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_PLAYER)
 			.send(buyEntriesBody(ENTRIES_PER_USER))
-			.expect(201)
+			.expect(200)
 
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
 
@@ -172,9 +172,11 @@ describe('Referral system E2E', () => {
 			.post('/referral-system/rewards')
 			.set('x-telegram-id', TELEGRAM_ID_REFERRER)
 			.send({ currencyAddress: NATIVE_ADDRESS })
-			.expect(201)
+			.expect(200)
 
-		const txCost = BigInt(withdrawRes.body.transaction.cost.amount)
+		const txCost = BigInt(
+			withdrawRes.body.withdrawal.transaction.cost.amount,
+		)
 
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
 		await clearCache(ctx)

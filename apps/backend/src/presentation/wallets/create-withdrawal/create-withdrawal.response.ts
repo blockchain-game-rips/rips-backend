@@ -1,13 +1,21 @@
 import { createZodDto } from 'nestjs-zod'
-import { Transaction } from '../../../domain/value-objects/transaction'
-import { toTransactionDto, TransactionDto } from '../../shared/transaction.dto'
+import { z } from 'zod'
+import { TransactionAttempt } from '../../../domain/value-objects/transaction-attempt'
+import {
+	toTransactionAttemptDto,
+	transactionAttemptSchema,
+} from '../../shared/transaction-attempt.dto'
+
+const createWithdrawalResponseSchema = z.object({
+	withdrawal: transactionAttemptSchema(),
+})
 
 export class CreateWithdrawalResponseDto extends createZodDto(
-	TransactionDto.schema,
+	createWithdrawalResponseSchema,
 ) {}
 
 export function toCreateWithdrawalResponseDto(
-	tx: Transaction,
+	attempt: TransactionAttempt,
 ): CreateWithdrawalResponseDto {
-	return toTransactionDto(tx)
+	return { withdrawal: toTransactionAttemptDto(attempt) }
 }

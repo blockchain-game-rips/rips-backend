@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { CurrenciesMismatchError } from '../../../domain/errors/currencies-mismatch.error'
 import { InsufficientBalanceError } from '../../../domain/errors/insufficient-balance.error'
-import { Transaction } from '../../../domain/value-objects/transaction'
+import { TransactionAttempt } from '../../../domain/value-objects/transaction-attempt'
 import { WalletReadService } from '../../interfaces/wallet-read.service'
 import { WalletWriteService } from '../../interfaces/wallet-write.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
@@ -15,7 +15,7 @@ export class WithdrawService implements WithdrawUseCase {
 		private readonly walletWriteService: WalletWriteService,
 	) {}
 
-	async execute(input: WithdrawInput): Promise<Transaction> {
+	async execute(input: WithdrawInput): Promise<TransactionAttempt> {
 		const { telegramId, amountIn, currencyOut, recipientAddress } = input
 
 		if (amountIn.currency.id !== currencyOut.id) {

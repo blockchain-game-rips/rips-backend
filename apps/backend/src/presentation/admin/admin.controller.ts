@@ -19,7 +19,6 @@ import { SetReferrerFrozenUseCase } from '../../application/use-cases/set-referr
 import { UpdatePresetConfigUseCase } from '../../application/use-cases/update-preset-config/update-preset-config.use-case'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
-import { toTransactionDto } from '../shared/transaction.dto'
 import { AdminApiKeyGuard } from './admin-api-key.guard'
 import { ADMIN_API_KEY_HEADER } from './admin-api-key.header'
 import { SetDefaultReferralFeeBodyDto } from './set-default-referral-fee/set-default-referral-fee.request'
@@ -36,7 +35,10 @@ import {
 	SetReferrerFrozenBodyDto,
 	SetReferrerFrozenParamsDto,
 } from './set-referrer-frozen/set-referrer-frozen.request'
-import { AdminTransactionResponseDto } from './shared/admin-transaction.response'
+import {
+	AdminTransactionResponseDto,
+	toAdminTransactionResponseDto,
+} from './shared/admin-transaction.response'
 import {
 	AdminWalletResponseDto,
 	toAdminWalletResponseDto,
@@ -72,11 +74,11 @@ export class AdminController {
 	async setPaused(
 		@Body() body: SetPausedBodyDto,
 	): Promise<AdminTransactionResponseDto> {
-		const transaction = await this.setPausedUseCase.execute({
+		const attempt = await this.setPausedUseCase.execute({
 			isPaused: body.isPaused,
 		})
 
-		return { transaction: toTransactionDto(transaction) }
+		return toAdminTransactionResponseDto(attempt)
 	}
 
 	@Put('referral/default-fee')
@@ -84,11 +86,11 @@ export class AdminController {
 	async setDefaultReferralFee(
 		@Body() body: SetDefaultReferralFeeBodyDto,
 	): Promise<AdminTransactionResponseDto> {
-		const transaction = await this.setDefaultReferralFeeUseCase.execute({
+		const attempt = await this.setDefaultReferralFeeUseCase.execute({
 			feeBps: body.feeBps,
 		})
 
-		return { transaction: toTransactionDto(transaction) }
+		return toAdminTransactionResponseDto(attempt)
 	}
 
 	@Put('referral/tiers/:currency')
@@ -97,12 +99,12 @@ export class AdminController {
 		@Param() params: SetReferralTiersParamsDto,
 		@Body() body: SetReferralTiersBodyDto,
 	): Promise<AdminTransactionResponseDto> {
-		const transaction = await this.setReferralTiersUseCase.execute({
+		const attempt = await this.setReferralTiersUseCase.execute({
 			currencyAddress: params.currency,
 			tiers: body.tiers,
 		})
 
-		return { transaction: toTransactionDto(transaction) }
+		return toAdminTransactionResponseDto(attempt)
 	}
 
 	@Put('presets/:presetId/config')
@@ -123,7 +125,7 @@ export class AdminController {
 			entryPrice.currencyChainAddress as ChainAddress,
 		)
 
-		const transaction = await this.updatePresetConfigUseCase.execute({
+		const attempt = await this.updatePresetConfigUseCase.execute({
 			presetId: Number(presetId),
 			config: {
 				durationSeconds: durationSeconds,
@@ -137,7 +139,7 @@ export class AdminController {
 			},
 		})
 
-		return { transaction: toTransactionDto(transaction) }
+		return toAdminTransactionResponseDto(attempt)
 	}
 
 	@Put('referrers/:address/frozen')
@@ -146,12 +148,12 @@ export class AdminController {
 		@Param() params: SetReferrerFrozenParamsDto,
 		@Body() body: SetReferrerFrozenBodyDto,
 	): Promise<AdminTransactionResponseDto> {
-		const transaction = await this.setReferrerFrozenUseCase.execute({
+		const attempt = await this.setReferrerFrozenUseCase.execute({
 			referrer: params.address,
 			frozen: body.frozen,
 		})
 
-		return { transaction: toTransactionDto(transaction) }
+		return toAdminTransactionResponseDto(attempt)
 	}
 
 	@Put('referrers/:address/custom-fee')
@@ -160,11 +162,11 @@ export class AdminController {
 		@Param() params: SetReferrerCustomFeeParamsDto,
 		@Body() body: SetReferrerCustomFeeBodyDto,
 	): Promise<AdminTransactionResponseDto> {
-		const transaction = await this.setReferrerCustomFeeUseCase.execute({
+		const attempt = await this.setReferrerCustomFeeUseCase.execute({
 			referrer: params.address,
 			feeBps: body.feeBps,
 		})
 
-		return { transaction: toTransactionDto(transaction) }
+		return toAdminTransactionResponseDto(attempt)
 	}
 }

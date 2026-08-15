@@ -8,10 +8,10 @@ import {
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
 import { ReferrerTier } from '../../domain/value-objects/referral-system'
-import { Transaction } from '../../domain/value-objects/transaction'
+import { TransactionAttempt } from '../../domain/value-objects/transaction-attempt'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
-import { requireSucceeded } from '../evm/utils/require-succeeded-transaction'
+import { toTransactionAttempt } from '../evm/utils/to-transaction-attempt'
 import { ripsAbi } from './rips-abi'
 import { OPERATOR_ROLE, RIPS_CONTRACT } from './rips.constants'
 
@@ -29,7 +29,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 		this.chainId = Number(contract.chain.reference)
 	}
 
-	pause(wallet: Wallet): Promise<Transaction> {
+	pause(wallet: Wallet): Promise<TransactionAttempt> {
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
@@ -39,7 +39,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 		})
 	}
 
-	unpause(wallet: Wallet): Promise<Transaction> {
+	unpause(wallet: Wallet): Promise<TransactionAttempt> {
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
@@ -52,7 +52,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 	setReferrerFrozen(
 		wallet: Wallet,
 		args: { referrer: EvmAddress; frozen: boolean },
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
@@ -65,7 +65,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 	updatePreset(
 		wallet: Wallet,
 		args: { presetId: number; config: Omit<Config, 'id'> },
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		const { presetId, config } = args
 
 		const currencyAddress = toEvmAddress(
@@ -96,7 +96,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 	setReferralTiers(
 		wallet: Wallet,
 		args: { currencyAddress: EvmAddress; tiers: ReferrerTier[] },
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
@@ -109,7 +109,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 	setDefaultReferralFee(
 		wallet: Wallet,
 		args: { feeBps: number },
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
@@ -122,7 +122,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 	setReferrerCustomFee(
 		wallet: Wallet,
 		args: { referrer: EvmAddress; feeBps: number },
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
@@ -135,7 +135,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 	grantOperatorRole(
 		wallet: Wallet,
 		args: { operator: EvmAddress },
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		return this.sendAdminTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
@@ -148,7 +148,7 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 	private async sendAdminTransaction(
 		wallet: Wallet,
 		requestFields: Pick<TransactionRequestEIP1559, 'data'>,
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		const request: TransactionRequestEIP1559 = {
 			...requestFields,
 			to: this.contractAddress,
@@ -160,6 +160,6 @@ export class RipsAdminServiceImpl extends RipsAdminService {
 			this.chainId,
 		)
 
-		return requireSucceeded(result, 'Admin transaction').transaction
+		return toTransactionAttempt(result)
 	}
 }

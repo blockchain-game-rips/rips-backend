@@ -3,6 +3,8 @@ import {
 	Controller,
 	Get,
 	Headers,
+	HttpCode,
+	HttpStatus,
 	Post,
 	UseInterceptors,
 } from '@nestjs/common'
@@ -71,17 +73,18 @@ export class ReferralSystemController {
 	}
 
 	@Post('rewards')
+	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: WithdrawRewardResponseDto })
 	async withdrawReward(
 		@Headers() headers: TelegramIdHeaderDto,
 		@Body() body: WithdrawRewardBodyDto,
 	): Promise<WithdrawRewardResponseDto> {
-		const reward = await this.withdrawRewardUseCase.execute({
+		const attempt = await this.withdrawRewardUseCase.execute({
 			telegramId: headers[TELEGRAM_ID_HEADER],
 			currencyAddress: body.currencyAddress,
 		})
 
-		return toWithdrawRewardResponseDto(reward)
+		return toWithdrawRewardResponseDto(attempt)
 	}
 
 	@Post('rewards/quote')

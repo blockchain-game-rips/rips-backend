@@ -123,20 +123,22 @@ describe('Rip settlement flow E2E', () => {
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.send(buyEntriesBody(ENTRIES_PER_USER_FIRST_PURCHASE))
-			.expect(201)
+			.expect(200)
 
-		ripId = res1.body.ripId
+		ripId = res1.body.purchase.result.ripId
 
-		expect(res1.body.entryCount).toBe(ENTRIES_PER_USER_FIRST_PURCHASE)
+		expect(res1.body.purchase.result.entryCount).toBe(
+			ENTRIES_PER_USER_FIRST_PURCHASE,
+		)
 
 		const res1SecondPurchase = await request(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.send(buyEntriesBody(ENTRIES_PER_USER_SECOND_PURCHASE))
-			.expect(201)
+			.expect(200)
 
-		expect(res1SecondPurchase.body.ripId).toBe(ripId)
-		expect(res1SecondPurchase.body.entryCount).toBe(
+		expect(res1SecondPurchase.body.purchase.result.ripId).toBe(ripId)
+		expect(res1SecondPurchase.body.purchase.result.entryCount).toBe(
 			ENTRIES_PER_USER_SECOND_PURCHASE,
 		)
 
@@ -144,10 +146,10 @@ describe('Rip settlement flow E2E', () => {
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.send(buyEntriesBody(ENTRIES_PER_USER))
-			.expect(201)
+			.expect(200)
 
-		expect(res2.body.ripId).toBe(ripId)
-		expect(res2.body.entryCount).toBe(ENTRIES_PER_USER)
+		expect(res2.body.purchase.result.ripId).toBe(ripId)
+		expect(res2.body.purchase.result.entryCount).toBe(ENTRIES_PER_USER)
 
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)
 	})
@@ -471,17 +473,17 @@ describe('Rip settlement flow E2E', () => {
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', REFUND_TELEGRAM_ID_USER_1)
 			.send(buyEntriesBody(ENTRIES_PER_REFUND_USER))
-			.expect(201)
+			.expect(200)
 
 		const res2 = await request(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', REFUND_TELEGRAM_ID_USER_2)
 			.send(buyEntriesBody(ENTRIES_PER_REFUND_USER))
-			.expect(201)
+			.expect(200)
 
-		refundRipId = res1.body.ripId
+		refundRipId = res1.body.purchase.result.ripId
 
-		expect(res2.body.ripId).toBe(refundRipId)
+		expect(res2.body.purchase.result.ripId).toBe(refundRipId)
 		expect(refundRipId).not.toBe(ripId)
 
 		await ensureIndexerSync(ctx.indexer, ctx.anvil)

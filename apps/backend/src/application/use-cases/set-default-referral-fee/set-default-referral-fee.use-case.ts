@@ -1,5 +1,5 @@
-import { Transaction } from '../../../domain/value-objects/transaction'
+import { TransactionAttempt } from '../../../domain/value-objects/transaction-attempt'
 
 export abstract class SetDefaultReferralFeeUseCase {
-	abstract execute(input: { feeBps: number }): Promise<Transaction>
+	abstract execute(input: { feeBps: number }): Promise<TransactionAttempt>
 }

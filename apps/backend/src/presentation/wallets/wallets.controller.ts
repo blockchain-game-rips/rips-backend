@@ -95,6 +95,7 @@ export class WalletsController {
 	}
 
 	@Post('withdrawals')
+	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: CreateWithdrawalResponseDto })
 	async createWithdrawal(
 		@Headers() headers: TelegramIdHeaderDto,
@@ -109,14 +110,14 @@ export class WalletsController {
 			this.currencyService.fromAccount(body.currencyOutChainAddress),
 		])
 
-		const transaction = await this.withdrawUseCase.execute({
+		const attempt = await this.withdrawUseCase.execute({
 			telegramId,
 			amountIn: { currency: currencyIn, amount: body.amountIn.amount },
 			currencyOut,
 			recipientAddress: body.recipientAddress,
 		})
 
-		return toCreateWithdrawalResponseDto(transaction)
+		return toCreateWithdrawalResponseDto(attempt)
 	}
 
 	@Post('quote-swap/crosschain')

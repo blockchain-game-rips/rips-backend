@@ -11,6 +11,7 @@ import {
 } from '../../domain/services/evm'
 import { PrivateKey } from '../../domain/value-objects/private-key'
 import { AdminWallet } from '../../domain/value-objects/wallet'
+import { requireSucceeded } from './require-succeeded-transaction'
 
 @Injectable()
 export class ProvisionService {
@@ -86,9 +87,12 @@ export class ProvisionService {
 		for (const executor of executors) {
 			const operator = evmAddressFromWallet(executor.wallet)
 
-			await this.ripsAdminService.grantOperatorRole(adminWallet, {
-				operator,
-			})
+			const attempt = await this.ripsAdminService.grantOperatorRole(
+				adminWallet,
+				{ operator },
+			)
+
+			requireSucceeded(attempt, `Grant OPERATOR_ROLE to ${operator}`)
 
 			this.logger.log(`Granted OPERATOR_ROLE to executor ${operator}`)
 		}

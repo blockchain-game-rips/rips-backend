@@ -1,11 +1,12 @@
 import { Config } from '../../domain/entities/config'
+import { CurrencyAmount } from '../../domain/value-objects/currency-amount'
 import { EvmAddress } from '../../domain/value-objects/evm-address'
-import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
-import { Reward } from '../../domain/value-objects/reward'
+import { Purchase } from '../../domain/value-objects/purchase'
+import { TransactionQuote } from '../../domain/value-objects/transaction'
 import {
-	Transaction,
-	TransactionQuote,
-} from '../../domain/value-objects/transaction'
+	TransactionAttempt,
+	TransactionAttemptWith,
+} from '../../domain/value-objects/transaction-attempt'
 import { Wallet } from '../../domain/value-objects/wallet'
 
 export abstract class RipsService {
@@ -16,29 +17,29 @@ export abstract class RipsService {
 			userAddress: EvmAddress
 			referrerAddress: EvmAddress | null
 		},
-	): Promise<Transaction>
+	): Promise<TransactionAttempt>
 
 	abstract refund(
 		wallet: Wallet,
 		args: { ripId: number; userAddress: EvmAddress },
-	): Promise<Transaction>
+	): Promise<TransactionAttempt>
 
 	abstract requestVrf(
 		wallet: Wallet,
 		args: { ripId: number },
-	): Promise<Transaction>
+	): Promise<TransactionAttempt>
 
 	abstract quoteBuyEntries(): Promise<TransactionQuote>
 
 	abstract buyEntries(
 		wallet: Wallet,
 		args: { presetId: number; config: Config; entryCount: number },
-	): Promise<PurchaseReceipt>
+	): Promise<TransactionAttemptWith<Purchase>>
 
 	abstract quoteWithdrawReward(): Promise<TransactionQuote>
 
 	abstract withdrawReward(
 		wallet: Wallet,
 		args: { currencyAddress: EvmAddress },
-	): Promise<Reward>
+	): Promise<TransactionAttemptWith<CurrencyAmount>>
 }

@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { WalletWriteService } from '../../application/interfaces/wallet-write.service'
 import { Currency } from '../../domain/entities/currency'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
-import {
-	Transaction,
-	TransactionQuote,
-} from '../../domain/value-objects/transaction'
+import { TransactionQuote } from '../../domain/value-objects/transaction'
+import { TransactionAttempt } from '../../domain/value-objects/transaction-attempt'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmCurrencyWriteService } from '../evm/evm-currency-write.service'
 import { EvmCurrency } from '../evm/primitives/currencies/evm-currency'
@@ -25,7 +23,7 @@ export class WalletWriteServiceImpl extends WalletWriteService {
 			to: ChainAddress
 			amount: bigint
 		},
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		if (args.currency instanceof EvmCurrency) {
 			return this.evmCurrencyWriteService.transfer(wallet, {
 				...args,

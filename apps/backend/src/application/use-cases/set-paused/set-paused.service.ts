@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { AdminWalletNotFoundError } from '../../../domain/errors/admin-wallet-not-found.error'
-import { Transaction } from '../../../domain/value-objects/transaction'
+import { TransactionAttempt } from '../../../domain/value-objects/transaction-attempt'
 import { AdminWalletRepository } from '../../interfaces/repositories/admin-wallet.repository'
 import { RipsAdminService } from '../../interfaces/rips-admin.service'
 import { SetPausedUseCase } from './set-paused.use-case'
@@ -14,7 +14,7 @@ export class SetPausedService extends SetPausedUseCase {
 		super()
 	}
 
-	async execute(input: { isPaused: boolean }): Promise<Transaction> {
+	async execute(input: { isPaused: boolean }): Promise<TransactionAttempt> {
 		const adminWallet = await this.adminWalletRepository.get()
 
 		if (!adminWallet) {

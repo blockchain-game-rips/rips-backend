@@ -4,7 +4,11 @@ import {
 	findAvailablePreset,
 	resolveConfig,
 } from '../../../domain/services/preset-utils'
-import { PurchaseReceipt } from '../../../domain/value-objects/purchase-receipt'
+import { Purchase } from '../../../domain/value-objects/purchase'
+import {
+	attemptTransactionId,
+	TransactionAttemptWith,
+} from '../../../domain/value-objects/transaction-attempt'
 import { CurrencyService } from '../../interfaces/currency.service'
 import { RipsService } from '../../interfaces/rips.service'
 import { GetAvailablePresetsUseCase } from '../get-available-presets/get-available-presets.use-case'
@@ -27,7 +31,9 @@ export class BuyEntriesPurchaseService extends BuyEntriesPurchaseUseCase {
 		super()
 	}
 
-	async execute(input: BuyEntriesPurchaseInput): Promise<PurchaseReceipt> {
+	async execute(
+		input: BuyEntriesPurchaseInput,
+	): Promise<TransactionAttemptWith<Purchase>> {
 		const {
 			telegramId,
 			presetId,
@@ -51,7 +57,7 @@ export class BuyEntriesPurchaseService extends BuyEntriesPurchaseUseCase {
 			)
 		}
 
-		const receipt = await this.ripsService.buyEntries(user.wallet, {
+		const attempt = await this.ripsService.buyEntries(user.wallet, {
 			presetId: availablePreset.preset.id,
 			config,
 			entryCount,
@@ -66,10 +72,14 @@ export class BuyEntriesPurchaseService extends BuyEntriesPurchaseUseCase {
 				entryCount,
 				totalCost: totalCost.toString(),
 				currency: paymentCurrency.chainAddress.address,
+				status: attempt.status,
+				transactionId: attemptTransactionId(attempt),
 			},
-			'Entry purchased',
+			attempt.status === 'succeeded'
+				? 'Entry purchase succeeded'
+				: 'Entry purchase did not succeed',
 		)
 
-		return receipt
+		return attempt
 	}
 }

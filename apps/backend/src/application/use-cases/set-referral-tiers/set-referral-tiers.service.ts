@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { AdminWalletNotFoundError } from '../../../domain/errors/admin-wallet-not-found.error'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
 import { ReferrerTier } from '../../../domain/value-objects/referral-system'
-import { Transaction } from '../../../domain/value-objects/transaction'
+import { TransactionAttempt } from '../../../domain/value-objects/transaction-attempt'
 import { AdminWalletRepository } from '../../interfaces/repositories/admin-wallet.repository'
 import { RipsAdminService } from '../../interfaces/rips-admin.service'
 import { SetReferralTiersUseCase } from './set-referral-tiers.use-case'
@@ -19,7 +19,7 @@ export class SetReferralTiersService extends SetReferralTiersUseCase {
 	async execute(input: {
 		currencyAddress: EvmAddress
 		tiers: ReferrerTier[]
-	}): Promise<Transaction> {
+	}): Promise<TransactionAttempt> {
 		const adminWallet = await this.adminWalletRepository.get()
 
 		if (!adminWallet) {

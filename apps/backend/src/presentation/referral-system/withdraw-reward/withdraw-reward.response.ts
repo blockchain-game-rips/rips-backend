@@ -1,15 +1,18 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-import { Reward } from '../../../domain/value-objects/reward'
+import { CurrencyAmount } from '../../../domain/value-objects/currency-amount'
+import { TransactionAttemptWith } from '../../../domain/value-objects/transaction-attempt'
 import {
 	CurrencyAmountDto,
 	toPricedCurrencyAmountDto,
 } from '../../shared/currency-amount.dto'
-import { TransactionDto, toTransactionDto } from '../../shared/transaction.dto'
+import {
+	toTransactionAttemptWithDto,
+	transactionAttemptSchema,
+} from '../../shared/transaction-attempt.dto'
 
 const withdrawRewardResponseSchema = z.object({
-	transaction: TransactionDto.schema,
-	amount: CurrencyAmountDto.schema,
+	withdrawal: transactionAttemptSchema(CurrencyAmountDto.schema),
 })
 
 export class WithdrawRewardResponseDto extends createZodDto(
@@ -17,10 +20,12 @@ export class WithdrawRewardResponseDto extends createZodDto(
 ) {}
 
 export function toWithdrawRewardResponseDto(
-	reward: Reward,
+	attempt: TransactionAttemptWith<CurrencyAmount>,
 ): WithdrawRewardResponseDto {
 	return {
-		transaction: toTransactionDto(reward.transaction),
-		amount: toPricedCurrencyAmountDto(reward.amount),
+		withdrawal: toTransactionAttemptWithDto(
+			attempt,
+			toPricedCurrencyAmountDto,
+		),
 	}
 }

@@ -1,6 +1,7 @@
 import { ChainAddress } from '../../../domain/value-objects/chain-address'
-import { PurchaseReceipt } from '../../../domain/value-objects/purchase-receipt'
+import { Purchase } from '../../../domain/value-objects/purchase'
 import { TelegramId } from '../../../domain/value-objects/telegram-id'
+import { TransactionAttemptWith } from '../../../domain/value-objects/transaction-attempt'
 
 export type BuyEntriesPurchaseInput = {
 	telegramId: TelegramId
@@ -10,5 +11,7 @@ export type BuyEntriesPurchaseInput = {
 }
 
 export abstract class BuyEntriesPurchaseUseCase {
-	abstract execute(input: BuyEntriesPurchaseInput): Promise<PurchaseReceipt>
+	abstract execute(
+		input: BuyEntriesPurchaseInput,
+	): Promise<TransactionAttemptWith<Purchase>>
 }

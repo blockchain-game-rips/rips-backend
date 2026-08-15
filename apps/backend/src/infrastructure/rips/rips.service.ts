@@ -1,32 +1,34 @@
 import { Inject, Injectable } from '@nestjs/common'
 import {
-	decodeEventLog,
 	encodeFunctionData,
-	getAddress,
 	zeroAddress,
 	type TransactionRequestEIP1559,
 } from 'viem'
 import { RipsService } from '../../application/interfaces/rips.service'
 import { Config } from '../../domain/entities/config'
-import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
 import { evmAddressFromWallet } from '../../domain/services/evm'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { CurrencyAmount } from '../../domain/value-objects/currency-amount'
 import {
 	EvmAddress,
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
-import { PurchaseReceipt } from '../../domain/value-objects/purchase-receipt'
-import { Reward } from '../../domain/value-objects/reward'
+import { Purchase } from '../../domain/value-objects/purchase'
+import { TransactionQuote } from '../../domain/value-objects/transaction'
 import {
-	Transaction,
-	TransactionQuote,
-} from '../../domain/value-objects/transaction'
+	TransactionAttempt,
+	TransactionAttemptWith,
+} from '../../domain/value-objects/transaction-attempt'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { TransactionFeeService } from '../evm/transaction-fee.service'
-import { requireSucceeded } from '../evm/utils/require-succeeded-transaction'
+import {
+	toAttemptWithParsedResult,
+	toTransactionAttempt,
+} from '../evm/utils/to-transaction-attempt'
 import { parsePurchase } from './parse-purchase'
+import { parseWithdrawnFee } from './parse-withdrawn-fee'
 import { ripsAbi } from './rips-abi'
 import { RIPS_CONTRACT } from './rips.constants'
 
@@ -58,7 +60,7 @@ export class RipsServiceIpml implements RipsService {
 			userAddress: EvmAddress
 			referrerAddress: EvmAddress | null
 		},
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		return this.sendKeeperTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
@@ -77,7 +79,7 @@ export class RipsServiceIpml implements RipsService {
 	refund(
 		wallet: Wallet,
 		args: { ripId: number; userAddress: EvmAddress },
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		return this.sendKeeperTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
@@ -87,7 +89,10 @@ export class RipsServiceIpml implements RipsService {
 		})
 	}
 
-	requestVrf(wallet: Wallet, args: { ripId: number }): Promise<Transaction> {
+	requestVrf(
+		wallet: Wallet,
+		args: { ripId: number },
+	): Promise<TransactionAttempt> {
 		return this.sendKeeperTransaction(wallet, {
 			data: encodeFunctionData({
 				abi: ripsAbi,
@@ -100,9 +105,7 @@ export class RipsServiceIpml implements RipsService {
 	private async sendKeeperTransaction(
 		wallet: Wallet,
 		requestFields: Pick<TransactionRequestEIP1559, 'data'>,
-	): Promise<Transaction> {
-		const chainId = this.chainId
-
+	): Promise<TransactionAttempt> {
 		const request: TransactionRequestEIP1559 = {
 			...requestFields,
 			to: this.contractAddress,
@@ -111,10 +114,10 @@ export class RipsServiceIpml implements RipsService {
 		const result = await this.evmTransactionService.sendTransaction(
 			wallet,
 			request,
-			chainId,
+			this.chainId,
 		)
 
-		return requireSucceeded(result, 'Keeper transaction').transaction
+		return toTransactionAttempt(result)
 	}
 
 	async quoteBuyEntries(): Promise<TransactionQuote> {
@@ -138,7 +141,7 @@ export class RipsServiceIpml implements RipsService {
 	async buyEntries(
 		wallet: Wallet,
 		args: { presetId: number; config: Config; entryCount: number },
-	): Promise<PurchaseReceipt> {
+	): Promise<TransactionAttemptWith<Purchase>> {
 		const { presetId, config, entryCount } = args
 
 		const chainId = this.chainId
@@ -156,30 +159,21 @@ export class RipsServiceIpml implements RipsService {
 			value: totalValue,
 		}
 
-		const { transaction, receipt } = requireSucceeded(
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				request,
-				chainId,
-			),
-			'Buy entries',
+		const result = await this.evmTransactionService.sendTransaction(
+			wallet,
+			request,
+			chainId,
 		)
 
-		const purchase = parsePurchase(receipt, this.contractAddress)
-
-		if (!purchase) {
-			throw new TransactionFailedError(
-				`RipEntered event not found in transaction: ${transaction.id}`,
-			)
-		}
-
-		return { transaction, purchase }
+		return toAttemptWithParsedResult(result, (receipt) =>
+			parsePurchase(receipt, this.contractAddress),
+		)
 	}
 
 	async withdrawReward(
 		wallet: Wallet,
 		args: { currencyAddress: EvmAddress },
-	): Promise<Reward> {
+	): Promise<TransactionAttemptWith<CurrencyAmount>> {
 		const { currencyAddress } = args
 
 		const chainId = this.chainId
@@ -194,30 +188,18 @@ export class RipsServiceIpml implements RipsService {
 			}),
 		}
 
-		const { transaction, receipt } = requireSucceeded(
-			await this.evmTransactionService.sendTransaction(
-				wallet,
-				request,
-				chainId,
-			),
-			'Withdraw reward',
+		const result = await this.evmTransactionService.sendTransaction(
+			wallet,
+			request,
+			chainId,
 		)
 
-		const log = receipt.logs
-			.filter((l) => getAddress(l.address) === this.contractAddress)
-			.map((l) => {
-				try {
-					return decodeEventLog({ abi: ripsAbi, ...l, strict: true })
-				} catch {
-					return null
-				}
-			})
-			.find((event) => event?.eventName === 'ReferrerFeeWithdrawn')
+		const attempt = toAttemptWithParsedResult(result, (receipt) =>
+			parseWithdrawnFee(receipt, this.contractAddress),
+		)
 
-		if (!log || log.eventName !== 'ReferrerFeeWithdrawn') {
-			throw new TransactionFailedError(
-				`ReferrerFeeWithdrawn event not found in transaction: ${transaction.id}`,
-			)
+		if (attempt.status !== 'succeeded') {
+			return attempt
 		}
 
 		const currency = await this.evmCurrencyService.fromAddress(
@@ -226,10 +208,11 @@ export class RipsServiceIpml implements RipsService {
 		)
 
 		return {
-			transaction,
-			amount: {
+			status: 'succeeded',
+			transaction: attempt.transaction,
+			result: {
 				currency,
-				amount: log.args.amount,
+				amount: attempt.result,
 			},
 		}
 	}

@@ -8,10 +8,7 @@ import {
 } from 'viem'
 import { evmChainIdFromCurrency } from '../../domain/services/evm'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
-import {
-	Transaction,
-	TransactionQuote,
-} from '../../domain/value-objects/transaction'
+import { TransactionQuote } from '../../domain/value-objects/transaction'
 import { TransactionAttempt } from '../../domain/value-objects/transaction-attempt'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { EvmTransactionService } from './evm-transaction.service'
@@ -19,7 +16,6 @@ import { EvmCurrency } from './primitives/currencies/evm-currency'
 import { NativeCurrency } from './primitives/currencies/native-currency'
 import { Token } from './primitives/currencies/token'
 import { TransactionFeeService } from './transaction-fee.service'
-import { requireSucceeded } from './utils/require-succeeded-transaction'
 import { toTransactionAttempt } from './utils/to-transaction-attempt'
 
 const NATIVE_TRANSFER_GAS = 21_000n
@@ -39,7 +35,7 @@ export class EvmCurrencyWriteService {
 			to: ChainAddress
 			amount: bigint
 		},
-	): Promise<Transaction> {
+	): Promise<TransactionAttempt> {
 		const { currency, to: recipient, amount } = args
 
 		const chainId = evmChainIdFromCurrency(currency)
@@ -56,7 +52,7 @@ export class EvmCurrencyWriteService {
 			chainId,
 		)
 
-		return requireSucceeded(result, 'Transfer').transaction
+		return toTransactionAttempt(result)
 	}
 
 	async approve(

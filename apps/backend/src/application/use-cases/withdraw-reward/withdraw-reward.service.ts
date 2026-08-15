@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { EIP155 } from '../../../constants'
+import { CurrencyAmount } from '../../../domain/value-objects/currency-amount'
 import { toEvmAddress } from '../../../domain/value-objects/evm-address'
-import { Reward } from '../../../domain/value-objects/reward'
+import { TransactionAttemptWith } from '../../../domain/value-objects/transaction-attempt'
 import { ReferralSystemRepository } from '../../interfaces/repositories/referral-system.repository'
 import { RipsService } from '../../interfaces/rips.service'
 import { GetUserUseCase } from '../get-user/get-user.use-case'
@@ -20,7 +21,9 @@ export class WithdrawRewardService extends WithdrawRewardUseCase {
 		super()
 	}
 
-	async execute(input: WithdrawRewardInput): Promise<Reward> {
+	async execute(
+		input: WithdrawRewardInput,
+	): Promise<TransactionAttemptWith<CurrencyAmount>> {
 		const { telegramId, currencyAddress } = input
 
 		const user = await this.getUserUseCase.execute({ telegramId })

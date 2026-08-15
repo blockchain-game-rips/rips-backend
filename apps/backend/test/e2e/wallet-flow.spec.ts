@@ -59,11 +59,16 @@ describe('Wallet flow E2E', () => {
 				currencyOutChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 				recipientAddress: RECIPIENT_ADDRESS,
 			})
-			.expect(201)
+			.expect(200)
 
-		expect(res.body.id).toMatch(/^0x[0-9a-fA-F]{64}$/)
-		expect(typeof res.body.cost.amount).toBe('string')
-		expect(typeof res.body.cost.currency.symbol).toBe('string')
+		const { withdrawal } = res.body
+
+		expect(withdrawal.status).toBe('succeeded')
+		expect(withdrawal.transaction.id).toMatch(/^0x[0-9a-fA-F]{64}$/)
+		expect(typeof withdrawal.transaction.cost.amount).toBe('string')
+		expect(typeof withdrawal.transaction.cost.currency.symbol).toBe(
+			'string',
+		)
 
 		const recipientBalanceAfter = await ctx.publicClient.getBalance({
 			address: RECIPIENT_ADDRESS,
