@@ -39,6 +39,7 @@ import {
 } from '../../src/infrastructure/rips/rips.constants'
 import { SeedModule } from '../../src/infrastructure/seed/seed.module'
 import { UseCaseExceptionFilter } from '../../src/presentation/filters/use-case-exception.filter'
+import { provisionTestEnv } from './env'
 import { provisionKekFile } from './kek'
 import { usePostgres } from './postgres'
 import { TestConfigModule } from './test-config.module'
@@ -92,6 +93,7 @@ export function useRipsApp(
 		})
 
 		provisionKekFile()
+		provisionTestEnv()
 
 		const testEvmClientConfig = {
 			rpcSettings: {

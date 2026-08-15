@@ -45,6 +45,7 @@ import {
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
 import { expectSucceeded } from '../../utils/attempts'
 import { provisionKekFile } from '../../utils/kek'
+import { usePostgres } from '../../utils/postgres'
 
 const BASE_CHAIN_ID = 8453
 
@@ -227,6 +228,10 @@ function useSamechainContext(): SamechainContext {
 }
 
 describe('LiFi integration', () => {
+	// LiFiModule pulls in the Prisma-backed wallet repositories, so the app
+	// only boots with a reachable database behind DATABASE_URL.
+	usePostgres()
+
 	describe('quoteEnterSamechain with USDC on Base', () => {
 		const context = useSamechainContext()
 

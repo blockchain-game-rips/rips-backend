@@ -58,6 +58,7 @@ import {
 import { expectSucceeded } from '../../utils/attempts'
 import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
 import { provisionKekFile } from '../../utils/kek'
+import { usePostgres } from '../../utils/postgres'
 
 const ARBITRUM_CHAIN_ID = 42161
 const BASE_CHAIN_ID = 8453
@@ -179,6 +180,10 @@ async function buildTestModule(
 }
 
 describe('DeBridge integration', () => {
+	// DeBridgeModule pulls in the Prisma-backed wallet repositories, so the app
+	// only boots with a reachable database behind DATABASE_URL.
+	usePostgres()
+
 	const { anvils } = useAnvil([
 		{
 			chainId: ARBITRUM_CHAIN_ID,
