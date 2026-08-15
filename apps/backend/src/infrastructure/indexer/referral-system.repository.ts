@@ -6,12 +6,16 @@ import { ReferralSystemRepository } from '../../application/interfaces/repositor
 import { Referrer } from '../../domain/entities/referrer'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { EvmAddress } from '../../domain/value-objects/evm-address'
-import { ReferrerTierTable } from '../../domain/value-objects/referral-system'
+import {
+	ReferrerTier,
+	ReferrerTierTable,
+} from '../../domain/value-objects/referral-system'
 import { withCache } from '../cache/with-cache'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { RIPS_CONTRACT } from '../rips/rips.constants'
 import { IndexerPrismaService } from './indexer-prisma.service'
 import { INDEXER_TTL_MS } from './indexer.constants'
+import { toBigInt } from './utils'
 
 const REFERRAL_PERIOD_MS = 30 * 24 * 60 * 60 * 1000
 
@@ -22,6 +26,19 @@ type ReferrerCustomFeeUpdated =
 type DefaultReferralFeeUpdated =
 	Prisma.default_referral_fee_updatedGetPayload<true>
 type ReferralTier = Prisma.referral_tierGetPayload<true>
+
+function toReferrerTiers(rawTiers: ReferralTier[]): ReferrerTier[] {
+	return rawTiers
+		.map((tier) => ({
+			minVolume: toBigInt(tier.min_volume),
+			feeBps: tier.fee_bps,
+		}))
+		.sort((a, b) => {
+			if (a.minVolume < b.minVolume) return -1
+
+			return a.minVolume > b.minVolume ? 1 : 0
+		})
+}
 
 @Injectable()
 export class IndexerReferralSystemRepository extends ReferralSystemRepository {
@@ -183,20 +200,11 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 		tiers: ReferralTier[],
 		volume: bigint,
 	): number {
-		if (tiers.length === 0) return 0
-
-		const sorted = [...tiers].sort((a, b) =>
-			Number(
-				BigInt(a.min_volume.toFixed(0)) -
-					BigInt(b.min_volume.toFixed(0)),
-			),
-		)
-
 		let activeFee = 0
 
-		for (const tier of sorted) {
-			if (volume >= BigInt(tier.min_volume.toFixed(0))) {
-				activeFee = tier.fee_bps
+		for (const tier of toReferrerTiers(tiers)) {
+			if (volume >= tier.minVolume) {
+				activeFee = tier.feeBps
 			}
 		}
 
@@ -256,8 +264,6 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 				() => this.fetchTierTables(),
 			)
 
-		if (latestTiersUpdate == null) return []
-
 		const defaultFeeBps = this.resolveDefaultFee(defaultReferralFeeUpdateds)
 
 		const currency = await this.evmCurrencyService.fromAddress(
@@ -265,17 +271,7 @@ export class IndexerReferralSystemRepository extends ReferralSystemRepository {
 			this.chainId,
 		)
 
-		const tiers = [...latestTiersUpdate.referral_tier]
-			.sort((a, b) =>
-				Number(
-					BigInt(a.min_volume.toFixed(0)) -
-						BigInt(b.min_volume.toFixed(0)),
-				),
-			)
-			.map((tier) => ({
-				minVolume: BigInt(tier.min_volume.toFixed(0)),
-				feeBps: tier.fee_bps,
-			}))
+		const tiers = toReferrerTiers(latestTiersUpdate?.referral_tier ?? [])
 
 		return [{ currency, defaultFeeBps, tiers }]
 	}

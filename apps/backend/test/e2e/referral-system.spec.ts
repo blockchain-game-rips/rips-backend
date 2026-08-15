@@ -36,6 +36,8 @@ const KEEPER_PRIVATE_KEY = ANVIL_ACCOUNT_0_PRIVATE_KEY
 const TELEGRAM_ID_REFERRER = '100200300'
 const TELEGRAM_ID_PLAYER = '400500600'
 
+const DEPLOYED_DEFAULT_REFERRAL_FEE_BPS = 2000
+
 describe('Referral system E2E', () => {
 	let referrerAddress: EvmAddress
 	let playerAddress: EvmAddress
@@ -48,6 +50,19 @@ describe('Referral system E2E', () => {
 
 		const seedService = ctx.app.get(SeedCardDefinitionsService)
 		await seedService.seed(seedService.parseConfig(cardsConfig))
+	})
+
+	it('reports the default fee in the tier table when no tiers are configured', async () => {
+		const res = await request(ctx.app.getHttpServer())
+			.get('/referral-system/tier-tables')
+			.expect(200)
+
+		expect(res.body.tierTables).toHaveLength(1)
+
+		const [table] = res.body.tierTables
+
+		expect(table.defaultFeeBps).toBe(DEPLOYED_DEFAULT_REFERRAL_FEE_BPS)
+		expect(table.tiers).toEqual([])
 	})
 
 	it('creates referrer user', async () => {
