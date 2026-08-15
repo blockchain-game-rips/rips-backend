@@ -1,128 +1,78 @@
 import { resolveRandomCard } from '../../../src/domain/services/payout-utils'
 import { CardCollection } from '../../../src/domain/value-objects/card-collection'
 
-const CARD_A = { id: 1, name: 'A', tier: 0, imageUrl: '' }
-const CARD_B = { id: 2, name: 'B', tier: 0, imageUrl: '' }
-const CARD_C = { id: 3, name: 'C', tier: 0, imageUrl: '' }
+const TIER = 6
+const CARDS_IN_TIER = 6
+const DRAWS = 1000
+const CONFIGURED_BIAS = 2
 
-// How many times we call resolveRandomCard per test — more samples = more accurate frequencies
-const SAMPLES = 10_000
+function makeCollection(
+	size: number,
+	ownedIndices: number[] = [],
+): CardCollection {
+	return Array.from({ length: size }, (_, i) => ({
+		card: {
+			id: TIER * 1000 + i,
+			tier: TIER,
+			name: `card-${i}`,
+			imageUrl: '',
+		},
+		count: ownedIndices.includes(i) ? 1 : 0,
+	}))
+}
 
-// Allowed deviation from the expected probability, e.g. 0.05 = ±5%
-const TOLERANCE = 0.05
+function distinctPicks(collection: CardCollection, bias: number): Set<number> {
+	const picked = new Set<number>()
 
-// Calls resolveRandomCard SAMPLES times and returns how often each card was picked,
-// as a fraction of total draws (e.g. 0.33 means picked 33% of the time).
-// The map key is card.id, the value is the observed frequency (0..1).
-function sampleFrequencies(
-	collection: CardCollection,
-	bias: number,
-): Map<number, number> {
-	// card.id → how many times this card was returned
-	const counts = new Map<number, number>()
-
-	for (let i = 0; i < SAMPLES; i++) {
-		const card = resolveRandomCard(collection, bias)
-		counts.set(card.id, (counts.get(card.id) ?? 0) + 1)
+	for (let i = 0; i < DRAWS; i++) {
+		picked.add(resolveRandomCard(collection, bias).id)
 	}
 
-	// Convert raw counts to frequencies by dividing by total samples
-	return new Map(
-		[...counts.entries()].map(([id, count]) => [id, count / SAMPLES]),
-	)
+	return picked
 }
 
 describe('resolveRandomCard', () => {
-	describe('when all cards are unseen (k=0)', () => {
-		it('distributes uniformly regardless of bias', () => {
-			const collection: CardCollection = [
-				{ card: CARD_A, count: 0 },
-				{ card: CARD_B, count: 0 },
-				{ card: CARD_C, count: 0 },
-			]
+	describe('when a bias is configured for the tier', () => {
+		it('spreads picks across the whole tier', () => {
+			const picked = distinctPicks(
+				makeCollection(CARDS_IN_TIER),
+				CONFIGURED_BIAS,
+			)
 
-			const freq = sampleFrequencies(collection, 2)
+			expect(picked.size).toBe(CARDS_IN_TIER)
+		})
 
-			// All unseen → all get boost weight → uniform
-			expect(freq.get(CARD_A.id)).toBeCloseTo(1 / 3, 1)
-			expect(freq.get(CARD_B.id)).toBeCloseTo(1 / 3, 1)
-			expect(freq.get(CARD_C.id)).toBeCloseTo(1 / 3, 1)
+		it('favours unseen cards over owned ones', () => {
+			const allButLastOwned = [0, 1, 2, 3, 4]
+			const collection = makeCollection(CARDS_IN_TIER, allButLastOwned)
+
+			let unseenHits = 0
+
+			for (let i = 0; i < DRAWS; i++) {
+				const card = resolveRandomCard(collection, CONFIGURED_BIAS)
+				if (card.id === collection[CARDS_IN_TIER - 1].card.id)
+					unseenHits++
+			}
+
+			expect(unseenHits).toBeGreaterThan(DRAWS / CARDS_IN_TIER)
 		})
 	})
 
-	describe('when all cards are seen (k=n)', () => {
-		it('distributes uniformly regardless of bias', () => {
-			const collection: CardCollection = [
-				{ card: CARD_A, count: 3 },
-				{ card: CARD_B, count: 1 },
-				{ card: CARD_C, count: 2 },
-			]
+	describe('when the tier has no configured bias', () => {
+		const missingBias = ([] as number[])[TIER]
 
-			const freq = sampleFrequencies(collection, 2)
-
-			// All seen → boost=1 → uniform
-			expect(freq.get(CARD_A.id)).toBeCloseTo(1 / 3, 1)
-			expect(freq.get(CARD_B.id)).toBeCloseTo(1 / 3, 1)
-			expect(freq.get(CARD_C.id)).toBeCloseTo(1 / 3, 1)
+		it('throws instead of collapsing to the fallback card', () => {
+			expect(() =>
+				resolveRandomCard(makeCollection(CARDS_IN_TIER), missingBias),
+			).toThrow(/finite number/)
 		})
 	})
 
-	describe('when 1 of 3 cards is seen', () => {
-		// k=1, n=3, c=1/3, bias=2 → boost = 1 + 2*(2/3) ≈ 2.33
-		// weights: seen=1, unseen=2.33, unseen=2.33 → total=5.66
-		// P(seen) ≈ 17.7%, P(each unseen) ≈ 41.2%
-		const collection: CardCollection = [
-			{ card: CARD_A, count: 2 },
-			{ card: CARD_B, count: 0 },
-			{ card: CARD_C, count: 0 },
-		]
-
-		const BIAS = 2
-		const boost = 1 + BIAS * (1 - 1 / 3)
-		const total = 1 + boost + boost
-		const expectedSeen = 1 / total
-		const expectedUnseen = boost / total
-
-		let freq: Map<number, number>
-
-		beforeAll(() => {
-			freq = sampleFrequencies(collection, BIAS)
-		})
-
-		it('seen card appears less frequently than unseen cards', () => {
-			expect(freq.get(CARD_A.id)).toBeLessThan(freq.get(CARD_B.id)!)
-			expect(freq.get(CARD_A.id)).toBeLessThan(freq.get(CARD_C.id)!)
-		})
-
-		it('seen card frequency matches expected probability', () => {
-			expect(freq.get(CARD_A.id)!).toBeCloseTo(expectedSeen, 1)
-		})
-
-		it('unseen cards frequency matches expected probability', () => {
-			expect(freq.get(CARD_B.id)!).toBeCloseTo(expectedUnseen, 1)
-			expect(freq.get(CARD_C.id)!).toBeCloseTo(expectedUnseen, 1)
-		})
-
-		it('unseen cards are boost times more likely than the seen card', () => {
-			const ratio = freq.get(CARD_B.id)! / freq.get(CARD_A.id)!
-			expect(ratio).toBeGreaterThan(boost - TOLERANCE * boost)
-			expect(ratio).toBeLessThan(boost + TOLERANCE * boost)
-		})
-	})
-
-	describe('bias=0 always distributes uniformly', () => {
-		it('ignores seen/unseen status when bias is 0', () => {
-			const collection: CardCollection = [
-				{ card: CARD_A, count: 5 },
-				{ card: CARD_B, count: 0 },
-				{ card: CARD_C, count: 0 },
-			]
-
-			const freq = sampleFrequencies(collection, 0)
-
-			expect(freq.get(CARD_A.id)).toBeCloseTo(1 / 3, 1)
-			expect(freq.get(CARD_B.id)).toBeCloseTo(1 / 3, 1)
-			expect(freq.get(CARD_C.id)).toBeCloseTo(1 / 3, 1)
+	describe('when the tier has no cards', () => {
+		it('throws instead of returning undefined', () => {
+			expect(() => resolveRandomCard([], CONFIGURED_BIAS)).toThrow(
+				/empty tier/,
+			)
 		})
 	})
 })

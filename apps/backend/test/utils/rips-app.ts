@@ -126,8 +126,8 @@ export function useRipsApp(
 			.overrideProvider(PRESET_TO_TIER_BIASES)
 			.useValue(
 				new Map([
-					['1', [2, 2, 2]],
-					['2', [1, 1, 1]],
+					[1, [2, 2, 2]],
+					[2, [1, 1, 1]],
 				]),
 			)
 			.overrideProvider(WARMUP_CURRENCY_IDS)
