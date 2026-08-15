@@ -41,7 +41,7 @@ export function requireConfig(ripRaw: RipRaw): ConfigRaw {
 	return ripRaw.config
 }
 
-function toBigInt(value: Prisma.Decimal): bigint {
+export function toBigInt(value: Prisma.Decimal): bigint {
 	if (!value.isInteger()) {
 		throw new Error(`Expected integer Decimal, got ${value.toString()}`)
 	}
