@@ -1,5 +1,7 @@
+import { TransactionReceipt } from 'viem'
 import {
 	TransactionAttempt,
+	TransactionAttemptWith,
 	UnsuccessfulAttempt,
 } from '../../../domain/value-objects/transaction-attempt'
 import { SendTransactionResult } from '../evm-transaction.service'
@@ -12,6 +14,32 @@ export function toTransactionAttempt(
 	}
 
 	return toUnsuccessfulAttempt(result)
+}
+
+/**
+ * A transaction that mined successfully but whose result cannot be read back
+ * leaves us unable to say what the operation did, so the outcome is genuinely
+ * unknown rather than a server failure.
+ */
+export function toAttemptWithParsedResult<T>(
+	result: SendTransactionResult,
+	parseResult: (receipt: TransactionReceipt) => T | null | undefined,
+): TransactionAttemptWith<T> {
+	if (result.status !== 'succeeded') {
+		return toUnsuccessfulAttempt(result)
+	}
+
+	const parsed = parseResult(result.receipt)
+
+	if (parsed === null || parsed === undefined) {
+		return { status: 'unknown', transactionId: result.transaction.id }
+	}
+
+	return {
+		status: 'succeeded',
+		transaction: result.transaction,
+		result: parsed,
+	}
 }
 
 /**

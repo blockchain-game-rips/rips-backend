@@ -25,7 +25,7 @@ import {
 import { EvmTransactionService } from '../evm/evm-transaction.service'
 import { TokenApprovalService } from '../evm/token-approval.service'
 import { TransactionFeeService } from '../evm/transaction-fee.service'
-import { toUnsuccessfulAttempt } from '../evm/utils/to-transaction-attempt'
+import { toAttemptWithParsedResult } from '../evm/utils/to-transaction-attempt'
 import { parsePurchase } from '../rips/parse-purchase'
 import { ripsAbi } from '../rips/rips-abi'
 import { RIPS_CONTRACT } from '../rips/rips.constants'
@@ -130,32 +130,13 @@ export class LiFiService {
 			chainId,
 		)
 
-		if (result.status !== 'succeeded') {
-			return { approval, enter: toUnsuccessfulAttempt(result) }
-		}
+		const enter = toAttemptWithParsedResult(result, (receipt) => {
+			const purchase = parsePurchase(receipt, this.ripsContractAddress)
 
-		const purchase = parsePurchase(result.receipt, this.ripsContractAddress)
+			return purchase ? { purchase } : null
+		})
 
-		// The transaction succeeded but we cannot say what was bought, so the
-		// outcome is genuinely unknown rather than a server failure.
-		if (!purchase) {
-			return {
-				approval,
-				enter: {
-					status: 'unknown',
-					transactionId: result.transaction.id,
-				},
-			}
-		}
-
-		return {
-			approval,
-			enter: {
-				status: 'succeeded',
-				transaction: result.transaction,
-				result: { purchase },
-			},
-		}
+		return { approval, enter }
 	}
 
 	private fetchEnterQuote(wallet: Wallet, args: EnterArgs) {
