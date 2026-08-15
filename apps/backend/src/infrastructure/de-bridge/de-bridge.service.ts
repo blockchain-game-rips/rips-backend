@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import {
 	Address,
 	decodeEventLog,
@@ -64,6 +64,7 @@ const DEFAULT_GAS_LIMIT = 2_000_000n
 
 @Injectable()
 export class DeBridgeService {
+	private readonly logger = new Logger(DeBridgeService.name)
 	private readonly ripsContractAddress: EvmAddress
 	private readonly ripsConduitContractAddress: EvmAddress
 
@@ -292,13 +293,21 @@ export class DeBridgeService {
 		const { config, paymentCurrency, entryCount, presetId } = args
 		const userAddress = evmAddressFromWallet(wallet)
 
-		const createTxResponse = await this.fetchCreateTxForBuyEntries({
-			userAddress,
-			presetId,
-			entryCount,
-			config,
-			paymentCurrency,
-		})
+		const createTxResponse = await this.tryQuote(
+			() =>
+				this.fetchCreateTxForBuyEntries({
+					userAddress,
+					presetId,
+					entryCount,
+					config,
+					paymentCurrency,
+				}),
+			{ operation: 'enterCrosschain', currencyIn: paymentCurrency },
+		)
+
+		if (createTxResponse === null) {
+			return { zap: NOT_SENT }
+		}
 
 		return this.sendZap(wallet, createTxResponse, paymentCurrency)
 	}
@@ -358,16 +367,22 @@ export class DeBridgeService {
 		const userAddress = evmAddressFromWallet(wallet)
 		const chainId = evmChainIdFromCurrency(currencyIn)
 
-		const swapResponse = await this.deBridgeApiService.fetchSameChainSwapTx(
-			{
-				chainId,
-				userAddress,
-				srcCurrency: currencyIn,
-				dstCurrency: currencyOut,
-				amountIn,
-				recipient: getAddress(recipient.address),
-			},
+		const swapResponse = await this.tryQuote(
+			() =>
+				this.deBridgeApiService.fetchSameChainSwapTx({
+					chainId,
+					userAddress,
+					srcCurrency: currencyIn,
+					dstCurrency: currencyOut,
+					amountIn,
+					recipient: getAddress(recipient.address),
+				}),
+			{ operation: 'swapSamechain', currencyIn },
 		)
+
+		if (swapResponse === null) {
+			return { swap: NOT_SENT }
+		}
 
 		const approval = await this.tokenApprovalService.approveIfNeeded({
 			wallet,
@@ -424,15 +439,50 @@ export class DeBridgeService {
 		const { currencyIn, currencyOut, amountIn, recipient } = args
 		const userAddress = evmAddressFromWallet(wallet)
 
-		const createTxResponse = await this.deBridgeApiService.fetchCreateTx({
-			userAddress,
-			recipient: getAddress(recipient.address),
-			srcCurrency: currencyIn,
-			dstCurrency: currencyOut,
-			exactIn: amountIn,
-		})
+		const createTxResponse = await this.tryQuote(
+			() =>
+				this.deBridgeApiService.fetchCreateTx({
+					userAddress,
+					recipient: getAddress(recipient.address),
+					srcCurrency: currencyIn,
+					dstCurrency: currencyOut,
+					exactIn: amountIn,
+				}),
+			{ operation: 'swapCrosschain', currencyIn },
+		)
+
+		if (createTxResponse === null) {
+			return { zap: NOT_SENT }
+		}
 
 		return this.sendZap(wallet, createTxResponse, currencyIn)
+	}
+
+	/**
+	 * A quote that never arrives or never parses leaves nothing to broadcast,
+	 * so the caller reports a non-send rather than a server failure.
+	 */
+	private async tryQuote<T>(
+		fetchQuote: () => Promise<T>,
+		context: { operation: string; currencyIn: Currency },
+	): Promise<T | null> {
+		const { operation, currencyIn } = context
+
+		try {
+			return await fetchQuote()
+		} catch (err) {
+			this.logger.error(
+				{
+					err,
+					operation,
+					chain: currencyIn.chainAddress.chain.reference,
+					fromToken: currencyIn.chainAddress.address,
+				},
+				'deBridge quote unavailable, transaction not sent',
+			)
+
+			return null
+		}
 	}
 
 	private async sendZap(

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import {
 	encodeFunctionData,
 	getAddress,
@@ -53,6 +53,7 @@ type EnterArgs = {
 
 @Injectable()
 export class LiFiService {
+	private readonly logger = new Logger(LiFiService.name)
 	private readonly ripsContractAddress: EvmAddress
 
 	constructor(
@@ -91,7 +92,17 @@ export class LiFiService {
 	): Promise<SamechainEnterResult> {
 		const { paymentCurrency } = args
 
-		const quote = await this.fetchEnterQuote(wallet, args)
+		const quoted = await this.tryQuote(async () => {
+			const quote = await this.fetchEnterQuote(wallet, args)
+
+			return { quote, request: this.toEnterRequest(quote) }
+		}, args)
+
+		if (quoted === null) {
+			return { enter: NOT_SENT }
+		}
+
+		const { quote, request } = quoted
 		const chainId = evmChainIdFromCurrency(paymentCurrency)
 		const userAddress = evmAddressFromWallet(wallet)
 
@@ -107,23 +118,6 @@ export class LiFiService {
 			return { approval, enter: NOT_SENT }
 		}
 
-		const { gasLimit } = quote.transactionRequest
-
-		if (!gasLimit) {
-			throw new Error(
-				'LI.FI quote is missing the gas limit, cannot send the transaction',
-			)
-		}
-
-		// Estimating this route locally under-reports the gas its nested swap
-		// needs, so the limit LI.FI quoted is used instead.
-		const request: TransactionRequestEIP1559 = {
-			to: getAddress(quote.transactionRequest.to),
-			data: quote.transactionRequest.data,
-			value: BigInt(quote.transactionRequest.value),
-			gas: BigInt(gasLimit),
-		}
-
 		const result = await this.evmTransactionService.sendTransaction(
 			wallet,
 			request,
@@ -137,6 +131,52 @@ export class LiFiService {
 		})
 
 		return { approval, enter }
+	}
+
+	/**
+	 * A quote that never arrives or never parses leaves nothing to broadcast,
+	 * so the caller reports a non-send rather than a server failure.
+	 */
+	private async tryQuote<T>(
+		fetchQuote: () => Promise<T>,
+		context: EnterArgs,
+	): Promise<T | null> {
+		const { paymentCurrency, presetId } = context
+
+		try {
+			return await fetchQuote()
+		} catch (err) {
+			this.logger.error(
+				{
+					err,
+					presetId,
+					chain: paymentCurrency.chainAddress.chain.reference,
+					fromToken: paymentCurrency.chainAddress.address,
+				},
+				'LI.FI quote unavailable, enter not sent',
+			)
+
+			return null
+		}
+	}
+
+	private toEnterRequest(
+		quote: ContractCallsQuote,
+	): TransactionRequestEIP1559 {
+		const { gasLimit } = quote.transactionRequest
+
+		if (!gasLimit) {
+			throw new Error('LI.FI quote is missing the gas limit')
+		}
+
+		// Estimating this route locally under-reports the gas its nested swap
+		// needs, so the limit LI.FI quoted is used instead.
+		return {
+			to: getAddress(quote.transactionRequest.to),
+			data: quote.transactionRequest.data,
+			value: BigInt(quote.transactionRequest.value),
+			gas: BigInt(gasLimit),
+		}
 	}
 
 	private fetchEnterQuote(wallet: Wallet, args: EnterArgs) {
