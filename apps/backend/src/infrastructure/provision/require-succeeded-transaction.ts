@@ -1,4 +1,3 @@
-import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { TransactionAttempt } from '../../domain/value-objects/transaction-attempt'
 
@@ -15,15 +14,13 @@ export function requireSucceeded(
 			return attempt.transaction
 
 		case 'reverted':
-			throw new TransactionFailedError(
-				`${operation} reverted: ${attempt.transaction.id}`,
-			)
+			throw new Error(`${operation} reverted: ${attempt.transaction.id}`)
 
 		case 'not-sent':
-			throw new TransactionFailedError(`${operation} was not sent`)
+			throw new Error(`${operation} was not sent`)
 
 		case 'unknown':
-			throw new TransactionFailedError(
+			throw new Error(
 				`${operation} outcome is unknown${
 					attempt.transactionId ? `: ${attempt.transactionId}` : ''
 				}`,

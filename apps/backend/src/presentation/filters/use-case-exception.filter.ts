@@ -12,7 +12,6 @@ import { CurrenciesMismatchError } from '../../domain/errors/currencies-mismatch
 import { InsufficientBalanceError } from '../../domain/errors/insufficient-balance.error'
 import { AvailablePresetNotFoundError } from '../../domain/errors/preset-not-found.error'
 import { PresetTierCountMismatchError } from '../../domain/errors/preset-tier-count-mismatch.error'
-import { TransactionFailedError } from '../../domain/errors/transaction-failed.error'
 import { UserAlreadyExistsError } from '../../domain/errors/user-already-exists.error'
 import { UserNotFoundError } from '../../domain/errors/user-not-found.error'
 import { WalletAlreadyExistsError } from '../../domain/errors/wallet-already-exists.error'
@@ -27,7 +26,6 @@ const ERROR_STATUS_MAP: Map<ErrorConstructor, HttpStatus> = new Map([
 	[WalletAlreadyExistsError, HttpStatus.CONFLICT],
 	[InsufficientBalanceError, HttpStatus.UNPROCESSABLE_ENTITY],
 	[CurrenciesMismatchError, HttpStatus.BAD_REQUEST],
-	[TransactionFailedError, HttpStatus.BAD_GATEWAY],
 	[AdminWalletNotFoundError, HttpStatus.INTERNAL_SERVER_ERROR],
 	[PresetTierCountMismatchError, HttpStatus.BAD_REQUEST],
 ])
