@@ -67,15 +67,37 @@ export class PrismaEntryPayoutRepository extends EntryPayoutRepository {
 		})
 	}
 
-	async getCardCollections(
+	async getAssignedCardCollections(
 		userAddress: EvmAddress,
 	): Promise<CardCollection[]> {
-		const cardDefinitions = await this.prisma.cardDefinition.findMany({
-			include: {
-				userCards: { where: { userAddress } },
-			},
-			orderBy: { tier: 'asc' },
-		})
+		return this.collectCardsByTier(userAddress, undefined)
+	}
+
+	async getRevealedCardCollections(
+		userAddress: EvmAddress,
+	): Promise<CardCollection[]> {
+		return this.collectCardsByTier(userAddress, true)
+	}
+
+	private async collectCardsByTier(
+		userAddress: EvmAddress,
+		revealed: boolean | undefined,
+	): Promise<CardCollection[]> {
+		const [cardDefinitions, payoutCounts] = await Promise.all([
+			this.prisma.cardDefinition.findMany({ orderBy: { tier: 'asc' } }),
+			this.prisma.entryPayout.groupBy({
+				by: ['cardDefinitionId'],
+				where: { userAddress, revealed },
+				_count: { _all: true },
+			}),
+		])
+
+		const countByCardId = new Map(
+			payoutCounts.map((group) => [
+				group.cardDefinitionId,
+				group._count._all,
+			]),
+		)
 
 		const tierMap = new Map<number, CardCollection>()
 
@@ -84,7 +106,7 @@ export class PrismaEntryPayoutRepository extends EntryPayoutRepository {
 
 			tier.push({
 				card: toCard(def),
-				count: def.userCards[0]?.quantity ?? 0,
+				count: countByCardId.get(def.id) ?? 0,
 			})
 
 			tierMap.set(def.tier, tier)

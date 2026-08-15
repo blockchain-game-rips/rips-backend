@@ -55,23 +55,10 @@ model CardDefinition {
     name         String
     imageUrl     String        @map("image_url")
     createdAt    DateTime      @default(now()) @map("created_at")
-    userCards    UserCard[]
     entryPayouts EntryPayout[]
 
     @@unique([tier, name])
     @@map("card_definitions")
-}
-
-model UserCard {
-    id               BigInt         @id @default(autoincrement())
-    userAddress      String         @map("user_address")
-    cardDefinitionId BigInt         @map("card_definition_id")
-    quantity         Int            @default(1)
-    firstObtainedAt  DateTime       @default(now()) @map("first_obtained_at")
-    cardDefinition   CardDefinition @relation(fields: [cardDefinitionId], references: [id])
-
-    @@unique([userAddress, cardDefinitionId])
-    @@map("user_cards")
 }
 
 enum NotificationType {
@@ -123,5 +110,6 @@ model EntryPayout {
     cardDefinition   CardDefinition @relation(fields: [cardDefinitionId], references: [id])
 
     @@unique([ripId, entryNumber])
+    @@index([userAddress, revealed])
     @@map("entry_payouts")
 }

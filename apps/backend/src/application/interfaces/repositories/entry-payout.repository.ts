@@ -17,7 +17,18 @@ export abstract class EntryPayoutRepository {
 
 	abstract revealAllAndGet(userAddress: EvmAddress): Promise<EntryPayout[]>
 
-	abstract getCardCollections(
+	/**
+	 * Counts every payout the user holds, revealed or not, so that card drops
+	 * cannot be biased by withholding a reveal.
+	 */
+	abstract getAssignedCardCollections(
+		userAddress: EvmAddress,
+	): Promise<CardCollection[]>
+
+	/**
+	 * Counts only revealed payouts — what the user has actually turned face-up.
+	 */
+	abstract getRevealedCardCollections(
 		userAddress: EvmAddress,
 	): Promise<CardCollection[]>
 

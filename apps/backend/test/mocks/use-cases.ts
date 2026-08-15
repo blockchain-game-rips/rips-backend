@@ -33,7 +33,8 @@ export function makeMockEntryPayoutRepository(): jest.Mocked<EntryPayoutReposito
 		find: jest.fn(),
 		revealAndGet: jest.fn(),
 		revealAllAndGet: jest.fn(),
-		getCardCollections: jest.fn(),
+		getAssignedCardCollections: jest.fn(),
+		getRevealedCardCollections: jest.fn(),
 		getCardDefinitions: jest.fn(),
 	}
 }

@@ -146,7 +146,7 @@ export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
 		purchases: PurchaseAction[],
 	): Promise<EntryPayout[]> {
 		const cardCollections =
-			await this.entryPayoutRepository.getCardCollections(address)
+			await this.entryPayoutRepository.getAssignedCardCollections(address)
 
 		const tierBiases = this.presetToBiases.get(rip.preset.id) ?? []
 		const payouts: EntryPayout[] = []

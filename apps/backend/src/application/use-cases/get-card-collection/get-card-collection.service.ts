@@ -25,6 +25,8 @@ export class GetCardCollectionService extends GetCardCollectionUseCase {
 
 		const userAddress = toEvmAddress(user.wallet.namespaceToAddress[EIP155])
 
-		return this.entryPayoutRepository.getCardCollections(userAddress)
+		return this.entryPayoutRepository.getRevealedCardCollections(
+			userAddress,
+		)
 	}
 }
