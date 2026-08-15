@@ -148,7 +148,12 @@ export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
 		const cardCollections =
 			await this.entryPayoutRepository.getAssignedCardCollections(address)
 
-		const tierBiases = this.presetToBiases.get(rip.preset.id) ?? []
+		const tierBiases = this.presetToBiases.get(rip.preset.id)
+
+		if (!tierBiases)
+			throw new Error(
+				`No tier biases configured for preset ${rip.preset.id}`,
+			)
 		const payouts: EntryPayout[] = []
 
 		for (const purchase of purchases) {

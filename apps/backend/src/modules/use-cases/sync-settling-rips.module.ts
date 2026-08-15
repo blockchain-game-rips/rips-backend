@@ -54,7 +54,11 @@ const presetToTierBiasesProvider: Provider = {
 			)
 		}
 
-		return new Map(Object.entries(cardConfig.presetsBiases))
+		return new Map(
+			Object.entries(cardConfig.presetsBiases).map(
+				([presetId, biases]) => [Number(presetId), biases],
+			),
+		)
 	},
 	inject: [ConfigService, GetAvailablePresetsUseCase, EntryPayoutRepository],
 }
