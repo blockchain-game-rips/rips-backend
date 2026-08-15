@@ -15,15 +15,7 @@ const LIFI_API_URL = 'https://li.quest/v1'
 const API_KEY_HEADER = 'x-lifi-api-key'
 const CONTRACT_CALLS_TTL_MS = 10000
 const REQUEST_TIMEOUT_MS = 10000
-
-/**
- * LI.FI intermittently fails to route a request it serves moments later,
- * answering 404. Quoting is read-only, so every failure is safe to retry.
- * ky retries neither POST nor 404 by default, so both are opted into here.
- */
-const RETRY_LIMIT = 3
-const RETRY_METHODS = ['post']
-const RETRY_STATUS_CODES = [404, 408, 413, 429, 500, 502, 503, 504]
+const RETRY_LIMIT = 0
 
 export type ContractCallsQuoteArgs = {
 	userAddress: Address
@@ -96,11 +88,7 @@ export class LiFiApiService {
 		const rawData = await ky
 			.post(`${LIFI_API_URL}/quote/contractCalls`, {
 				timeout: REQUEST_TIMEOUT_MS,
-				retry: {
-					limit: RETRY_LIMIT,
-					methods: RETRY_METHODS,
-					statusCodes: RETRY_STATUS_CODES,
-				},
+				retry: RETRY_LIMIT,
 				headers: this.buildHeaders(),
 				json: {
 					fromChain: Number(currencyIn.chainAddress.chain.reference),
