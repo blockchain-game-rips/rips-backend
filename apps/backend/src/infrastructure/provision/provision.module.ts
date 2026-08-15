@@ -1,6 +1,6 @@
-import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { AppConfigModule } from '../../configuration/app-config.module'
+import { AppCacheModule } from '../cache/app-cache.module'
 import { CurrencyRegistryModule } from '../currency-registry/currency-registry.module'
 import { EncryptionModule } from '../encryption/encryption.module'
 import { PrismaModule } from '../prisma/prisma.module'
@@ -14,7 +14,7 @@ import { ProvisionService } from './provision.service'
 		RipsModule,
 		AppConfigModule,
 		CurrencyRegistryModule,
-		CacheModule.register({ isGlobal: true }),
+		AppCacheModule,
 	],
 	providers: [ProvisionService],
 	exports: [ProvisionService],

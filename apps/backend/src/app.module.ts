@@ -1,7 +1,7 @@
-import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { AppConfigModule } from './configuration/app-config.module'
+import { AppCacheModule } from './infrastructure/cache/app-cache.module'
 import { CurrencyRegistryModule } from './infrastructure/currency-registry/currency-registry.module'
 import { LoggingModule } from './infrastructure/logging/logging.module'
 import { MetricsModule } from './infrastructure/metrics/metrics.module'
@@ -23,7 +23,7 @@ import { SyncSettlingRipsModule } from './modules/sync-settling-rips/sync-settli
 		LoggingModule,
 		MetricsModule,
 		AppConfigModule,
-		CacheModule.register({ isGlobal: true }),
+		AppCacheModule,
 		ScheduleModule.forRoot(),
 		PrismaModule,
 		ProvisionModule,
