@@ -78,6 +78,11 @@ export function resolveRandomCard(
 ): Card {
 	const n = collection.length
 
+	if (n === 0) throw new Error('Cannot pick a card from an empty tier')
+
+	if (!Number.isFinite(tierBias))
+		throw new Error(`Tier bias must be a finite number, got ${tierBias}`)
+
 	// How many unique cards the user already owns in this tier
 	let k = 0
 	for (const entry of collection) {
