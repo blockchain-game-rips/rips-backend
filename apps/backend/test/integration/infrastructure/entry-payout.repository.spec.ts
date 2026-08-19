@@ -30,7 +30,7 @@ describe('PrismaEntryPayoutRepository card collections', () => {
 
 	beforeAll(async () => {
 		const queryDuration = {
-			observe: jest.fn(),
+			observe: vi.fn(),
 		} as unknown as Histogram<string>
 
 		prisma = new PrismaService(queryDuration)

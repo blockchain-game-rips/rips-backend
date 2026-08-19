@@ -5,6 +5,7 @@
         "test",
         "dist",
         "generated",
-        "**/*spec.ts"
+        "**/*spec.ts",
+        "vitest.config.mts"
     ]
 }

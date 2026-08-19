@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+import { Mocked } from 'vitest'
 import { EIP155 } from '../../../src/constants'
 import { Currency } from '../../../src/domain/entities/currency'
 import { composeChainId } from '../../../src/domain/services/chain-id-utils'
@@ -51,11 +52,11 @@ const ETH_NATIVE_ARB: Currency = {
 	decimals: 18,
 }
 
-function makeMockEvmCurrencyService(): jest.Mocked<
+function makeMockEvmCurrencyService(): Mocked<
 	Pick<EvmCurrencyService, 'getWrappedNative'>
 > {
 	return {
-		getWrappedNative: jest.fn().mockImplementation((chainId: number) => {
+		getWrappedNative: vi.fn().mockImplementation((chainId: number) => {
 			if (chainId === 42161) return Promise.resolve(WETH_ARB)
 			throw new Error(`No wrapped native for chain ${chainId}`)
 		}),

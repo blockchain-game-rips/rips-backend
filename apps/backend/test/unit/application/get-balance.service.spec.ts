@@ -1,3 +1,4 @@
+import { Mocked } from 'vitest'
 import { CurrencyService } from '../../../src/application/interfaces/currency.service'
 import { GetBalanceService } from '../../../src/application/use-cases/get-balance/get-balance.service'
 import { UserNotFoundError } from '../../../src/application/use-cases/get-user/get-user.use-case'
@@ -17,12 +18,12 @@ import {
 describe('GetBalanceService', () => {
 	const getUserUseCase = makeMockGetUserUseCase()
 	const walletReadService = makeMockWalletReadService()
-	const currencyService: jest.Mocked<CurrencyService> = {
-		fromAccount: jest.fn(),
+	const currencyService: Mocked<CurrencyService> = {
+		fromAccount: vi.fn(),
 	}
 	const cacheManager = {
-		get: jest.fn().mockResolvedValue(undefined),
-		set: jest.fn(),
+		get: vi.fn().mockResolvedValue(undefined),
+		set: vi.fn(),
 	} as never
 	const service = new GetBalanceService(
 		getUserUseCase,
@@ -32,7 +33,7 @@ describe('GetBalanceService', () => {
 	)
 
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 	})
 
 	it('should return currency amount for user wallet', async () => {

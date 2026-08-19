@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 import { DeBridgeApiService } from '../../src/infrastructure/de-bridge/de-bridge-api.service'
 import {
 	Order,
@@ -14,10 +15,10 @@ export type MockOrderParams = {
 
 export function createMockDeBridgeApiService(): DeBridgeApiService {
 	const service = new DeBridgeApiService({
-		get: jest.fn(),
-		set: jest.fn(),
+		get: vi.fn(),
+		set: vi.fn(),
 	} as never)
-	jest.spyOn(service, 'getOrder').mockImplementation(jest.fn())
+	vi.spyOn(service, 'getOrder').mockImplementation(vi.fn())
 	return service
 }
 
@@ -42,5 +43,5 @@ export function mockGetOrder(
 			: null,
 	}
 
-	jest.mocked(service.getOrder).mockResolvedValue(order)
+	vi.mocked(service.getOrder).mockResolvedValue(order)
 }

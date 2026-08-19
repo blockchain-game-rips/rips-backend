@@ -44,8 +44,8 @@ describe('collectPricedNodes', () => {
 describe('PriceEnrichmentInterceptor', () => {
 	function makeInterceptor(prices: Map<CurrencyId, number>) {
 		const provider: PriceProvider = {
-			getPrice: jest.fn(),
-			getPrices: jest.fn().mockResolvedValue(prices),
+			getPrice: vi.fn(),
+			getPrices: vi.fn().mockResolvedValue(prices),
 		}
 
 		return {
@@ -81,7 +81,7 @@ describe('PriceEnrichmentInterceptor', () => {
 		expect(nodeA2.priceUsd).toBe(42)
 		expect(nodeB.priceUsd).toBe(7)
 
-		const fetched = (provider.getPrices as jest.Mock).mock.calls[0][0]
+		const fetched = vi.mocked(provider.getPrices).mock.calls[0][0]
 
 		expect(provider.getPrices).toHaveBeenCalledTimes(1)
 		expect(fetched).toHaveLength(2)

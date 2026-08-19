@@ -1,3 +1,4 @@
+import { Mocked, vi } from 'vitest'
 import { CurrencyService } from '../../src/application/interfaces/currency.service'
 import { EncryptionService } from '../../src/application/interfaces/encryption.service'
 import { EntryPayoutRepository } from '../../src/application/interfaces/repositories/entry-payout.repository'
@@ -19,103 +20,103 @@ import { SwapUseCase } from '../../src/application/use-cases/swap/swap.use-case'
 import { WithdrawUseCase } from '../../src/application/use-cases/withdraw.ts/withdraw.use-case'
 import { ENCRYPTED_KEY } from '../fixtures/entities'
 
-export function makeMockUserRepository(): jest.Mocked<UserRepository> {
+export function makeMockUserRepository(): Mocked<UserRepository> {
 	return {
-		findByTelegramId: jest.fn(),
-		findByEvmAddress: jest.fn(),
-		create: jest.fn(),
-		setReferrer: jest.fn(),
+		findByTelegramId: vi.fn(),
+		findByEvmAddress: vi.fn(),
+		create: vi.fn(),
+		setReferrer: vi.fn(),
 	}
 }
 
-export function makeMockEntryPayoutRepository(): jest.Mocked<EntryPayoutRepository> {
+export function makeMockEntryPayoutRepository(): Mocked<EntryPayoutRepository> {
 	return {
-		find: jest.fn(),
-		revealAndGet: jest.fn(),
-		revealAllAndGet: jest.fn(),
-		getAssignedCardCollections: jest.fn(),
-		getRevealedCardCollections: jest.fn(),
-		getCardDefinitions: jest.fn(),
+		find: vi.fn(),
+		revealAndGet: vi.fn(),
+		revealAllAndGet: vi.fn(),
+		getAssignedCardCollections: vi.fn(),
+		getRevealedCardCollections: vi.fn(),
+		getCardDefinitions: vi.fn(),
 	}
 }
 
-export function makeMockWalletReadService(): jest.Mocked<WalletReadService> {
+export function makeMockWalletReadService(): Mocked<WalletReadService> {
 	return {
-		balanceOf: jest.fn(),
-		balancesOf: jest.fn(),
+		balanceOf: vi.fn(),
+		balancesOf: vi.fn(),
 	}
 }
 
-export function makeMockWalletWriteService(): jest.Mocked<WalletWriteService> {
+export function makeMockWalletWriteService(): Mocked<WalletWriteService> {
 	return {
-		transfer: jest.fn(),
-		quoteTransfer: jest.fn(),
+		transfer: vi.fn(),
+		quoteTransfer: vi.fn(),
 	}
 }
 
-export function makeMockEncryptionService(): jest.Mocked<EncryptionService> {
+export function makeMockEncryptionService(): Mocked<EncryptionService> {
 	return {
-		encrypt: jest.fn().mockResolvedValue(ENCRYPTED_KEY),
-		decrypt: jest.fn(),
+		encrypt: vi.fn().mockResolvedValue(ENCRYPTED_KEY),
+		decrypt: vi.fn(),
 	}
 }
 
-export function makeMockGetUserUseCase(): jest.Mocked<GetUserUseCase> {
-	return { execute: jest.fn() }
+export function makeMockGetUserUseCase(): Mocked<GetUserUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockCreateUserUseCase(): jest.Mocked<CreateUserUseCase> {
-	return { execute: jest.fn() }
+export function makeMockCreateUserUseCase(): Mocked<CreateUserUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockSetReferrerUseCase(): jest.Mocked<GetUserUseCase> {
-	return { execute: jest.fn() }
+export function makeMockSetReferrerUseCase(): Mocked<GetUserUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockExportKeyUseCase(): jest.Mocked<ExportKeyUseCase> {
-	return { execute: jest.fn() }
+export function makeMockExportKeyUseCase(): Mocked<ExportKeyUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockGetBalanceUseCase(): jest.Mocked<GetBalanceUseCase> {
-	return { execute: jest.fn() }
+export function makeMockGetBalanceUseCase(): Mocked<GetBalanceUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockRevealEntryPayoutsUseCase(): jest.Mocked<RevealEntryPayoutsUseCase> {
-	return { execute: jest.fn() }
+export function makeMockRevealEntryPayoutsUseCase(): Mocked<RevealEntryPayoutsUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockGetPayoutsUseCase(): jest.Mocked<GetPayoutsUseCase> {
-	return { execute: jest.fn() }
+export function makeMockGetPayoutsUseCase(): Mocked<GetPayoutsUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockWithdrawUseCase(): jest.Mocked<WithdrawUseCase> {
-	return { execute: jest.fn() }
+export function makeMockWithdrawUseCase(): Mocked<WithdrawUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockBuyEntriesPurchaseUseCase(): jest.Mocked<BuyEntriesPurchaseUseCase> {
-	return { execute: jest.fn() }
+export function makeMockBuyEntriesPurchaseUseCase(): Mocked<BuyEntriesPurchaseUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockBuyEntriesZapUseCase(): jest.Mocked<BuyEntriesZapUseCase> {
-	return { execute: jest.fn() }
+export function makeMockBuyEntriesZapUseCase(): Mocked<BuyEntriesZapUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockQuoteSwapUseCase(): jest.Mocked<QuoteSwapUseCase> {
-	return { execute: jest.fn() }
+export function makeMockQuoteSwapUseCase(): Mocked<QuoteSwapUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockQuoteWithdrawUseCase(): jest.Mocked<QuoteWithdrawUseCase> {
-	return { execute: jest.fn() }
+export function makeMockQuoteWithdrawUseCase(): Mocked<QuoteWithdrawUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockSwapUseCase(): jest.Mocked<SwapUseCase> {
-	return { execute: jest.fn() }
+export function makeMockSwapUseCase(): Mocked<SwapUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockGetSwapResultUseCase(): jest.Mocked<GetSwapResultUseCase> {
-	return { execute: jest.fn() }
+export function makeMockGetSwapResultUseCase(): Mocked<GetSwapResultUseCase> {
+	return { execute: vi.fn() }
 }
 
-export function makeMockCurrencyService(): jest.Mocked<CurrencyService> {
-	return { fromAccount: jest.fn() }
+export function makeMockCurrencyService(): Mocked<CurrencyService> {
+	return { fromAccount: vi.fn() }
 }

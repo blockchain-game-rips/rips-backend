@@ -8,7 +8,7 @@ describe('GetUserService', () => {
 	const service = new GetUserService(repo)
 
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 	})
 
 	it('should return user when found', async () => {

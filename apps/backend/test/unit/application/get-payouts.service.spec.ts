@@ -22,7 +22,7 @@ describe('GetPayoutsService', () => {
 	)
 
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 		getUser.execute.mockResolvedValue(MOCK_USER)
 		entryPayoutRepository.find.mockResolvedValue([])
 	})

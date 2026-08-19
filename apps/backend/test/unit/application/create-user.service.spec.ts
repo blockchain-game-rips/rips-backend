@@ -12,7 +12,7 @@ describe('CreateUserService', () => {
 	const service = new CreateUserService(repo, encryption)
 
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 	})
 
 	it('should create user with a generated wallet and return it', async () => {

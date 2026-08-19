@@ -1,3 +1,4 @@
+import { Mocked } from 'vitest'
 import { EIP155 } from '../../../src/constants'
 import { Currency } from '../../../src/domain/entities/currency'
 import { composeChainId } from '../../../src/domain/services/chain-id-utils'
@@ -71,17 +72,17 @@ const ETH_NATIVE_ARB: Currency = {
 
 function makeMockGeckoTerminalService(
 	prices: { address: string; price: number }[],
-): jest.Mocked<Pick<GeckoTerminalService, 'getTokenPrices'>> {
+): Mocked<Pick<GeckoTerminalService, 'getTokenPrices'>> {
 	return {
-		getTokenPrices: jest.fn().mockResolvedValue(prices),
+		getTokenPrices: vi.fn().mockResolvedValue(prices),
 	}
 }
 
-function makeMockEvmCurrencyService(): jest.Mocked<
+function makeMockEvmCurrencyService(): Mocked<
 	Pick<EvmCurrencyService, 'getWrappedNative'>
 > {
 	return {
-		getWrappedNative: jest.fn().mockImplementation((chainId: number) => {
+		getWrappedNative: vi.fn().mockImplementation((chainId: number) => {
 			if (chainId === 42161) return Promise.resolve(WETH_ARB)
 			if (chainId === 122) return Promise.resolve(WETH_FUSE)
 			throw new Error(`No wrapped native for chain ${chainId}`)
@@ -90,8 +91,8 @@ function makeMockEvmCurrencyService(): jest.Mocked<
 }
 
 function makeService(
-	geckoMock: jest.Mocked<Pick<GeckoTerminalService, 'getTokenPrices'>>,
-	currencyMock: jest.Mocked<Pick<EvmCurrencyService, 'getWrappedNative'>>,
+	geckoMock: Mocked<Pick<GeckoTerminalService, 'getTokenPrices'>>,
+	currencyMock: Mocked<Pick<EvmCurrencyService, 'getWrappedNative'>>,
 ): PriceProviderService {
 	return new PriceProviderService(
 		currencyMock as unknown as EvmCurrencyService,
@@ -102,15 +103,15 @@ function makeService(
 
 describe('PriceProviderService', () => {
 	beforeAll(() => {
-		jest.useFakeTimers()
+		vi.useFakeTimers()
 	})
 
 	afterAll(() => {
-		jest.useRealTimers()
+		vi.useRealTimers()
 	})
 
 	afterEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 	})
 
 	it('should return price for a token', async () => {

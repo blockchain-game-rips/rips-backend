@@ -23,7 +23,7 @@ describe('UsersController', () => {
 	)
 
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 	})
 
 	const EXPECTED_USER_DTO = {

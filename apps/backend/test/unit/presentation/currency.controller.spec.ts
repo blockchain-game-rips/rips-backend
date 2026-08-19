@@ -8,8 +8,8 @@ import {
 } from '../../fixtures/entities'
 
 describe('CurrencyController', () => {
-	const fromAccount = jest.fn()
-	const supported = jest.fn()
+	const fromAccount = vi.fn()
+	const supported = vi.fn()
 
 	const currencyService: CurrencyService = { fromAccount }
 	const supportedCurrencies: SupportedCurrencies = { supported }
@@ -20,7 +20,7 @@ describe('CurrencyController', () => {
 	)
 
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 	})
 
 	describe('GET /currencies/supported', () => {

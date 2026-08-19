@@ -5,10 +5,18 @@
         "strict": true,
         "outDir": "lib",
         "rootDir": ".",
+        "types": ["node", "vitest/globals"],
+        // "paths" replaces rather than merges with the base config, so the ox
+        // declaration redirects from tsconfig.base.json are repeated here.
         "paths": {
             "src/*": ["./src/*"],
             "generated/*": ["./generated/*"],
-            "test/*": ["./test/*"]
+            "test/*": ["./test/*"],
+            "ox": ["../../node_modules/ox/_types/index.d.ts"],
+            "ox/tempo/*": ["../../node_modules/ox/_types/tempo/*.d.ts"],
+            "ox/core/*": ["../../node_modules/ox/_types/core/*.d.ts"],
+            "ox/*": ["../../node_modules/ox/_types/*.d.ts"]
         }
-    }
+    },
+    "exclude": ["lib", "vitest.config.mts"]
 }
