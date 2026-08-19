@@ -10,6 +10,18 @@
         "allowSyntheticDefaultImports": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+
+        // ox publishes its raw .ts sources alongside the built output. Under
+        // node10 resolution TypeScript ignores the package's "exports" map and
+        // resolves `ox/*` to those sources, then reports type errors from
+        // inside the dependency. Point the compiler at the shipped
+        // declarations instead. Remove once moduleResolution moves to node16.
+        "paths": {
+            "ox": ["./node_modules/ox/_types/index.d.ts"],
+            "ox/tempo/*": ["./node_modules/ox/_types/tempo/*.d.ts"],
+            "ox/core/*": ["./node_modules/ox/_types/core/*.d.ts"],
+            "ox/*": ["./node_modules/ox/_types/*.d.ts"]
+        }
     }
 }
