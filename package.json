@@ -21,9 +21,6 @@
 		"dev:fill-random": "NODE_ENV=development ts-node scripts/dev-fill-random.ts",
 		"sync-indexer-prisma-schema": "yarn workspace indexer build && ts-node scripts/sync-indexer-prisma-schema.ts"
 	},
-	"resolutions": {
-		"ox": "0.14.5"
-	},
 	"packageManager": "yarn@4.17.0",
 	"devDependencies": {
 		"@eslint/js": "^9.18.0",
