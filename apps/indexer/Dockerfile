@@ -25,9 +25,7 @@ COPY apps/indexer/ ./apps/indexer/
 
 RUN yarn workspace @rips/abi run build
 
-# src/abi and src/model/generated are gitignored, so both are regenerated here.
-RUN yarn workspace indexer run generate
-
+# src/abi and src/model/generated are gitignored; `build` regenerates them.
 RUN yarn workspace indexer run build
 
 # --- runner: production-only deps + compiled output ---

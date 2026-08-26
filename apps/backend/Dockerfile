@@ -25,10 +25,7 @@ COPY apps/backend/ ./apps/backend/
 
 RUN yarn workspace @rips/abi run build
 
-# The generated clients are gitignored, so both are produced here.
-RUN yarn workspace backend exec prisma generate
-RUN yarn workspace backend exec prisma generate --config prisma.indexer.config.ts
-
+# The generated Prisma clients are gitignored; `build` regenerates them.
 RUN yarn workspace backend run build
 
 # --- runner: runtime deps + compiled output ---
