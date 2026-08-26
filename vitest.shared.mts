@@ -2,6 +2,9 @@ import { resolve } from 'node:path'
 
 const TEST_TIMEOUT_MS = 30_000
 
+// Setup hooks start testcontainers, which pull their image on a cold cache.
+const HOOK_TIMEOUT_MS = 120_000
+
 const repoRoot = import.meta.dirname
 const harnessRoot = resolve(repoRoot, 'packages/test-harness/src')
 
@@ -35,6 +38,7 @@ export const projectFactory = (appRoot: string) => {
 			globals: true,
 			environment: 'node' as const,
 			testTimeout: TEST_TIMEOUT_MS,
+			hookTimeout: HOOK_TIMEOUT_MS,
 			include: [`test/${name}/**/*.spec.ts`],
 			fileParallelism: !serial,
 		},
