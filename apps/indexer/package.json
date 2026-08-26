@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"build": "rm -rf lib && tsc -p tsconfig.build.json",
+		"build": "yarn generate && rm -rf lib && tsc -p tsconfig.build.json",
 		"test": "yarn build && vitest run",
 		"fmt": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"lint": "eslint src test",

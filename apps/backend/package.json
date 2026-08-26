@@ -6,7 +6,8 @@
 	"private": true,
 	"license": "UNLICENSED",
 	"scripts": {
-		"build": "nest build",
+		"generate": "prisma generate && prisma generate --config prisma.indexer.config.ts",
+		"build": "yarn generate && nest build",
 		"test": "vitest run",
 		"test:unit": "vitest run --project unit",
 		"test:integration": "vitest run --project integration",
