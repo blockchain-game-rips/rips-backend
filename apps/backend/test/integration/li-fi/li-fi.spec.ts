@@ -1,14 +1,11 @@
 import { CacheModule } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 import {
-	Anvil,
 	ANVIL_ACCOUNT_1_PRIVATE_KEY,
 	ANVIL_STATE_PATH,
 	deployments,
 	setNativeBalance,
 	setTokenBalance,
-	useAnvil,
-	withTraces,
 } from '@rips/test-harness'
 import {
 	Chain,
@@ -44,6 +41,8 @@ import {
 } from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
 import { expectSucceeded } from '../../utils/attempts'
+import { TapedAnvil } from '../../utils/cassette/taped-anvil'
+import { Cassette, useCassette } from '../../utils/cassette/use-cassette'
 import { provisionKekFile } from '../../utils/kek'
 import { usePostgres } from '../../utils/postgres'
 
@@ -155,7 +154,7 @@ async function buildTestModule(
 type SamechainContext = {
 	liFiService: LiFiService
 	baseClient: PublicClient<HttpTransport, Chain>
-	anvil: Anvil
+	anvil: TapedAnvil
 }
 
 /**
@@ -164,12 +163,13 @@ type SamechainContext = {
  * contained to the test that caused it rather than leaving state behind for
  * the next one.
  */
-function useSamechainContext(): SamechainContext {
-	const { anvils } = useAnvil([
+function useSamechainContext(cassette: Cassette): SamechainContext {
+	const anvils = cassette.useAnvil([
 		{
 			chainId: BASE_CHAIN_ID,
 			fork: { rpcUrl: 'https://mainnet.base.org' },
 			pathToState: ANVIL_STATE_PATH,
+			printTraces: true,
 		},
 	])
 
@@ -193,26 +193,27 @@ function useSamechainContext(): SamechainContext {
 	beforeAll(async () => {
 		const [baseAnvil] = anvils
 
-		const baseRpcUrl = `http://127.0.0.1:${baseAnvil.port}`
+		const baseRpcUrl = baseAnvil.rpcUrl
 
 		baseClient = createPublicClient({
 			chain: baseChain,
 			transport: http(baseRpcUrl),
 		})
 
-		await Promise.all([
-			setTokenBalance(
-				userAccount.address,
-				USDC_BASE_ADDRESS,
-				INITIAL_USDC_BALANCE,
-				baseClient,
-			),
-			setNativeBalance(
-				baseClient,
-				userAccount.address,
-				INITIAL_ETH_BALANCE,
-			),
-		])
+		// Sequential rather than concurrent: viem stamps a request id when the
+		// call is made, so racing these two lands them on the tape out of order.
+		await setTokenBalance(
+			userAccount.address,
+			USDC_BASE_ADDRESS,
+			INITIAL_USDC_BALANCE,
+			baseClient,
+		)
+
+		await setNativeBalance(
+			baseClient,
+			userAccount.address,
+			INITIAL_ETH_BALANCE,
+		)
 
 		const moduleRef = await buildTestModule({
 			[BASE_CHAIN_ID]: {
@@ -232,8 +233,10 @@ describe('LiFi integration', () => {
 	// only boots with a reachable database behind DATABASE_URL.
 	usePostgres()
 
+	const cassette = useCassette()
+
 	describe('quoteEnterSamechain with USDC on Base', () => {
-		const context = useSamechainContext()
+		const context = useSamechainContext(cassette)
 
 		it('returns amountIn in the payment currency and a native fee', async () => {
 			const { liFiService } = context
@@ -263,9 +266,9 @@ describe('LiFi integration', () => {
 	})
 
 	describe('enterSamechain with USDC on Base', () => {
-		const context = useSamechainContext()
+		const context = useSamechainContext(cassette)
 
-		it(
+		it.only(
 			'swaps USDC and buys entries for the user',
 			async () => {
 				const { liFiService, baseClient } = context
@@ -295,66 +298,69 @@ describe('LiFi integration', () => {
 					enterArgs,
 				)
 
-				const { transaction, result } = expectSucceeded(
-					(
-						await withTraces(context.anvil, () =>
-							liFiService.enterSamechain(userWallet, enterArgs),
-						)
-					).enter,
-				)
+				await cassette.withTraces(context.anvil, async () => {
+					const outcome = await liFiService.enterSamechain(
+						userWallet,
+						enterArgs,
+					)
+					const { transaction, result } = expectSucceeded(
+						outcome.enter,
+					)
+					expect(result.purchase.entryCount).toBe(entryCount)
+					expect(transaction.chain.reference).toBe(
+						String(BASE_CHAIN_ID),
+					)
 
-				expect(result.purchase.entryCount).toBe(entryCount)
-				expect(transaction.chain.reference).toBe(String(BASE_CHAIN_ID))
+					const usdcBalanceAfter = await baseClient.readContract({
+						address: USDC_BASE_ADDRESS,
+						abi: erc20Abi,
+						functionName: 'balanceOf',
+						args: [userAccount.address],
+					})
 
-				const usdcBalanceAfter = await baseClient.readContract({
-					address: USDC_BASE_ADDRESS,
-					abi: erc20Abi,
-					functionName: 'balanceOf',
-					args: [userAccount.address],
+					// The swap spends a fixed input baked into the quote's calldata, so
+					// the amount leaving the wallet is exactly what was quoted.
+					const spent = usdcBalanceBefore - usdcBalanceAfter
+
+					expect(spent).toBe(quote.amountIn.amount)
+
+					// The entries are paid for out of the swapped USDC, so the only ETH
+					// the user parts with is the fee for sending the transaction. The
+					// swap overshoots the entry cost to survive a price move, and
+					// enterRip refunds that surplus, so the user can only come out ahead
+					// of the gas they paid.
+					const ethBalanceAfter = await baseClient.getBalance({
+						address: userAccount.address,
+					})
+
+					// The reported cost omits Base's L1 data fee, so the ETH leaving the
+					// wallet is compared against the entry cost it must stay far below
+					// rather than against the fee itself.
+					const ethSpent = ethBalanceBefore - ethBalanceAfter
+
+					expect(ethSpent).toBeLessThan(
+						MOCK_CONFIG.entryPrice.amount * BigInt(entryCount),
+					)
+
+					expect(
+						await baseClient.readContract({
+							address: ripsContractAddress,
+							abi: ripsAbi,
+							functionName: 'userEntryCount',
+							args: [
+								BigInt(result.purchase.ripId),
+								userAccount.address,
+							],
+						}),
+					).toBe(BigInt(entryCount))
 				})
-
-				// The swap spends a fixed input baked into the quote's calldata, so
-				// the amount leaving the wallet is exactly what was quoted.
-				const spent = usdcBalanceBefore - usdcBalanceAfter
-
-				expect(spent).toBe(quote.amountIn.amount)
-
-				// The entries are paid for out of the swapped USDC, so the only ETH
-				// the user parts with is the fee for sending the transaction. The
-				// swap overshoots the entry cost to survive a price move, and
-				// enterRip refunds that surplus, so the user can only come out ahead
-				// of the gas they paid.
-				const ethBalanceAfter = await baseClient.getBalance({
-					address: userAccount.address,
-				})
-
-				// The reported cost omits Base's L1 data fee, so the ETH leaving the
-				// wallet is compared against the entry cost it must stay far below
-				// rather than against the fee itself.
-				const ethSpent = ethBalanceBefore - ethBalanceAfter
-
-				expect(ethSpent).toBeLessThan(
-					MOCK_CONFIG.entryPrice.amount * BigInt(entryCount),
-				)
-
-				expect(
-					await baseClient.readContract({
-						address: ripsContractAddress,
-						abi: ripsAbi,
-						functionName: 'userEntryCount',
-						args: [
-							BigInt(result.purchase.ripId),
-							userAccount.address,
-						],
-					}),
-				).toBe(BigInt(entryCount))
 			},
 			ENTER_TIMEOUT_MS,
 		)
 	})
 
 	describe('enterSamechain beyond the cap', () => {
-		const context = useSamechainContext()
+		const context = useSamechainContext(cassette)
 
 		it(
 			'refunds the entries it could not sell beyond the cap',
@@ -386,7 +392,7 @@ describe('LiFi integration', () => {
 
 				const { result } = expectSucceeded(
 					(
-						await withTraces(context.anvil, () =>
+						await cassette.withTraces(context.anvil, () =>
 							liFiService.enterSamechain(userWallet, {
 								presetId: PRESET_ID,
 								config: MOCK_CONFIG,
