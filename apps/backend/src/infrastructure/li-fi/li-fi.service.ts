@@ -40,7 +40,7 @@ export const ENTER_RIP_GAS_LIMIT = 800_000n
  * Tessera pool that reverts with "T8: Insufficient Liquidity". The route is
  * not visible in the quote, so the aggregator itself has to be excluded.
  */
-export const DENIED_EXCHANGES = ['okx']
+export const DENIED_EXCHANGES = ['okx', 'fly']
 
 const SEND_GAS_COST_TYPE = 'SEND'
 
