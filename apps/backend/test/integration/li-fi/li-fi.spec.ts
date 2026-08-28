@@ -41,8 +41,10 @@ import {
 } from '../../../src/infrastructure/rips/rips.constants'
 import { SignService } from '../../../src/infrastructure/sign/sign.service'
 import { expectSucceeded } from '../../utils/attempts'
-import { TapedAnvil } from '../../utils/cassette/taped-anvil'
-import { Cassette, useCassette } from '../../utils/cassette/use-cassette'
+import { anvilTape } from '../../utils/cassette/anvil-tape'
+import { externalTapes } from '../../utils/cassette/host-tape'
+import { useVcr } from '../../utils/cassette/use-vcr'
+import { withAnvilTraces } from '../../utils/cassette/with-traces'
 import { provisionKekFile } from '../../utils/kek'
 import { usePostgres } from '../../utils/postgres'
 
@@ -154,7 +156,9 @@ async function buildTestModule(
 type SamechainContext = {
 	liFiService: LiFiService
 	baseClient: PublicClient<HttpTransport, Chain>
-	anvil: TapedAnvil
+
+	/** Prints anvil's log if the call fails, when there is a log to print. */
+	withTraces<T>(run: () => Promise<T>): Promise<T>
 }
 
 /**
@@ -163,15 +167,16 @@ type SamechainContext = {
  * contained to the test that caused it rather than leaving state behind for
  * the next one.
  */
-function useSamechainContext(cassette: Cassette): SamechainContext {
-	const anvils = cassette.useAnvil([
-		{
+function useSamechainContext(): SamechainContext {
+	const vcr = useVcr({
+		...externalTapes(),
+		base: anvilTape({
 			chainId: BASE_CHAIN_ID,
 			fork: { rpcUrl: 'https://mainnet.base.org' },
 			pathToState: ANVIL_STATE_PATH,
 			printTraces: true,
-		},
-	])
+		}),
+	})
 
 	let liFiService: LiFiService
 	let baseClient: PublicClient<HttpTransport, Chain>
@@ -183,17 +188,19 @@ function useSamechainContext(cassette: Cassette): SamechainContext {
 		get baseClient() {
 			return baseClient
 		},
-		get anvil() {
-			const [baseAnvil] = anvils
+		withTraces(run) {
+			if (vcr.mode === 'replay') {
+				return run()
+			}
 
-			return baseAnvil
+			const { base } = vcr.tapes
+
+			return withAnvilTraces(() => base.logs, run)
 		},
 	}
 
 	beforeAll(async () => {
-		const [baseAnvil] = anvils
-
-		const baseRpcUrl = baseAnvil.rpcUrl
+		const baseRpcUrl = vcr.tapes.base.rpcUrl
 
 		baseClient = createPublicClient({
 			chain: baseChain,
@@ -233,10 +240,8 @@ describe('LiFi integration', () => {
 	// only boots with a reachable database behind DATABASE_URL.
 	usePostgres()
 
-	const cassette = useCassette()
-
 	describe('quoteEnterSamechain with USDC on Base', () => {
-		const context = useSamechainContext(cassette)
+		const context = useSamechainContext()
 
 		it('returns amountIn in the payment currency and a native fee', async () => {
 			const { liFiService } = context
@@ -266,7 +271,7 @@ describe('LiFi integration', () => {
 	})
 
 	describe('enterSamechain with USDC on Base', () => {
-		const context = useSamechainContext(cassette)
+		const context = useSamechainContext()
 
 		it.only(
 			'swaps USDC and buys entries for the user',
@@ -298,7 +303,7 @@ describe('LiFi integration', () => {
 					enterArgs,
 				)
 
-				await cassette.withTraces(context.anvil, async () => {
+				await context.withTraces(async () => {
 					const outcome = await liFiService.enterSamechain(
 						userWallet,
 						enterArgs,
@@ -360,7 +365,7 @@ describe('LiFi integration', () => {
 	})
 
 	describe('enterSamechain beyond the cap', () => {
-		const context = useSamechainContext(cassette)
+		const context = useSamechainContext()
 
 		it(
 			'refunds the entries it could not sell beyond the cap',
@@ -392,7 +397,7 @@ describe('LiFi integration', () => {
 
 				const { result } = expectSucceeded(
 					(
-						await cassette.withTraces(context.anvil, () =>
+						await context.withTraces(() =>
 							liFiService.enterSamechain(userWallet, {
 								presetId: PRESET_ID,
 								config: MOCK_CONFIG,
