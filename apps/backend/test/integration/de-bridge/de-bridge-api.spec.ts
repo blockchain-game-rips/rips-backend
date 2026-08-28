@@ -1,6 +1,8 @@
 import { CacheModule } from '@nestjs/cache-manager'
 import { Test } from '@nestjs/testing'
 import { DeBridgeApiService } from '../../../src/infrastructure/de-bridge/de-bridge-api.service'
+import { externalTapes } from '../../utils/cassette/host-tape'
+import { useVcr } from '../../utils/cassette/use-vcr'
 
 const FULFILLED_ORDER_ID =
 	'0xc4a83ba91f9d6cd438606e1616ef652abf9563296f12be0361f53ff999917aa0'
@@ -22,6 +24,8 @@ describe('DeBridgeApiService', () => {
 	})
 
 	describe('getOrder', () => {
+		useVcr(externalTapes())
+
 		it('returns ClaimedUnlock state for a fulfilled and unlocked order', async () => {
 			const order = await service.getOrder(FULFILLED_ORDER_ID)
 

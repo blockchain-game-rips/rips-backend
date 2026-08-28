@@ -1,4 +1,6 @@
 import { GeckoTerminalService } from '../../../src/infrastructure/price-provider/gecko-terminal.service'
+import { externalTapes } from '../../utils/cassette/host-tape'
+import { useVcr } from '../../utils/cassette/use-vcr'
 
 const USDT_ETH = '0xdac17f958d2ee523a2206206994597c13d831ec7'
 const USDC_ETH = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
@@ -48,6 +50,8 @@ describe('GeckoTerminalService', () => {
 	})
 
 	describe('getTokenPrice', () => {
+		useVcr(externalTapes())
+
 		it('should return price for a single token', async () => {
 			const price = await service.getTokenPrice(USDT_ETH, 'eth')
 
@@ -62,6 +66,8 @@ describe('GeckoTerminalService', () => {
 	})
 
 	describe('getTokenPrices', () => {
+		useVcr(externalTapes())
+
 		it('should return prices for multiple tokens', async () => {
 			const addresses = [USDT_ETH, USDC_ETH, WETH_ETH, WBTC_ETH, DAI_ETH]
 

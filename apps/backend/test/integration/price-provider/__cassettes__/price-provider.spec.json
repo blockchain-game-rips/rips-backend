@@ -1,0 +1,75 @@
+{
+  "PriceProviderService": [
+    {
+      "scope": "https://api.geckoterminal.com:443",
+      "method": "GET",
+      "path": "/api/v2/networks/arbitrum/tokens/multi/0x82aF49447D8a07e3bd95BD0d56f35241523fBab1,0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "body": "",
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "arbitrum_0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+            "type": "token",
+            "attributes": {
+              "address": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+              "name": "Wrapped Ether",
+              "symbol": "WETH",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/39713/large/WETH.PNG?1723731496",
+              "banner_image_url": null,
+              "coingecko_coin_id": "arbitrum-bridged-weth-arbitrum-one",
+              "total_supply": "115722174155140563835555.0",
+              "normalized_total_supply": "115722.174155141",
+              "price_usd": "2514.56",
+              "fdv_usd": "290990335.421879",
+              "total_reserve_in_usd": "63180654.623577516642460227067600511387674203251387824974219810501101998908195563748504830916316813",
+              "volume_usd": {
+                "h24": "91492796.6554136"
+              },
+              "market_cap_usd": "291232672.972302"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "arbitrum_0xc6962004f452be9203591991d15f6b388e09e8d0",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rawHeaders": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cache-control": "max-age=30, public, must-revalidate, s-maxage=60",
+        "cf-cache-status": "MISS",
+        "cf-ray": "a323d79d6d0d82ac-ARN",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Fri, 28 Aug 2026 14:00:26 GMT",
+        "etag": "W/\"07f9f2a5b117cbaae555ce2036b19d5a\"",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "cloudflare",
+        "set-cookie": "_cfuvid=60zBjv3quVZ_E.U4p_1JgRqKJEBfc561lPFuY52YShI-1787925626.4626276-1.0.1.1-5I.oipQujwYHg6kHG86zTk0QAsUo5N.Mihh7uE.EqO4; HttpOnly; SameSite=None; Secure; Path=/; Domain=geckoterminal.com",
+        "speculation-rules": "\"/cdn-cgi/speculation\"",
+        "strict-transport-security": "max-age=15724800; includeSubdomains",
+        "transfer-encoding": "chunked",
+        "vary": "Accept, Origin, accept-encoding",
+        "x-content-digest": "71ef7bf191e2d46045a0ed9d8f548e8f6c271e02",
+        "x-content-type-options": "nosniff",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-gt-env": "qa-3tm",
+        "x-permitted-cross-domain-policies": "none",
+        "x-rack-cache": "stale, invalid, ignore, store",
+        "x-request-id": "026a5cf4-61dd-4e9d-8836-74d62f347ad0",
+        "x-runtime": "0.042322",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseIsBinary": false
+    }
+  ]
+}

@@ -18,6 +18,8 @@ import {
 import { EvmCurrencyService } from '../../../src/infrastructure/evm/evm-currency.service'
 import { GeckoTerminalService } from '../../../src/infrastructure/price-provider/gecko-terminal.service'
 import { PriceProviderService } from '../../../src/infrastructure/price-provider/price-provider.service'
+import { externalTapes } from '../../utils/cassette/host-tape'
+import { useVcr } from '../../utils/cassette/use-vcr'
 
 function ChainAddressFromCurrencyId(id: CurrencyId): ChainAddress {
 	const { chainId, address } = parseCurrencyId(id)
@@ -70,6 +72,8 @@ function makeMockPriceSeedSource(): CurrencyPriceSeedSource {
 }
 
 describe('PriceProviderService', () => {
+	useVcr(externalTapes())
+
 	let service: PriceProviderService
 
 	beforeEach(async () => {

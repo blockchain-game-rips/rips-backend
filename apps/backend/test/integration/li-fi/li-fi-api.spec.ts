@@ -10,6 +10,8 @@ import {
 	SLIPPAGE,
 } from '../../../src/infrastructure/li-fi/li-fi.service'
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
+import { externalTapes } from '../../utils/cassette/host-tape'
+import { useVcr } from '../../utils/cassette/use-vcr'
 
 const BASE_CHAIN_ID = 8453
 const USDC_BASE_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
@@ -39,6 +41,8 @@ const enterRipCallData = encodeFunctionData({
 })
 
 describe('LiFiApiService', () => {
+	useVcr(externalTapes())
+
 	let service: LiFiApiService
 
 	beforeAll(async () => {

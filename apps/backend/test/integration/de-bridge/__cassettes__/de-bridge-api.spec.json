@@ -1,0 +1,838 @@
+{
+  "DeBridgeApiService > getOrder": [
+    {
+      "scope": "https://dln-api.debridge.finance:443",
+      "method": "GET",
+      "path": "/api/Orders/0xc4a83ba91f9d6cd438606e1616ef652abf9563296f12be0361f53ff999917aa0",
+      "body": "",
+      "status": 200,
+      "response": {
+        "orderId": {
+          "bytesValue": "xKg7qR+dbNQ4YG4WFu9lKr+VYylvEr4DYfU/+ZmReqA=",
+          "bytesArrayValue": "[196,168,59,169,31,157,108,212,56,96,110,22,22,239,101,42,191,149,99,41,111,18,190,3,97,245,63,249,153,145,122,160]",
+          "stringValue": "0xc4a83ba91f9d6cd438606e1616ef652abf9563296f12be0361f53ff999917aa0"
+        },
+        "makerOrderNonce": 1776422642977,
+        "makerSrc": {
+          "Base64Value": "89NDCimKQqyaMNhDBOlDuCMihZo=",
+          "bytesArrayValue": "[243,211,67,10,41,138,66,172,154,48,216,67,4,233,67,184,35,34,133,154]",
+          "stringValue": "0xf3d3430a298a42ac9a30d84304e943b82322859a"
+        },
+        "giveOfferWithMetadata": {
+          "chainId": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,56]",
+            "bigIntegerValue": 56,
+            "stringValue": "56"
+          },
+          "tokenAddress": {
+            "Base64Value": "IXDtCICsmnVf0psmiJVr2Vn5M/g=",
+            "bytesArrayValue": "[33,112,237,8,128,172,154,117,95,210,155,38,136,149,107,217,89,249,51,248]",
+            "stringValue": "0x2170ed0880ac9a755fd29b2688956bd959f933f8"
+          },
+          "amount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABE6Z5FySI/4=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,78,153,228,92,146,35,254]",
+            "bigIntegerValue": 310354630419817500,
+            "stringValue": "310354630419817470"
+          },
+          "finalAmount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABE6Z5FySI/4=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,78,153,228,92,146,35,254]",
+            "bigIntegerValue": 310354630419817500,
+            "stringValue": "310354630419817470"
+          },
+          "metadata": {
+            "decimals": 18,
+            "name": "Ethereum Token",
+            "symbol": "ETH",
+            "logoURI": "https://tokens.debridge.finance/Logo/56/0x2170ed0880ac9a755fd29b2688956bd959f933f8/big/token-logo.png"
+          },
+          "decimals": 18,
+          "name": "Ethereum Token",
+          "symbol": "ETH",
+          "logoURI": "https://tokens.debridge.finance/Logo/56/0x2170ed0880ac9a755fd29b2688956bd959f933f8/big/token-logo.png"
+        },
+        "receiverDst": {
+          "Base64Value": "WflM/2LczINGfDdcAg7VbzxWcT0=",
+          "bytesArrayValue": "[89,249,76,255,98,220,204,131,70,124,55,92,2,14,213,111,60,86,113,61]",
+          "stringValue": "0x59f94cff62dccc83467c375c020ed56f3c56713d"
+        },
+        "takeOfferWithMetadata": {
+          "chainId": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]",
+            "bigIntegerValue": 1,
+            "stringValue": "1"
+          },
+          "tokenAddress": {
+            "Base64Value": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+            "stringValue": "0x0000000000000000000000000000000000000000"
+          },
+          "amount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABE2J4auZ8ME=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,77,137,225,171,153,240,193]",
+            "bigIntegerValue": 310055551698071740,
+            "stringValue": "310055551698071745"
+          },
+          "finalAmount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABE2J4auZ8ME=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,77,137,225,171,153,240,193]",
+            "bigIntegerValue": 310055551698071740,
+            "stringValue": "310055551698071745"
+          },
+          "metadata": {
+            "decimals": 18,
+            "name": "Ethereum",
+            "symbol": "ETH",
+            "logoURI": "https://tokens.debridge.finance/Logo/1/0x0000000000000000000000000000000000000000/big/token-logo.svg"
+          },
+          "decimals": 18,
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "logoURI": "https://tokens.debridge.finance/Logo/1/0x0000000000000000000000000000000000000000/big/token-logo.svg"
+        },
+        "actualFulfillAmount": {
+          "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABE2J4auZ8ME=",
+          "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,77,137,225,171,153,240,193]",
+          "bigIntegerValue": 310055551698071740,
+          "stringValue": "310055551698071745"
+        },
+        "givePatchAuthoritySrc": {
+          "Base64Value": "89NDCimKQqyaMNhDBOlDuCMihZo=",
+          "bytesArrayValue": "[243,211,67,10,41,138,66,172,154,48,216,67,4,233,67,184,35,34,133,154]",
+          "stringValue": "0xf3d3430a298a42ac9a30d84304e943b82322859a"
+        },
+        "orderAuthorityAddressDst": {
+          "Base64Value": "89NDCimKQqyaMNhDBOlDuCMihZo=",
+          "bytesArrayValue": "[243,211,67,10,41,138,66,172,154,48,216,67,4,233,67,184,35,34,133,154]",
+          "stringValue": "0xf3d3430a298a42ac9a30d84304e943b82322859a"
+        },
+        "allowedTakerDst": {
+          "Base64Value": "VVziNsAiBpW2g0G8SMaNUiEMw1s=",
+          "bytesArrayValue": "[85,92,226,54,192,34,6,149,182,131,65,188,72,198,141,82,33,12,195,91]",
+          "stringValue": "0x555ce236c0220695b68341bc48c68d52210cc35b"
+        },
+        "allowedCancelBeneficiarySrc": {
+          "Base64Value": null,
+          "bytesArrayValue": "",
+          "stringValue": null
+        },
+        "state": "ClaimedUnlock",
+        "externalCallState": "NoExtCall",
+        "referralCode": 4850,
+        "percentFee": {
+          "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABw85f0/q4=",
+          "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,112,243,151,244,254,174]",
+          "bigIntegerValue": 124191528779438,
+          "stringValue": "124191528779438"
+        },
+        "finalPercentFee": {
+          "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABw85f0/q4=",
+          "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,112,243,151,244,254,174]",
+          "bigIntegerValue": 124191528779438,
+          "stringValue": "124191528779438"
+        },
+        "fixFee": {
+          "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABHDeTfggAA=",
+          "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,17,195,121,55,224,128,0]",
+          "bigIntegerValue": 5000000000000000,
+          "stringValue": "5000000000000000"
+        },
+        "unlockBeneficiarySrc": {
+          "Base64Value": "VVziNsAiBpW2g0G8SMaNUiEMw1s=",
+          "bytesArrayValue": "[85,92,226,54,192,34,6,149,182,131,65,188,72,198,141,82,33,12,195,91]",
+          "stringValue": "0x555ce236c0220695b68341bc48c68d52210cc35b"
+        },
+        "cancelBeneficiarySrc": null,
+        "taker": {
+          "Base64Value": "VVziNsAiBpW2g0G8SMaNUiEMw1s=",
+          "bytesArrayValue": "[85,92,226,54,192,34,6,149,182,131,65,188,72,198,141,82,33,12,195,91]",
+          "stringValue": "0x555ce236c0220695b68341bc48c68d52210cc35b"
+        },
+        "unlockAuthorityDst": {
+          "Base64Value": "VVziNsAiBpW2g0G8SMaNUiEMw1s=",
+          "bytesArrayValue": "[85,92,226,54,192,34,6,149,182,131,65,188,72,198,141,82,33,12,195,91]",
+          "stringValue": "0x555ce236c0220695b68341bc48c68d52210cc35b"
+        },
+        "affiliateFee": null,
+        "createdSrcEventMetadata": {
+          "transactionHash": {
+            "stringValue": "0xdfba38fad6c15f2a04d38104415be80a2bfcbe3827f9912aa21bc005eb148217",
+            "bytesValue": "37o4+tbBXyoE04EEQVvoCiv8vjgn+ZEqohvABesUghc=",
+            "bytesArrayValue": "[223,186,56,250,214,193,95,42,4,211,129,4,65,91,232,10,43,252,190,56,39,249,145,42,162,27,192,5,235,20,130,23]"
+          },
+          "blockNumber": 93047770,
+          "blockHash": {
+            "bytesValue": "yCd7raSWwHviYkbax+bS4hO8HlFc8gPqpskDoVdQwls=",
+            "bytesArrayValue": "[200,39,123,173,164,150,192,123,226,98,70,218,199,230,210,226,19,188,30,81,92,242,3,234,166,201,3,161,87,80,194,91]",
+            "stringValue": "0xc8277bada496c07be26246dac7e6d2e213bc1e515cf203eaa6c903a15750c25b"
+          },
+          "blockTimeStamp": 1776422656,
+          "initiator": {
+            "Base64Value": "89NDCimKQqyaMNhDBOlDuCMihZo=",
+            "bytesArrayValue": "[243,211,67,10,41,138,66,172,154,48,216,67,4,233,67,184,35,34,133,154]",
+            "stringValue": "0xf3d3430a298a42ac9a30d84304e943b82322859a"
+          }
+        },
+        "fulfilledDstEventMetadata": {
+          "transactionHash": {
+            "stringValue": "0x7cefec55e0ede4b86101a8eab7650a6799326475f3c75c8984dc7d2aaea6897a",
+            "bytesValue": "fO/sVeDt5LhhAajqt2UKZ5kyZHXzx1yJhNx9Kq6miXo=",
+            "bytesArrayValue": "[124,239,236,85,224,237,228,184,97,1,168,234,183,101,10,103,153,50,100,117,243,199,92,137,132,220,125,42,174,166,137,122]"
+          },
+          "blockNumber": 24899054,
+          "blockHash": {
+            "bytesValue": "Z5M1sY1EOlOtM8tzuaySUK6nBX7o3gPRrFPMphOc0LI=",
+            "bytesArrayValue": "[103,147,53,177,141,68,58,83,173,51,203,115,185,172,146,80,174,167,5,126,232,222,3,209,172,83,204,166,19,156,208,178]",
+            "stringValue": "0x679335b18d443a53ad33cb73b9ac9250aea7057ee8de03d1ac53cca6139cd0b2"
+          },
+          "blockTimeStamp": 1776422663,
+          "initiator": {
+            "Base64Value": "VVziNsAiBpW2g0G8SMaNUiEMw1s=",
+            "bytesArrayValue": "[85,92,226,54,192,34,6,149,182,131,65,188,72,198,141,82,33,12,195,91]",
+            "stringValue": "0x555ce236c0220695b68341bc48c68d52210cc35b"
+          }
+        },
+        "sentUnlockDstEventInfo": {
+          "transactionMetadata": {
+            "transactionHash": {
+              "stringValue": "0x76b7f36f9f267c9ec307fdf751eab23277736edbb44133ed16aac9ae87269665",
+              "bytesValue": "drfzb58mfJ7DB/33UeqyMndzbtu0QTPtFqrJrocmlmU=",
+              "bytesArrayValue": "[118,183,243,111,159,38,124,158,195,7,253,247,81,234,178,50,119,115,110,219,180,65,51,237,22,170,201,174,135,38,150,101]"
+            },
+            "blockNumber": 24899069,
+            "blockHash": {
+              "bytesValue": "MErPN6dI/Z9TmKY2vqytarDJKGYau7WR8oYNFDwAr5U=",
+              "bytesArrayValue": "[48,74,207,55,167,72,253,159,83,152,166,54,190,172,173,106,176,201,40,102,26,187,181,145,242,134,13,20,60,0,175,149]",
+              "stringValue": "0x304acf37a748fd9f5398a636beacad6ab0c928661abbb591f2860d143c00af95"
+            },
+            "blockTimeStamp": 1776422843,
+            "initiator": {
+              "Base64Value": "VVziNsAiBpW2g0G8SMaNUiEMw1s=",
+              "bytesArrayValue": "[85,92,226,54,192,34,6,149,182,131,65,188,72,198,141,82,33,12,195,91]",
+              "stringValue": "0x555ce236c0220695b68341bc48c68d52210cc35b"
+            }
+          },
+          "submissionId": {
+            "bytesValue": "8GTe5fWrCQpVKzuJPf6s4GkdD5BuAWRjp3hXl+Gh+Bk=",
+            "bytesArrayValue": "[240,100,222,229,245,171,9,10,85,43,59,137,61,254,172,224,105,29,15,144,110,1,100,99,167,120,87,151,225,161,248,25]",
+            "stringValue": "0xf064dee5f5ab090a552b3b893dfeace0691d0f906e016463a7785797e1a1f819"
+          }
+        },
+        "claimedUnlockSrcEventInfo": {
+          "transactionMetadata": {
+            "transactionHash": {
+              "stringValue": "0xd4464d173a5da49f44327dd76a52311d11f9a24a785f780f788ec76f0a391702",
+              "bytesValue": "1EZNFzpdpJ9EMn3XalIxHRH5okp4X3gPeI7Hbwo5FwI=",
+              "bytesArrayValue": "[212,70,77,23,58,93,164,159,68,50,125,215,106,82,49,29,17,249,162,74,120,95,120,15,120,142,199,111,10,57,23,2]"
+            },
+            "blockNumber": 93048548,
+            "blockHash": {
+              "bytesValue": "ps1mKKx6/KpHF973p4tvviCyxY5r8GbA93w0A/4pMqU=",
+              "bytesArrayValue": "[166,205,102,40,172,122,252,170,71,23,222,247,167,139,111,190,32,178,197,142,107,240,102,192,247,124,52,3,254,41,50,165]",
+              "stringValue": "0xa6cd6628ac7afcaa4717def7a78b6fbe20b2c58e6bf066c0f77c3403fe2932a5"
+            },
+            "blockTimeStamp": 1776423007,
+            "initiator": {
+              "Base64Value": "3lziKlbtdr9wVBIVALI6cYOZ/rc=",
+              "bytesArrayValue": "[222,92,226,42,86,237,118,191,112,84,18,21,0,178,58,113,131,153,254,183]",
+              "stringValue": "0xde5ce22a56ed76bf7054121500b23a718399feb7"
+            }
+          },
+          "submissionId": {
+            "bytesValue": null,
+            "bytesArrayValue": null,
+            "stringValue": null
+          }
+        },
+        "orderCancelledDstEventMetadata": null,
+        "sentOrderCancelDstEventInfo": {
+          "transactionMetadata": null,
+          "submissionId": {
+            "bytesValue": null,
+            "bytesArrayValue": null,
+            "stringValue": null
+          }
+        },
+        "claimedOrderCancelSrcEventInfo": {
+          "transactionMetadata": null,
+          "submissionId": {
+            "bytesValue": null,
+            "bytesArrayValue": null,
+            "stringValue": null
+          }
+        },
+        "preswapData": {
+          "chainId": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,56]",
+            "bigIntegerValue": 56,
+            "stringValue": "56"
+          },
+          "inTokenAddress": {
+            "Base64Value": "u0zbnL02sBvRy66/LeCNkXO8CVw=",
+            "bytesArrayValue": "[187,76,219,156,189,54,176,27,209,203,174,191,45,224,141,145,115,188,9,92]",
+            "stringValue": "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c"
+          },
+          "inAmount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBEGIlEIgtY=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,17,6,34,81,8,130,214]",
+            "bigIntegerValue": 1157713323669095200,
+            "stringValue": "1157713323669095126"
+          },
+          "tokenInMetadata": {
+            "decimals": 18,
+            "name": "Wrapped BNB",
+            "symbol": "WBNB",
+            "logoURI": "https://tokens.debridge.finance/Logo/56/0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c/big/token-logo.png"
+          },
+          "tokenInLogoURI": "https://tokens.debridge.finance/Logo/56/0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c/big/token-logo.png",
+          "outTokenAddress": {
+            "Base64Value": "IXDtCICsmnVf0psmiJVr2Vn5M/g=",
+            "bytesArrayValue": "[33,112,237,8,128,172,154,117,95,210,155,38,136,149,107,217,89,249,51,248]",
+            "stringValue": "0x2170ed0880ac9a755fd29b2688956bd959f933f8"
+          },
+          "outAmount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABFHJ2f+sOWE=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,81,201,217,255,172,57,97]",
+            "bigIntegerValue": 311251787399838100,
+            "stringValue": "311251787399838049"
+          },
+          "tokenOutMetadata": {
+            "decimals": 18,
+            "name": "Ethereum Token",
+            "symbol": "ETH",
+            "logoURI": "https://tokens.debridge.finance/Logo/56/0x2170ed0880ac9a755fd29b2688956bd959f933f8/big/token-logo.png"
+          },
+          "tokenOutLogoURI": "https://tokens.debridge.finance/Logo/56/0x2170ed0880ac9a755fd29b2688956bd959f933f8/big/token-logo.png"
+        },
+        "externalCallData": null,
+        "orderMetadata": {
+          "version": 1,
+          "creationProcessType": "SrcAmountSet",
+          "origin": "DeSwap",
+          "additionalTakerIncentiveBps": 0,
+          "operatingExpensesAmount": "650743504035292",
+          "recommendedTakeAmount": "310055551698071745",
+          "metadata": "0x0000000000000000000000000000000000000000",
+          "promotionType": "None",
+          "orderTradeType": "Market",
+          "partnerFeeBps": null,
+          "srcProtocolChainId": null,
+          "dstProtocolChainId": null
+        }
+      },
+      "rawHeaders": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "a323d9059a6c9903-ARN",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Fri, 28 Aug 2026 14:01:24 GMT",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://dln-api.debridge.finance:443",
+      "method": "GET",
+      "path": "/api/Orders/0x77dc952671c2753de869ac0f076cd6c1e12d8af983ca4b08d91d2eb6ac2af4ce",
+      "body": "",
+      "status": 200,
+      "response": {
+        "orderId": {
+          "bytesValue": "d9yVJnHCdT3oaawPB2zWweEtivmDyksI2R0utqwq9M4=",
+          "bytesArrayValue": "[119,220,149,38,113,194,117,61,232,105,172,15,7,108,214,193,225,45,138,249,131,202,75,8,217,29,46,182,172,42,244,206]",
+          "stringValue": "0x77dc952671c2753de869ac0f076cd6c1e12d8af983ca4b08d91d2eb6ac2af4ce"
+        },
+        "makerOrderNonce": 0,
+        "makerSrc": {
+          "Base64Value": "sh3+oBDpOfS7DwyzYTUphKjGrA0=",
+          "bytesArrayValue": "[178,29,254,160,16,233,57,244,187,15,12,179,97,53,41,132,168,198,172,13]",
+          "stringValue": "0xb21dfea010e939f4bb0f0cb361352984a8c6ac0d"
+        },
+        "giveOfferWithMetadata": {
+          "chainId": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,56]",
+            "bigIntegerValue": 56,
+            "stringValue": "56"
+          },
+          "tokenAddress": {
+            "Base64Value": "isdqUcyVDZgi1ouD/hrZezLNWA0=",
+            "bytesArrayValue": "[138,199,106,81,204,149,13,152,34,214,139,131,254,26,217,123,50,205,88,13]",
+            "stringValue": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"
+          },
+          "amount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT+dyAaSwAA=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,63,157,200,6,146,192,0]",
+            "bigIntegerValue": 89964000000000000,
+            "stringValue": "89964000000000000"
+          },
+          "finalAmount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT+dyAaSwAA=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,63,157,200,6,146,192,0]",
+            "bigIntegerValue": 89964000000000000,
+            "stringValue": "89964000000000000"
+          },
+          "metadata": {
+            "decimals": 18,
+            "name": "USD Coin",
+            "symbol": "USDC",
+            "logoURI": "https://tokens.debridge.finance/Logo/56/0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d/big/token-logo.png"
+          },
+          "decimals": 18,
+          "name": "USD Coin",
+          "symbol": "USDC",
+          "logoURI": "https://tokens.debridge.finance/Logo/56/0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d/big/token-logo.png"
+        },
+        "receiverDst": {
+          "Base64Value": "sh3+oBDpOfS7DwyzYTUphKjGrA0=",
+          "bytesArrayValue": "[178,29,254,160,16,233,57,244,187,15,12,179,97,53,41,132,168,198,172,13]",
+          "stringValue": "0xb21dfea010e939f4bb0f0cb361352984a8c6ac0d"
+        },
+        "takeOfferWithMetadata": {
+          "chainId": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]",
+            "bigIntegerValue": 1,
+            "stringValue": "1"
+          },
+          "tokenAddress": {
+            "Base64Value": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+            "stringValue": "0x0000000000000000000000000000000000000000"
+          },
+          "amount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADk+8aUSfIAAA=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,147,239,26,81,39,200,0,0]",
+            "bigIntegerValue": 66000000000000000000,
+            "stringValue": "66000000000000000000"
+          },
+          "finalAmount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADk+8aUSfIAAA=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,147,239,26,81,39,200,0,0]",
+            "bigIntegerValue": 66000000000000000000,
+            "stringValue": "66000000000000000000"
+          },
+          "metadata": {
+            "decimals": 18,
+            "name": "Ethereum",
+            "symbol": "ETH",
+            "logoURI": "https://tokens.debridge.finance/Logo/1/0x0000000000000000000000000000000000000000/big/token-logo.svg"
+          },
+          "decimals": 18,
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "logoURI": "https://tokens.debridge.finance/Logo/1/0x0000000000000000000000000000000000000000/big/token-logo.svg"
+        },
+        "actualFulfillAmount": null,
+        "givePatchAuthoritySrc": {
+          "Base64Value": "sh3+oBDpOfS7DwyzYTUphKjGrA0=",
+          "bytesArrayValue": "[178,29,254,160,16,233,57,244,187,15,12,179,97,53,41,132,168,198,172,13]",
+          "stringValue": "0xb21dfea010e939f4bb0f0cb361352984a8c6ac0d"
+        },
+        "orderAuthorityAddressDst": {
+          "Base64Value": "sh3+oBDpOfS7DwyzYTUphKjGrA0=",
+          "bytesArrayValue": "[178,29,254,160,16,233,57,244,187,15,12,179,97,53,41,132,168,198,172,13]",
+          "stringValue": "0xb21dfea010e939f4bb0f0cb361352984a8c6ac0d"
+        },
+        "allowedTakerDst": {
+          "Base64Value": null,
+          "bytesArrayValue": "",
+          "stringValue": null
+        },
+        "allowedCancelBeneficiarySrc": {
+          "Base64Value": null,
+          "bytesArrayValue": "",
+          "stringValue": null
+        },
+        "state": "Created",
+        "externalCallState": "NoExtCall",
+        "referralCode": 19,
+        "percentFee": {
+          "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgvec2QAA=",
+          "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,189,231,54,64,0]",
+          "bigIntegerValue": 36000000000000,
+          "stringValue": "36000000000000"
+        },
+        "finalPercentFee": {
+          "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgvec2QAA=",
+          "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,189,231,54,64,0]",
+          "bigIntegerValue": 36000000000000,
+          "stringValue": "36000000000000"
+        },
+        "fixFee": {
+          "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABHDeTfggAA=",
+          "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,17,195,121,55,224,128,0]",
+          "bigIntegerValue": 5000000000000000,
+          "stringValue": "5000000000000000"
+        },
+        "unlockBeneficiarySrc": null,
+        "cancelBeneficiarySrc": null,
+        "taker": null,
+        "unlockAuthorityDst": null,
+        "affiliateFee": null,
+        "createdSrcEventMetadata": {
+          "transactionHash": {
+            "stringValue": "0xdfac8744c16aef88cb908786ce5b969c3e117702b475400de7aa62cc0b5aa696",
+            "bytesValue": "36yHRMFq74jLkIeGzluWnD4RdwK0dUAN56pizAtappY=",
+            "bytesArrayValue": "[223,172,135,68,193,106,239,136,203,144,135,134,206,91,150,156,62,17,119,2,180,117,64,13,231,170,98,204,11,90,166,150]"
+          },
+          "blockNumber": 24726166,
+          "blockHash": {
+            "bytesValue": "gZsuZQAZgmpY130+E0711xEclm6kWS6GgSl/maPMx0s=",
+            "bytesArrayValue": "[129,155,46,101,0,25,130,106,88,215,125,62,19,78,245,215,17,28,150,110,164,89,46,134,129,41,127,153,163,204,199,75]",
+            "stringValue": "0x819b2e650019826a58d77d3e134ef5d7111c966ea4592e8681297f99a3ccc74b"
+          },
+          "blockTimeStamp": 1673539177,
+          "initiator": {
+            "Base64Value": "sh3+oBDpOfS7DwyzYTUphKjGrA0=",
+            "bytesArrayValue": "[178,29,254,160,16,233,57,244,187,15,12,179,97,53,41,132,168,198,172,13]",
+            "stringValue": "0xb21dfea010e939f4bb0f0cb361352984a8c6ac0d"
+          }
+        },
+        "fulfilledDstEventMetadata": null,
+        "sentUnlockDstEventInfo": {
+          "transactionMetadata": null,
+          "submissionId": {
+            "bytesValue": null,
+            "bytesArrayValue": null,
+            "stringValue": null
+          }
+        },
+        "claimedUnlockSrcEventInfo": {
+          "transactionMetadata": null,
+          "submissionId": {
+            "bytesValue": null,
+            "bytesArrayValue": null,
+            "stringValue": null
+          }
+        },
+        "orderCancelledDstEventMetadata": null,
+        "sentOrderCancelDstEventInfo": {
+          "transactionMetadata": null,
+          "submissionId": {
+            "bytesValue": null,
+            "bytesArrayValue": null,
+            "stringValue": null
+          }
+        },
+        "claimedOrderCancelSrcEventInfo": {
+          "transactionMetadata": null,
+          "submissionId": {
+            "bytesValue": null,
+            "bytesArrayValue": null,
+            "stringValue": null
+          }
+        },
+        "preswapData": null,
+        "externalCallData": null,
+        "orderMetadata": null
+      },
+      "rawHeaders": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "a323d906cb659903-ARN",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Fri, 28 Aug 2026 14:01:24 GMT",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://dln-api.debridge.finance:443",
+      "method": "GET",
+      "path": "/api/Orders/0xd1a71424848a80bfd0f08b4c8ccb2f573604132f74be4e3fd156e0afd069d706",
+      "body": "",
+      "status": 200,
+      "response": {
+        "orderId": {
+          "bytesValue": "0acUJISKgL/Q8ItMjMsvVzYEEy90vk4/0Vbgr9Bp1wY=",
+          "bytesArrayValue": "[209,167,20,36,132,138,128,191,208,240,139,76,140,203,47,87,54,4,19,47,116,190,78,63,209,86,224,175,208,105,215,6]",
+          "stringValue": "0xd1a71424848a80bfd0f08b4c8ccb2f573604132f74be4e3fd156e0afd069d706"
+        },
+        "makerOrderNonce": 1776421709775,
+        "makerSrc": {
+          "Base64Value": "uxcDJwgpqywLfXvaNN7h8Y24+/M=",
+          "bytesArrayValue": "[187,23,3,39,8,41,171,44,11,125,123,218,52,222,225,241,141,184,251,243]",
+          "stringValue": "0xbb1703270829ab2c0b7d7bda34dee1f18db8fbf3"
+        },
+        "giveOfferWithMetadata": {
+          "chainId": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]",
+            "bigIntegerValue": 1,
+            "stringValue": "1"
+          },
+          "tokenAddress": {
+            "Base64Value": "oLhpkcYhizbB0Z1KLp6wzjYG60g=",
+            "bytesArrayValue": "[160,184,105,145,198,33,139,54,193,209,157,74,46,158,176,206,54,6,235,72]",
+            "stringValue": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+          },
+          "amount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB+Cw5oA=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,224,176,230,128]",
+            "bigIntegerValue": 33834460800,
+            "stringValue": "33834460800"
+          },
+          "finalAmount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB+Cw5oA=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,224,176,230,128]",
+            "bigIntegerValue": 33834460800,
+            "stringValue": "33834460800"
+          },
+          "metadata": {
+            "decimals": 6,
+            "name": "USD Coin",
+            "symbol": "USDC",
+            "logoURI": "https://tokens.debridge.finance/Logo/1/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48/big/token-logo.png"
+          },
+          "decimals": 6,
+          "name": "USD Coin",
+          "symbol": "USDC",
+          "logoURI": "https://tokens.debridge.finance/Logo/1/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48/big/token-logo.png"
+        },
+        "receiverDst": {
+          "Base64Value": "uxcDJwgpqywLfXvaNN7h8Y24+/M=",
+          "bytesArrayValue": "[187,23,3,39,8,41,171,44,11,125,123,218,52,222,225,241,141,184,251,243]",
+          "stringValue": "0xbb1703270829ab2c0b7d7bda34dee1f18db8fbf3"
+        },
+        "takeOfferWithMetadata": {
+          "chainId": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQU=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,33,5]",
+            "bigIntegerValue": 8453,
+            "stringValue": "8453"
+          },
+          "tokenAddress": {
+            "Base64Value": "wGNAkPL+bG115hviuUlGSrtJiXM=",
+            "bytesArrayValue": "[192,99,64,144,242,254,108,109,117,230,27,226,185,73,70,74,187,73,137,115]",
+            "stringValue": "0xc0634090f2fe6c6d75e61be2b949464abb498973"
+          },
+          "amount": {
+            "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAACgFxhatbAUCSJQ=",
+            "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,5,198,22,173,108,5,2,72,148]",
+            "bigIntegerValue": 1.8900116682190282e+23,
+            "stringValue": "189001166821902805780628"
+          },
+          "finalAmount": {
+            "bytesValue": "KAXGFq1sBQJIlA==",
+            "bytesArrayValue": "[40,5,198,22,173,108,5,2,72,148]",
+            "bigIntegerValue": 1.8900116682190282e+23,
+            "stringValue": "189001166821902805780628"
+          },
+          "metadata": {
+            "decimals": 18,
+            "name": "Keeta",
+            "symbol": "KTA",
+            "logoURI": "https://tokens.debridge.finance/Logo/8453/0xc0634090f2fe6c6d75e61be2b949464abb498973/big/token-logo.png"
+          },
+          "decimals": 18,
+          "name": "Keeta",
+          "symbol": "KTA",
+          "logoURI": "https://tokens.debridge.finance/Logo/8453/0xc0634090f2fe6c6d75e61be2b949464abb498973/big/token-logo.png"
+        },
+        "actualFulfillAmount": null,
+        "givePatchAuthoritySrc": {
+          "Base64Value": "uxcDJwgpqywLfXvaNN7h8Y24+/M=",
+          "bytesArrayValue": "[187,23,3,39,8,41,171,44,11,125,123,218,52,222,225,241,141,184,251,243]",
+          "stringValue": "0xbb1703270829ab2c0b7d7bda34dee1f18db8fbf3"
+        },
+        "orderAuthorityAddressDst": {
+          "Base64Value": "B0bn5NFfMIhWFrSsPSdDkzVOgMA=",
+          "bytesArrayValue": "[7,70,231,228,209,95,48,136,86,22,180,172,61,39,67,147,53,78,128,192]",
+          "stringValue": "0x0746e7e4d15f30885616b4ac3d274393354e80c0"
+        },
+        "allowedTakerDst": {
+          "Base64Value": "VVziNsAiBpW2g0G8SMaNUiEMw1s=",
+          "bytesArrayValue": "[85,92,226,54,192,34,6,149,182,131,65,188,72,198,141,82,33,12,195,91]",
+          "stringValue": "0x555ce236c0220695b68341bc48c68d52210cc35b"
+        },
+        "allowedCancelBeneficiarySrc": {
+          "Base64Value": "uxcDJwgpqywLfXvaNN7h8Y24+/M=",
+          "bytesArrayValue": "[187,23,3,39,8,41,171,44,11,125,123,218,52,222,225,241,141,184,251,243]",
+          "stringValue": "0xbb1703270829ab2c0b7d7bda34dee1f18db8fbf3"
+        },
+        "state": "ClaimedOrderCancel",
+        "externalCallState": "NoExtCall",
+        "referralCode": 100000001,
+        "percentFee": {
+          "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADOl4A=",
+          "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,206,151,128]",
+          "bigIntegerValue": 13539200,
+          "stringValue": "13539200"
+        },
+        "finalPercentFee": {
+          "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADOl4A=",
+          "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,206,151,128]",
+          "bigIntegerValue": 13539200,
+          "stringValue": "13539200"
+        },
+        "fixFee": {
+          "bytesValue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAONfqTGgAA=",
+          "bytesArrayValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,141,126,164,198,128,0]",
+          "bigIntegerValue": 1000000000000000,
+          "stringValue": "1000000000000000"
+        },
+        "unlockBeneficiarySrc": null,
+        "cancelBeneficiarySrc": {
+          "Base64Value": "uxcDJwgpqywLfXvaNN7h8Y24+/M=",
+          "bytesArrayValue": "[187,23,3,39,8,41,171,44,11,125,123,218,52,222,225,241,141,184,251,243]",
+          "stringValue": "0xbb1703270829ab2c0b7d7bda34dee1f18db8fbf3"
+        },
+        "taker": null,
+        "unlockAuthorityDst": null,
+        "affiliateFee": null,
+        "createdSrcEventMetadata": {
+          "transactionHash": {
+            "stringValue": "0xba380fd8929d6605d10aa53af14b6a33dc9ef169f5822800a81bd086cf55050f",
+            "bytesValue": "ujgP2JKdZgXRCqU68UtqM9ye8Wn1gigAqBvQhs9VBQ8=",
+            "bytesArrayValue": "[186,56,15,216,146,157,102,5,209,10,165,58,241,75,106,51,220,158,241,105,245,130,40,0,168,27,208,134,207,85,5,15]"
+          },
+          "blockNumber": 24898978,
+          "blockHash": {
+            "bytesValue": "SSbVAXGBFTnLppUOVCe/efordMcBihh6AUVJPcJyN9g=",
+            "bytesArrayValue": "[73,38,213,1,113,129,21,57,203,166,149,14,84,39,191,121,250,43,116,199,1,138,24,122,1,69,73,61,194,114,55,216]",
+            "stringValue": "0x4926d50171811539cba6950e5427bf79fa2b74c7018a187a0145493dc27237d8"
+          },
+          "blockTimeStamp": 1776421751,
+          "initiator": {
+            "Base64Value": "uxcDJwgpqywLfXvaNN7h8Y24+/M=",
+            "bytesArrayValue": "[187,23,3,39,8,41,171,44,11,125,123,218,52,222,225,241,141,184,251,243]",
+            "stringValue": "0xbb1703270829ab2c0b7d7bda34dee1f18db8fbf3"
+          }
+        },
+        "fulfilledDstEventMetadata": null,
+        "sentUnlockDstEventInfo": {
+          "transactionMetadata": null,
+          "submissionId": {
+            "bytesValue": null,
+            "bytesArrayValue": null,
+            "stringValue": null
+          }
+        },
+        "claimedUnlockSrcEventInfo": {
+          "transactionMetadata": null,
+          "submissionId": {
+            "bytesValue": null,
+            "bytesArrayValue": null,
+            "stringValue": null
+          }
+        },
+        "orderCancelledDstEventMetadata": {
+          "transactionHash": {
+            "stringValue": "0x4c3b529dfb40e8660e668766afb7cdbfc74d466ac2a1096483a38d0b5bab53c1",
+            "bytesValue": "TDtSnftA6GYOZodmr7fNv8dNRmrCoQlkg6ONC1urU8E=",
+            "bytesArrayValue": "[76,59,82,157,251,64,232,102,14,102,135,102,175,183,205,191,199,77,70,106,194,161,9,100,131,163,141,11,91,171,83,193]"
+          },
+          "blockNumber": 44816358,
+          "blockHash": {
+            "bytesValue": "QMNGU6pm2X/oIxd4zENx0MfdXp1ZgY4s/svACHXsnb8=",
+            "bytesArrayValue": "[64,195,70,83,170,102,217,127,232,35,23,120,204,67,113,208,199,221,94,157,89,129,142,44,254,203,192,8,117,236,157,191]",
+            "stringValue": "0x40c34653aa66d97fe8231778cc4371d0c7dd5e9d59818e2cfecbc00875ec9dbf"
+          },
+          "blockTimeStamp": 1776422063,
+          "initiator": {
+            "Base64Value": "B0bn5NFfMIhWFrSsPSdDkzVOgMA=",
+            "bytesArrayValue": "[7,70,231,228,209,95,48,136,86,22,180,172,61,39,67,147,53,78,128,192]",
+            "stringValue": "0x0746e7e4d15f30885616b4ac3d274393354e80c0"
+          }
+        },
+        "sentOrderCancelDstEventInfo": {
+          "transactionMetadata": {
+            "transactionHash": {
+              "stringValue": "0x4c3b529dfb40e8660e668766afb7cdbfc74d466ac2a1096483a38d0b5bab53c1",
+              "bytesValue": "TDtSnftA6GYOZodmr7fNv8dNRmrCoQlkg6ONC1urU8E=",
+              "bytesArrayValue": "[76,59,82,157,251,64,232,102,14,102,135,102,175,183,205,191,199,77,70,106,194,161,9,100,131,163,141,11,91,171,83,193]"
+            },
+            "blockNumber": 44816358,
+            "blockHash": {
+              "bytesValue": "QMNGU6pm2X/oIxd4zENx0MfdXp1ZgY4s/svACHXsnb8=",
+              "bytesArrayValue": "[64,195,70,83,170,102,217,127,232,35,23,120,204,67,113,208,199,221,94,157,89,129,142,44,254,203,192,8,117,236,157,191]",
+              "stringValue": "0x40c34653aa66d97fe8231778cc4371d0c7dd5e9d59818e2cfecbc00875ec9dbf"
+            },
+            "blockTimeStamp": 1776422063,
+            "initiator": {
+              "Base64Value": "B0bn5NFfMIhWFrSsPSdDkzVOgMA=",
+              "bytesArrayValue": "[7,70,231,228,209,95,48,136,86,22,180,172,61,39,67,147,53,78,128,192]",
+              "stringValue": "0x0746e7e4d15f30885616b4ac3d274393354e80c0"
+            }
+          },
+          "submissionId": {
+            "bytesValue": "4YFyxUd4gKauD2RE0UbchR221sCdFI7OFczNchxXB/8=",
+            "bytesArrayValue": "[225,129,114,197,71,120,128,166,174,15,100,68,209,70,220,133,29,182,214,192,157,20,142,206,21,204,205,114,28,87,7,255]",
+            "stringValue": "0xe18172c5477880a6ae0f6444d146dc851db6d6c09d148ece15cccd721c5707ff"
+          }
+        },
+        "claimedOrderCancelSrcEventInfo": {
+          "transactionMetadata": {
+            "transactionHash": {
+              "stringValue": "0x25d244bdd3b8f2aa8953c9f64f136a8cfb05156aa3b17c338b8a2d7a47f45d06",
+              "bytesValue": "JdJEvdO48qqJU8n2TxNqjPsFFWqjsXwzi4otekf0XQY=",
+              "bytesArrayValue": "[37,210,68,189,211,184,242,170,137,83,201,246,79,19,106,140,251,5,21,106,163,177,124,51,139,138,45,122,71,244,93,6]"
+            },
+            "blockNumber": 24899009,
+            "blockHash": {
+              "bytesValue": "py7lO4+pO7pR40c1dBCE6aSuN9msAiuM/1d3dkGBBn8=",
+              "bytesArrayValue": "[167,46,229,59,143,169,59,186,81,227,71,53,116,16,132,233,164,174,55,217,172,2,43,140,255,87,119,118,65,129,6,127]",
+              "stringValue": "0xa72ee53b8fa93bba51e34735741084e9a4ae37d9ac022b8cff5777764181067f"
+            },
+            "blockTimeStamp": 1776422123,
+            "initiator": {
+              "Base64Value": "3lziKlbtdr9wVBIVALI6cYOZ/rc=",
+              "bytesArrayValue": "[222,92,226,42,86,237,118,191,112,84,18,21,0,178,58,113,131,153,254,183]",
+              "stringValue": "0xde5ce22a56ed76bf7054121500b23a718399feb7"
+            }
+          },
+          "submissionId": {
+            "bytesValue": null,
+            "bytesArrayValue": null,
+            "stringValue": null
+          }
+        },
+        "preswapData": null,
+        "externalCallData": null,
+        "orderMetadata": {
+          "version": 1,
+          "creationProcessType": "SrcAmountSet",
+          "origin": "Default",
+          "additionalTakerIncentiveBps": 70,
+          "operatingExpensesAmount": "1795397",
+          "recommendedTakeAmount": "189001166821902805780628",
+          "metadata": "0x0000000000000000000000000000000000000000",
+          "promotionType": "None",
+          "orderTradeType": "Market",
+          "partnerFeeBps": null,
+          "srcProtocolChainId": null,
+          "dstProtocolChainId": null
+        }
+      },
+      "rawHeaders": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "a323d9079c0d9903-ARN",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Fri, 28 Aug 2026 14:01:24 GMT",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "responseIsBinary": false
+    }
+  ]
+}

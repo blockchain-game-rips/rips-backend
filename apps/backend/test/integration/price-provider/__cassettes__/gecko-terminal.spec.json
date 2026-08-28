@@ -1,0 +1,1349 @@
+{
+  "GeckoTerminalService > getTokenPrice": [
+    {
+      "scope": "https://api.geckoterminal.com:443",
+      "method": "GET",
+      "path": "/api/v2/networks/eth/tokens/0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "body": "",
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "eth_0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "type": "token",
+          "attributes": {
+            "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "name": "Tether USD",
+            "symbol": "USDT",
+            "decimals": 6,
+            "image_url": "https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661",
+            "banner_image_url": null,
+            "coingecko_coin_id": "tether",
+            "total_supply": "88306390736352788.0",
+            "normalized_total_supply": "88306390736.3528",
+            "price_usd": "0.9990243447",
+            "fdv_usd": "88220172662.6155",
+            "total_reserve_in_usd": "367108310.159540672869592853928404863192158754305031223781850164132902428209216755927890496295023586883413014075311491460915",
+            "volume_usd": {
+              "h24": "745077355.776134"
+            },
+            "market_cap_usd": "182937215435.204"
+          },
+          "relationships": {
+            "top_pools": {
+              "data": [
+                {
+                  "id": "eth_0x3b1b1f2e775a6db1664f8e7d59ad568605ea2406312c11aef03146c0cf89d5b9",
+                  "type": "pool"
+                },
+                {
+                  "id": "eth_0x4e68ccd3e89f51c3074ca5072bbac773960dfa36",
+                  "type": "pool"
+                },
+                {
+                  "id": "eth_0x667701e51b4d1ca244f17c78f7ab8744b4c99f9b",
+                  "type": "pool"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "rawHeaders": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cache-control": "max-age=30, public, must-revalidate, s-maxage=60",
+        "cf-cache-status": "MISS",
+        "cf-ray": "a323d3163b985d1d-ARN",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Fri, 28 Aug 2026 13:57:21 GMT",
+        "etag": "W/\"7910f35c1f006906e48a24262b0104a0\"",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "cloudflare",
+        "set-cookie": "_cfuvid=KTubWuaZ64HEA51uod7avuuPsrvTH_6yMxO7c54kKKE-1787925440.9988232-1.0.1.1-_A0BeUdzfbu3kd0eiO0WOLpOU97AlurgcQAaxukNZ_w; HttpOnly; SameSite=None; Secure; Path=/; Domain=geckoterminal.com",
+        "speculation-rules": "\"/cdn-cgi/speculation\"",
+        "strict-transport-security": "max-age=15724800; includeSubdomains",
+        "transfer-encoding": "chunked",
+        "vary": "Accept, Origin, accept-encoding",
+        "x-content-digest": "2e48faac400dd98df708ab2604c1840fc9601158",
+        "x-content-type-options": "nosniff",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-rack-cache": "miss, ignore, store",
+        "x-request-id": "74fa5ef1-38cb-49b4-8daa-a2984af556dc",
+        "x-runtime": "0.035995",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseIsBinary": false
+    }
+  ],
+  "GeckoTerminalService > getTokenPrices": [
+    {
+      "scope": "https://api.geckoterminal.com:443",
+      "method": "GET",
+      "path": "/api/v2/networks/eth/tokens/multi/0xdac17f958d2ee523a2206206994597c13d831ec7,0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48,0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2,0x2260fac5e5542a773aa44fbcfedf7c193bc2c599,0x6b175474e89094c44da98b954eedeac495271d0f",
+      "body": "",
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "eth_0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "type": "token",
+            "attributes": {
+              "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+              "name": "Tether USD",
+              "symbol": "USDT",
+              "decimals": 6,
+              "image_url": "https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661",
+              "banner_image_url": null,
+              "coingecko_coin_id": "tether",
+              "total_supply": "88306390736352788.0",
+              "normalized_total_supply": "88306390736.3528",
+              "price_usd": "0.9990243447",
+              "fdv_usd": "88220172662.6155",
+              "total_reserve_in_usd": "367108310.159540672869592853928404863192158754305031223781850164132902428209216755927890496295023586883413014075311491460915",
+              "volume_usd": {
+                "h24": "745077355.776134"
+              },
+              "market_cap_usd": "182937215435.204"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x3b1b1f2e775a6db1664f8e7d59ad568605ea2406312c11aef03146c0cf89d5b9",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            "type": "token",
+            "attributes": {
+              "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+              "name": "USD Coin",
+              "symbol": "USDC",
+              "decimals": 6,
+              "image_url": "https://coin-images.coingecko.com/coins/images/6319/large/USDC.png?1769615602",
+              "banner_image_url": null,
+              "coingecko_coin_id": "usd-coin",
+              "total_supply": "50444444006206709.0",
+              "normalized_total_supply": "50444444006.2067",
+              "price_usd": "0.9993669724",
+              "fdv_usd": "50412457342.806",
+              "total_reserve_in_usd": "596895586.01897229372853443176918080174640045324765765505004092137441566778457036096706693047087057627648101850006328804444481428272",
+              "volume_usd": {
+                "h24": "691187090.992356"
+              },
+              "market_cap_usd": "73536932940.5722"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+            "type": "token",
+            "attributes": {
+              "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+              "name": "Wrapped Ether",
+              "symbol": "WETH",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/2518/large/weth.png?1696503332",
+              "banner_image_url": null,
+              "coingecko_coin_id": "weth",
+              "total_supply": "2040733139373201856053413.0",
+              "normalized_total_supply": "2040733.1393732",
+              "price_usd": "2511.2",
+              "fdv_usd": "5121250384.73527",
+              "total_reserve_in_usd": "914376293.270080841647784566254005466500364535707564798883329622612123437369108165135039228525869982",
+              "volume_usd": {
+                "h24": "335147136.078278"
+              },
+              "market_cap_usd": "5118291856.00265"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+            "type": "token",
+            "attributes": {
+              "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+              "name": "Wrapped BTC",
+              "symbol": "WBTC",
+              "decimals": 8,
+              "image_url": "https://coin-images.coingecko.com/coins/images/7598/large/WBTCLOGO.png?1764496367",
+              "banner_image_url": null,
+              "coingecko_coin_id": "wrapped-bitcoin",
+              "total_supply": "11613218273272.0",
+              "normalized_total_supply": "116132.18273272",
+              "price_usd": "79264.3944417278",
+              "fdv_usd": "9205145615.46325",
+              "total_reserve_in_usd": "207486634.207242926727918592696254938648421591592968880316944217020913885520068707704110849102802989605",
+              "volume_usd": {
+                "h24": "76917014.2426458"
+              },
+              "market_cap_usd": "9186497361.60985"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x4585fe77225b41b697c938b018e2ac67ac5a20c0",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x6b175474e89094c44da98b954eedeac495271d0f",
+            "type": "token",
+            "attributes": {
+              "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+              "name": "Dai Stablecoin",
+              "symbol": "DAI",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/9956/large/Badge_Dai.png?1696509996",
+              "banner_image_url": null,
+              "coingecko_coin_id": "dai",
+              "total_supply": "4584712705760877823284967629.0",
+              "normalized_total_supply": "4584712705.76088",
+              "price_usd": "1.0003345281",
+              "fdv_usd": "4586225728.9457",
+              "total_reserve_in_usd": "85710149.2679365162493300441556638648007001002656402636736580283976711135331229285499107118964156564872289556195384917586949320151642",
+              "volume_usd": {
+                "h24": "20671089.4722361"
+              },
+              "market_cap_usd": "4573319204.2415"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rawHeaders": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cache-control": "max-age=30, public, must-revalidate, s-maxage=60",
+        "cf-cache-status": "MISS",
+        "cf-ray": "a323d3186aba5d1d-ARN",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Fri, 28 Aug 2026 13:57:21 GMT",
+        "etag": "W/\"5c27011dcebe146d5b4c4300dff70272\"",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "cloudflare",
+        "set-cookie": "_cfuvid=Qx12J2lz0iurbZanQ_AR7A28EUYZDwYXuoXmYodKffY-1787925441.3420432-1.0.1.1-sf27GBgoNxvC63UMTZYtB.UbfX6nCx6SMV6D_lk.d9Y; HttpOnly; SameSite=None; Secure; Path=/; Domain=geckoterminal.com",
+        "speculation-rules": "\"/cdn-cgi/speculation\"",
+        "strict-transport-security": "max-age=15724800; includeSubdomains",
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding, Accept, Origin",
+        "x-content-digest": "e00c06ac68fe03cfaa32813d39cd4d8edd735814",
+        "x-content-type-options": "nosniff",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-rack-cache": "miss, ignore, store",
+        "x-request-id": "0e7cf518-4e15-4d93-bb47-3a0bb3876542",
+        "x-runtime": "0.069010",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://api.geckoterminal.com:443",
+      "method": "GET",
+      "path": "/api/v2/networks/eth/tokens/multi/0xdac17f958d2ee523a2206206994597c13d831ec7,0xB8c77482e45F1F44dE1745F52C74426C631bDD52,0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48,0xae7ab96520de3a18e5e111b5eaab095312d7fe84,0x2260fac5e5542a773aa44fbcfedf7c193bc2c599,0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0,0x514910771af9ca656af840dff83e8264ecf986ca,0x2af5d2ad76741191d15dfe7bf6ac92d4bd912ca3,0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2,0xdC035D45d973E3EC169d2276DDab16f1e407384F,0x582d872a1b094fc48f5de31d3b73f2d9be47def1,0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE,0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee,0x54D2252757e1672EEaD234D27B1270728fF90581,0x4c9edd5852cd905f086c759e8383e09bff1e68b3,0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf,0x1f9840a85d5af5bf1d1762f925bdaddc4201f984,0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9,0x4da27a545c0c5b758a6ba100e3a049001de870f5,0x6982508145454ce325ddbe47a25d4ec3d2311933,0x6b175474e89094c44da98b954eedeac495271d0f,0x9D39A5DE30e57443BfF2A8307A4256c8797A3497,0x75231f58b43240c9718dd58b4967c5114342a86c,0x85f17cf997934a597031b2e18a9ab6ebd4b9f6a4,0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b,0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD,0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3,0x3c3a81e81dc49a522a592e7622a7e711c06bf354,0xe66747a101bff2dba3697199dcce5b743b454759,0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
+      "body": "",
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "eth_0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "type": "token",
+            "attributes": {
+              "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+              "name": "Tether USD",
+              "symbol": "USDT",
+              "decimals": 6,
+              "image_url": "https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661",
+              "banner_image_url": null,
+              "coingecko_coin_id": "tether",
+              "total_supply": "88306390736352788.0",
+              "normalized_total_supply": "88306390736.3528",
+              "price_usd": "0.9990243447",
+              "fdv_usd": "88220172662.6155",
+              "total_reserve_in_usd": "367108310.159540672869592853928404863192158754305031223781850164132902428209216755927890496295023586883413014075311491460915",
+              "volume_usd": {
+                "h24": "745077355.776134"
+              },
+              "market_cap_usd": "182937215435.204"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x3b1b1f2e775a6db1664f8e7d59ad568605ea2406312c11aef03146c0cf89d5b9",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xb8c77482e45f1f44de1745f52c74426c631bdd52",
+            "type": "token",
+            "attributes": {
+              "address": "0xb8c77482e45f1f44de1745f52c74426c631bdd52",
+              "name": "BNB",
+              "symbol": "BNB",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970",
+              "banner_image_url": null,
+              "coingecko_coin_id": "binancecoin",
+              "total_supply": "392908135046413249272161.0",
+              "normalized_total_supply": "392908.135046413",
+              "price_usd": "735.5606983417",
+              "fdv_usd": "289007716.946763",
+              "total_reserve_in_usd": "278190.754433362461394035850543956020785661181042905733181012507837356815265527916345798733985520621655231065316",
+              "volume_usd": {
+                "h24": "31477.6731220374"
+              },
+              "market_cap_usd": "97604006413.0244"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x9e7809c21ba130c1a51c112928ea6474d9a9ae3c",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            "type": "token",
+            "attributes": {
+              "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+              "name": "USD Coin",
+              "symbol": "USDC",
+              "decimals": 6,
+              "image_url": "https://coin-images.coingecko.com/coins/images/6319/large/USDC.png?1769615602",
+              "banner_image_url": null,
+              "coingecko_coin_id": "usd-coin",
+              "total_supply": "50444444006206709.0",
+              "normalized_total_supply": "50444444006.2067",
+              "price_usd": "0.9993669724",
+              "fdv_usd": "50412457342.806",
+              "total_reserve_in_usd": "596895586.01897229372853443176918080174640045324765765505004092137441566778457036096706693047087057627648101850006328804444481428272",
+              "volume_usd": {
+                "h24": "691187090.992356"
+              },
+              "market_cap_usd": "73536932940.5722"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+            "type": "token",
+            "attributes": {
+              "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+              "name": "Liquid staked Ether 2.0",
+              "symbol": "stETH",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/13442/large/steth_logo.png?1696513206",
+              "banner_image_url": null,
+              "coingecko_coin_id": "staked-ether",
+              "total_supply": "9626017214390890082499146.0",
+              "normalized_total_supply": "9626017.21439089",
+              "price_usd": "2497.1902203075",
+              "fdv_usd": "24037996040.5517",
+              "total_reserve_in_usd": "76763810.8921056016263119058631924622980771038559331065260796315734174618387438611106153630328219344966646671137757",
+              "volume_usd": {
+                "h24": "662020.876848243"
+              },
+              "market_cap_usd": "24037907584.1491"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0xdc24316b9ae028f1497c275eb9192a3ea0f67022",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+            "type": "token",
+            "attributes": {
+              "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+              "name": "Wrapped BTC",
+              "symbol": "WBTC",
+              "decimals": 8,
+              "image_url": "https://coin-images.coingecko.com/coins/images/7598/large/WBTCLOGO.png?1764496367",
+              "banner_image_url": null,
+              "coingecko_coin_id": "wrapped-bitcoin",
+              "total_supply": "11613218273272.0",
+              "normalized_total_supply": "116132.18273272",
+              "price_usd": "79264.3944417278",
+              "fdv_usd": "9205145615.46325",
+              "total_reserve_in_usd": "207486634.207242926727918592696254938648421591592968880316944217020913885520068707704110849102802989605",
+              "volume_usd": {
+                "h24": "76917014.2426458"
+              },
+              "market_cap_usd": "9186497361.60985"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x4585fe77225b41b697c938b018e2ac67ac5a20c0",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+            "type": "token",
+            "attributes": {
+              "address": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+              "name": "Wrapped liquid staked Ether 2.0",
+              "symbol": "wstETH",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/18834/large/wstETH.png?1696518295",
+              "banner_image_url": null,
+              "coingecko_coin_id": "wrapped-steth",
+              "total_supply": "3755755651882977122766251.0",
+              "normalized_total_supply": "3755755.65188298",
+              "price_usd": "3116.1142728355",
+              "fdv_usd": "11703363792.0223",
+              "total_reserve_in_usd": "47914839.61152853936730944671947442069515972897795245539922519264453690850310415186635154547602094963539355132239784",
+              "volume_usd": {
+                "h24": "2084899.48249556"
+              },
+              "market_cap_usd": "11788031323.069"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x0b1a513ee24972daef112bc777a5610d4325c9e7",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x514910771af9ca656af840dff83e8264ecf986ca",
+            "type": "token",
+            "attributes": {
+              "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+              "name": "ChainLink Token",
+              "symbol": "LINK",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/877/large/Chainlink_Logo_500.png?1760023405",
+              "banner_image_url": null,
+              "coingecko_coin_id": "chainlink",
+              "total_supply": "1000000000000000000000000000.0",
+              "normalized_total_supply": "1000000000.0",
+              "price_usd": "11.7064011771",
+              "fdv_usd": "11706399886.3778",
+              "total_reserve_in_usd": "25290566.94497185176354935521893174022507307561122519191818950799428424696456224241162135102365756473537285752890361718324661",
+              "volume_usd": {
+                "h24": "7797975.74397965"
+              },
+              "market_cap_usd": "8757558374.37034"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0xb2b5618903d74bbac9e9049a035c3827afc4487cde3b994a1568b050f4c8e2e4",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x2af5d2ad76741191d15dfe7bf6ac92d4bd912ca3",
+            "type": "token",
+            "attributes": {
+              "address": "0x2af5d2ad76741191d15dfe7bf6ac92d4bd912ca3",
+              "name": "Bitfinex LEO Token",
+              "symbol": "LEO",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/8418/large/leo-token.png?1696508607",
+              "banner_image_url": null,
+              "coingecko_coin_id": "leo-token",
+              "total_supply": "660000000000000000000000000.0",
+              "normalized_total_supply": "660000000.0",
+              "price_usd": "9.2775813864",
+              "fdv_usd": "6123203715.024",
+              "total_reserve_in_usd": "9538.201748733451069695551639647735013475817522803025427982172794805",
+              "volume_usd": {
+                "h24": "0.0"
+              },
+              "market_cap_usd": "8478444009.73779"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x16f28c6464d2a80a19890f1fc8c842ff5d43f922",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+            "type": "token",
+            "attributes": {
+              "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+              "name": "Wrapped Ether",
+              "symbol": "WETH",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/2518/large/weth.png?1696503332",
+              "banner_image_url": null,
+              "coingecko_coin_id": "weth",
+              "total_supply": "2040733139373201856053413.0",
+              "normalized_total_supply": "2040733.1393732",
+              "price_usd": "2511.2",
+              "fdv_usd": "5121250384.73527",
+              "total_reserve_in_usd": "914376293.270080841647784566254005466500364535707564798883329622612123437369108165135039228525869982",
+              "volume_usd": {
+                "h24": "335147136.078278"
+              },
+              "market_cap_usd": "5118291856.00265"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xdc035d45d973e3ec169d2276ddab16f1e407384f",
+            "type": "token",
+            "attributes": {
+              "address": "0xdc035d45d973e3ec169d2276ddab16f1e407384f",
+              "name": "USDS Stablecoin",
+              "symbol": "USDS",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/39926/large/usds.webp?1726666683",
+              "banner_image_url": null,
+              "coingecko_coin_id": "usds",
+              "total_supply": "6694203073125980402497106625.0",
+              "normalized_total_supply": "6694203073.12598",
+              "price_usd": "0.9989081559",
+              "fdv_usd": "6686894043.22582",
+              "total_reserve_in_usd": "96924859.72659213670297965451453682273737566886178726605873667721373443598345321740752784652949760283658932202745070433769553050576",
+              "volume_usd": {
+                "h24": "499378314.871334"
+              },
+              "market_cap_usd": "9802610866.04362"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x3b1b1f2e775a6db1664f8e7d59ad568605ea2406312c11aef03146c0cf89d5b9",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x582d872a1b094fc48f5de31d3b73f2d9be47def1",
+            "type": "token",
+            "attributes": {
+              "address": "0x582d872a1b094fc48f5de31d3b73f2d9be47def1",
+              "name": "Wrapped TON Coin",
+              "symbol": "TONCOIN",
+              "decimals": 9,
+              "image_url": "https://coin-images.coingecko.com/coins/images/17980/large/Gram_Circular_Badge.png?1781524778",
+              "banner_image_url": null,
+              "coingecko_coin_id": "the-open-network",
+              "total_supply": "9296405290103562.0",
+              "normalized_total_supply": "9296405.29010356",
+              "price_usd": "1.4485134777",
+              "fdv_usd": "13465958.5090506",
+              "total_reserve_in_usd": "569719.15689156851691128324346490175134247967947460452572333903766996994823602749034691724754784913168446",
+              "volume_usd": {
+                "h24": "28329.7791325218"
+              },
+              "market_cap_usd": "4006940031.25981"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x4b62fa30fea125e43780dc425c2be5acb4ba743b",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce",
+            "type": "token",
+            "attributes": {
+              "address": "0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce",
+              "name": "SHIBA INU",
+              "symbol": "SHIB",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/11939/large/shiba.png?1696511800",
+              "banner_image_url": null,
+              "coingecko_coin_id": "shiba-inu",
+              "total_supply": "999982329055168014311278372706779.0",
+              "normalized_total_supply": "999982329055168.0",
+              "price_usd": "0.000005308721804",
+              "fdv_usd": "5308365704.10286",
+              "total_reserve_in_usd": "2308554.67114615386498765571650172995258292833659256128469959623826817083194166312521222837857612924370514539397130863834",
+              "volume_usd": {
+                "h24": "82218.9367322652"
+              },
+              "market_cap_usd": "3120872596.04511"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0xcf6daab95c476106eca715d48de4b13287ffdeaa",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee",
+            "type": "token",
+            "attributes": {
+              "address": "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee",
+              "name": "Wrapped eETH",
+              "symbol": "weETH",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/33033/large/weETH.png?1701438396",
+              "banner_image_url": null,
+              "coingecko_coin_id": "wrapped-eeth",
+              "total_supply": "1828622360468093242910672.0",
+              "normalized_total_supply": "1828622.36046809",
+              "price_usd": "2757.7417725588",
+              "fdv_usd": "5042868269.58768",
+              "total_reserve_in_usd": "15807679.146923198632387809507677965942194309612816968207052107989422759826827423501490486761026152397248792832258524",
+              "volume_usd": {
+                "h24": "365100.51487738"
+              },
+              "market_cap_usd": "5041466830.45862"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0xdb74dfdd3bb46be8ce6c33dc9d82777bcfc3ded5",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x54d2252757e1672eead234d27b1270728ff90581",
+            "type": "token",
+            "attributes": {
+              "address": "0x54d2252757e1672eead234d27b1270728ff90581",
+              "name": "BitgetToken",
+              "symbol": "BGB",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/11610/large/Bitget_logo.png?1736925727",
+              "banner_image_url": null,
+              "coingecko_coin_id": "bitget-token",
+              "total_supply": "2000000000000000000000000000.0",
+              "normalized_total_supply": "2000000000.0",
+              "price_usd": "1.9372633233",
+              "fdv_usd": "1764693600.91301",
+              "total_reserve_in_usd": "237303.15229103074189102379830924771476011636696579283702156932166986576124870884587420570696636519117506691209614",
+              "volume_usd": {
+                "h24": "15532.8109939023"
+              },
+              "market_cap_usd": "1356319577.77513"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x7fd91c569f66ba7eda9b72454e879c206c44c0e1",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+            "type": "token",
+            "attributes": {
+              "address": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+              "name": "USDe",
+              "symbol": "USDe",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/33613/large/usde.png?1733810059",
+              "banner_image_url": null,
+              "coingecko_coin_id": "ethena-usde",
+              "total_supply": "4062012029869410185523503861.0",
+              "normalized_total_supply": "4062012029.86941",
+              "price_usd": "0.9975014567",
+              "fdv_usd": "4051862916.88365",
+              "total_reserve_in_usd": "14185439.18440506570066894997801430069269263264338767403524429433529940923399857168988299969350233182921052951385043443759805922328",
+              "volume_usd": {
+                "h24": "33200875.4468683"
+              },
+              "market_cap_usd": "4053126637.26699"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x56fc29b86900aa0afa6e20b020429bffba1105cfb45070492c67529b46eb48c1",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
+            "type": "token",
+            "attributes": {
+              "address": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
+              "name": "Coinbase Wrapped BTC",
+              "symbol": "cbBTC",
+              "decimals": 8,
+              "image_url": "https://coin-images.coingecko.com/coins/images/40143/large/cbbtc.webp?1726136727",
+              "banner_image_url": null,
+              "coingecko_coin_id": "coinbase-wrapped-btc",
+              "total_supply": "4972357369137.0",
+              "normalized_total_supply": "49723.57369137",
+              "price_usd": "79264.0461478464",
+              "fdv_usd": "3941291639.70859",
+              "total_reserve_in_usd": "85466498.182285431797766816824938660147759183554798371284429128053287742129908289650439652250235120703736664646694094",
+              "volume_usd": {
+                "h24": "22739695.6153246"
+              },
+              "market_cap_usd": "7773312533.16325"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x3c0441b42195f4ad6aa9a0978e06096ea616cda7",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+            "type": "token",
+            "attributes": {
+              "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+              "name": "Uniswap",
+              "symbol": "UNI",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/12504/large/uniswap-logo.png?1720676669",
+              "banner_image_url": null,
+              "coingecko_coin_id": "uniswap",
+              "total_supply": "1000000000000000000000000000.0",
+              "normalized_total_supply": "1000000000.0",
+              "price_usd": "4.5867617321",
+              "fdv_usd": "4083540855.55364",
+              "total_reserve_in_usd": "22730912.77665368264305182429418822565673532604731617010749350927811211965062581781843483550781158124629947857038722",
+              "volume_usd": {
+                "h24": "9879038.11415487"
+              },
+              "market_cap_usd": "2849790289.05625"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x053f6a47ccba79e7d5d623173ed6dd5a31cf19c28bae0fb8276f4506295f90da",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+            "type": "token",
+            "attributes": {
+              "address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+              "name": "Aave Token",
+              "symbol": "AAVE",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/12645/large/aave-token-round.png?1720472354",
+              "banner_image_url": null,
+              "coingecko_coin_id": "aave",
+              "total_supply": "16000000000000000000000000.0",
+              "normalized_total_supply": "16000000.0",
+              "price_usd": "124.6674461001",
+              "fdv_usd": "1994679103.32261",
+              "total_reserve_in_usd": "20483975.5103924753315596330259853913697459473971252186413472930658229411089304620411179813149763755390754845866455",
+              "volume_usd": {
+                "h24": "3870231.32870948"
+              },
+              "market_cap_usd": "1919748939.12776"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x1c60dc7ce348dc9f1e8992c027350acfda4ba66e2365aa87cbdd98c490185088",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x4da27a545c0c5b758a6ba100e3a049001de870f5",
+            "type": "token",
+            "attributes": {
+              "address": "0x4da27a545c0c5b758a6ba100e3a049001de870f5",
+              "name": "Staked Aave",
+              "symbol": "stkAAVE",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/70936/large/7278.png?1764682199",
+              "banner_image_url": null,
+              "coingecko_coin_id": "staked-aave",
+              "total_supply": "2477717899580880115248135.0",
+              "normalized_total_supply": "2477717.89958088",
+              "price_usd": "125.5817689512",
+              "fdv_usd": "311156188.313752",
+              "total_reserve_in_usd": "132089.93291776205716145390280567968927323380958124407071876423529806984687553474257246371113430297431821166932032",
+              "volume_usd": {
+                "h24": "2959.3911273091"
+              },
+              "market_cap_usd": "311200628.476615"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x1a76f6b9b3d9c532e0b56990944a31a705933fbd",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x6982508145454ce325ddbe47a25d4ec3d2311933",
+            "type": "token",
+            "attributes": {
+              "address": "0x6982508145454ce325ddbe47a25d4ec3d2311933",
+              "name": "Pepe",
+              "symbol": "PEPE",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/29850/large/pepe-token.jpeg?1696528776",
+              "banner_image_url": null,
+              "coingecko_coin_id": "pepe",
+              "total_supply": "420689899645536006445468000045255.0",
+              "normalized_total_supply": "420689899645536.0",
+              "price_usd": "0.000003810436592",
+              "fdv_usd": "1576653322.73974",
+              "total_reserve_in_usd": "14965202.715003872963375921267219997741381517344883797435460163278192335491444011420051016182293206751002881678788201105594",
+              "volume_usd": {
+                "h24": "1459027.92838699"
+              },
+              "market_cap_usd": "1603012569.88848"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0xa43fe16908251ee70ef74718545e4fe6c5ccec9f",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x6b175474e89094c44da98b954eedeac495271d0f",
+            "type": "token",
+            "attributes": {
+              "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+              "name": "Dai Stablecoin",
+              "symbol": "DAI",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/9956/large/Badge_Dai.png?1696509996",
+              "banner_image_url": null,
+              "coingecko_coin_id": "dai",
+              "total_supply": "4584712705760877823284967629.0",
+              "normalized_total_supply": "4584712705.76088",
+              "price_usd": "1.0003345281",
+              "fdv_usd": "4586225728.9457",
+              "total_reserve_in_usd": "85710149.2679365162493300441556638648007001002656402636736580283976711135331229285499107118964156564872289556195384917586949320151642",
+              "volume_usd": {
+                "h24": "20671089.4722361"
+              },
+              "market_cap_usd": "4573319204.2415"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+            "type": "token",
+            "attributes": {
+              "address": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+              "name": "Staked USDe",
+              "symbol": "sUSDe",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/33669/large/sUSDe-Symbol-Color.png?1716307680",
+              "banner_image_url": null,
+              "coingecko_coin_id": "ethena-staked-usde",
+              "total_supply": "1058246996721660102748810203.0",
+              "normalized_total_supply": "1058246996.72166",
+              "price_usd": "1.2390242796",
+              "fdv_usd": "1311193722.30693",
+              "total_reserve_in_usd": "19612118.80759088053419451836537125353011650081615781967957294851077623664420583344540228868294268282860442638360433494251101747872",
+              "volume_usd": {
+                "h24": "10708435.6281283"
+              },
+              "market_cap_usd": "1310649665.00186"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x744793b5110f6ca9cc7cdfe1ce16677c3eb192ef",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x75231f58b43240c9718dd58b4967c5114342a86c",
+            "type": "token",
+            "attributes": {
+              "address": "0x75231f58b43240c9718dd58b4967c5114342a86c",
+              "name": "OKB",
+              "symbol": "OKB",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/4463/large/WeChat_Image_20220118095654.png?1696505053",
+              "banner_image_url": null,
+              "coingecko_coin_id": "okb",
+              "total_supply": "429064577598083360851373.0",
+              "normalized_total_supply": "429064.577598083",
+              "price_usd": "114.1932219606",
+              "fdv_usd": "48996266.545101",
+              "total_reserve_in_usd": "101173.7479706222929274139920354813471747041025684824783504418145362177181162675822902406245663166435927429707296",
+              "volume_usd": {
+                "h24": "4450.3113088197"
+              },
+              "market_cap_usd": "2398057661.1726"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x6368172f9df8ff70ac7e2fc6b30cb964158d0090",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x85f17cf997934a597031b2e18a9ab6ebd4b9f6a4",
+            "type": "token",
+            "attributes": {
+              "address": "0x85f17cf997934a597031b2e18a9ab6ebd4b9f6a4",
+              "name": "NEAR",
+              "symbol": "NEAR",
+              "decimals": 24,
+              "image_url": "https://coin-images.coingecko.com/coins/images/71681/large/near.png?1768905174",
+              "banner_image_url": null,
+              "coingecko_coin_id": "rainbow-bridged-near-ethereum",
+              "total_supply": "3419724438434191480544054087960.0",
+              "normalized_total_supply": "3419724.43843419",
+              "price_usd": "1.8574568618",
+              "fdv_usd": "6351990.62365423",
+              "total_reserve_in_usd": "246421.2847521937079287281480352775248449778439378061256615916784459856669963312477492645943083810592420744173303926609605691472",
+              "volume_usd": {
+                "h24": "34152.3577417944"
+              },
+              "market_cap_usd": "6350946.62984132"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0xee8aaa362a75fbf8e0a38a50ddc27f38551e16ea",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b",
+            "type": "token",
+            "attributes": {
+              "address": "0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b",
+              "name": "CRO",
+              "symbol": "CRO",
+              "decimals": 8,
+              "image_url": "https://coin-images.coingecko.com/coins/images/7310/large/cro_token_logo.png?1696507599",
+              "banner_image_url": null,
+              "coingecko_coin_id": "crypto-com-chain",
+              "total_supply": "10000000000000000000.0",
+              "normalized_total_supply": "100000000000.0",
+              "price_usd": "0.0594556808",
+              "fdv_usd": "781770804.115951",
+              "total_reserve_in_usd": "602319.763776507852763382880053894319667598508585404352451810864844888342609190654691062764951317289138528",
+              "volume_usd": {
+                "h24": "44743.7509278573"
+              },
+              "market_cap_usd": "2884712205.14274"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x3a4f24ef62fa97f3bbf9d606c8bc67b7118fc75b7d83550cbf1dc6edf84766c6",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xa3931d71877c0e7a3148cb7eb4463524fec27fbd",
+            "type": "token",
+            "attributes": {
+              "address": "0xa3931d71877c0e7a3148cb7eb4463524fec27fbd",
+              "name": "Savings USDS",
+              "symbol": "sUSDS",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/52721/large/sUSDS_Coin.png?1734086971",
+              "banner_image_url": null,
+              "coingecko_coin_id": "susds",
+              "total_supply": "4231915862082996370293834321.0",
+              "normalized_total_supply": "4231915862.083",
+              "price_usd": "1.105499644",
+              "fdv_usd": "4678381479.04854",
+              "total_reserve_in_usd": "4513297.399546191465061264735349145757235270407493283857709472453340747071922492834950237214632223812145833146920808",
+              "volume_usd": {
+                "h24": "422513.300690649"
+              },
+              "market_cap_usd": "4679364491.44594"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x8b83c4aa949254895507d09365229bc3a8c7f710",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",
+            "type": "token",
+            "attributes": {
+              "address": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",
+              "name": "Ondo",
+              "symbol": "ONDO",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/26580/large/ONDO.png?1696525656",
+              "banner_image_url": null,
+              "coingecko_coin_id": "ondo-finance",
+              "total_supply": "10000000000000000000000000000.0",
+              "normalized_total_supply": "10000000000.0",
+              "price_usd": "0.367214017",
+              "fdv_usd": "3672140167.46617",
+              "total_reserve_in_usd": "952543.327367970445814469334265199402720638334703495872",
+              "volume_usd": {
+                "h24": "288722.258929312"
+              },
+              "market_cap_usd": "1782905330.2119"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x7b1e5d984a43ee732de195628d20d05cfabc3cc7",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0x3c3a81e81dc49a522a592e7622a7e711c06bf354",
+            "type": "token",
+            "attributes": {
+              "address": "0x3c3a81e81dc49a522a592e7622a7e711c06bf354",
+              "name": "Mantle",
+              "symbol": "MNT",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/30980/large/MNT_Token_Logo.png?1765516974",
+              "banner_image_url": null,
+              "coingecko_coin_id": "mantle",
+              "total_supply": "6219316794889999291248757829.0",
+              "normalized_total_supply": "6219316794.89",
+              "price_usd": "0.5256102791",
+              "fdv_usd": "3268936835.81289",
+              "total_reserve_in_usd": "2161950.173615209971588630545316389566567837044439657432",
+              "volume_usd": {
+                "h24": "295488.153693552"
+              },
+              "market_cap_usd": "1735719872.07555"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x9aac67deef711d438ad711ae495b8cb43a6ee1a8",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xe66747a101bff2dba3697199dcce5b743b454759",
+            "type": "token",
+            "attributes": {
+              "address": "0xe66747a101bff2dba3697199dcce5b743b454759",
+              "name": "GateChainToken",
+              "symbol": "GT",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/8183/large/200X200.png?1735246724",
+              "banner_image_url": null,
+              "coingecko_coin_id": "gatechain-token",
+              "total_supply": "300000000000000000000000000.0",
+              "normalized_total_supply": "300000000.0",
+              "price_usd": "8.3999247811",
+              "fdv_usd": "2519977434.32935",
+              "total_reserve_in_usd": "6791.5000102453691604137635148410401124649936576662500000000000663511806570742345543722027252888576",
+              "volume_usd": {
+                "h24": "354.0475360968"
+              },
+              "market_cap_usd": "895501557.598788"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x2b773b3db41971c069f79c257ab60bdc8bd1ae5f",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "eth_0xaea46a60368a7bd060eec7df8cba43b7ef41ad85",
+            "type": "token",
+            "attributes": {
+              "address": "0xaea46a60368a7bd060eec7df8cba43b7ef41ad85",
+              "name": "Fetch",
+              "symbol": "FET",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/5681/large/ASI.png?1719827289",
+              "banner_image_url": null,
+              "coingecko_coin_id": "fetch-ai",
+              "total_supply": "2714384546671999999999656122.0",
+              "normalized_total_supply": "2714384546.672",
+              "price_usd": "0.1605064346",
+              "fdv_usd": "435676185.709959",
+              "total_reserve_in_usd": "721901.450382082966556595176271582142845935532545163738749948600332619211189816372524453671544853724479973438264",
+              "volume_usd": {
+                "h24": "82113.2289696086"
+              },
+              "market_cap_usd": "362974264.47523"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x948b54a93f5ad1df6b8bff6dc249d99ca2eca052",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rawHeaders": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cache-control": "max-age=30, public, must-revalidate, s-maxage=60",
+        "cf-cache-status": "MISS",
+        "cf-ray": "a323d31bde995d1d-ARN",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Fri, 28 Aug 2026 13:57:22 GMT",
+        "etag": "W/\"6c0fe6d1d854a996948fa2e1feae6634\"",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "cloudflare",
+        "set-cookie": "_cfuvid=uDmreZFFmgXuMCVGZZ3d_QjQ9ZvIzPrqOOTQt_EDrKE-1787925441.891887-1.0.1.1-libY86uI_Srit9ODd_flX4_ARYpNTdsiKeCcuoHCGJc; HttpOnly; SameSite=None; Secure; Path=/; Domain=geckoterminal.com",
+        "speculation-rules": "\"/cdn-cgi/speculation\"",
+        "strict-transport-security": "max-age=15724800; includeSubdomains",
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding, Accept, Origin",
+        "x-content-digest": "8b42b0951c28b514502ad2c5467559d1bb0f9f28",
+        "x-content-type-options": "nosniff",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-gt-env": "qa-3tm",
+        "x-permitted-cross-domain-policies": "none",
+        "x-rack-cache": "miss, ignore, store",
+        "x-request-id": "9fab7111-5ca0-444d-92bd-399f5e968e04",
+        "x-runtime": "0.120609",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseIsBinary": false
+    },
+    {
+      "scope": "https://api.geckoterminal.com:443",
+      "method": "GET",
+      "path": "/api/v2/networks/eth/tokens/multi/0x56072C95FAA701256059aa122697B133aDEd9279",
+      "body": "",
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "eth_0x56072c95faa701256059aa122697b133aded9279",
+            "type": "token",
+            "attributes": {
+              "address": "0x56072c95faa701256059aa122697b133aded9279",
+              "name": "SKY Governance Token",
+              "symbol": "SKY",
+              "decimals": 18,
+              "image_url": "https://coin-images.coingecko.com/coins/images/39925/large/sky.jpg?1724827980",
+              "banner_image_url": null,
+              "coingecko_coin_id": "sky",
+              "total_supply": "23462665147365966560979671451.0",
+              "normalized_total_supply": "23462665147.366",
+              "price_usd": "0.06881286136",
+              "fdv_usd": "1614533123.5499",
+              "total_reserve_in_usd": "9527165.954594913791281645991409999404255045693510624010477777689816771248122068015472225690591542432771175271868103486838060508",
+              "volume_usd": {
+                "h24": "831758.717386039"
+              },
+              "market_cap_usd": "1611948952.06055"
+            },
+            "relationships": {
+              "top_pools": {
+                "data": [
+                  {
+                    "id": "eth_0x2621cc0b3f3c079c1db0e80794aa24976f0b9e3c",
+                    "type": "pool"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rawHeaders": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cache-control": "max-age=30, public, must-revalidate, s-maxage=60",
+        "cf-cache-status": "MISS",
+        "cf-ray": "a323d31f6af65d1d-ARN",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Fri, 28 Aug 2026 13:57:22 GMT",
+        "etag": "W/\"03004e00eb8e48572ad6de5edc6adb4c\"",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "cloudflare",
+        "set-cookie": "_cfuvid=F9HIcFsORFyQhsdaND7nd_qPYdJ3aDXcjTYX9rLKpbQ-1787925442.4635215-1.0.1.1-lwbFjQYVXijkqhsnz6LiR.54APOrMVLFY1xP4r2MSjk; HttpOnly; SameSite=None; Secure; Path=/; Domain=geckoterminal.com",
+        "speculation-rules": "\"/cdn-cgi/speculation\"",
+        "strict-transport-security": "max-age=15724800; includeSubdomains",
+        "transfer-encoding": "chunked",
+        "vary": "Accept, Origin, accept-encoding",
+        "x-content-digest": "5e633f6914f53d13d9102b96a41f7f7788a477ed",
+        "x-content-type-options": "nosniff",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-rack-cache": "miss, ignore, store",
+        "x-request-id": "873f2cdb-3b67-4c51-acae-616053742ee6",
+        "x-runtime": "0.034205",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseIsBinary": false
+    }
+  ]
+}
