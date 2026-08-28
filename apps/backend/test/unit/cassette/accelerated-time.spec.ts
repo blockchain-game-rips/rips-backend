@@ -1,7 +1,7 @@
 import { useAcceleratedTime } from '../../utils/cassette/accelerated-time'
 
 const DELAY_MS = 2_000
-const SPEEDUP = 10
+const SPEEDUP = 50
 
 // The scaled delay, with room for the event loop to get around to it.
 const TOLERANCE_MS = 150
