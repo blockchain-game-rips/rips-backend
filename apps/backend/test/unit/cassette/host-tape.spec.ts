@@ -47,7 +47,9 @@ describe('external tapes', () => {
 	it('names every api the backend talks to, so no test has to', () => {
 		expect(Object.keys(externalTapes())).toEqual([
 			'liFi',
-			'deBridge',
+			'deBridgeSwap',
+			'deBridgeOrders',
+			'deBridgeDln',
 			'geckoTerminal',
 			'alchemyBase',
 			'alchemyEthereum',

@@ -36,8 +36,13 @@ function originOf(definition: { scope: string | RegExp }): string {
 }
 
 const LI_FI_ORIGIN = 'https://li.quest'
-const DE_BRIDGE_ORIGIN = 'https://dln.debridge.finance'
 const GECKO_TERMINAL_ORIGIN = 'https://api.geckoterminal.com'
+
+// de-bridge splits its api across three hosts: quotes and swaps on one, order
+// lookups on another, and a dln alias for the first.
+const DE_BRIDGE_SWAP_ORIGIN = 'https://dln.debridge.finance'
+const DE_BRIDGE_ORDERS_ORIGIN = 'https://dln-api.debridge.finance'
+const DE_BRIDGE_DLN_ORIGIN = 'https://api.dln.trade'
 
 // Alchemy answers on a host per chain, plus one for the portfolio api. An
 // origin has to be spelled out, so every chain a test touches needs its own.
@@ -55,7 +60,9 @@ const ALCHEMY_PORTFOLIO_ORIGIN = 'https://api.g.alchemy.com'
 export function externalTapes() {
 	return {
 		liFi: hostTape(LI_FI_ORIGIN),
-		deBridge: hostTape(DE_BRIDGE_ORIGIN),
+		deBridgeSwap: hostTape(DE_BRIDGE_SWAP_ORIGIN),
+		deBridgeOrders: hostTape(DE_BRIDGE_ORDERS_ORIGIN),
+		deBridgeDln: hostTape(DE_BRIDGE_DLN_ORIGIN),
 		geckoTerminal: hostTape(GECKO_TERMINAL_ORIGIN),
 		alchemyBase: alchemyTape(ALCHEMY_BASE_ORIGIN),
 		alchemyEthereum: alchemyTape(ALCHEMY_ETHEREUM_ORIGIN),
