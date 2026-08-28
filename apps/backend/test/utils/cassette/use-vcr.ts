@@ -4,6 +4,7 @@ import { TestContext } from 'vitest'
 import { getCurrentSuite } from 'vitest/suite'
 import { useAcceleratedTime } from './accelerated-time'
 import { decompressResponse } from './decompress'
+import { ignoringRequestId } from './request-id'
 import { sectionNameFrom } from './section-name'
 import { isDefinition, Tape, Tapes } from './tape'
 import { readSection, writeSection } from './tape-file'
@@ -206,7 +207,7 @@ function replay(path: string, section: string, specPath: string): void {
 		nock.activate()
 	}
 
-	nock.define(recorded)
+	nock.define(recorded.map(ignoringRequestId))
 }
 
 function missingTapeMessage(

@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { createServer, Server } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { ignoringRequestId } from '../../utils/cassette/request-id'
 
 /**
  * Exercises the record -> save -> replay cycle the helper performs, against a
@@ -73,4 +74,65 @@ describe('cassette round-trip', () => {
 
 		nock.cleanAll()
 	})
+
+	/**
+	 * viem numbers its JSON-RPC requests from a counter that lives in the
+	 * module, not in the test, so the same call gets a different id depending
+	 * on how many requests the worker made before it. Running one spec on its
+	 * own and running it after another therefore produce different bodies for
+	 * the same exchange, and a tape that matched the id verbatim would only
+	 * replay in the order it was recorded in.
+	 */
+	it('replays a json-rpc call whose id moved since the recording', async () => {
+		const rpcOrigin = 'http://anvil-8453'
+
+		const call = (id: number) => ({
+			jsonrpc: '2.0',
+			id,
+			method: 'anvil_setBalance',
+			params: ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0x1'],
+		})
+
+		if (!nock.isActive()) {
+			nock.activate()
+		}
+
+		nock.define(
+			[
+				{
+					scope: `${rpcOrigin}:80`,
+					method: 'POST',
+					path: '/',
+					body: call(RECORDED_REQUEST_ID),
+					status: 200,
+					response: {
+						jsonrpc: '2.0',
+						id: RECORDED_REQUEST_ID,
+						result: null,
+					},
+				},
+			].map(ignoringRequestId),
+		)
+
+		const response = await fetch(rpcOrigin, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify(call(REPLAYED_REQUEST_ID)),
+		})
+
+		expect(response.status).toBe(200)
+
+		// A json-rpc client pairs a reply to its call by id, so the answer has
+		// to come back under the id that was asked, not the taped one.
+		expect(await response.json()).toMatchObject({
+			id: REPLAYED_REQUEST_ID,
+		})
+
+		nock.cleanAll()
+	})
 })
+
+// Two ids for one call: what the recording captured, and what the counter had
+// climbed to by the time another spec replayed it.
+const RECORDED_REQUEST_ID = 20
+const REPLAYED_REQUEST_ID = 46
