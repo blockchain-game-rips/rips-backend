@@ -1,3 +1,4 @@
+import { alchemyTape } from './alchemy-tape'
 import { Tape } from './tape'
 
 /**
@@ -37,7 +38,12 @@ function originOf(definition: { scope: string | RegExp }): string {
 const LI_FI_ORIGIN = 'https://li.quest'
 const DE_BRIDGE_ORIGIN = 'https://dln.debridge.finance'
 const GECKO_TERMINAL_ORIGIN = 'https://api.geckoterminal.com'
-const ALCHEMY_ORIGIN = 'https://base-mainnet.g.alchemy.com'
+
+// Alchemy answers on a host per chain, plus one for the portfolio api. An
+// origin has to be spelled out, so every chain a test touches needs its own.
+const ALCHEMY_BASE_ORIGIN = 'https://base-mainnet.g.alchemy.com'
+const ALCHEMY_ETHEREUM_ORIGIN = 'https://eth-mainnet.g.alchemy.com'
+const ALCHEMY_PORTFOLIO_ORIGIN = 'https://api.g.alchemy.com'
 
 /**
  * Every external API the backend talks to, so that a test names none of them
@@ -46,11 +52,13 @@ const ALCHEMY_ORIGIN = 'https://base-mainnet.g.alchemy.com'
  * which Node reports as `localhost:80` — out of view entirely, rather than
  * filtered back out after the fact.
  */
-export function externalTapes(): Record<string, HostTape> {
+export function externalTapes() {
 	return {
 		liFi: hostTape(LI_FI_ORIGIN),
 		deBridge: hostTape(DE_BRIDGE_ORIGIN),
 		geckoTerminal: hostTape(GECKO_TERMINAL_ORIGIN),
-		alchemy: hostTape(ALCHEMY_ORIGIN),
+		alchemyBase: alchemyTape(ALCHEMY_BASE_ORIGIN),
+		alchemyEthereum: alchemyTape(ALCHEMY_ETHEREUM_ORIGIN),
+		alchemyPortfolio: alchemyTape(ALCHEMY_PORTFOLIO_ORIGIN),
 	}
 }

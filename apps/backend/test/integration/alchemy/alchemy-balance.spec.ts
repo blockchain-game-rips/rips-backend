@@ -2,6 +2,8 @@ import { config } from 'dotenv'
 import path from 'node:path'
 import { Address, getAddress } from 'viem'
 import { AlchemyBalanceService } from '../../../src/infrastructure/evm/evm-client/alchemy/alchemy-balance.service'
+import { externalTapes } from '../../utils/cassette/host-tape'
+import { useVcr } from '../../utils/cassette/use-vcr'
 
 const ETH_MAINNET_CHAIN_ID = 1
 const BASE_CHAIN_ID = 8453
@@ -17,10 +19,10 @@ const USDC_BASE: Address = getAddress(
 
 config({ path: path.resolve(__dirname, '../../../.env') })
 
-const describeWithKey = process.env.ALCHEMY_API_KEY ? describe : describe.skip
+describe('AlchemyBalanceService (integration)', () => {
+	const vcr = useVcr(externalTapes())
 
-describeWithKey('AlchemyBalanceService (integration)', () => {
-	const service = new AlchemyBalanceService()
+	const service = new AlchemyBalanceService(vcr.tapes.alchemyPortfolio.apiKey)
 
 	it('fetches native and erc20 balances grouped by chain id', async () => {
 		const result = await service.fetchBalances(WHALE_ADDRESS, [

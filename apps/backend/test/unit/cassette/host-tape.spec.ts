@@ -49,7 +49,9 @@ describe('external tapes', () => {
 			'liFi',
 			'deBridge',
 			'geckoTerminal',
-			'alchemy',
+			'alchemyBase',
+			'alchemyEthereum',
+			'alchemyPortfolio',
 		])
 	})
 
