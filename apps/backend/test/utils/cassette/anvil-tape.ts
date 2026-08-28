@@ -1,5 +1,7 @@
 import { Anvil, AnvilConfig } from '@rips/test-harness'
 import nock from 'nock'
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import { Tape } from './tape'
 
 /** A live anvil: a real process, so it has logs to explain a revert with. */
@@ -28,7 +30,9 @@ export type AnvilTape = Tape<RecordedAnvil, ReplayedAnvil> & {
 export function anvilTape(params: AnvilConfig): AnvilTape {
 	const anvil = new Anvil(params)
 
-	const replayedUrl = replayedAnvilUrl(params.chainId)
+	const replayedOrigin = replayedAnvilUrl(params.chainId)
+
+	const fingerprint = stateFingerprint(params.pathToState)
 
 	let started = false
 
@@ -42,11 +46,16 @@ export function anvilTape(params: AnvilConfig): AnvilTape {
 				return definition
 			}
 
-			return { ...definition, scope: withDefaultPort(replayedUrl) }
+			return {
+				...definition,
+				scope: withDefaultPort(replayedOrigin),
+				path: withFingerprint(String(definition.path), fingerprint),
+			}
 		},
 
 		owns: (definition) =>
-			scopeOf(definition) === withDefaultPort(replayedUrl),
+			scopeOf(definition) === withDefaultPort(replayedOrigin) &&
+			fingerprintOf(String(definition.path)) === fingerprint,
 
 		recorded: () => ({
 			// Read through to the process rather than copied, so the address
@@ -73,7 +82,9 @@ export function anvilTape(params: AnvilConfig): AnvilTape {
 			}
 		},
 
-		replayed: () => ({ rpcUrl: replayedUrl }),
+		replayed: () => ({
+			rpcUrl: withFingerprint(replayedOrigin, fingerprint),
+		}),
 	}
 }
 
@@ -99,6 +110,51 @@ function liveOrigin(anvil: Anvil): string | undefined {
  */
 function replayedAnvilUrl(chainId: number): string {
 	return `http://anvil-${chainId}`
+}
+
+const STATE_PARAM = 'state'
+
+/**
+ * Pins a url to the state behind it, because a url identifies a source and the
+ * source is the chain *and* what was loaded into it. Editing a contract leaves
+ * the calldata of an eth_call byte for byte the same, so without this the tape
+ * would keep answering for a contract that no longer exists.
+ *
+ * It rides in the path rather than the scope's query because nock.define()
+ * keeps only the origin of a scope and drops its query, while it matches the
+ * path verbatim. A fingerprint in the scope would be discarded on load and
+ * every replay would miss.
+ */
+function withFingerprint(url: string, fingerprint?: string): string {
+	return fingerprint === undefined
+		? url
+		: `${url}?${STATE_PARAM}=${fingerprint}`
+}
+
+/** The fingerprint a path was pinned with, if it carries one. */
+function fingerprintOf(path: string): string | undefined {
+	return path.split(`?${STATE_PARAM}=`)[1]
+}
+
+/**
+ * Short enough to read in a `no match`, long enough that two states this repo
+ * ever loads will not collide.
+ */
+const FINGERPRINT_LENGTH = 6
+
+/**
+ * What was loaded into anvil, as something a url can carry. A bare fork has no
+ * state file, and so has nothing to pin and nothing to check.
+ */
+function stateFingerprint(pathToState?: string): string | undefined {
+	if (pathToState === undefined) {
+		return undefined
+	}
+
+	return createHash('sha256')
+		.update(readFileSync(pathToState))
+		.digest('hex')
+		.slice(0, FINGERPRINT_LENGTH)
 }
 
 // nock records a scope with its port spelled out, so a rewrite target has to
