@@ -7,7 +7,6 @@ import {
 	deployments,
 	setNativeBalance,
 	setTokenBalance,
-	useAnvil,
 } from '@rips/test-harness'
 import {
 	Chain,
@@ -56,6 +55,9 @@ import {
 	mockGetOrder,
 } from '../../mocks/mock-de-bridge-api.service'
 import { expectSucceeded } from '../../utils/attempts'
+import { anvilTape } from '../../utils/cassette/anvil-tape'
+import { externalTapes } from '../../utils/cassette/host-tape'
+import { useVcr } from '../../utils/cassette/use-vcr'
 import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
 import { provisionKekFile } from '../../utils/kek'
 import { usePostgres } from '../../utils/postgres'
@@ -179,58 +181,75 @@ async function buildTestModule(
 	return builder.compile()
 }
 
+const ARBITRUM_FORK_RPC_URL = 'https://arb1.arbitrum.io/rpc'
+const BASE_FORK_RPC_URL = 'https://mainnet.base.org'
+
+/**
+ * Base carries the deployed contracts, so it loads a state file and its
+ * recording is pinned to one.
+ */
+function baseTape() {
+	return anvilTape({
+		chainId: BASE_CHAIN_ID,
+		fork: { rpcUrl: BASE_FORK_RPC_URL },
+		pathToState: ANVIL_STATE_PATH,
+	})
+}
+
+/**
+ * Arbitrum is a bare fork that nothing is deployed to: it has no state to pin
+ * a recording against, and only the crosschain flow brings it up at all.
+ */
+function arbitrumTape() {
+	return anvilTape({
+		chainId: ARBITRUM_CHAIN_ID,
+		fork: { rpcUrl: ARBITRUM_FORK_RPC_URL },
+	})
+}
+
+function publicClientFor(chain: Chain, rpcUrl: string) {
+	return createPublicClient({ chain, transport: http(rpcUrl) })
+}
+
 describe('DeBridge integration', () => {
 	// DeBridgeModule pulls in the Prisma-backed wallet repositories, so the app
 	// only boots with a reachable database behind DATABASE_URL.
 	usePostgres()
 
-	const { anvils } = useAnvil([
-		{
-			chainId: ARBITRUM_CHAIN_ID,
-			fork: { rpcUrl: 'https://arb1.arbitrum.io/rpc' },
-		},
-		{
-			chainId: BASE_CHAIN_ID,
-			fork: { rpcUrl: 'https://mainnet.base.org' },
-			pathToState: ANVIL_STATE_PATH,
-		},
-	])
-
 	describe('buy entries with USDC on Arbitrum', () => {
+		const vcr = useVcr({
+			...externalTapes(),
+			arbitrum: arbitrumTape(),
+			base: baseTape(),
+		})
+
 		let deBridgeService: DeBridgeService
 		let mockDeBridgeApiService: DeBridgeApiService
 		let arbitrumClient: PublicClient<HttpTransport, Chain>
 		let baseClient: PublicClient<HttpTransport, Chain>
 
 		beforeAll(async () => {
-			const [arbitrumAnvil, baseAnvil] = anvils
+			const arbitrumRpcUrl = vcr.tapes.arbitrum.rpcUrl
+			const baseRpcUrl = vcr.tapes.base.rpcUrl
 
-			arbitrumClient = createPublicClient({
-				chain: arbitrum,
-				transport: http(`http://127.0.0.1:${arbitrumAnvil.port}`),
-			})
+			arbitrumClient = publicClientFor(arbitrum, arbitrumRpcUrl)
+			baseClient = publicClientFor(baseChain, baseRpcUrl)
 
-			baseClient = createPublicClient({
-				chain: baseChain,
-				transport: http(`http://127.0.0.1:${baseAnvil.port}`),
-			})
+			// Sequential rather than concurrent: viem stamps a request id when
+			// the call is made, so racing these two lands them on the tape out
+			// of order.
+			await setTokenBalance(
+				userAccount.address,
+				USDC_ARBITRUM_ADDRESS,
+				INITIAL_USDC_BALANCE,
+				arbitrumClient,
+			)
 
-			await Promise.all([
-				setTokenBalance(
-					userAccount.address,
-					USDC_ARBITRUM_ADDRESS,
-					INITIAL_USDC_BALANCE,
-					arbitrumClient,
-				),
-				setNativeBalance(
-					arbitrumClient,
-					userAccount.address,
-					INITIAL_ETH_BALANCE,
-				),
-			])
-
-			const arbitrumRpcUrl = `http://127.0.0.1:${arbitrumAnvil.port}`
-			const baseRpcUrl = `http://127.0.0.1:${baseAnvil.port}`
+			await setNativeBalance(
+				arbitrumClient,
+				userAccount.address,
+				INITIAL_ETH_BALANCE,
+			)
 
 			mockDeBridgeApiService = createMockDeBridgeApiService()
 
@@ -559,32 +578,31 @@ describe('DeBridge integration', () => {
 	})
 
 	describe('swapOnchain USDC to ETH on Base', () => {
+		const vcr = useVcr({ ...externalTapes(), base: baseTape() })
+
 		let deBridgeService: DeBridgeService
 		let baseClient: PublicClient<HttpTransport, Chain>
 
 		beforeAll(async () => {
-			const [, baseAnvil] = anvils
+			const baseRpcUrl = vcr.tapes.base.rpcUrl
 
-			baseClient = createPublicClient({
-				chain: baseChain,
-				transport: http(`http://127.0.0.1:${baseAnvil.port}`),
-			})
+			baseClient = publicClientFor(baseChain, baseRpcUrl)
 
-			await Promise.all([
-				setTokenBalance(
-					userAccount.address,
-					USDC_BASE_ADDRESS,
-					INITIAL_USDC_BALANCE,
-					baseClient,
-				),
-				setNativeBalance(
-					baseClient,
-					userAccount.address,
-					INITIAL_ETH_BALANCE,
-				),
-			])
+			// Sequential rather than concurrent: viem stamps a request id when
+			// the call is made, so racing these two lands them on the tape out
+			// of order.
+			await setTokenBalance(
+				userAccount.address,
+				USDC_BASE_ADDRESS,
+				INITIAL_USDC_BALANCE,
+				baseClient,
+			)
 
-			const baseRpcUrl = `http://127.0.0.1:${baseAnvil.port}`
+			await setNativeBalance(
+				baseClient,
+				userAccount.address,
+				INITIAL_ETH_BALANCE,
+			)
 
 			const moduleRef = await buildTestModule({
 				[BASE_CHAIN_ID]: {
