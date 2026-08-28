@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { getAlchemyRpcUrl } from './alchemy/alchemy-utils'
 import { CHAIN_CLIENT_CONFIG_KEY } from './configuration/chain-client-config'
 import {
+	ALCHEMY_API_KEY,
 	ChainClientConfig,
 	CustomChain,
 	EVM_CLIENT_CONFIG,
@@ -14,13 +15,14 @@ import {
 
 function transformRpcSettings(
 	rpcSettings: RpcSettings,
+	apiKey: string | undefined,
 ): ResolvedEvmClientConfig['rpcSettings'] {
 	const resolved: NonNullable<ResolvedEvmClientConfig['rpcSettings']> = {}
 
 	for (const [chainId, settings] of Object.entries(rpcSettings)) {
 		const resolvedUrls = settings.rpcUrls.map((url) => {
 			const rawUrl =
-				url === 'alchemy' ? getAlchemyRpcUrl(Number(chainId)) : url
+				url === 'alchemy' ? alchemyRpcUrl(Number(chainId), apiKey) : url
 			return z.url().parse(rawUrl) as RpcUrl
 		})
 
@@ -32,6 +34,14 @@ function transformRpcSettings(
 	}
 
 	return resolved
+}
+
+function alchemyRpcUrl(chainId: number, apiKey: string | undefined): string {
+	if (apiKey === undefined) {
+		throw new Error('ALCHEMY_API_KEY is not set')
+	}
+
+	return getAlchemyRpcUrl(chainId, apiKey)
 }
 
 function transformCustomChains(customChains: CustomChain[]): Chain[] {
@@ -47,19 +57,22 @@ function transformCustomChains(customChains: CustomChain[]): Chain[] {
 
 export const evmClientConfigProvider = {
 	provide: EVM_CLIENT_CONFIG,
-	useFactory: (configService?: ConfigService): ResolvedEvmClientConfig => {
+	useFactory: (
+		apiKey: string | undefined,
+		configService?: ConfigService,
+	): ResolvedEvmClientConfig => {
 		const config = configService?.get<ChainClientConfig>(
 			CHAIN_CLIENT_CONFIG_KEY,
 		)
 
 		return {
 			rpcSettings: config?.rpcSettings
-				? transformRpcSettings(config.rpcSettings)
+				? transformRpcSettings(config.rpcSettings, apiKey)
 				: undefined,
 			customChains: config?.customChains
 				? transformCustomChains(config.customChains)
 				: undefined,
 		}
 	},
-	inject: [{ token: ConfigService, optional: true }],
+	inject: [ALCHEMY_API_KEY, { token: ConfigService, optional: true }],
 }

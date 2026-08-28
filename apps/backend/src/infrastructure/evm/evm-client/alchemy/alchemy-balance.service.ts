@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { Address, getAddress, hexToBigInt, isAddressEqual, isHex } from 'viem'
 import { z } from 'zod'
 import { Currency } from '../../../../domain/entities/currency'
 import { CurrencyId } from '../../../../domain/value-objects/currency-id'
 import { NATIVE_ADDRESS } from '../../primitives/currencies/constants'
+import { ALCHEMY_API_KEY } from '../types'
 import { getAlchemyNetwork, getAlchemyPortfolioUrl } from './alchemy-utils'
 
 const REQUEST_TIMEOUT_MS = 8_000
@@ -42,6 +43,11 @@ type AlchemyToken = z.infer<
 @Injectable()
 export class AlchemyBalanceService {
 	private readonly logger = new Logger(AlchemyBalanceService.name)
+
+	constructor(
+		@Inject(ALCHEMY_API_KEY)
+		private readonly apiKey: string | undefined,
+	) {}
 
 	async fetchBalances(
 		address: Address,
@@ -188,7 +194,11 @@ export class AlchemyBalanceService {
 		address: Address,
 		networks: string[],
 	): Promise<AlchemyToken[]> {
-		const response = await fetch(getAlchemyPortfolioUrl(), {
+		if (this.apiKey === undefined) {
+			throw new Error('ALCHEMY_API_KEY is not set')
+		}
+
+		const response = await fetch(getAlchemyPortfolioUrl(this.apiKey), {
 			method: 'POST',
 			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({

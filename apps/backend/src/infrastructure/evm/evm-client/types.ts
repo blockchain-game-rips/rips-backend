@@ -36,3 +36,5 @@ export type ResolvedEvmClientConfig = {
 }
 
 export const EVM_CLIENT_CONFIG = Symbol('EVM_CLIENT_CONFIG')
+
+export const ALCHEMY_API_KEY = Symbol('ALCHEMY_API_KEY')

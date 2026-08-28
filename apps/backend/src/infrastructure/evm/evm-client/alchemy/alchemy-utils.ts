@@ -1,16 +1,10 @@
 import { CHAIN_ID_TO_CHAIN_KEY } from './constants'
 
-export function getAlchemyApiKey() {
-	const apiKey = process.env.ALCHEMY_API_KEY
-	if (!apiKey) {
-		throw new Error('ALCHEMY_API_KEY is not set')
-	}
-	return apiKey
+export function readAlchemyApiKey(): string | undefined {
+	return process.env.ALCHEMY_API_KEY || undefined
 }
 
-export function getAlchemyRpcUrl(chainId: number) {
-	const apiKey = getAlchemyApiKey()
-
+export function getAlchemyRpcUrl(chainId: number, apiKey: string) {
 	const chainKey = CHAIN_ID_TO_CHAIN_KEY[chainId]
 
 	if (!chainKey) {
@@ -20,9 +14,7 @@ export function getAlchemyRpcUrl(chainId: number) {
 	return `https://${chainKey}.g.alchemy.com/v2/${apiKey}` as const
 }
 
-export function getAlchemyPortfolioUrl() {
-	const apiKey = getAlchemyApiKey()
-
+export function getAlchemyPortfolioUrl(apiKey: string) {
 	return `https://api.g.alchemy.com/data/v1/${apiKey}/assets/tokens/by-address` as const
 }
 
