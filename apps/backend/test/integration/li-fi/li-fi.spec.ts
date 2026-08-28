@@ -273,7 +273,7 @@ describe('LiFi integration', () => {
 	describe('enterSamechain with USDC on Base', () => {
 		const context = useSamechainContext()
 
-		it.only(
+		it(
 			'swaps USDC and buys entries for the user',
 			async () => {
 				const { liFiService, baseClient } = context
