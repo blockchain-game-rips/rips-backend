@@ -16,13 +16,9 @@ import {
 	Hash,
 	http,
 	HttpTransport,
-	keccak256,
 	parseEther,
-	parseSignature,
 	parseUnits,
 	PublicClient,
-	serializeTransaction,
-	TransactionSerializableEIP1559,
 	zeroAddress,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
@@ -49,7 +45,7 @@ import {
 	RIPS_CONDUIT_CONTRACT,
 	RIPS_CONTRACT,
 } from '../../../src/infrastructure/rips/rips.constants'
-import { SignService } from '../../../src/infrastructure/sign/sign.service'
+import { SignModule } from '../../../src/infrastructure/sign/sign.module'
 import {
 	createMockDeBridgeApiService,
 	mockGetOrder,
@@ -59,8 +55,7 @@ import { anvilTape } from '../../utils/cassette/anvil-tape'
 import { externalTapes } from '../../utils/cassette/host-tape'
 import { useVcr } from '../../utils/cassette/use-vcr'
 import { fulfillDlnOrder } from '../../utils/de-bridge-dln'
-import { provisionKekFile } from '../../utils/kek'
-import { usePostgres } from '../../utils/postgres'
+import { MockSignModule } from '../../utils/sign'
 
 const ARBITRUM_CHAIN_ID = 42161
 const BASE_CHAIN_ID = 8453
@@ -120,16 +115,6 @@ const userWallet: UserWallet = {
 	namespaceToAddress: { [EIP155]: userAccount.address },
 }
 
-const mockSignService: Pick<SignService, 'signTx'> = {
-	signTx: async (_wallet, tx: TransactionSerializableEIP1559) => {
-		const serializedUnsigned = serializeTransaction(tx)
-		const hash = keccak256(serializedUnsigned)
-		const signatureHex = await userAccount.sign({ hash })
-		const signature = parseSignature(signatureHex)
-		return serializeTransaction(tx, signature)
-	},
-}
-
 function toBaseChainAddress(address: `0x${string}`): ChainAddress {
 	return {
 		address,
@@ -150,8 +135,6 @@ async function buildTestModule(
 	>,
 	extraProviders: { token: unknown; value: unknown }[] = [],
 ): Promise<TestingModule> {
-	provisionKekFile()
-
 	let builder = Test.createTestingModule({
 		imports: [
 			CacheModule.register({ isGlobal: true }),
@@ -171,8 +154,8 @@ async function buildTestModule(
 		})
 		.overrideProvider(EVM_CLIENT_CONFIG)
 		.useValue({ rpcSettings })
-		.overrideProvider(SignService)
-		.useValue(mockSignService)
+		.overrideModule(SignModule)
+		.useModule(MockSignModule.withAccount(userAccount))
 
 	for (const { token, value } of extraProviders) {
 		builder = builder.overrideProvider(token).useValue(value)
@@ -212,10 +195,6 @@ function publicClientFor(chain: Chain, rpcUrl: string) {
 }
 
 describe('DeBridge integration', () => {
-	// DeBridgeModule pulls in the Prisma-backed wallet repositories, so the app
-	// only boots with a reachable database behind DATABASE_URL.
-	usePostgres()
-
 	describe('buy entries with USDC on Arbitrum', () => {
 		const vcr = useVcr({
 			...externalTapes(),

@@ -15,13 +15,9 @@ import {
 	getAddress,
 	http,
 	HttpTransport,
-	keccak256,
 	parseEther,
-	parseSignature,
 	parseUnits,
 	PublicClient,
-	serializeTransaction,
-	TransactionSerializableEIP1559,
 	zeroAddress,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
@@ -39,14 +35,13 @@ import {
 	RIPS_CONDUIT_CONTRACT,
 	RIPS_CONTRACT,
 } from '../../../src/infrastructure/rips/rips.constants'
-import { SignService } from '../../../src/infrastructure/sign/sign.service'
+import { SignModule } from '../../../src/infrastructure/sign/sign.module'
 import { expectSucceeded } from '../../utils/attempts'
 import { anvilTape } from '../../utils/cassette/anvil-tape'
 import { externalTapes } from '../../utils/cassette/host-tape'
 import { useVcr } from '../../utils/cassette/use-vcr'
 import { withAnvilTraces } from '../../utils/cassette/with-traces'
-import { provisionKekFile } from '../../utils/kek'
-import { usePostgres } from '../../utils/postgres'
+import { MockSignModule } from '../../utils/sign'
 
 const BASE_CHAIN_ID = 8453
 
@@ -111,24 +106,12 @@ const userWallet: UserWallet = {
 	namespaceToAddress: { [EIP155]: userAccount.address },
 }
 
-const mockSignService: Pick<SignService, 'signTx'> = {
-	signTx: async (_wallet, tx: TransactionSerializableEIP1559) => {
-		const serializedUnsigned = serializeTransaction(tx)
-		const hash = keccak256(serializedUnsigned)
-		const signatureHex = await userAccount.sign({ hash })
-		const signature = parseSignature(signatureHex)
-		return serializeTransaction(tx, signature)
-	},
-}
-
 async function buildTestModule(
 	rpcSettings: Record<
 		number,
 		{ rpcUrls: string[]; disableDefaultRpcUrl: boolean }
 	>,
 ): Promise<TestingModule> {
-	provisionKekFile()
-
 	return Test.createTestingModule({
 		imports: [
 			CacheModule.register({ isGlobal: true }),
@@ -148,8 +131,8 @@ async function buildTestModule(
 		})
 		.overrideProvider(EVM_CLIENT_CONFIG)
 		.useValue({ rpcSettings })
-		.overrideProvider(SignService)
-		.useValue(mockSignService)
+		.overrideModule(SignModule)
+		.useModule(MockSignModule.withAccount(userAccount))
 		.compile()
 }
 
@@ -236,10 +219,6 @@ function useSamechainContext(): SamechainContext {
 }
 
 describe('LiFi integration', () => {
-	// LiFiModule pulls in the Prisma-backed wallet repositories, so the app
-	// only boots with a reachable database behind DATABASE_URL.
-	usePostgres()
-
 	describe('quoteEnterSamechain with USDC on Base', () => {
 		const context = useSamechainContext()
 
