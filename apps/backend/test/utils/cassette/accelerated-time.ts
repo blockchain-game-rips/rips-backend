@@ -27,7 +27,7 @@ export function useAcceleratedTime(): void {
 	})
 }
 
-const SPEEDUP = 50
+const SPEEDUP = 20
 
 function accelerateTime(): () => void {
 	const original = globalThis.setTimeout
