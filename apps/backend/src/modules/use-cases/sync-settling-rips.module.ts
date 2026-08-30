@@ -1,7 +1,10 @@
 import { Module, Provider } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { EntryPayoutRepository } from '../../application/interfaces/repositories/entry-payout.repository'
-import { PRESET_TO_TIER_BIASES } from '../../application/interfaces/tokens'
+import {
+	PRESET_TO_TIER_BIASES,
+	PresetToTierBiases,
+} from '../../application/interfaces/tokens'
 import { GetAvailablePresetsUseCase } from '../../application/use-cases/get-available-presets/get-available-presets.use-case'
 import { SyncSettlingRipsService } from '../../application/use-cases/sync-settling-rips/sync-settling-rips.service'
 import { SyncSettlingRipsUseCase } from '../../application/use-cases/sync-settling-rips/sync-settling-rips.use-case'
@@ -10,6 +13,17 @@ import { isProd } from '../../constants'
 import { IndexerModule } from '../../infrastructure/indexer/indexer.module'
 import { PrismaModule } from '../../infrastructure/prisma/prisma.module'
 import { GetAvailablePresetsModule } from './get-available-presets.module'
+
+function presetToTierBiases(
+	presetsBiases: Record<string, number[]>,
+): PresetToTierBiases {
+	return new Map(
+		Object.entries(presetsBiases).map(([presetId, biases]) => [
+			Number(presetId),
+			biases,
+		]),
+	)
+}
 
 async function assertConfig(
 	getAvailablePresetsUseCase: GetAvailablePresetsUseCase,
@@ -43,7 +57,7 @@ const presetToTierBiasesProvider: Provider = {
 		configService: ConfigService,
 		getAvailablePresetsUseCase: GetAvailablePresetsUseCase,
 		entryPayoutRepository: EntryPayoutRepository,
-	) => {
+	): Promise<PresetToTierBiases> => {
 		const cardConfig = configService.getOrThrow<CardConfig>(CARD_CONFIG_KEY)
 
 		if (isProd) {
@@ -54,11 +68,7 @@ const presetToTierBiasesProvider: Provider = {
 			)
 		}
 
-		return new Map(
-			Object.entries(cardConfig.presetsBiases).map(
-				([presetId, biases]) => [Number(presetId), biases],
-			),
-		)
+		return presetToTierBiases(cardConfig.presetsBiases)
 	},
 	inject: [ConfigService, GetAvailablePresetsUseCase, EntryPayoutRepository],
 }

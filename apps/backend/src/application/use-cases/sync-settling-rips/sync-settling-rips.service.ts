@@ -8,7 +8,10 @@ import { EntryPayoutRepository } from '../../interfaces/repositories/entry-payou
 import { RipSyncRepository } from '../../interfaces/repositories/rip-sync.repository'
 import { RipRepository } from '../../interfaces/repositories/rip.repository'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
-import { PRESET_TO_TIER_BIASES } from '../../interfaces/tokens'
+import {
+	PRESET_TO_TIER_BIASES,
+	PresetToTierBiases,
+} from '../../interfaces/tokens'
 import { SyncSettlingRipsUseCase } from './sync-settling-rips.use-case'
 
 @Injectable()
@@ -22,7 +25,7 @@ export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
 		private readonly ripSyncRepository: RipSyncRepository,
 
 		@Inject(PRESET_TO_TIER_BIASES)
-		private readonly presetToBiases: Map<number, number[]>,
+		private readonly presetToBiases: PresetToTierBiases,
 	) {
 		super()
 	}
