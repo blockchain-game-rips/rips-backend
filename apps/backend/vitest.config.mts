@@ -7,8 +7,8 @@ export default defineConfig({
 	test: {
 		projects: [
 			projectFor('unit'),
-			projectFor('integration', { serial: true }),
-			projectFor('e2e', { serial: true }),
+			projectFor('integration'),
+			projectFor('e2e'),
 		],
 	},
 })

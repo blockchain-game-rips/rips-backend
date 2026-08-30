@@ -8,10 +8,6 @@ const HOOK_TIMEOUT_MS = 120_000
 const repoRoot = import.meta.dirname
 const harnessRoot = resolve(repoRoot, 'packages/test-harness/src')
 
-type ProjectOptions = {
-	serial?: boolean
-}
-
 // Vitest 4 projects do not inherit `resolve` from the root config, so every
 // project gets its own copy of these aliases.
 const aliasesFor = (appRoot: string) => [
@@ -31,7 +27,7 @@ const aliasesFor = (appRoot: string) => [
 export const projectFactory = (appRoot: string) => {
 	const alias = aliasesFor(appRoot)
 
-	return (name: string, { serial = false }: ProjectOptions = {}) => ({
+	return (name: string) => ({
 		resolve: { alias },
 		test: {
 			name,
@@ -40,7 +36,6 @@ export const projectFactory = (appRoot: string) => {
 			testTimeout: TEST_TIMEOUT_MS,
 			hookTimeout: HOOK_TIMEOUT_MS,
 			include: [`test/${name}/**/*.spec.ts`],
-			fileParallelism: !serial,
 		},
 	})
 }
