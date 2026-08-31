@@ -15,7 +15,21 @@ export class AccessCoverageValidator implements OnApplicationBootstrap {
 	) {}
 
 	onApplicationBootstrap(): void {
-		const uncovered = this.findUncoveredRoutes()
+		const controllers = this.managedControllers()
+
+		const classLevelled = controllers
+			.filter((controller) => this.hasOwnAccessLevel(controller))
+			.map((controller) => controller.name)
+
+		if (classLevelled.length > 0) {
+			throw new Error(
+				`Access levels belong on route handlers, not on the controller class, so the guard and the OpenAPI header cannot disagree: ${classLevelled.join(', ')}`,
+			)
+		}
+
+		const uncovered = controllers.flatMap((controller) =>
+			this.uncoveredHandlers(controller),
+		)
 
 		if (uncovered.length > 0) {
 			throw new Error(
@@ -24,8 +38,8 @@ export class AccessCoverageValidator implements OnApplicationBootstrap {
 		}
 	}
 
-	private findUncoveredRoutes(): string[] {
-		const uncovered: string[] = []
+	private managedControllers(): Type[] {
+		const controllers: Type[] = []
 
 		for (const wrapper of this.discovery.getControllers()) {
 			const controller: unknown = wrapper.metatype
@@ -37,10 +51,14 @@ export class AccessCoverageValidator implements OnApplicationBootstrap {
 				continue
 			}
 
-			uncovered.push(...this.uncoveredHandlers(controller))
+			controllers.push(controller)
 		}
 
-		return uncovered
+		return controllers
+	}
+
+	private hasOwnAccessLevel(controller: Type): boolean {
+		return Reflect.hasOwnMetadata(ACCESS_LEVEL_KEY, controller)
 	}
 
 	private uncoveredHandlers(controller: Type): string[] {
@@ -54,9 +72,10 @@ export class AccessCoverageValidator implements OnApplicationBootstrap {
 				continue
 			}
 
-			const level = this.reflector.getAllAndOverride<
-				AccessLevel | undefined
-			>(ACCESS_LEVEL_KEY, [handler, controller])
+			const level = this.reflector.get<AccessLevel | undefined>(
+				ACCESS_LEVEL_KEY,
+				handler,
+			)
 
 			if (!level) {
 				uncovered.push(`${controller.name}.${methodName}`)
