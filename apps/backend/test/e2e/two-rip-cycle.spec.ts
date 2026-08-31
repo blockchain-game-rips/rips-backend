@@ -2,7 +2,6 @@ import {
 	ANVIL_ACCOUNT_0_PRIVATE_KEY,
 	ensureIndexerSync,
 } from '@rips/test-harness'
-import request from 'supertest'
 import { parseEventLogs } from 'viem'
 import { KeeperUseCase } from '../../src/application/use-cases/keeper/keeper.use-case'
 import { SyncSettlingRipsUseCase } from '../../src/application/use-cases/sync-settling-rips/sync-settling-rips.use-case'
@@ -16,6 +15,7 @@ import {
 	ENTRY_COST,
 	NATIVE_CURRENCY_CHAIN_ADDRESS,
 } from '../fixtures/entities'
+import { botRequest } from '../utils/bot-request'
 import { useRipsApp } from '../utils/rips-app'
 import {
 	clearCache,
@@ -86,7 +86,7 @@ describe('Runs two consecutive rip cycles end to end', () => {
 	})
 
 	async function buyEntries(telegramId: string): Promise<number> {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', telegramId)
 			.send({

@@ -1,10 +1,10 @@
 import { setNativeBalance } from '@rips/test-harness'
-import request from 'supertest'
 import {
 	BALANCE_BUFFER_MULTIPLIER,
 	ENTRY_COST,
 	NATIVE_CURRENCY_CHAIN_ADDRESS,
 } from '../fixtures/entities'
+import { botRequest } from '../utils/bot-request'
 import { useRipsApp } from '../utils/rips-app'
 
 const PRESET_ID = 1
@@ -16,7 +16,7 @@ describe('Buy entries E2E', () => {
 	const ctx = useRipsApp()
 
 	it('creates a user', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.post('/users')
 			.send({ telegramId: USER_TG_ID })
 			.expect(201)
@@ -25,7 +25,7 @@ describe('Buy entries E2E', () => {
 	})
 
 	it('buys entries and returns tx with rip and entry info', async () => {
-		const userRes = await request(ctx.app.getHttpServer())
+		const userRes = await botRequest(ctx.app.getHttpServer())
 			.get(`/users/${USER_TG_ID}`)
 			.expect(200)
 
@@ -35,7 +35,7 @@ describe('Buy entries E2E', () => {
 
 		await setNativeBalance(ctx.publicClient, walletAddress, requiredBalance)
 
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', USER_TG_ID)
 			.send({

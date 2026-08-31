@@ -1,6 +1,5 @@
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager'
 import { deployments, setNativeBalance } from '@rips/test-harness'
-import request from 'supertest'
 import {
 	createWalletClient,
 	getAddress,
@@ -15,6 +14,7 @@ import {
 	toEvmAddress,
 } from '../../src/domain/value-objects/evm-address'
 import { vrfCoordinatorAbi } from '../fixtures/vrf-coordinator-abi'
+import { botRequest } from './bot-request'
 import { RipsApp } from './rips-app'
 
 const RIPS_ADDRESS: Address = getAddress(deployments.rips)
@@ -37,12 +37,12 @@ export async function createUserAndFund(
 	telegramId: string,
 	balance: bigint,
 ): Promise<EvmAddress> {
-	await request(ctx.app.getHttpServer())
+	await botRequest(ctx.app.getHttpServer())
 		.post('/users')
 		.send({ telegramId })
 		.expect(201)
 
-	const userRes = await request(ctx.app.getHttpServer())
+	const userRes = await botRequest(ctx.app.getHttpServer())
 		.get(`/users/${telegramId}`)
 		.expect(200)
 

@@ -4,7 +4,6 @@ import {
 	getBalances,
 	setNativeBalance,
 } from '@rips/test-harness'
-import request from 'supertest'
 import { parseEventLogs } from 'viem'
 import { KeeperUseCase } from '../../src/application/use-cases/keeper/keeper.use-case'
 import { SyncSettlingRipsUseCase } from '../../src/application/use-cases/sync-settling-rips/sync-settling-rips.use-case'
@@ -21,6 +20,7 @@ import {
 	NATIVE_ADDRESS,
 	NATIVE_CURRENCY_CHAIN_ADDRESS,
 } from '../fixtures/entities'
+import { botRequest } from '../utils/bot-request'
 import { useRipsApp } from '../utils/rips-app'
 import {
 	parseRandomnessFulfilled,
@@ -53,7 +53,7 @@ describe('Referral system E2E', () => {
 	})
 
 	it('reports the default fee in the tier table when no tiers are configured', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/referral-system/tier-tables')
 			.expect(200)
 
@@ -66,7 +66,7 @@ describe('Referral system E2E', () => {
 	})
 
 	it('creates referrer user', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.post('/users')
 			.send({ telegramId: TELEGRAM_ID_REFERRER })
 			.expect(201)
@@ -77,7 +77,7 @@ describe('Referral system E2E', () => {
 	})
 
 	it('creates player user linked to referrer', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.post('/users')
 			.send({ telegramId: TELEGRAM_ID_PLAYER, referrerAddress })
 			.expect(201)
@@ -86,11 +86,11 @@ describe('Referral system E2E', () => {
 	})
 
 	async function runGameCycle(): Promise<void> {
-		const referrerRes = await request(ctx.app.getHttpServer())
+		const referrerRes = await botRequest(ctx.app.getHttpServer())
 			.get(`/users/${TELEGRAM_ID_REFERRER}`)
 			.expect(200)
 
-		const playerRes = await request(ctx.app.getHttpServer())
+		const playerRes = await botRequest(ctx.app.getHttpServer())
 			.get(`/users/${TELEGRAM_ID_PLAYER}`)
 			.expect(200)
 
@@ -113,13 +113,13 @@ describe('Referral system E2E', () => {
 			paymentCurrencyChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 		})
 
-		await request(ctx.app.getHttpServer())
+		await botRequest(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_REFERRER)
 			.send(buyEntriesBody(ENTRIES_PER_USER))
 			.expect(200)
 
-		await request(ctx.app.getHttpServer())
+		await botRequest(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_PLAYER)
 			.send(buyEntriesBody(ENTRIES_PER_USER))
@@ -167,7 +167,7 @@ describe('Referral system E2E', () => {
 				referrerAddress.toLowerCase(),
 		)
 
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/referral-system/referrers')
 			.set('x-telegram-id', TELEGRAM_ID_REFERRER)
 			.expect(200)
@@ -183,7 +183,7 @@ describe('Referral system E2E', () => {
 			ctx.publicClient,
 		)
 
-		const withdrawRes = await request(ctx.app.getHttpServer())
+		const withdrawRes = await botRequest(ctx.app.getHttpServer())
 			.post('/referral-system/rewards')
 			.set('x-telegram-id', TELEGRAM_ID_REFERRER)
 			.send({ currencyAddress: NATIVE_ADDRESS })
@@ -203,7 +203,7 @@ describe('Referral system E2E', () => {
 
 		expect(balanceAfter - balanceBefore).toBe(availableReward - txCost)
 
-		const referrerRes = await request(ctx.app.getHttpServer())
+		const referrerRes = await botRequest(ctx.app.getHttpServer())
 			.get('/referral-system/referrers')
 			.set('x-telegram-id', TELEGRAM_ID_REFERRER)
 			.expect(200)

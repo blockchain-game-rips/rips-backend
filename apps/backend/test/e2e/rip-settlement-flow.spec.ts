@@ -5,7 +5,6 @@ import {
 	getBalances,
 	increaseTime,
 } from '@rips/test-harness'
-import request from 'supertest'
 import { getAddress, parseEventLogs } from 'viem'
 import { NotificationType } from '../../generated/prisma'
 import { KeeperUseCase } from '../../src/application/use-cases/keeper/keeper.use-case'
@@ -21,6 +20,7 @@ import {
 	ENTRY_COST,
 	NATIVE_CURRENCY_CHAIN_ADDRESS,
 } from '../fixtures/entities'
+import { botRequest } from '../utils/bot-request'
 import { useRipsApp } from '../utils/rips-app'
 import {
 	parseRandomnessFulfilled,
@@ -119,7 +119,7 @@ describe('Rip settlement flow E2E', () => {
 
 		// Split across two purchases so the participation lookup has to
 		// collapse duplicate rows for the same user and rip.
-		const res1 = await request(ctx.app.getHttpServer())
+		const res1 = await botRequest(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.send(buyEntriesBody(ENTRIES_PER_USER_FIRST_PURCHASE))
@@ -131,7 +131,7 @@ describe('Rip settlement flow E2E', () => {
 			ENTRIES_PER_USER_FIRST_PURCHASE,
 		)
 
-		const res1SecondPurchase = await request(ctx.app.getHttpServer())
+		const res1SecondPurchase = await botRequest(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.send(buyEntriesBody(ENTRIES_PER_USER_SECOND_PURCHASE))
@@ -142,7 +142,7 @@ describe('Rip settlement flow E2E', () => {
 			ENTRIES_PER_USER_SECOND_PURCHASE,
 		)
 
-		const res2 = await request(ctx.app.getHttpServer())
+		const res2 = await botRequest(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.send(buyEntriesBody(ENTRIES_PER_USER))
@@ -196,7 +196,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('reports the claimed-but-unsynced rip as CLAIM_SETTLING in ongoing', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/ongoing')
 			.expect(200)
 
@@ -209,7 +209,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('omits the settling rip from the finished feed', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.expect(200)
 
@@ -221,7 +221,7 @@ describe('Rip settlement flow E2E', () => {
 	// Counted only once the backend has settled the rip, not once the chain
 	// has finished with it. The sync worker has not run yet.
 	it('leaves the settling rip out of a participant count', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished/counts')
 			.query({ userAddress: user1Address })
 			.expect(200)
@@ -255,7 +255,7 @@ describe('Rip settlement flow E2E', () => {
 	it('moves the synced rip out of ongoing and into finished as CLAIMED', async () => {
 		await clearCache(ctx)
 
-		const ongoingRes = await request(ctx.app.getHttpServer())
+		const ongoingRes = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/ongoing')
 			.expect(200)
 
@@ -265,7 +265,7 @@ describe('Rip settlement flow E2E', () => {
 			),
 		).toBe(false)
 
-		const finishedRes = await request(ctx.app.getHttpServer())
+		const finishedRes = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.expect(200)
 
@@ -278,21 +278,21 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('rejects a malformed cursor on the finished feed', async () => {
-		await request(ctx.app.getHttpServer())
+		await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({ cursor: 'not-a-cursor' })
 			.expect(400)
 	})
 
 	it('rejects a limit above the maximum', async () => {
-		await request(ctx.app.getHttpServer())
+		await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({ limit: MAX_LIMIT + 1 })
 			.expect(400)
 	})
 
 	it('pages the finished feed with the returned cursor', async () => {
-		const firstPage = await request(ctx.app.getHttpServer())
+		const firstPage = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({ limit: 1 })
 			.expect(200)
@@ -303,7 +303,7 @@ describe('Rip settlement flow E2E', () => {
 			return
 		}
 
-		const secondPage = await request(ctx.app.getHttpServer())
+		const secondPage = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({ limit: 1, cursor: firstPage.body.nextCursor })
 			.expect(200)
@@ -319,12 +319,12 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('get-payouts returns 4 entries for each user', async () => {
-		const res1 = await request(ctx.app.getHttpServer())
+		const res1 = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/payouts')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.expect(200)
 
-		const res2 = await request(ctx.app.getHttpServer())
+		const res2 = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/payouts')
 			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.expect(200)
@@ -334,7 +334,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('user 1 reveals 1 entry, user 2 reveals all 4 entries', async () => {
-		const revealOneRes = await request(ctx.app.getHttpServer())
+		const revealOneRes = await botRequest(ctx.app.getHttpServer())
 			.patch('/rips/payouts')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.send({ revealAll: false })
@@ -344,7 +344,7 @@ describe('Rip settlement flow E2E', () => {
 			ENTRIES_REVEALED_ONE_AT_A_TIME,
 		)
 
-		const revealAllRes = await request(ctx.app.getHttpServer())
+		const revealAllRes = await botRequest(ctx.app.getHttpServer())
 			.patch('/rips/payouts')
 			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.send({ revealAll: true })
@@ -354,12 +354,12 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('user 1 has 3 unrevealed entries remaining, user 2 has 0', async () => {
-		const res1 = await request(ctx.app.getHttpServer())
+		const res1 = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/payouts?revealed=false')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.expect(200)
 
-		const res2 = await request(ctx.app.getHttpServer())
+		const res2 = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/payouts?revealed=false')
 			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.expect(200)
@@ -369,12 +369,12 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('revealed filter returns the mirror image of unrevealed', async () => {
-		const res1 = await request(ctx.app.getHttpServer())
+		const res1 = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/payouts?revealed=true')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.expect(200)
 
-		const res2 = await request(ctx.app.getHttpServer())
+		const res2 = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/payouts?revealed=true')
 			.set('x-telegram-id', TELEGRAM_ID_USER_2)
 			.expect(200)
@@ -384,7 +384,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('unfiltered call returns all payouts regardless of reveal state', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/payouts')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.expect(200)
@@ -396,14 +396,14 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('ripId filter returns both reveal states for that rip', async () => {
-		const allRes = await request(ctx.app.getHttpServer())
+		const allRes = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/payouts')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.expect(200)
 
 		const ripId: number = allRes.body.payouts[0].ripId
 
-		const ripRes = await request(ctx.app.getHttpServer())
+		const ripRes = await botRequest(ctx.app.getHttpServer())
 			.get(`/rips/payouts?ripId=${ripId}`)
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.expect(200)
@@ -417,7 +417,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('rejects a malformed ripId', async () => {
-		await request(ctx.app.getHttpServer())
+		await botRequest(ctx.app.getHttpServer())
 			.get('/rips/payouts?ripId=abc')
 			.set('x-telegram-id', TELEGRAM_ID_USER_1)
 			.expect(400)
@@ -469,13 +469,13 @@ describe('Rip settlement flow E2E', () => {
 			paymentCurrencyChainAddress: NATIVE_CURRENCY_CHAIN_ADDRESS,
 		})
 
-		const res1 = await request(ctx.app.getHttpServer())
+		const res1 = await botRequest(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', REFUND_TELEGRAM_ID_USER_1)
 			.send(buyEntriesBody(ENTRIES_PER_REFUND_USER))
 			.expect(200)
 
-		const res2 = await request(ctx.app.getHttpServer())
+		const res2 = await botRequest(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', REFUND_TELEGRAM_ID_USER_2)
 			.send(buyEntriesBody(ENTRIES_PER_REFUND_USER))
@@ -533,7 +533,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('narrows the finished feed to the rips a user entered', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({ userAddress: user1Address })
 			.expect(200)
@@ -545,7 +545,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('narrows the finished feed to a refund-rip participant', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({ userAddress: refundUser1Address })
 			.expect(200)
@@ -557,7 +557,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('returns every finished rip when no user address is given', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.expect(200)
 
@@ -568,7 +568,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('returns an empty page for an address that entered nothing', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({ userAddress: NEVER_PARTICIPATED_ADDRESS })
 			.expect(200)
@@ -581,7 +581,7 @@ describe('Rip settlement flow E2E', () => {
 	// lookup that failed to collapse them would page as if there were more
 	// rips than exist and hand back a cursor promising a further page.
 	it('pages a filtered feed without inventing a page that is not there', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({ userAddress: user1Address, limit: 1 })
 			.expect(200)
@@ -593,7 +593,7 @@ describe('Rip settlement flow E2E', () => {
 			return
 		}
 
-		const secondPage = await request(ctx.app.getHttpServer())
+		const secondPage = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({
 				userAddress: user1Address,
@@ -607,14 +607,14 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('rejects a malformed user address on the finished feed', async () => {
-		await request(ctx.app.getHttpServer())
+		await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({ userAddress: 'not-an-address' })
 			.expect(400)
 	})
 
 	it('matches a user address regardless of its casing', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished')
 			.query({ userAddress: user1Address.toLowerCase() })
 			.expect(200)
@@ -625,7 +625,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('counts a claim-rip participant against the claimed total', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished/counts')
 			.query({ userAddress: user1Address })
 			.expect(200)
@@ -637,7 +637,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('counts a refund-rip participant against the refunded total', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished/counts')
 			.query({ userAddress: refundUser1Address })
 			.expect(200)
@@ -649,7 +649,7 @@ describe('Rip settlement flow E2E', () => {
 	})
 
 	it('counts nothing for an address that entered nothing', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.get('/rips/rips/finished/counts')
 			.query({ userAddress: NEVER_PARTICIPATED_ADDRESS })
 			.expect(200)

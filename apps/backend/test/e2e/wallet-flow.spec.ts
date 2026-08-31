@@ -1,7 +1,7 @@
 import { setNativeBalance } from '@rips/test-harness'
-import request from 'supertest'
 import { parseEther } from 'viem'
 import { NATIVE_CURRENCY_CHAIN_ADDRESS } from '../fixtures/entities'
+import { botRequest } from '../utils/bot-request'
 import { useRipsApp } from '../utils/rips-app'
 
 const USER_TG_ID = '123456789'
@@ -16,7 +16,7 @@ describe('Wallet flow E2E', () => {
 	const ctx = useRipsApp()
 
 	it('creates a user and returns an EVM wallet address', async () => {
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.post('/users')
 			.send({ telegramId: USER_TG_ID })
 			.expect(201)
@@ -25,7 +25,7 @@ describe('Wallet flow E2E', () => {
 	})
 
 	it('deposits funds — balance reflects on-chain transfer', async () => {
-		const userRes = await request(ctx.app.getHttpServer())
+		const userRes = await botRequest(ctx.app.getHttpServer())
 			.get(`/users/${USER_TG_ID}`)
 			.expect(200)
 
@@ -33,7 +33,7 @@ describe('Wallet flow E2E', () => {
 
 		await setNativeBalance(ctx.publicClient, walletAddress, DEPOSIT_AMOUNT)
 
-		const balanceRes = await request(ctx.app.getHttpServer())
+		const balanceRes = await botRequest(ctx.app.getHttpServer())
 			.get(
 				`/wallets/balances?chainAddress=${CHAIN_ADDRESS_QUERY}&chainAddress=${CHAIN_ADDRESS_QUERY}`,
 			)
@@ -48,7 +48,7 @@ describe('Wallet flow E2E', () => {
 			address: RECIPIENT_ADDRESS,
 		})
 
-		const res = await request(ctx.app.getHttpServer())
+		const res = await botRequest(ctx.app.getHttpServer())
 			.post('/wallets/withdrawals')
 			.set('x-telegram-id', USER_TG_ID)
 			.send({
