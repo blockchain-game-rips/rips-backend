@@ -10300,6 +10300,7 @@ __metadata:
     lefthook: "npm:^2.1.9"
     prettier: "npm:^3.8.4"
     prettier-plugin-organize-imports: "npm:^4.3.0"
+    ts-node: "npm:^10.9.2"
     typescript-eslint: "npm:^8.20.0"
   languageName: unknown
   linkType: soft
