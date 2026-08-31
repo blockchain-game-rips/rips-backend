@@ -29,6 +29,7 @@ import { QuotePurchaseUseCase } from '../../application/use-cases/quote-purchase
 import { QuoteZapSamechainUseCase } from '../../application/use-cases/quote-zap-samechain/quote-zap-samechain.use-case'
 import { QuoteZapUseCase } from '../../application/use-cases/quote-zap/quote-zap.use-case'
 import { RevealEntryPayoutsUseCase } from '../../application/use-cases/reveal-entry-payouts/reveal-entry-payouts.use-case'
+import { PublicAccess, UserAccess } from '../shared/access/access-level'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
 import {
 	TELEGRAM_ID_HEADER,
@@ -97,6 +98,7 @@ import { toPayoutDto } from './shared/payout.dto'
 import { toRipDto } from './shared/rip.dto'
 
 @Controller('rips')
+@UserAccess()
 @UseInterceptors(PriceEnrichmentInterceptor)
 export class RipsController {
 	constructor(
@@ -119,6 +121,7 @@ export class RipsController {
 		private readonly getCardDefinitionsUseCase: GetCardDefinitionsUseCase,
 	) {}
 
+	@PublicAccess()
 	@Get('state')
 	@ZodResponse({ type: GetRipsStateResponseDto })
 	async getRipsState(): Promise<GetRipsStateResponseDto> {
@@ -130,6 +133,7 @@ export class RipsController {
 		}
 	}
 
+	@PublicAccess()
 	@Get('presets')
 	@ZodResponse({ type: GetPresetsResponseDto })
 	async getPresets(): Promise<GetPresetsResponseDto> {
@@ -157,6 +161,7 @@ export class RipsController {
 		return toBuyEntriesPurchaseResponseDto(attempt)
 	}
 
+	@PublicAccess()
 	@Post('entries/quote-purchase')
 	@ZodResponse({ type: QuotePurchaseResponseDto })
 	async quotePurchase(
@@ -237,6 +242,7 @@ export class RipsController {
 		return toQuoteZapSamechainResponseDto(quote)
 	}
 
+	@PublicAccess()
 	@Get('entries/zap/crosschain/result')
 	@ZodResponse({ type: GetZapResultResponseDto })
 	async getZapResult(
@@ -285,6 +291,7 @@ export class RipsController {
 		}
 	}
 
+	@PublicAccess()
 	@Get('rips/ongoing')
 	@ZodResponse({ type: GetOngoingRipsResponseDto })
 	async getOngoingRips(): Promise<GetOngoingRipsResponseDto> {
@@ -295,6 +302,7 @@ export class RipsController {
 		}
 	}
 
+	@PublicAccess()
 	@Get('rips')
 	@ZodResponse({ type: GetRipsResponseDto })
 	async getRips(
@@ -309,6 +317,7 @@ export class RipsController {
 		}
 	}
 
+	@PublicAccess()
 	@Get('rips/finished')
 	@ApiOperation({
 		description:
@@ -336,6 +345,7 @@ export class RipsController {
 		}
 	}
 
+	@PublicAccess()
 	@Get('rips/finished/counts')
 	@ApiOperation({
 		description:
@@ -362,6 +372,7 @@ export class RipsController {
 		return toGetCardCollectionResponseDto(tiers)
 	}
 
+	@PublicAccess()
 	@Get('card-definition')
 	@ZodResponse({ type: GetCardDefinitionsResponseDto })
 	async getCardDefinitions(): Promise<GetCardDefinitionsResponseDto> {

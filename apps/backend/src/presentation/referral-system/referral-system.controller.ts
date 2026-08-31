@@ -14,6 +14,7 @@ import { GetReferrerTierTablesUseCase } from '../../application/use-cases/get-re
 import { GetReferrerUseCase } from '../../application/use-cases/get-referrer/get-referrer.use-case'
 import { QuoteWithdrawRewardUseCase } from '../../application/use-cases/quote-withdraw-reward/quote-withdraw-reward.use-case'
 import { WithdrawRewardUseCase } from '../../application/use-cases/withdraw-reward/withdraw-reward.use-case'
+import { PublicAccess, UserAccess } from '../shared/access/access-level'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
 import {
 	TELEGRAM_ID_HEADER,
@@ -39,6 +40,7 @@ import {
 } from './withdraw-reward/withdraw-reward.response'
 
 @Controller('referral-system')
+@UserAccess()
 @UseInterceptors(PriceEnrichmentInterceptor)
 export class ReferralSystemController {
 	constructor(
@@ -64,6 +66,7 @@ export class ReferralSystemController {
 		return toGetReferrerResponseDto(referrer)
 	}
 
+	@PublicAccess()
 	@Get('tier-tables')
 	@ZodResponse({ type: GetTierTablesResponseDto })
 	async getTierTables(): Promise<GetTierTablesResponseDto> {

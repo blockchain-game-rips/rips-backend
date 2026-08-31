@@ -12,6 +12,7 @@ import { CreateUserUseCase } from '../../application/use-cases/create-user/creat
 import { ExportKeyUseCase } from '../../application/use-cases/export-key/export-key.use-case'
 import { GetUserUseCase } from '../../application/use-cases/get-user/get-user.use-case'
 import { SetReferrerUseCase } from '../../application/use-cases/set-referrer/set-referrer.use-case'
+import { UserAccess } from '../shared/access/access-level'
 import {
 	TELEGRAM_ID_HEADER,
 	TelegramIdHeaderDto,
@@ -27,6 +28,7 @@ import { SetReferrerBodyDto } from './set-referrer/set-referrer.request'
 import { toUserDto, UserDto } from './shared/user.dto'
 
 @Controller('users')
+@UserAccess()
 export class UsersController {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,

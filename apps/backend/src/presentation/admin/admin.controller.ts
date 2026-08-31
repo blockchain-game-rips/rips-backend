@@ -4,7 +4,6 @@ import {
 	Get,
 	Param,
 	Put,
-	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common'
 import { ApiHeader } from '@nestjs/swagger'
@@ -18,8 +17,8 @@ import { SetReferrerCustomFeeUseCase } from '../../application/use-cases/set-ref
 import { SetReferrerFrozenUseCase } from '../../application/use-cases/set-referrer-frozen/set-referrer-frozen.use-case'
 import { UpdatePresetConfigUseCase } from '../../application/use-cases/update-preset-config/update-preset-config.use-case'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
+import { AdminAccess } from '../shared/access/access-level'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
-import { AdminApiKeyGuard } from './admin-api-key.guard'
 import { ADMIN_API_KEY_HEADER } from './admin-api-key.header'
 import { SetDefaultReferralFeeBodyDto } from './set-default-referral-fee/set-default-referral-fee.request'
 import { SetPausedBodyDto } from './set-paused/set-paused.request'
@@ -46,7 +45,7 @@ import {
 import { UpdatePresetConfigBodyDto } from './update-preset-config/update-preset-config.request'
 
 @Controller('admin')
-@UseGuards(AdminApiKeyGuard)
+@AdminAccess()
 @UseInterceptors(PriceEnrichmentInterceptor)
 @ApiHeader({ name: ADMIN_API_KEY_HEADER, required: true })
 export class AdminController {

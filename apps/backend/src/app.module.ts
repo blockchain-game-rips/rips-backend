@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { APP_GUARD, DiscoveryModule } from '@nestjs/core'
 import { ScheduleModule } from '@nestjs/schedule'
 import { AppConfigModule } from './configuration/app-config.module'
 import { AppCacheModule } from './infrastructure/cache/app-cache.module'
@@ -17,9 +18,12 @@ import { UsersApiModule } from './modules/api/users-api/users-api.module'
 import { WalletsApiModule } from './modules/api/wallets-api/wallets-api.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
 import { SyncSettlingRipsModule } from './modules/sync-settling-rips/sync-settling-rips.module'
+import { AccessCoverageValidator } from './presentation/shared/access/access-coverage.validator'
+import { AccessGuard } from './presentation/shared/access/access.guard'
 
 @Module({
 	imports: [
+		DiscoveryModule,
 		LoggingModule,
 		MetricsModule,
 		AppConfigModule,
@@ -38,6 +42,13 @@ import { SyncSettlingRipsModule } from './modules/sync-settling-rips/sync-settli
 		KeeperModule,
 		SyncSettlingRipsModule,
 		NotificationsApiModule,
+	],
+	providers: [
+		{
+			provide: APP_GUARD,
+			useClass: AccessGuard,
+		},
+		AccessCoverageValidator,
 	],
 })
 export class AppModule {}

@@ -19,6 +19,7 @@ import { QuoteWithdrawUseCase } from '../../application/use-cases/quote-withdraw
 import { SwapSamechainUseCase } from '../../application/use-cases/swap-samechain/swap-samechain.use-case'
 import { SwapUseCase } from '../../application/use-cases/swap/swap.use-case'
 import { WithdrawUseCase } from '../../application/use-cases/withdraw.ts/withdraw.use-case'
+import { PublicAccess, UserAccess } from '../shared/access/access-level'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
 import {
 	TELEGRAM_ID_HEADER,
@@ -63,6 +64,7 @@ import { SwapBodyDto } from './swap/swap.request'
 import { SwapResponseDto, toSwapResponseDto } from './swap/swap.response'
 
 @Controller('wallets')
+@UserAccess()
 @UseInterceptors(PriceEnrichmentInterceptor)
 export class WalletsController {
 	constructor(
@@ -206,6 +208,7 @@ export class WalletsController {
 		return toSwapSamechainResponseDto(result)
 	}
 
+	@PublicAccess()
 	@Get('swap/crosschain/result')
 	@ZodResponse({ type: GetSwapResultResponseDto })
 	async getSwapResult(

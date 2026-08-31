@@ -2,6 +2,7 @@ import { Controller, Get, Param, Patch } from '@nestjs/common'
 import { ZodResponse } from 'nestjs-zod'
 import { GetNotificationsUseCase } from '../../application/use-cases/get-notifications/get-notifications.use-case'
 import { MarkNotificationNotifiedUseCase } from '../../application/use-cases/mark-notification-notified/mark-notification-notified.use-case'
+import { PublicAccess } from '../shared/access/access-level'
 import {
 	GetNotificationsResponseDto,
 	toGetNotificationsResponseDto,
@@ -16,6 +17,7 @@ import {
 } from './mark-notification-notified/mark-notification-notified.response'
 
 @Controller('notifications')
+@PublicAccess()
 export class NotificationsController {
 	constructor(
 		private readonly getNotificationsUseCase: GetNotificationsUseCase,

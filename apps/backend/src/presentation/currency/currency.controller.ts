@@ -5,6 +5,7 @@ import {
 	SUPPORTED_CURRENCIES,
 	SupportedCurrencies,
 } from '../../infrastructure/currency-registry/currency-registry.interfaces'
+import { PublicAccess } from '../shared/access/access-level'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
 import { GetCurrenciesQueryDto } from './get-currencies/get-currencies.request'
 import {
@@ -17,6 +18,7 @@ import {
 } from './get-supported-currencies/get-supported-currencies.response'
 
 @Controller('currencies')
+@PublicAccess()
 @UseInterceptors(PriceEnrichmentInterceptor)
 export class CurrencyController {
 	constructor(
