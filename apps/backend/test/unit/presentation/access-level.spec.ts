@@ -8,7 +8,7 @@ import {
 	UserAccess,
 } from '../../../src/presentation/shared/access/access-level'
 import { ADMIN_API_KEY_HEADER } from '../../../src/presentation/shared/access/admin-api-key.header'
-import { BOT_API_KEY_HEADER } from '../../../src/presentation/shared/access/bot-api-key.header'
+import { USER_API_KEY_HEADER } from '../../../src/presentation/shared/access/user-api-key.header'
 
 // @nestjs/swagger only exports this key from a private path, so the spec
 // restates the literal rather than reaching into the package internals.
@@ -71,11 +71,11 @@ describe('Access level decorators', () => {
 		expect(headersOf(handlers.public)).toEqual([])
 	})
 
-	it('documents the bot key on a user route', () => {
+	it('documents the user key on a user route', () => {
 		expect(levelOf(handlers.user)).toBe(AccessLevel.User)
 		expect(headersOf(handlers.user)).toEqual([
 			expect.objectContaining({
-				name: BOT_API_KEY_HEADER,
+				name: USER_API_KEY_HEADER,
 				required: true,
 			}),
 		])

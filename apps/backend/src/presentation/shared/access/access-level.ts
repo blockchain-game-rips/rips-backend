@@ -1,7 +1,7 @@
 import { applyDecorators, SetMetadata } from '@nestjs/common'
 import { ApiHeader } from '@nestjs/swagger'
 import { ADMIN_API_KEY_HEADER } from './admin-api-key.header'
-import { BOT_API_KEY_HEADER } from './bot-api-key.header'
+import { USER_API_KEY_HEADER } from './user-api-key.header'
 
 export enum AccessLevel {
 	Public = 'public',
@@ -32,7 +32,7 @@ export const PublicAccess = () =>
 	SetMetadata(ACCESS_LEVEL_KEY, AccessLevel.Public)
 
 export const UserAccess = () =>
-	guardedAccess(AccessLevel.User, BOT_API_KEY_HEADER)
+	guardedAccess(AccessLevel.User, USER_API_KEY_HEADER)
 
 export const AdminAccess = () =>
 	guardedAccess(AccessLevel.Admin, ADMIN_API_KEY_HEADER)

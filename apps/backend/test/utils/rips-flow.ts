@@ -14,8 +14,8 @@ import {
 	toEvmAddress,
 } from '../../src/domain/value-objects/evm-address'
 import { vrfCoordinatorAbi } from '../fixtures/vrf-coordinator-abi'
-import { botRequest } from './bot-request'
 import { RipsApp } from './rips-app'
+import { userRequest } from './user-request'
 
 const RIPS_ADDRESS: Address = getAddress(deployments.rips)
 const VRF_COORDINATOR_ADDRESS: Address = getAddress(deployments.vrfCoordinator)
@@ -37,12 +37,12 @@ export async function createUserAndFund(
 	telegramId: string,
 	balance: bigint,
 ): Promise<EvmAddress> {
-	await botRequest(ctx.app.getHttpServer())
+	await userRequest(ctx.app.getHttpServer())
 		.post('/users')
 		.send({ telegramId })
 		.expect(201)
 
-	const userRes = await botRequest(ctx.app.getHttpServer())
+	const userRes = await userRequest(ctx.app.getHttpServer())
 		.get(`/users/${telegramId}`)
 		.expect(200)
 

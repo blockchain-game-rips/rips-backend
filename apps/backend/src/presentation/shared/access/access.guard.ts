@@ -11,7 +11,7 @@ import { safeCompare } from '../../../utils/safe-compare'
 import { ACCESS_LEVEL_KEY, AccessLevel } from './access-level'
 import { WHITELISTED_PATHS } from './access-whitelist'
 import { ADMIN_API_KEY_HEADER } from './admin-api-key.header'
-import { BOT_API_KEY_HEADER } from './bot-api-key.header'
+import { USER_API_KEY_HEADER } from './user-api-key.header'
 
 type Credential = { header: string; key: string }
 
@@ -20,7 +20,7 @@ export class AccessGuard implements CanActivate {
 	private readonly credentials: Map<AccessLevel, Credential> = new Map([
 		[
 			AccessLevel.User,
-			{ header: BOT_API_KEY_HEADER, key: getEnvSafe('BOT_API_KEY') },
+			{ header: USER_API_KEY_HEADER, key: getEnvSafe('USER_API_KEY') },
 		],
 		[
 			AccessLevel.Admin,

@@ -15,7 +15,6 @@ import {
 	ENTRY_COST,
 	NATIVE_CURRENCY_CHAIN_ADDRESS,
 } from '../fixtures/entities'
-import { botRequest } from '../utils/bot-request'
 import { useRipsApp } from '../utils/rips-app'
 import {
 	clearCache,
@@ -23,6 +22,7 @@ import {
 	fulfillRandomWords,
 	getRipsLogs,
 } from '../utils/rips-flow'
+import { userRequest } from '../utils/user-request'
 
 const PRESET_ID = 1
 const ENTRIES_PER_USER = 4
@@ -86,7 +86,7 @@ describe('Runs two consecutive rip cycles end to end', () => {
 	})
 
 	async function buyEntries(telegramId: string): Promise<number> {
-		const res = await botRequest(ctx.app.getHttpServer())
+		const res = await userRequest(ctx.app.getHttpServer())
 			.post('/rips/entries/purchase')
 			.set('x-telegram-id', telegramId)
 			.send({
