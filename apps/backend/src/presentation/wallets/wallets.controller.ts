@@ -64,7 +64,6 @@ import { SwapBodyDto } from './swap/swap.request'
 import { SwapResponseDto, toSwapResponseDto } from './swap/swap.response'
 
 @Controller('wallets')
-@UserAccess()
 @UseInterceptors(PriceEnrichmentInterceptor)
 export class WalletsController {
 	constructor(
@@ -79,6 +78,7 @@ export class WalletsController {
 		private readonly currencyService: CurrencyService,
 	) {}
 
+	@UserAccess()
 	@Get('balances')
 	@ZodResponse({ type: GetBalancesResponseDto })
 	async getBalances(
@@ -96,6 +96,7 @@ export class WalletsController {
 		return toGetBalancesResponseDto(currencyAmounts)
 	}
 
+	@UserAccess()
 	@Post('withdrawals')
 	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: CreateWithdrawalResponseDto })
@@ -122,6 +123,7 @@ export class WalletsController {
 		return toCreateWithdrawalResponseDto(attempt)
 	}
 
+	@UserAccess()
 	@Post('quote-swap/crosschain')
 	@ZodResponse({ type: QuoteSwapResponseDto })
 	async quoteSwapCrosschain(
@@ -143,6 +145,7 @@ export class WalletsController {
 		return toQuoteSwapResponseDto(result)
 	}
 
+	@UserAccess()
 	@Post('quote-swap/samechain')
 	@ZodResponse({ type: QuoteSwapSamechainResponseDto })
 	async quoteSwapSamechain(
@@ -164,6 +167,7 @@ export class WalletsController {
 		return toQuoteSwapSamechainResponseDto(result)
 	}
 
+	@UserAccess()
 	@Post('swap/crosschain')
 	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: SwapResponseDto })
@@ -186,6 +190,7 @@ export class WalletsController {
 		return toSwapResponseDto(pendingZap)
 	}
 
+	@UserAccess()
 	@Post('swap/samechain')
 	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: SwapSamechainResponseDto })
@@ -225,6 +230,7 @@ export class WalletsController {
 		return toSuccessSwapResultDto(result)
 	}
 
+	@UserAccess()
 	@Post('quote-withdraw')
 	@ZodResponse({ type: QuoteWithdrawResponseDto })
 	async quoteWithdraw(

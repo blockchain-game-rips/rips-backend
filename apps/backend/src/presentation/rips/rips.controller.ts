@@ -98,7 +98,6 @@ import { toPayoutDto } from './shared/payout.dto'
 import { toRipDto } from './shared/rip.dto'
 
 @Controller('rips')
-@UserAccess()
 @UseInterceptors(PriceEnrichmentInterceptor)
 export class RipsController {
 	constructor(
@@ -144,6 +143,7 @@ export class RipsController {
 		}
 	}
 
+	@UserAccess()
 	@Post('entries/purchase')
 	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: BuyEntriesPurchaseResponseDto })
@@ -176,6 +176,7 @@ export class RipsController {
 		return toQuotePurchaseResponseDto(quote)
 	}
 
+	@UserAccess()
 	@Post('entries/zap/crosschain')
 	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: BuyEntriesZapResponseDto })
@@ -193,6 +194,7 @@ export class RipsController {
 		return toBuyEntriesZapResponseDto(pendingZap)
 	}
 
+	@UserAccess()
 	@Post('entries/zap/samechain')
 	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: BuyEntriesZapSamechainResponseDto })
@@ -210,6 +212,7 @@ export class RipsController {
 		return toBuyEntriesZapSamechainResponseDto(result)
 	}
 
+	@UserAccess()
 	@Post('entries/quote-zap/crosschain')
 	@ZodResponse({ type: QuoteZapResponseDto })
 	async quoteZapCrosschain(
@@ -226,6 +229,7 @@ export class RipsController {
 		return toQuoteZapResponseDto(quote)
 	}
 
+	@UserAccess()
 	@Post('entries/quote-zap/samechain')
 	@ZodResponse({ type: QuoteZapSamechainResponseDto })
 	async quoteZapSamechain(
@@ -255,6 +259,7 @@ export class RipsController {
 		return toGetZapResultResponseDto(result)
 	}
 
+	@UserAccess()
 	@Get('payouts')
 	@ApiOperation({
 		description:
@@ -275,6 +280,7 @@ export class RipsController {
 		}
 	}
 
+	@UserAccess()
 	@Patch('payouts')
 	@ZodResponse({ type: RevealPayoutsResponseDto })
 	async revealPayouts(
@@ -360,6 +366,7 @@ export class RipsController {
 		})
 	}
 
+	@UserAccess()
 	@Get('card-collection')
 	@ZodResponse({ type: GetCardCollectionResponseDto })
 	async getCardCollection(

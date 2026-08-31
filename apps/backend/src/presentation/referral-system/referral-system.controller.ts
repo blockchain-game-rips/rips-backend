@@ -40,7 +40,6 @@ import {
 } from './withdraw-reward/withdraw-reward.response'
 
 @Controller('referral-system')
-@UserAccess()
 @UseInterceptors(PriceEnrichmentInterceptor)
 export class ReferralSystemController {
 	constructor(
@@ -50,6 +49,7 @@ export class ReferralSystemController {
 		private readonly quoteWithdrawRewardUseCase: QuoteWithdrawRewardUseCase,
 	) {}
 
+	@UserAccess()
 	@Get('referrers')
 	@ApiOperation({
 		description:
@@ -75,6 +75,7 @@ export class ReferralSystemController {
 		return toGetTierTablesResponseDto(tierTables)
 	}
 
+	@UserAccess()
 	@Post('rewards')
 	@HttpCode(HttpStatus.OK)
 	@ZodResponse({ type: WithdrawRewardResponseDto })
@@ -90,6 +91,7 @@ export class ReferralSystemController {
 		return toWithdrawRewardResponseDto(attempt)
 	}
 
+	@UserAccess()
 	@Post('rewards/quote')
 	@ApiOperation({
 		description:

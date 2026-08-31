@@ -6,7 +6,6 @@ import {
 	Put,
 	UseInterceptors,
 } from '@nestjs/common'
-import { ApiHeader } from '@nestjs/swagger'
 import { ZodResponse } from 'nestjs-zod'
 import { CurrencyService } from '../../application/interfaces/currency.service'
 import { GetAdminWalletUseCase } from '../../application/use-cases/get-admin-wallet/get-admin-wallet.use-case'
@@ -19,7 +18,6 @@ import { UpdatePresetConfigUseCase } from '../../application/use-cases/update-pr
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { AdminAccess } from '../shared/access/access-level'
 import { PriceEnrichmentInterceptor } from '../shared/pricing/price-enrichment.interceptor'
-import { ADMIN_API_KEY_HEADER } from './admin-api-key.header'
 import { SetDefaultReferralFeeBodyDto } from './set-default-referral-fee/set-default-referral-fee.request'
 import { SetPausedBodyDto } from './set-paused/set-paused.request'
 import {
@@ -45,9 +43,7 @@ import {
 import { UpdatePresetConfigBodyDto } from './update-preset-config/update-preset-config.request'
 
 @Controller('admin')
-@AdminAccess()
 @UseInterceptors(PriceEnrichmentInterceptor)
-@ApiHeader({ name: ADMIN_API_KEY_HEADER, required: true })
 export class AdminController {
 	constructor(
 		private readonly getAdminWalletUseCase: GetAdminWalletUseCase,
@@ -60,6 +56,7 @@ export class AdminController {
 		private readonly currencyService: CurrencyService,
 	) {}
 
+	@AdminAccess()
 	@Get()
 	@ZodResponse({ type: AdminWalletResponseDto })
 	async getAdminWallet(): Promise<AdminWalletResponseDto> {
@@ -68,6 +65,7 @@ export class AdminController {
 		return toAdminWalletResponseDto(result)
 	}
 
+	@AdminAccess()
 	@Put('contract/paused')
 	@ZodResponse({ type: AdminTransactionResponseDto })
 	async setPaused(
@@ -80,6 +78,7 @@ export class AdminController {
 		return toAdminTransactionResponseDto(attempt)
 	}
 
+	@AdminAccess()
 	@Put('referral/default-fee')
 	@ZodResponse({ type: AdminTransactionResponseDto })
 	async setDefaultReferralFee(
@@ -92,6 +91,7 @@ export class AdminController {
 		return toAdminTransactionResponseDto(attempt)
 	}
 
+	@AdminAccess()
 	@Put('referral/tiers/:currency')
 	@ZodResponse({ type: AdminTransactionResponseDto })
 	async setReferralTiers(
@@ -106,6 +106,7 @@ export class AdminController {
 		return toAdminTransactionResponseDto(attempt)
 	}
 
+	@AdminAccess()
 	@Put('presets/:presetId/config')
 	@ZodResponse({ type: AdminTransactionResponseDto })
 	async updatePresetConfig(
@@ -141,6 +142,7 @@ export class AdminController {
 		return toAdminTransactionResponseDto(attempt)
 	}
 
+	@AdminAccess()
 	@Put('referrers/:address/frozen')
 	@ZodResponse({ type: AdminTransactionResponseDto })
 	async setReferrerFrozen(
@@ -155,6 +157,7 @@ export class AdminController {
 		return toAdminTransactionResponseDto(attempt)
 	}
 
+	@AdminAccess()
 	@Put('referrers/:address/custom-fee')
 	@ZodResponse({ type: AdminTransactionResponseDto })
 	async setReferrerCustomFee(

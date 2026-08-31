@@ -28,7 +28,6 @@ import { SetReferrerBodyDto } from './set-referrer/set-referrer.request'
 import { toUserDto, UserDto } from './shared/user.dto'
 
 @Controller('users')
-@UserAccess()
 export class UsersController {
 	constructor(
 		private readonly getUserUseCase: GetUserUseCase,
@@ -37,6 +36,7 @@ export class UsersController {
 		private readonly exportKeyUseCase: ExportKeyUseCase,
 	) {}
 
+	@UserAccess()
 	@Get(`:${TELEGRAM_ID_PARAM}`)
 	@ZodResponse({ type: UserDto })
 	async getUser(@Param() params: TelegramIdParamDto): Promise<UserDto> {
@@ -47,6 +47,7 @@ export class UsersController {
 		return toUserDto(user)
 	}
 
+	@UserAccess()
 	@Post()
 	@ZodResponse({ type: UserDto })
 	async createUser(@Body() body: CreateUserBodyDto): Promise<UserDto> {
@@ -58,6 +59,7 @@ export class UsersController {
 		return toUserDto(user)
 	}
 
+	@UserAccess()
 	@Post('import')
 	@ZodResponse({ type: UserDto })
 	async importUser(@Body() body: ImportUserBodyDto): Promise<UserDto> {
@@ -70,6 +72,7 @@ export class UsersController {
 		return toUserDto(user)
 	}
 
+	@UserAccess()
 	@Get(`:${TELEGRAM_ID_PARAM}/export-key`)
 	@ZodResponse({ type: ExportKeyResponseDto })
 	async exportKey(
@@ -82,6 +85,7 @@ export class UsersController {
 		return { privateKey }
 	}
 
+	@UserAccess()
 	@Patch()
 	@ZodResponse({ type: UserDto })
 	async setReferrer(

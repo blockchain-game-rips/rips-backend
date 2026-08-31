@@ -18,7 +18,6 @@ import {
 } from './get-supported-currencies/get-supported-currencies.response'
 
 @Controller('currencies')
-@PublicAccess()
 @UseInterceptors(PriceEnrichmentInterceptor)
 export class CurrencyController {
 	constructor(
@@ -27,6 +26,7 @@ export class CurrencyController {
 		private readonly supportedCurrencies: SupportedCurrencies,
 	) {}
 
+	@PublicAccess()
 	@Get('supported')
 	@ZodResponse({ type: GetSupportedCurrenciesResponseDto })
 	async getSupportedCurrencies(): Promise<GetSupportedCurrenciesResponseDto> {
@@ -41,6 +41,7 @@ export class CurrencyController {
 		return toGetSupportedCurrenciesResponseDto(currencies)
 	}
 
+	@PublicAccess()
 	@Get()
 	@ZodResponse({ type: GetCurrenciesResponseDto })
 	async getCurrencies(

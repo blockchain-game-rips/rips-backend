@@ -17,13 +17,13 @@ import {
 } from './mark-notification-notified/mark-notification-notified.response'
 
 @Controller('notifications')
-@PublicAccess()
 export class NotificationsController {
 	constructor(
 		private readonly getNotificationsUseCase: GetNotificationsUseCase,
 		private readonly markNotificationNotifiedUseCase: MarkNotificationNotifiedUseCase,
 	) {}
 
+	@PublicAccess()
 	@Get()
 	@ZodResponse({ type: GetNotificationsResponseDto })
 	async getNotifications(): Promise<GetNotificationsResponseDto> {
@@ -32,6 +32,7 @@ export class NotificationsController {
 		return toGetNotificationsResponseDto(notifications)
 	}
 
+	@PublicAccess()
 	@Patch(`:${NOTIFICATION_ID_PARAM}`)
 	@ZodResponse({ type: MarkNotificationNotifiedResponseDto })
 	async markNotified(
