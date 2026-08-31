@@ -13,6 +13,7 @@ const STUB_ENV = {
 	DATABASE_URL: 'postgresql://stub:stub@127.0.0.1:1/stub',
 	INDEXER_DATABASE_URL: 'postgresql://stub:stub@127.0.0.1:1/stub',
 	ADMIN_API_KEY: 'stub',
+	BOT_API_KEY: 'stub',
 	RIPS_CHAIN_ID: '1',
 	RIPS_CONTRACT_ADDRESS: '0x0000000000000000000000000000000000000000',
 	RIPS_CONDUIT_CONTRACT_ADDRESS: '0x0000000000000000000000000000000000000000',
@@ -54,9 +55,9 @@ async function generate() {
 		const { buildOpenApiDocument } =
 			await import('../src/openapi/build-openapi-document')
 
-		// Never initialised or listening: lifecycle hooks that would connect to
-		// the database, start schedulers or warm caches are therefore skipped.
-		const app = await NestFactory.create(AppModule, { logger: false })
+		// abortOnError lets a failed bootstrap reject here instead of Nest
+		// silently exiting the process before this promise can report why.
+		const app = await NestFactory.create(AppModule, { abortOnError: false })
 
 		const document = buildOpenApiDocument(app)
 
@@ -66,10 +67,17 @@ async function generate() {
 	} finally {
 		rmSync(stubDir, { recursive: true, force: true })
 	}
-
-	console.log(`OpenAPI schema written to ${OUTPUT_PATH}`)
-
-	process.exit(0)
 }
 
-void generate()
+generate()
+	.then(() => {
+		console.log(`✓ OpenAPI schema written to ${OUTPUT_PATH}`)
+
+		process.exit(0)
+	})
+	.catch((error: unknown) => {
+		console.error('✗ OpenAPI generation failed:')
+		console.error(error)
+
+		process.exit(1)
+	})
