@@ -1,7 +1,7 @@
 import { setNativeBalance } from '@rips/test-harness'
 import {
 	BALANCE_BUFFER_MULTIPLIER,
-	ENTRY_COST,
+	ENTRY_PRICE_PRESET_1,
 	NATIVE_CURRENCY_CHAIN_ADDRESS,
 } from '../fixtures/entities'
 import { useRipsApp } from '../utils/rips-app'
@@ -31,7 +31,9 @@ describe('Buy entries E2E', () => {
 
 		const walletAddress = userRes.body.wallets['eip155']
 		const requiredBalance =
-			ENTRY_COST * BigInt(ENTRY_COUNT) * BALANCE_BUFFER_MULTIPLIER
+			ENTRY_PRICE_PRESET_1 *
+			BigInt(ENTRY_COUNT) *
+			BALANCE_BUFFER_MULTIPLIER
 
 		await setNativeBalance(ctx.publicClient, walletAddress, requiredBalance)
 

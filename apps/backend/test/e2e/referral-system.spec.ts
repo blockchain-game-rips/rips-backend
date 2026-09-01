@@ -16,7 +16,7 @@ import { SeedCardDefinitionsService } from '../../src/infrastructure/seed/seed-c
 import cardsConfig from '../fixtures/cards.json'
 import {
 	BALANCE_BUFFER_MULTIPLIER,
-	ENTRY_COST,
+	ENTRY_PRICE_PRESET_1,
 	NATIVE_ADDRESS,
 	NATIVE_CURRENCY_CHAIN_ADDRESS,
 } from '../fixtures/entities'
@@ -97,7 +97,9 @@ describe('Referral system E2E', () => {
 		playerAddress = toEvmAddress(playerRes.body.wallets['eip155'])
 
 		const entryBalance =
-			ENTRY_COST * BigInt(ENTRIES_PER_USER) * BALANCE_BUFFER_MULTIPLIER
+			ENTRY_PRICE_PRESET_1 *
+			BigInt(ENTRIES_PER_USER) *
+			BALANCE_BUFFER_MULTIPLIER
 
 		await setNativeBalance(
 			ctx.publicClient,

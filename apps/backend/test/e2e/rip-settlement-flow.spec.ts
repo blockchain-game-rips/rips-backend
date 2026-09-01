@@ -17,7 +17,7 @@ import { MAX_LIMIT } from '../../src/presentation/rips/get-finished-rips/get-fin
 import cardsConfig from '../fixtures/cards.json'
 import {
 	BALANCE_BUFFER_MULTIPLIER,
-	ENTRY_COST,
+	ENTRY_PRICE_PRESET_1,
 	NATIVE_CURRENCY_CHAIN_ADDRESS,
 } from '../fixtures/entities'
 import { useRipsApp } from '../utils/rips-app'
@@ -74,7 +74,9 @@ describe('Rip settlement flow E2E', () => {
 	const ctx = useRipsApp()
 
 	const entryFunding =
-		ENTRY_COST * BigInt(ENTRIES_PER_USER) * BALANCE_BUFFER_MULTIPLIER
+		ENTRY_PRICE_PRESET_1 *
+		BigInt(ENTRIES_PER_USER) *
+		BALANCE_BUFFER_MULTIPLIER
 
 	beforeAll(async () => {
 		await clearCache(ctx)
@@ -452,7 +454,7 @@ describe('Rip settlement flow E2E', () => {
 		expect(totalEntries).toBeLessThan(Number(entryCap))
 
 		const entryFunding =
-			ENTRY_COST *
+			ENTRY_PRICE_PRESET_1 *
 			BigInt(ENTRIES_PER_REFUND_USER) *
 			BALANCE_BUFFER_MULTIPLIER
 

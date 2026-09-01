@@ -21,7 +21,11 @@ export const ENCRYPTED_KEY: EncryptedKey = {
 	kekVersion: 'test-v1',
 }
 
-export const ENTRY_COST = parseEther('0.005')
+// Named after the contract's `entryPrice` field. Both presets of the test
+// deployment share an entry cap; only their prices differ.
+export const ENTRY_PRICE_PRESET_1 = parseEther('0.005')
+export const ENTRY_PRICE_PRESET_2 = parseEther('0.01')
+export const ENTRY_CAP = 8
 
 // Fund users with double the entry cost to cover gas on top of entry payment.
 export const BALANCE_BUFFER_MULTIPLIER = 2n
