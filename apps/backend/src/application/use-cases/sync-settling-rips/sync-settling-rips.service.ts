@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { RipStatus, SettlingRip } from '../../../domain/entities/rip'
 import { resolvePayout } from '../../../domain/services/payout-utils'
+import { resolveSyncProgress } from '../../../domain/services/sync-progress-utils'
 import { PurchaseAction } from '../../../domain/value-objects/actions'
 import { EntryPayout } from '../../../domain/value-objects/entry-payout'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
@@ -31,10 +32,7 @@ export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
 	}
 
 	async execute(): Promise<void> {
-		const highestRipId =
-			(await this.ripSyncRepository.getHighestSyncedRipId()) ?? 0
-
-		const rip = await this.ripRepository.getNextSettlingRip(highestRipId)
+		const rip = await this.getRipToSync()
 
 		if (!rip) return
 
@@ -43,6 +41,14 @@ export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
 		} else {
 			await this.syncRefundedRip(rip)
 		}
+	}
+
+	private async getRipToSync(): Promise<SettlingRip | null> {
+		const syncedIds = await this.ripSyncRepository.getSyncedRipIds()
+
+		const progress = resolveSyncProgress(syncedIds)
+
+		return this.ripRepository.getFirstUnsyncedSettlingRip(progress)
 	}
 
 	private async syncClaimedRip(rip: SettlingRip): Promise<void> {

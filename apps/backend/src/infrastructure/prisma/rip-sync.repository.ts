@@ -12,13 +12,13 @@ export class PrismaRipSyncRepository extends RipSyncRepository {
 		super()
 	}
 
-	async getHighestSyncedRipId(): Promise<number | null> {
-		const result = await this.prisma.syncedRip.findFirst({
-			orderBy: { ripId: 'desc' },
+	async getSyncedRipIds(): Promise<number[]> {
+		const rows = await this.prisma.syncedRip.findMany({
+			orderBy: { ripId: 'asc' },
 			select: { ripId: true },
 		})
 
-		return result?.ripId ?? null
+		return rows.map((row) => row.ripId)
 	}
 
 	async syncClaimedRip(args: {

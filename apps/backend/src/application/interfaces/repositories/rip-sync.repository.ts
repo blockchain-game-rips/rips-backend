@@ -1,7 +1,7 @@
 import { EntryPayout } from '../../../domain/value-objects/entry-payout'
 
 export abstract class RipSyncRepository {
-	abstract getHighestSyncedRipId(): Promise<number | null>
+	abstract getSyncedRipIds(): Promise<number[]>
 
 	abstract syncClaimedRip(args: {
 		ripId: number

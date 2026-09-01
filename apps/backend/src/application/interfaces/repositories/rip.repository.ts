@@ -5,6 +5,7 @@ import {
 	SettlingRip,
 } from '../../../domain/entities/rip'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
+import { SyncProgress } from '../../../domain/value-objects/sync-progress'
 
 export type FinishedCursor = {
 	syncedAt: Date
@@ -46,5 +47,7 @@ export abstract class RipRepository {
 		userAddress: EvmAddress,
 	): Promise<FinishedRipCounts>
 
-	abstract getNextSettlingRip(afterRipId: number): Promise<SettlingRip | null>
+	abstract getFirstUnsyncedSettlingRip(
+		progress: SyncProgress,
+	): Promise<SettlingRip | null>
 }

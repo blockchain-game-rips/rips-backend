@@ -18,6 +18,7 @@ import {
 } from '../../domain/entities/rip'
 import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { EvmAddress } from '../../domain/value-objects/evm-address'
+import { SyncProgress } from '../../domain/value-objects/sync-progress'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
 import { IndexerPrismaService } from '../indexer/indexer-prisma.service'
 import {
@@ -341,12 +342,22 @@ export class PrismaRipRepository extends RipRepository {
 		return { rips: finishedRips, nextCursor }
 	}
 
-	async getNextSettlingRip(afterRipId: number): Promise<SettlingRip | null> {
+	async getFirstUnsyncedSettlingRip(
+		progress: SyncProgress,
+	): Promise<SettlingRip | null> {
+		const { highest, holeIds } = progress
+
+		// Holes sit below the highest synced id, so ordering by id picks them
+		// up before anything new. An empty hole list is the common case, which
+		// is why this is ANY(array) rather than IN (...).
 		const rows = await this.indexer.$queryRaw<{ id: string }[]>`
 			SELECT id
 			FROM rip
 			WHERE status IN ('CLAIMED', 'REFUNDED')
-				AND id::numeric > ${afterRipId}::numeric
+				AND (
+					id::numeric = ANY(${holeIds}::numeric[])
+					OR id::numeric > ${highest}::numeric
+				)
 			ORDER BY id::numeric ASC
 			LIMIT 1
 		`
@@ -354,15 +365,6 @@ export class PrismaRipRepository extends RipRepository {
 		const id = rows[0]?.id
 
 		if (id == null) {
-			return null
-		}
-
-		const alreadySynced = await this.prisma.syncedRip.findUnique({
-			where: { ripId: Number(id) },
-			select: { ripId: true },
-		})
-
-		if (alreadySynced != null) {
 			return null
 		}
 
