@@ -32,7 +32,14 @@ import { parseWithdrawnFee } from './parse-withdrawn-fee'
 import { ripsAbi } from './rips-abi'
 import { RIPS_CONTRACT } from './rips.constants'
 
-const CLAIM_MAX_CHUNKS = 100n
+/**
+ * The worst case a buyer can reach today is one entry per chunk, so this covers
+ * a whole rip in a single transaction. It is a gas bet on the current presets:
+ * a chunk holds up to the contract's MAX_ENTRIES_PER_CHUNK entries and costs
+ * gas per entry, so an entryCap large enough to fill this many whole chunks for
+ * one buyer would not fit in a block. Revisit alongside any entryCap increase.
+ */
+const CLAIM_MAX_CHUNKS = 128n
 const BUY_ENTRIES_GAS = 800_000n
 const WITHDRAW_REWARD_GAS = 300_000n
 
