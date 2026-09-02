@@ -359,7 +359,7 @@ async function claimPayouts(
 			address: RIPS_ADDRESS,
 			abi: ripsAbi,
 			functionName: 'claimPayout',
-			args: [ripId, 0n, 100n, recipient, zeroAddress],
+			args: [ripId, 100n, recipient, zeroAddress],
 		}),
 		publicClient,
 	)

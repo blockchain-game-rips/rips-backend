@@ -368,7 +368,6 @@ describe('indexer e2e', () => {
 				functionName: 'claimPayout',
 				args: [
 					BigInt(PRESET_1_RIP_1_ID),
-					0n,
 					10n,
 					deployer.address,
 					deployer.address,
@@ -665,7 +664,6 @@ describe('indexer e2e', () => {
 				functionName: 'claimPayout',
 				args: [
 					BigInt(PRESET_2_RIP_1_ID),
-					0n,
 					10n,
 					deployer.address,
 					referrer.address,

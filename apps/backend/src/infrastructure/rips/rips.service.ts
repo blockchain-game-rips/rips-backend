@@ -32,8 +32,7 @@ import { parseWithdrawnFee } from './parse-withdrawn-fee'
 import { ripsAbi } from './rips-abi'
 import { RIPS_CONTRACT } from './rips.constants'
 
-const CLAIM_START_INDEX = 0n
-const CLAIM_MAX_RANGES = 100n
+const CLAIM_MAX_CHUNKS = 100n
 const BUY_ENTRIES_GAS = 800_000n
 const WITHDRAW_REWARD_GAS = 300_000n
 
@@ -67,8 +66,7 @@ export class RipsServiceIpml implements RipsService {
 				functionName: 'claimPayout',
 				args: [
 					BigInt(args.ripId),
-					CLAIM_START_INDEX,
-					CLAIM_MAX_RANGES,
+					CLAIM_MAX_CHUNKS,
 					args.userAddress,
 					args.referrerAddress ?? zeroAddress,
 				],
