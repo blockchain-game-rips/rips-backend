@@ -53,7 +53,7 @@
 	},
 	{
 		"type": "function",
-		"name": "MAX_ENTRIES_PER_RANGE",
+		"name": "MAX_ENTRIES_PER_CHUNK",
 		"inputs": [],
 		"outputs": [
 			{
@@ -165,12 +165,7 @@
 				"internalType": "uint256"
 			},
 			{
-				"name": "startIndex",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "maxRanges",
+				"name": "maxChunks",
 				"type": "uint256",
 				"internalType": "uint256"
 			},
@@ -450,7 +445,7 @@
 			{
 				"name": "",
 				"type": "tuple[]",
-				"internalType": "struct IRips.EntryRange[]",
+				"internalType": "struct IRips.EntryChunk[]",
 				"components": [
 					{
 						"name": "start",
@@ -461,11 +456,6 @@
 						"name": "count",
 						"type": "uint64",
 						"internalType": "uint64"
-					},
-					{
-						"name": "claimed",
-						"type": "bool",
-						"internalType": "bool"
 					}
 				]
 			}
@@ -572,6 +562,30 @@
 				"name": "frozen",
 				"type": "bool",
 				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "nextClaimChunkIndex",
+		"inputs": [
+			{
+				"name": "ripId",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "chunkIndex",
+				"type": "uint64",
+				"internalType": "uint64"
 			}
 		],
 		"stateMutability": "view"
@@ -1953,11 +1967,6 @@
 	},
 	{
 		"type": "error",
-		"name": "InvalidStartIndex",
-		"inputs": []
-	},
-	{
-		"type": "error",
 		"name": "InvalidTierCount",
 		"inputs": []
 	},
@@ -1974,6 +1983,11 @@
 	{
 		"type": "error",
 		"name": "NotRecipientOrOwner",
+		"inputs": []
+	},
+	{
+		"type": "error",
+		"name": "NothingToClaim",
 		"inputs": []
 	},
 	{
@@ -2075,6 +2089,11 @@
 	{
 		"type": "error",
 		"name": "ZeroEntries",
+		"inputs": []
+	},
+	{
+		"type": "error",
+		"name": "ZeroMaxChunks",
 		"inputs": []
 	},
 	{
