@@ -14,6 +14,7 @@ const purchaseActionSchema = z.object({
 
 const claimActionSchema = z.object({
 	userAddress: z.string(),
+	entryCount: z.number(),
 	amount: z.string(),
 })
 
@@ -57,6 +58,7 @@ function toActionsDto(actions: Rip['actions']): z.infer<typeof actionsSchema> {
 		})),
 		claims: actions.claims.map((c) => ({
 			userAddress: c.userAddress,
+			entryCount: c.entryCount,
 			amount: c.amount.toString(),
 		})),
 		refunds: actions.refunds.map((r) => ({

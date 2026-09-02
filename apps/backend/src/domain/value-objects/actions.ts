@@ -13,6 +13,7 @@ export type RefundAction = {
 
 export type ClaimAction = {
 	userAddress: EvmAddress
+	entryCount: number
 	amount: bigint
 }
 

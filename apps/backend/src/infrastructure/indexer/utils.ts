@@ -110,6 +110,7 @@ function resolveActions(ripRaw: RipRaw): AddressesActions {
 		})),
 		claims: ripRaw.payout_claim.map((c) => ({
 			userAddress: toEvmAddress(c.user),
+			entryCount: toNumber(c.entry_count),
 			amount: toBigInt(c.amount),
 		})),
 		refunds: ripRaw.refund.map((r) => ({
