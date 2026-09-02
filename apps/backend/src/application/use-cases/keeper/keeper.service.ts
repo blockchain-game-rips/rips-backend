@@ -110,7 +110,18 @@ export class KeeperService extends KeeperUseCase {
 			try {
 				await this.executeAction(executor, action)
 			} catch (error) {
-				console.log(error)
+				this.logger.warn(
+					{
+						actionType: action.type,
+						ripId: action.rip.id,
+						userAddress:
+							'userAddress' in action
+								? action.userAddress
+								: undefined,
+						error,
+					},
+					'Keeper action threw',
+				)
 			}
 		}
 	}
