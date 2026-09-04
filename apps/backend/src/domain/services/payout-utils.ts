@@ -1,19 +1,23 @@
 import { Config, PayoutTier } from '../entities/config'
-import { Rip } from '../entities/rip'
+import { RandomnessFulfillment } from '../entities/rip'
 import { Card } from '../value-objects/card'
 import { CardCollection } from '../value-objects/card-collection'
+import { deriveCardEntropy } from './card-entropy'
 
-export function resolvePayout(
-	entryNumber: number,
-	randoms: NonNullable<Rip['randoms']>,
-	config: Config,
-	presetCardCollections: CardCollection[],
-	tierBiases: number[],
-): {
+export function resolvePayout(args: {
+	entryNumber: number
+	fulfillment: RandomnessFulfillment
+	config: Config
+	cardCollections: CardCollection[]
+	tierBiases: readonly bigint[]
+}): {
 	card: Card
 	payoutAmount: bigint
 } {
-	const { a, b } = randoms
+	const { entryNumber, fulfillment, config, cardCollections, tierBiases } =
+		args
+
+	const { a, b } = fulfillment.randoms
 	const { entryCap, payoutDistribution } = config
 
 	const n = BigInt(entryCap)
@@ -24,9 +28,12 @@ export function resolvePayout(
 		payoutDistribution,
 	)
 
+	const entropy = deriveCardEntropy({ fulfillment, entryNumber })
+
 	const card = resolveRandomCard(
-		presetCardCollections[tierIndex],
+		cardCollections[tierIndex],
 		tierBiases[tierIndex],
+		entropy,
 	)
 
 	return {
@@ -74,14 +81,20 @@ function resolveTier(
 
 export function resolveRandomCard(
 	collection: CardCollection,
-	tierBias: number,
+	tierBias: bigint,
+	entropy: bigint,
 ): Card {
 	const n = collection.length
 
 	if (n === 0) throw new Error('Cannot pick a card from an empty tier')
 
-	if (!Number.isFinite(tierBias))
-		throw new Error(`Tier bias must be a finite number, got ${tierBias}`)
+	// A tier the bias list is too short for arrives here as undefined despite
+	// the type, and would otherwise fail deep inside the weight arithmetic.
+	if (tierBias === undefined)
+		throw new Error('Tier bias is not configured for this tier')
+
+	if (tierBias < 0n)
+		throw new Error(`Tier bias must not be negative, got ${tierBias}`)
 
 	// How many unique cards the user already owns in this tier
 	let k = 0
@@ -89,32 +102,47 @@ export function resolveRandomCard(
 		if (entry.count > 0) k++
 	}
 
-	// boost > 1 while collection is incomplete, = 1 when fully collected
-	const boost = 1 + tierBias * (1 - k / n)
+	const { unseenWeight, seenWeight } = resolveCardWeights(tierBias, k, n)
 
-	// Each card gets a weight: unseen = boost, seen = 1
-	// A card's probability = its weight / totalWeight
-	// e.g. 3 cards, boost=2.33: seen=1, unseen=2.33, unseen=2.33 → total=5.66
-	// probabilities: 17.7%, 41.2%, 41.2% — unseen cards are boost times more likely
-	let totalWeight = 0
-	const weights: number[] = new Array(n)
+	// A card's probability is its weight over the total, so an unseen card is
+	// unseenWeight / seenWeight times likelier than one the player already has.
+	let totalWeight = 0n
+	const weights: bigint[] = new Array(n)
 
 	for (let i = 0; i < n; i++) {
-		const w = collection[i].count === 0 ? boost : 1
-		weights[i] = w
-		totalWeight += w
+		const weight = collection[i].count === 0 ? unseenWeight : seenWeight
+
+		weights[i] = weight
+		totalWeight += weight
 	}
 
-	// Weighted pick: subtract weights until roll crosses zero
-	let roll = Math.random() * totalWeight
+	// The remainder lies in [0, totalWeight), so subtracting weights always
+	// crosses zero before the list runs out — no fallback branch is reachable.
+	let roll = entropy % totalWeight
 
 	for (let i = 0; i < n; i++) {
 		roll -= weights[i]
-		if (roll < 0) return collection[i].card
+		if (roll < 0n) return collection[i].card
 	}
 
-	// Floating point fallback
-	return collection[n - 1].card
+	throw new Error('Weighted card pick failed to cross zero')
+}
+
+/**
+ * Draw weights for one tier, carrying `boost = 1 + tierBias * (1 - k/n)` in
+ * exact integers: both weights are scaled by `n`, so the division by `n` never
+ * happens and an incomplete collection cannot round down to a boost of 1.
+ */
+function resolveCardWeights(
+	tierBias: bigint,
+	k: number,
+	n: number,
+): { unseenWeight: bigint; seenWeight: bigint } {
+	const seenWeight = BigInt(n)
+
+	const unseenWeight = seenWeight + tierBias * BigInt(n - k)
+
+	return { unseenWeight, seenWeight }
 }
 
 function resolvePayoutInTier(tier: PayoutTier, rank: bigint): bigint {

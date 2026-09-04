@@ -31,11 +31,11 @@ model config {
 }
 
 model default_referral_fee_updated {
-  id                   String   @id(map: "PK_5ffc9a5b3b9e0722c5c182ac277") @db.VarChar
+  id                       String   @id(map: "PK_5ffc9a5b3b9e0722c5c182ac277") @db.VarChar
   default_referral_fee_bps Int
-  block_number         Decimal  @db.Decimal
-  time                 DateTime @db.Timestamptz(6)
-  tx_hash              String
+  block_number             Decimal  @db.Decimal
+  time                     DateTime @db.Timestamptz(6)
+  tx_hash                  String
 }
 
 model entry_purchase {
@@ -155,12 +155,12 @@ model referral_tiers_updated {
 }
 
 model referrer_custom_fee_updated {
-  id                 String   @id(map: "PK_ff5880fec7f44ed1db4121f6453") @db.VarChar
-  referrer           String
-  custom_fee_bps     Int
-  block_number       Decimal  @db.Decimal
-  time               DateTime @db.Timestamptz(6)
-  tx_hash            String
+  id             String   @id(map: "PK_ff5880fec7f44ed1db4121f6453") @db.VarChar
+  referrer       String
+  custom_fee_bps Int
+  block_number   Decimal  @db.Decimal
+  time           DateTime @db.Timestamptz(6)
+  tx_hash        String
 }
 
 model referrer_fee_seized {
@@ -202,15 +202,15 @@ model referrer_reward {
 }
 
 model referrer_state_updated {
-  id                 String   @id(map: "PK_7b1e67952d6b61a65f5da7cb656") @db.VarChar
-  referrer           String
-  currency           String
-  active_fee_bps     Int
-  period_start_time  DateTime @db.Timestamptz(6)
-  period_volume      Decimal  @db.Decimal
-  block_number       Decimal  @db.Decimal
-  time               DateTime @db.Timestamptz(6)
-  tx_hash            String
+  id                String   @id(map: "PK_7b1e67952d6b61a65f5da7cb656") @db.VarChar
+  referrer          String
+  currency          String
+  active_fee_bps    Int
+  period_start_time DateTime @db.Timestamptz(6)
+  period_volume     Decimal  @db.Decimal
+  block_number      Decimal  @db.Decimal
+  time              DateTime @db.Timestamptz(6)
+  tx_hash           String
 }
 
 model refund {
@@ -240,6 +240,8 @@ model rip {
   vrf_request_id       Decimal?               @db.Decimal
   config_id            String?                @db.VarChar
   preset_id            String?                @db.VarChar
+  settle_block_number  Decimal?               @db.Decimal
+  settle_log_index     Int?
   entry_purchase       entry_purchase[]
   payout_claim         payout_claim[]
   protocol_fee_accrued protocol_fee_accrued[]

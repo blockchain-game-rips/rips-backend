@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { NotificationType } from '../../../generated/prisma'
 import { RipSyncRepository } from '../../application/interfaces/repositories/rip-sync.repository'
 import { EntryPayout } from '../../domain/value-objects/entry-payout'
+import { SettlementKey } from '../../domain/value-objects/settlement-key'
 import { PrismaService } from './prisma.service'
 
 const GROUP_USER_ID = 0n
@@ -21,11 +22,40 @@ export class PrismaRipSyncRepository extends RipSyncRepository {
 		return rows.map((row) => row.ripId)
 	}
 
+	async getDrawRulesFingerprintsSettledBefore(
+		settlementKey: SettlementKey,
+	): Promise<string[]> {
+		const { blockNumber, logIndex } = settlementKey
+
+		const rows = await this.prisma.syncedRip.findMany({
+			where: {
+				drawRulesFingerprint: { not: null },
+				OR: [
+					{ settleBlockNumber: { lt: blockNumber } },
+					{
+						settleBlockNumber: blockNumber,
+						settleLogIndex: { lt: logIndex },
+					},
+				],
+			},
+			distinct: ['drawRulesFingerprint'],
+			select: { drawRulesFingerprint: true },
+		})
+
+		return rows
+			.map((row) => row.drawRulesFingerprint)
+			.filter(
+				(fingerprint): fingerprint is string => fingerprint !== null,
+			)
+	}
+
 	async syncClaimedRip(args: {
 		ripId: number
+		settlementKey: SettlementKey
+		drawRulesFingerprint: string
 		payouts: EntryPayout[]
 	}): Promise<void> {
-		const { ripId, payouts } = args
+		const { ripId, settlementKey, drawRulesFingerprint, payouts } = args
 
 		const uniqueUserAddresses = [
 			...new Set(payouts.map((payout) => payout.userAddress)),
@@ -37,18 +67,26 @@ export class PrismaRipSyncRepository extends RipSyncRepository {
 				select: { userId: true },
 			})
 
+			// The payouts reference this row, so it has to exist before them.
+			await tx.syncedRip.create({
+				data: {
+					ripId,
+					settleBlockNumber: settlementKey.blockNumber,
+					settleLogIndex: settlementKey.logIndex,
+					drawRulesFingerprint,
+				},
+			})
+
 			await Promise.all([
-				...payouts.map((payout) =>
-					tx.entryPayout.create({
-						data: {
-							userAddress: payout.userAddress,
-							ripId: payout.ripId,
-							entryNumber: payout.entryNumber,
-							payoutAmount: payout.payoutAmount,
-							cardDefinitionId: BigInt(payout.card.id),
-						},
-					}),
-				),
+				tx.entryPayout.createMany({
+					data: payouts.map((payout) => ({
+						userAddress: payout.userAddress,
+						ripId: payout.ripId,
+						entryNumber: payout.entryNumber,
+						payoutAmount: payout.payoutAmount,
+						cardDefinitionId: BigInt(payout.card.id),
+					})),
+				}),
 				...wallets.map((wallet) =>
 					tx.notification.create({
 						data: {
@@ -65,7 +103,6 @@ export class PrismaRipSyncRepository extends RipSyncRepository {
 						type: NotificationType.CLAIMED,
 					},
 				}),
-				tx.syncedRip.create({ data: { ripId } }),
 			])
 		})
 	}

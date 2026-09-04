@@ -8,6 +8,7 @@ import {
 	toEvmAddress,
 } from '../../domain/value-objects/evm-address'
 import { PayoutFilter } from '../../domain/value-objects/payout-filter'
+import { SettlementKey } from '../../domain/value-objects/settlement-key'
 import { PrismaService } from './prisma.service'
 
 @Injectable()
@@ -69,50 +70,36 @@ export class PrismaEntryPayoutRepository extends EntryPayoutRepository {
 
 	async getAssignedCardCollections(
 		userAddress: EvmAddress,
-	): Promise<CardCollection[]> {
-		return this.collectCardsByTier(userAddress, undefined)
-	}
-
-	async getRevealedCardCollections(
-		userAddress: EvmAddress,
-	): Promise<CardCollection[]> {
-		return this.collectCardsByTier(userAddress, true)
-	}
-
-	private async collectCardsByTier(
-		userAddress: EvmAddress,
-		revealed: boolean | undefined,
+		settlementKey: SettlementKey,
 	): Promise<CardCollection[]> {
 		const [cardDefinitions, payoutCounts] = await Promise.all([
 			this.prisma.cardDefinition.findMany({ orderBy: { tier: 'asc' } }),
 			this.prisma.entryPayout.groupBy({
 				by: ['cardDefinitionId'],
-				where: { userAddress, revealed },
+				where: {
+					userAddress,
+					rip: settledBefore(settlementKey),
+				},
 				_count: { _all: true },
 			}),
 		])
 
-		const countByCardId = new Map(
-			payoutCounts.map((group) => [
-				group.cardDefinitionId,
-				group._count._all,
-			]),
-		)
+		return groupCountsByTier(cardDefinitions, payoutCounts)
+	}
 
-		const tierMap = new Map<number, CardCollection>()
+	async getRevealedCardCollections(
+		userAddress: EvmAddress,
+	): Promise<CardCollection[]> {
+		const [cardDefinitions, payoutCounts] = await Promise.all([
+			this.prisma.cardDefinition.findMany({ orderBy: { tier: 'asc' } }),
+			this.prisma.entryPayout.groupBy({
+				by: ['cardDefinitionId'],
+				where: { userAddress, revealed: true },
+				_count: { _all: true },
+			}),
+		])
 
-		for (const def of cardDefinitions) {
-			const tier = tierMap.get(def.tier) ?? []
-
-			tier.push({
-				card: toCard(def),
-				count: countByCardId.get(def.id) ?? 0,
-			})
-
-			tierMap.set(def.tier, tier)
-		}
-
-		return Array.from(tierMap.values())
+		return groupCountsByTier(cardDefinitions, payoutCounts)
 	}
 
 	async getCardDefinitions(): Promise<Card[][]> {
@@ -132,6 +119,54 @@ export class PrismaEntryPayoutRepository extends EntryPayoutRepository {
 
 		return Array.from(tierMap.values())
 	}
+}
+
+/**
+ * Matches rips that settled strictly before the given key. Ordering is
+ * lexicographic on (block, log index), so a tie on the block falls through to
+ * the log index.
+ */
+function settledBefore(settlementKey: SettlementKey) {
+	const { blockNumber, logIndex } = settlementKey
+
+	return {
+		OR: [
+			{ settleBlockNumber: { lt: blockNumber } },
+			{
+				settleBlockNumber: blockNumber,
+				settleLogIndex: { lt: logIndex },
+			},
+		],
+	}
+}
+
+function groupCountsByTier(
+	cardDefinitions: {
+		id: bigint
+		tier: number
+		name: string
+		imageUrl: string
+	}[],
+	payoutCounts: { cardDefinitionId: bigint; _count: { _all: number } }[],
+): CardCollection[] {
+	const countByCardId = new Map(
+		payoutCounts.map((group) => [
+			group.cardDefinitionId,
+			group._count._all,
+		]),
+	)
+
+	const tierMap = new Map<number, CardCollection>()
+
+	for (const def of cardDefinitions) {
+		const tier = tierMap.get(def.tier) ?? []
+
+		tier.push({ card: toCard(def), count: countByCardId.get(def.id) ?? 0 })
+
+		tierMap.set(def.tier, tier)
+	}
+
+	return Array.from(tierMap.values())
 }
 
 function toCard(def: {

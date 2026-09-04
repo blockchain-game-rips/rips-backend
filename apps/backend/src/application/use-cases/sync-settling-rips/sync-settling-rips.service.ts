@@ -1,19 +1,25 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
-import { RipStatus, SettlingRip } from '../../../domain/entities/rip'
+import { Injectable, Logger } from '@nestjs/common'
+import {
+	RandomnessFulfillment,
+	RipStatus,
+	SettlingRip,
+} from '../../../domain/entities/rip'
+import { renderDrawRulesFingerprint } from '../../../domain/services/draw-rules-fingerprint'
 import { resolvePayout } from '../../../domain/services/payout-utils'
 import { resolveSyncProgress } from '../../../domain/services/sync-progress-utils'
-import { PurchaseAction } from '../../../domain/value-objects/actions'
+import { getTierBiases } from '../../../domain/services/tier-biases'
+import { CardCollection } from '../../../domain/value-objects/card-collection'
 import { EntryPayout } from '../../../domain/value-objects/entry-payout'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
 import { EntryPayoutRepository } from '../../interfaces/repositories/entry-payout.repository'
 import { RipSyncRepository } from '../../interfaces/repositories/rip-sync.repository'
 import { RipRepository } from '../../interfaces/repositories/rip.repository'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
-import {
-	PRESET_TO_TIER_BIASES,
-	PresetToTierBiases,
-} from '../../interfaces/tokens'
 import { SyncSettlingRipsUseCase } from './sync-settling-rips.use-case'
+
+type FulfilledRip = SettlingRip & {
+	fulfillment: NonNullable<SettlingRip['fulfillment']>
+}
 
 @Injectable()
 export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
@@ -24,9 +30,6 @@ export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
 		private readonly userRepository: UserRepository,
 		private readonly entryPayoutRepository: EntryPayoutRepository,
 		private readonly ripSyncRepository: RipSyncRepository,
-
-		@Inject(PRESET_TO_TIER_BIASES)
-		private readonly presetToBiases: PresetToTierBiases,
 	) {
 		super()
 	}
@@ -52,10 +55,27 @@ export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
 	}
 
 	private async syncClaimedRip(rip: SettlingRip): Promise<void> {
-		const payouts = await this.resolveRipPayouts(rip)
+		if (!this.isFulfilled(rip))
+			throw new Error(`Rip ${rip.id} has no randomness fulfillment`)
+
+		const cardTiers = await this.entryPayoutRepository.getCardDefinitions()
+
+		const drawRulesFingerprint = renderDrawRulesFingerprint(cardTiers)
+
+		await this.assertDrawRulesUnchanged(
+			rip.fulfillment,
+			drawRulesFingerprint,
+		)
+
+		const payouts = await this.resolveRipPayouts(
+			rip,
+			getTierBiases(cardTiers.length),
+		)
 
 		await this.ripSyncRepository.syncClaimedRip({
 			ripId: rip.id,
+			settlementKey: rip.fulfillment,
+			drawRulesFingerprint,
 			payouts,
 		})
 
@@ -86,6 +106,32 @@ export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
 		)
 	}
 
+	/**
+	 * Guards against the cards or the biases changing under rips that already
+	 * settled. Only rips before this one in settlement order matter: their
+	 * payouts are what `k` counts, so a fingerprint of theirs that disagrees
+	 * with the current one means this draw would differ from the one already
+	 * awarded.
+	 */
+	private async assertDrawRulesUnchanged(
+		fulfillment: RandomnessFulfillment,
+		current: string,
+	): Promise<void> {
+		const recorded =
+			await this.ripSyncRepository.getDrawRulesFingerprintsSettledBefore(
+				fulfillment,
+			)
+
+		const mismatched = recorded.filter(
+			(fingerprint) => fingerprint !== current,
+		)
+
+		if (mismatched.length > 0)
+			throw new Error(
+				`Draw rules changed: earlier rips settled under [${mismatched.join(' / ')}], current rules are ${current}`,
+			)
+	}
+
 	private async syncRefundedRip(rip: SettlingRip): Promise<void> {
 		const userIds = await this.resolveParticipantUserIds(rip)
 
@@ -112,86 +158,73 @@ export class SyncSettlingRipsService extends SyncSettlingRipsUseCase {
 		return userIds
 	}
 
-	private hasRandoms(rip: SettlingRip): rip is SettlingRip & {
-		randoms: NonNullable<SettlingRip['randoms']>
-	} {
-		return rip.randoms !== undefined
+	private isFulfilled(rip: SettlingRip): rip is FulfilledRip {
+		return rip.fulfillment !== undefined
 	}
 
-	private async resolveRipPayouts(rip: SettlingRip): Promise<EntryPayout[]> {
-		if (!this.hasRandoms(rip))
-			throw new Error(`Rip ${rip.id} is missing randoms`)
-
-		const purchasesByAddress = new Map<EvmAddress, PurchaseAction[]>()
-
-		for (const purchase of rip.actions.purchases) {
-			const existing = purchasesByAddress.get(purchase.userAddress) ?? []
-			purchasesByAddress.set(purchase.userAddress, [
-				...existing,
-				purchase,
-			])
-		}
-
-		const payouts: EntryPayout[] = []
-
-		for (const [address, purchases] of purchasesByAddress) {
-			const userPayouts = await this.resolveUserPayouts(
-				rip,
-				address,
-				purchases,
-			)
-
-			payouts.push(...userPayouts)
-		}
-
-		return payouts
-	}
-
-	private async resolveUserPayouts(
-		rip: SettlingRip & {
-			randoms: NonNullable<SettlingRip['randoms']>
-		},
-		address: EvmAddress,
-		purchases: PurchaseAction[],
+	/**
+	 * Walks the whole rip in ascending `entryNumber` — the order the chain
+	 * itself defines — rather than grouping by address. Each player's
+	 * collection grows as their entries are drawn, so `k` accumulates within
+	 * the rip exactly as it would have on any other run.
+	 */
+	private async resolveRipPayouts(
+		rip: FulfilledRip,
+		tierBiases: readonly bigint[],
 	): Promise<EntryPayout[]> {
-		const cardCollections =
-			await this.entryPayoutRepository.getAssignedCardCollections(address)
-
-		const tierBiases = this.presetToBiases.get(rip.preset.id)
-
-		if (!tierBiases)
-			throw new Error(
-				`No tier biases configured for preset ${rip.preset.id}`,
+		const entries = rip.actions.purchases
+			.flatMap((purchase) =>
+				Array.from({ length: purchase.entryCount }, (_, i) => ({
+					entryNumber: purchase.startEntryIndex + i + 1,
+					userAddress: purchase.userAddress,
+				})),
 			)
+			.sort((a, b) => a.entryNumber - b.entryNumber)
+
+		const collectionsByAddress = new Map<EvmAddress, CardCollection[]>()
+
 		const payouts: EntryPayout[] = []
 
-		for (const purchase of purchases) {
-			for (let i = 0; i < purchase.entryCount; i++) {
-				const entryNumber = purchase.startEntryIndex + i + 1
+		for (const { entryNumber, userAddress } of entries) {
+			let cardCollections = collectionsByAddress.get(userAddress)
 
-				const payout = resolvePayout(
-					entryNumber,
-					rip.randoms,
-					rip.config,
-					cardCollections,
-					tierBiases,
-				)
+			if (!cardCollections) {
+				cardCollections =
+					await this.entryPayoutRepository.getAssignedCardCollections(
+						userAddress,
+						rip.fulfillment,
+					)
 
-				const tierCollection = cardCollections[payout.card.tier]
-				const cardIndex = tierCollection.findIndex(
-					(c) => c.card.id === payout.card.id,
-				)
-				tierCollection[cardIndex].count += 1
-
-				payouts.push({
-					card: payout.card,
-					payoutAmount: payout.payoutAmount,
-					revealed: false,
-					ripId: rip.id,
-					entryNumber,
-					userAddress: address,
-				})
+				collectionsByAddress.set(userAddress, cardCollections)
 			}
+
+			const payout = resolvePayout({
+				entryNumber,
+				fulfillment: rip.fulfillment,
+				config: rip.config,
+				cardCollections,
+				tierBiases,
+			})
+
+			const drawnCard = cardCollections[payout.card.tier].find(
+				(entry) => entry.card.id === payout.card.id,
+			)
+
+			if (!drawnCard)
+				throw new Error(
+					`Card ${payout.card.id} is missing from tier ${payout.card.tier}`,
+				)
+
+			drawnCard.count += 1
+
+			payouts.push({
+				card: payout.card,
+				payoutAmount: payout.payoutAmount,
+				revealed: false,
+				ripId: rip.id,
+				entryNumber,
+				userAddress,
+			})
 		}
 
 		return payouts

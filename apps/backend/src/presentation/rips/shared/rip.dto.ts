@@ -78,10 +78,10 @@ export function toRipDto(rip: Rip): RipDto {
 		status: rip.status,
 		startTime: rip.startTime.toISOString(),
 		randoms:
-			rip.randoms !== undefined
+			rip.fulfillment !== undefined
 				? {
-						a: rip.randoms.a.toString(),
-						b: rip.randoms.b.toString(),
+						a: rip.fulfillment.randoms.a.toString(),
+						b: rip.fulfillment.randoms.b.toString(),
 					}
 				: undefined,
 	}

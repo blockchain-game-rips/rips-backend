@@ -3,6 +3,7 @@ import { CardCollection } from '../../../domain/value-objects/card-collection'
 import { EntryPayout } from '../../../domain/value-objects/entry-payout'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
 import { PayoutFilter } from '../../../domain/value-objects/payout-filter'
+import { SettlementKey } from '../../../domain/value-objects/settlement-key'
 
 export abstract class EntryPayoutRepository {
 	abstract find(
@@ -18,11 +19,14 @@ export abstract class EntryPayoutRepository {
 	abstract revealAllAndGet(userAddress: EvmAddress): Promise<EntryPayout[]>
 
 	/**
-	 * Counts every payout the user holds, revealed or not, so that card drops
-	 * cannot be biased by withholding a reveal.
+	 * The user collection as it stood before the given rip settled: every
+	 * payout, revealed or not, from a rip with a strictly smaller settlement
+	 * key. Counting unrevealed payouts too keeps a withheld reveal from
+	 * biasing later draws.
 	 */
 	abstract getAssignedCardCollections(
 		userAddress: EvmAddress,
+		settlementKey: SettlementKey,
 	): Promise<CardCollection[]>
 
 	/**

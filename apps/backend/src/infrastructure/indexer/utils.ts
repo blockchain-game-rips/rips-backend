@@ -2,7 +2,11 @@ import { getAddress } from 'viem'
 import { Prisma } from '../../../generated/prisma-indexer'
 import { Config } from '../../domain/entities/config'
 import { Currency } from '../../domain/entities/currency'
-import { Rip, RipStatus } from '../../domain/entities/rip'
+import {
+	RandomnessFulfillment,
+	Rip,
+	RipStatus,
+} from '../../domain/entities/rip'
 import { AddressesActions } from '../../domain/value-objects/actions'
 import { toEvmAddress } from '../../domain/value-objects/evm-address'
 import { EvmCurrencyService } from '../evm/evm-currency.service'
@@ -120,6 +124,29 @@ function resolveActions(ripRaw: RipRaw): AddressesActions {
 	}
 }
 
+/**
+ * All four columns are written by the same `RandomnessFulfilled` handler, so
+ * they are either all present or all absent.
+ */
+function toFulfillment(ripRaw: RipRaw): RandomnessFulfillment | undefined {
+	if (
+		ripRaw.random_a == null ||
+		ripRaw.random_b == null ||
+		ripRaw.settle_block_number == null ||
+		ripRaw.settle_log_index == null
+	)
+		return undefined
+
+	return {
+		randoms: {
+			a: toBigInt(ripRaw.random_a),
+			b: toBigInt(ripRaw.random_b),
+		},
+		blockNumber: toBigInt(ripRaw.settle_block_number),
+		logIndex: ripRaw.settle_log_index,
+	}
+}
+
 export function fromRipRaw(ripRaw: RipRaw, currency: Currency): Rip {
 	const config = requireConfig(ripRaw)
 
@@ -131,10 +158,7 @@ export function fromRipRaw(ripRaw: RipRaw, currency: Currency): Rip {
 		actions: resolveActions(ripRaw),
 		status: resolveRipStatus(ripRaw.status),
 		startTime: ripRaw.start_time,
-		randoms:
-			ripRaw.random_a != null && ripRaw.random_b != null
-				? { a: toBigInt(ripRaw.random_a), b: toBigInt(ripRaw.random_b) }
-				: undefined,
+		fulfillment: toFulfillment(ripRaw),
 	}
 }
 

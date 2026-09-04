@@ -15,6 +15,12 @@ export enum RipStatus {
 	REFUNDED = 'REFUNDED',
 }
 
+export type RandomnessFulfillment = {
+	randoms: { a: bigint; b: bigint }
+	blockNumber: bigint
+	logIndex: number
+}
+
 export type Rip = {
 	id: number
 	preset: Preset
@@ -23,7 +29,8 @@ export type Rip = {
 	actions: AddressesActions
 	status: RipStatus
 	startTime: Date
-	randoms?: { a: bigint; b: bigint }
+
+	fulfillment?: RandomnessFulfillment
 }
 
 export type OngoingStatus =

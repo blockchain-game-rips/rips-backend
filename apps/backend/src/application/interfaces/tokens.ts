@@ -1,3 +1,0 @@
-export const PRESET_TO_TIER_BIASES = Symbol('PRESET_TO_TIER_BIASES')
-
-export type PresetToTierBiases = Map<number, number[]>

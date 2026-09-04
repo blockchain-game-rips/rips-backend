@@ -4,6 +4,7 @@ import { GetAvailablePresetsUseCase } from '../../application/use-cases/get-avai
 import { PrismaService } from '../prisma/prisma.service'
 
 const CardDefinitionInputSchema = z.object({
+	id: z.number().int().positive(),
 	tier: z.number().int().min(0),
 	name: z.string().min(1),
 	imageUrl: z.string().url(),
@@ -27,7 +28,9 @@ export class SeedCardDefinitionsService {
 	}
 
 	async seed(config: CardDefinitionsConfig): Promise<void> {
-		await this.validateTierCounts(config)
+		const cardTierCount = new Set(config.map((card) => card.tier)).size
+
+		await this.validateTierCounts(config, cardTierCount)
 
 		await this.upsertCards(config)
 
@@ -36,9 +39,8 @@ export class SeedCardDefinitionsService {
 
 	private async validateTierCounts(
 		config: CardDefinitionsConfig,
+		cardTierCount: number,
 	): Promise<void> {
-		const cardTierCount = new Set(config.map((card) => card.tier)).size
-
 		const availablePresets = await this.getAvailablePresetsUseCase.execute()
 
 		for (const { preset, fillingRip } of availablePresets) {
@@ -59,13 +61,8 @@ export class SeedCardDefinitionsService {
 	private async upsertCards(config: CardDefinitionsConfig): Promise<void> {
 		for (const card of config) {
 			await this.prisma.cardDefinition.upsert({
-				where: {
-					tier_name: {
-						tier: card.tier,
-						name: card.name,
-					},
-				},
-				create: card,
+				where: { id: BigInt(card.id) },
+				create: { ...card, id: BigInt(card.id) },
 				update: { imageUrl: card.imageUrl },
 			})
 		}

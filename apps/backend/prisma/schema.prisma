@@ -50,7 +50,7 @@ model ExecutorWallet {
 }
 
 model CardDefinition {
-    id           BigInt        @id @default(autoincrement())
+    id           BigInt        @id
     tier         Int
     name         String
     imageUrl     String        @map("image_url")
@@ -83,7 +83,14 @@ model SyncedRip {
     ripId  Int      @id @map("rip_id")
     syncedAt DateTime @default(now()) @map("synced_at")
 
+    settleBlockNumber  BigInt? @map("settle_block_number")
+    settleLogIndex     Int?    @map("settle_log_index")
+    drawRulesFingerprint String? @map("draw_rules_fingerprint")
+
+    payouts EntryPayout[]
+
     @@index([syncedAt(sort: Desc), ripId(sort: Desc)], map: "synced_rips_synced_at_rip_id_desc_idx")
+    @@index([settleBlockNumber, settleLogIndex])
     @@map("synced_rips")
 }
 
@@ -108,6 +115,7 @@ model EntryPayout {
     revealed         Boolean        @default(false)
     createdAt        DateTime       @default(now()) @map("created_at")
     cardDefinition   CardDefinition @relation(fields: [cardDefinitionId], references: [id])
+    rip              SyncedRip      @relation(fields: [ripId], references: [ripId], onDelete: Cascade)
 
     @@unique([ripId, entryNumber])
     @@index([userAddress, revealed])
