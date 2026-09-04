@@ -357,6 +357,16 @@ describe('indexer e2e', () => {
 			expect(rip.random_a).not.toBeNull()
 			expect(rip.random_b).not.toBeNull()
 		})
+
+		it('records the settlement key from the RandomnessFulfilled log', async () => {
+			const rip = (await waitForRow(
+				dataSource,
+				`SELECT * FROM rip WHERE id = '${PRESET_1_RIP_1_ID}' AND settle_block_number IS NOT NULL`,
+			)) as Record<string, unknown>
+
+			expect(rip.settle_block_number).not.toBeNull()
+			expect(rip.settle_log_index).not.toBeNull()
+		})
 	})
 
 	describe('claimPayouts', () => {
