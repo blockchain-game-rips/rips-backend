@@ -44,3 +44,25 @@ all, and is never offered.
 
 Note that "live" is narrower than "ongoing": a preset whose only rip is sealed
 or claiming is not live, because that rip can no longer be joined.
+
+## Collection
+
+Every card that exists in the game, grouped by tier. A fixed, game-wide set —
+the same for every player. Its size per tier is what the reward boost divides
+by.
+
+Never say "pool" or "card set" for this. The collection is the whole catalogue;
+what a specific player holds is a *user collection*.
+
+## User collection
+
+The cards one player has been awarded, counted per card. Derived from that
+player's entry payouts, not stored as its own thing.
+
+The distinction that matters for card rewards is *unique* cards held within a
+tier: a player who owns three copies of one card still holds one unique card.
+That count is what drives the boost — the fewer unique cards a player holds in
+a tier, the likelier an unseen one becomes.
+
+A user collection is scoped to an EVM address. Two addresses are two players,
+even behind one Telegram account.
