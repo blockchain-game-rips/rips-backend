@@ -24,7 +24,6 @@ import {
 	type PublicClient,
 } from 'viem'
 import { AppModule } from '../../src/app.module'
-import { PRESET_TO_TIER_BIASES } from '../../src/application/interfaces/tokens'
 import { AppConfigModule } from '../../src/configuration/app-config.module'
 import { EIP155 } from '../../src/constants'
 import { Executor } from '../../src/domain/entities/executor'
@@ -123,13 +122,6 @@ export function useRipsApp(
 				chain: { namespace: EIP155, reference: String(BASE_CHAIN_ID) },
 				address: deployments.conduit,
 			})
-			.overrideProvider(PRESET_TO_TIER_BIASES)
-			.useValue(
-				new Map([
-					[1, [2, 2, 2]],
-					[2, [1, 1, 1]],
-				]),
-			)
 			.overrideProvider(WARMUP_CURRENCY_IDS)
 			.useValue([])
 

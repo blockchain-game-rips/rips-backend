@@ -1,4 +1,1 @@
 # yaml-language-server: $schema=./../../config/config-schema.json
-cardConfig:
-  presetsBiases:
-    "1": [2, 2, 2]

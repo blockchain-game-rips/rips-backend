@@ -532,6 +532,12 @@ describe('Rip settlement flow E2E', () => {
 
 		expect(syncedRips).toHaveLength(1)
 		expect(syncedRips[0].ripId).toBe(refundRipId)
+
+		// A rip refunded before VRF never reaches RandomnessFulfilled, so it
+		// has no settlement key — recording one must stay optional.
+		expect(syncedRips[0].settleBlockNumber).toBeNull()
+		expect(syncedRips[0].settleLogIndex).toBeNull()
+		expect(syncedRips[0].drawRulesFingerprint).toBeNull()
 	})
 
 	it('narrows the finished feed to the rips a user entered', async () => {

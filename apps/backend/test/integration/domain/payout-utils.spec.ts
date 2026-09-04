@@ -23,9 +23,12 @@ import {
 	type PublicClient,
 } from 'viem'
 import { Account, privateKeyToAccount } from 'viem/accounts'
+import { RandomnessFulfillment } from '../../../src/domain/entities/rip'
+import { deriveCardEntropy } from '../../../src/domain/services/card-entropy'
 import {
 	resolveOnchainPayout,
 	resolvePayout,
+	resolveRandomCard,
 } from '../../../src/domain/services/payout-utils'
 import { CardCollection } from '../../../src/domain/value-objects/card-collection'
 import { ripsAbi } from '../../../src/infrastructure/rips/rips-abi'
@@ -73,6 +76,8 @@ const STUB_CARD: CardCollection = [
 	{ card: { id: 1, name: 'Stub', tier: 1, imageUrl: '' }, count: 1 },
 ]
 const STUB_COLLECTIONS: CardCollection[] = [STUB_CARD, STUB_CARD, STUB_CARD]
+
+const STUB_POSITION = { blockNumber: 1n, logIndex: 0 }
 
 describe('payout-utils: resolvePayout matches on-chain balance diff', () => {
 	const { anvils } = useAnvil({
@@ -328,6 +333,207 @@ describe('payout-utils: resolvePayout matches on-chain balance diff', () => {
 	})
 })
 
+const DRAW_RANDOMS = { a: 7n, b: 11n }
+const DRAW_ENTRY_NUMBER = 1
+
+const DRAW_KEY: RandomnessFulfillment = {
+	randoms: DRAW_RANDOMS,
+	blockNumber: 500n,
+	logIndex: 2,
+}
+
+const OTHER_DRAW_KEY: RandomnessFulfillment = {
+	randoms: DRAW_RANDOMS,
+	blockNumber: 500n,
+	logIndex: 3,
+}
+
+const DRAW_TIER = 0
+const DRAW_CARDS_IN_TIER = 4
+const DRAW_BIAS = 2n
+const NO_BIAS = 0n
+const DRAW_SAMPLES = 400
+
+const MAX_ENTROPY = 2n ** 256n - 1n
+const ZERO_ENTROPY = 0n
+
+function drawCollection(ownedIndices: number[] = []): CardCollection {
+	return Array.from({ length: DRAW_CARDS_IN_TIER }, (_, i) => ({
+		card: {
+			id: i + 1,
+			tier: DRAW_TIER,
+			name: `draw-card-${i}`,
+			imageUrl: '',
+		},
+		count: ownedIndices.includes(i) ? 1 : 0,
+	}))
+}
+
+function drawEntropy(
+	entryNumber: number,
+	fulfillment: RandomnessFulfillment,
+): bigint {
+	return deriveCardEntropy({ fulfillment, entryNumber })
+}
+
+function drawCard(
+	collection: CardCollection,
+	entryNumber: number,
+	fulfillment: RandomnessFulfillment,
+	bias: bigint = DRAW_BIAS,
+) {
+	return resolveRandomCard(
+		collection,
+		bias,
+		drawEntropy(entryNumber, fulfillment),
+	)
+}
+
+describe('payout-utils: card draws are deterministic', () => {
+	it('gives the same card for the same inputs', () => {
+		const first = drawCard(drawCollection(), DRAW_ENTRY_NUMBER, DRAW_KEY)
+		const second = drawCard(drawCollection(), DRAW_ENTRY_NUMBER, DRAW_KEY)
+
+		expect(first.id).toBe(second.id)
+	})
+
+	it('decorrelates entry numbers under the same randoms', () => {
+		const drawn = new Set(
+			Array.from(
+				{ length: DRAW_SAMPLES },
+				(_, i) => drawCard(drawCollection(), i + 1, DRAW_KEY).id,
+			),
+		)
+
+		expect(drawn.size).toBe(DRAW_CARDS_IN_TIER)
+	})
+
+	it('decorrelates settlement keys under the same randoms and entry', () => {
+		const drawn = new Set<number>()
+
+		for (let logIndex = 0; logIndex < DRAW_SAMPLES; logIndex++) {
+			drawn.add(
+				drawCard(drawCollection(), DRAW_ENTRY_NUMBER, {
+					...DRAW_KEY,
+					logIndex,
+				}).id,
+			)
+		}
+
+		expect(drawn.size).toBe(DRAW_CARDS_IN_TIER)
+	})
+
+	it('is sensitive to the settlement key alone', () => {
+		const drawnKeys = new Set(
+			[DRAW_KEY, OTHER_DRAW_KEY].map((key) =>
+				drawEntropy(DRAW_ENTRY_NUMBER, key),
+			),
+		)
+
+		expect(drawnKeys.size).toBe(2)
+	})
+
+	describe('boost', () => {
+		it('favours unseen cards while the collection is incomplete', () => {
+			const allButLastOwned = [0, 1, 2]
+
+			let unseenHits = 0
+
+			for (let i = 0; i < DRAW_SAMPLES; i++) {
+				const card = drawCard(
+					drawCollection(allButLastOwned),
+					i + 1,
+					DRAW_KEY,
+				)
+
+				if (card.id === DRAW_CARDS_IN_TIER) unseenHits++
+			}
+
+			expect(unseenHits).toBeGreaterThan(
+				DRAW_SAMPLES / DRAW_CARDS_IN_TIER,
+			)
+		})
+
+		it('spreads evenly once every card is owned', () => {
+			const allOwned = [0, 1, 2, 3]
+			const hits = new Map<number, number>()
+
+			for (let i = 0; i < DRAW_SAMPLES; i++) {
+				const card = drawCard(drawCollection(allOwned), i + 1, DRAW_KEY)
+
+				hits.set(card.id, (hits.get(card.id) ?? 0) + 1)
+			}
+
+			const expectedShare = DRAW_SAMPLES / DRAW_CARDS_IN_TIER
+			const tolerance = expectedShare / 2
+
+			for (const count of hits.values()) {
+				expect(Math.abs(count - expectedShare)).toBeLessThan(tolerance)
+			}
+		})
+	})
+
+	describe('a single-card tier', () => {
+		const singleCard: CardCollection = [
+			{
+				card: { id: 1, tier: DRAW_TIER, name: 'only', imageUrl: '' },
+				count: 1,
+			},
+		]
+
+		it('returns that card when it is already owned and unboosted', () => {
+			const card = resolveRandomCard(
+				singleCard,
+				NO_BIAS,
+				drawEntropy(DRAW_ENTRY_NUMBER, DRAW_KEY),
+			)
+
+			expect(card.id).toBe(1)
+		})
+	})
+
+	describe('a card outside the rip revision', () => {
+		it('never drops and does not count towards the tier size', () => {
+			// The revision governs the draw, so a card missing from it simply
+			// is not in the collection handed to resolveRandomCard.
+			const inRevision = drawCollection().slice(0, 3)
+
+			const drawn = new Set(
+				Array.from(
+					{ length: DRAW_SAMPLES },
+					(_, i) => drawCard(inRevision, i + 1, DRAW_KEY).id,
+				),
+			)
+
+			expect(drawn.size).toBe(inRevision.length)
+			expect(drawn).not.toContain(DRAW_CARDS_IN_TIER)
+		})
+
+		it('keeps k from exceeding n when the player owns one', () => {
+			// A player holding every card of a 3-card revision has k === n, so
+			// the boost collapses to 1 and no weight can go negative.
+			const everyCardOwned = drawCollection([0, 1, 2]).slice(0, 3)
+
+			const card = drawCard(everyCardOwned, DRAW_ENTRY_NUMBER, DRAW_KEY)
+
+			expect(everyCardOwned.map((c) => c.card.id)).toContain(card.id)
+		})
+	})
+
+	describe('entropy at the range boundaries', () => {
+		it.each([
+			['zero', ZERO_ENTROPY],
+			['max', MAX_ENTROPY],
+		])('returns a card in the tier for %s entropy', (_label, entropy) => {
+			const collection = drawCollection()
+
+			const card = resolveRandomCard(collection, DRAW_BIAS, entropy)
+
+			expect(collection.map((c) => c.card.id)).toContain(card.id)
+		})
+	})
+})
+
 type Wallet = WalletClient<HttpTransport, Chain, Account>
 
 async function buyEntries(
@@ -383,13 +589,13 @@ function sumPayouts(
 
 	for (let i = 0n; i < entryCount; i++) {
 		const entryNumber = Number(startEntryIndex + i) + 1
-		total += resolvePayout(
+		total += resolvePayout({
 			entryNumber,
-			randoms,
+			fulfillment: { randoms, ...STUB_POSITION },
 			config,
-			STUB_COLLECTIONS,
-			[1, 1, 1],
-		).payoutAmount
+			cardCollections: STUB_COLLECTIONS,
+			tierBiases: [1n, 1n, 1n],
+		}).payoutAmount
 	}
 
 	return total
