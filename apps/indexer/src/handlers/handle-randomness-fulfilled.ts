@@ -17,6 +17,8 @@ export async function handleRandomnessFulfilled(
 	rip.vrfRequestStatus = VrfRequestStatus.FULFILLED
 	rip.randomA = randomA
 	rip.randomB = randomB
+	rip.settleBlockNumber = BigInt(log.block.height)
+	rip.settleLogIndex = log.logIndex
 	rip.status = RipStatus.CLAIMING
 
 	entities.rips.set(ripIdStr, rip)

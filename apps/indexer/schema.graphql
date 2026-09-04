@@ -92,6 +92,8 @@ type Rip @entity {
 	vrfRequestStatus: VrfRequestStatus!
 	randomA: BigInt
 	randomB: BigInt
+	settleBlockNumber: BigInt
+	settleLogIndex: Int
 	vrfRequestId: BigInt
 	entryPurchases: [EntryPurchase!]! @derivedFrom(field: "rip")
 	payoutsClaimed: [PayoutClaim!]! @derivedFrom(field: "rip")

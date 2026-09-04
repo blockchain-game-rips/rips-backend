@@ -1,5 +1,5 @@
-module.exports = class Data1783427238305 {
-    name = 'Data1783427238305'
+module.exports = class Data1788460293454 {
+    name = 'Data1788460293454'
 
     async up(db) {
         await db.query(`CREATE TABLE "payout_tier" ("id" character varying NOT NULL, "tier_index" integer NOT NULL, "payout_count" numeric NOT NULL, "min_payout" numeric NOT NULL, "max_payout" numeric NOT NULL, "config_id" character varying, CONSTRAINT "PK_84aef8c273010587864706219e4" PRIMARY KEY ("id"))`)
@@ -10,7 +10,7 @@ module.exports = class Data1783427238305 {
         await db.query(`CREATE INDEX "IDX_f54f79f651c54024ce8f68d806" ON "payout_claim" ("rip_id") `)
         await db.query(`CREATE TABLE "refund" ("id" character varying NOT NULL, "user" text NOT NULL, "entry_count" numeric NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "rip_id" character varying, CONSTRAINT "PK_f1cefa2e60d99b206c46c1116e5" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_771580d815bc7da2921539efe5" ON "refund" ("rip_id") `)
-        await db.query(`CREATE TABLE "rip" ("id" character varying NOT NULL, "start_time" TIMESTAMP WITH TIME ZONE NOT NULL, "entries_sold" numeric NOT NULL, "entries_claimed" numeric NOT NULL, "entries_refunded" numeric NOT NULL, "status" character varying(13) NOT NULL, "vrf_request_status" character varying(13) NOT NULL, "random_a" numeric, "random_b" numeric, "vrf_request_id" numeric, "config_id" character varying, "preset_id" character varying, CONSTRAINT "PK_400d25b7399da5f0c0b8428b546" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "rip" ("id" character varying NOT NULL, "start_time" TIMESTAMP WITH TIME ZONE NOT NULL, "entries_sold" numeric NOT NULL, "entries_claimed" numeric NOT NULL, "entries_refunded" numeric NOT NULL, "status" character varying(13) NOT NULL, "vrf_request_status" character varying(13) NOT NULL, "random_a" numeric, "random_b" numeric, "settle_block_number" numeric, "settle_log_index" integer, "vrf_request_id" numeric, "config_id" character varying, "preset_id" character varying, CONSTRAINT "PK_400d25b7399da5f0c0b8428b546" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_5b76bef547adc9cc3273eb014b" ON "rip" ("config_id") `)
         await db.query(`CREATE INDEX "IDX_48ff3965e27909f69d35ee5766" ON "rip" ("preset_id") `)
         await db.query(`CREATE TABLE "config" ("id" character varying NOT NULL, "entry_cap" numeric NOT NULL, "currency" text NOT NULL, "duration_seconds" numeric NOT NULL, "entry_price" numeric NOT NULL, "fee_bps" numeric NOT NULL, "preset_id" character varying, CONSTRAINT "PK_d0ee79a681413d50b0a4f98cf7b" PRIMARY KEY ("id"))`)
