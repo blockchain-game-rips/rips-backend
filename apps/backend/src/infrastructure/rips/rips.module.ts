@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { ExecutorHealthService } from '../../application/interfaces/executor-health.service'
 import { RipsAdminService } from '../../application/interfaces/rips-admin.service'
 import { RipsReadService } from '../../application/interfaces/rips-read.service'
 import { RipsService } from '../../application/interfaces/rips.service'
@@ -7,6 +8,7 @@ import { ChainAddress } from '../../domain/value-objects/chain-address'
 import { toEvmAddress } from '../../domain/value-objects/evm-address'
 import { getEnvSafe } from '../../utils/common'
 import { EvmModule } from '../evm/evm.module'
+import { ExecutorHealthServiceImpl } from './executor-health.service'
 import { RipsAdminServiceImpl } from './rips-admin.service'
 import { RipsReadServiceImpl } from './rips-read.service'
 import { RIPS_CONDUIT_CONTRACT, RIPS_CONTRACT } from './rips.constants'
@@ -37,11 +39,13 @@ function contractOnRipsChain(addressEnvVar: string): ChainAddress {
 		{ provide: RipsService, useClass: RipsServiceIpml },
 		{ provide: RipsReadService, useClass: RipsReadServiceImpl },
 		{ provide: RipsAdminService, useClass: RipsAdminServiceImpl },
+		{ provide: ExecutorHealthService, useClass: ExecutorHealthServiceImpl },
 	],
 	exports: [
 		RipsService,
 		RipsReadService,
 		RipsAdminService,
+		ExecutorHealthService,
 		RIPS_CONTRACT,
 		RIPS_CONDUIT_CONTRACT,
 	],

@@ -16,6 +16,7 @@ import { ReferralSystemApiModule } from './modules/api/referral-system-api/refer
 import { RipsApiModule } from './modules/api/rips-api/rips-api.module'
 import { UsersApiModule } from './modules/api/users-api/users-api.module'
 import { WalletsApiModule } from './modules/api/wallets-api/wallets-api.module'
+import { ExecutorHealthModule } from './modules/executor-health/executor-health.module'
 import { KeeperModule } from './modules/keeper/keeper.module'
 import { SyncSettlingRipsModule } from './modules/sync-settling-rips/sync-settling-rips.module'
 import { AccessCoverageValidator } from './presentation/shared/access/access-coverage.validator'
@@ -40,6 +41,7 @@ import { AccessGuard } from './presentation/shared/access/access.guard'
 		RipsApiModule,
 		ReferralSystemApiModule,
 		KeeperModule,
+		ExecutorHealthModule,
 		SyncSettlingRipsModule,
 		NotificationsApiModule,
 	],
