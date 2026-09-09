@@ -27,6 +27,7 @@ import { handleVrfRequestConfirmationsUpdated } from './handlers/handle-vrf-requ
 import { handleVrfSubscriptionIdUpdated } from './handlers/handle-vrf-subscription-id-updated'
 import { Rip, RipStatus } from './model'
 import { Block, Context, processor } from './processor'
+import { applyStatus } from './rip-status'
 import { Entities, HandlerArgs } from './types'
 
 type Handler = (args: HandlerArgs) => void | Promise<void>
@@ -84,8 +85,12 @@ async function handleFillingToRefunding(
 			BigInt(target.startTime.getTime()) +
 			target.config.durationSeconds * MILLISECONDS_PER_SECOND
 
-		if (lastBlockTimestamp >= deadlineMs) {
-			target.status = RipStatus.REFUNDING
+		// The query above only saw pre-batch statuses, so a rip handlers already
+		// advanced past FILLING reaches here; applyStatus rejects and logs it.
+		if (
+			lastBlockTimestamp >= deadlineMs &&
+			applyStatus(target, RipStatus.REFUNDING, ctx)
+		) {
 			entities.rips.set(target.id, target)
 		}
 	}

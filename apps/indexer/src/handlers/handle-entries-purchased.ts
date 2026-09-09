@@ -1,6 +1,7 @@
 import * as rips from '../abi/rips'
 import { resolveRipOrThrow } from '../helpers'
 import { EntryPurchase, RipStatus } from '../model'
+import { applyStatus } from '../rip-status'
 import { HandlerArgs } from '../types'
 
 export async function handleEntriesPurchased(args: HandlerArgs): Promise<void> {
@@ -15,7 +16,7 @@ export async function handleEntriesPurchased(args: HandlerArgs): Promise<void> {
 	rip.entriesSold += entryCount
 
 	if (rip.entriesSold === rip.config.entryCap) {
-		rip.status = RipStatus.SEALED
+		applyStatus(rip, RipStatus.SEALED, ctx)
 	}
 
 	entities.rips.set(ripIdStr, rip)

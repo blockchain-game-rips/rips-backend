@@ -1,6 +1,7 @@
 import * as rips from '../abi/rips'
 import { resolveRipOrThrow } from '../helpers'
 import { Refund, RipStatus } from '../model'
+import { applyStatus } from '../rip-status'
 import { HandlerArgs } from '../types'
 
 export async function handleRefundIssued(args: HandlerArgs): Promise<void> {
@@ -14,7 +15,7 @@ export async function handleRefundIssued(args: HandlerArgs): Promise<void> {
 	rip.entriesRefunded += entryCount
 
 	if (rip.entriesRefunded === rip.entriesSold) {
-		rip.status = RipStatus.REFUNDED
+		applyStatus(rip, RipStatus.REFUNDED, ctx)
 	}
 
 	entities.rips.set(ripIdStr, rip)

@@ -1,6 +1,7 @@
 import * as rips from '../abi/rips'
 import { resolveRipOrThrow } from '../helpers'
 import { PayoutClaim, RipStatus } from '../model'
+import { applyStatus } from '../rip-status'
 import { HandlerArgs } from '../types'
 
 export async function handlePayoutsClaimed(args: HandlerArgs): Promise<void> {
@@ -15,7 +16,7 @@ export async function handlePayoutsClaimed(args: HandlerArgs): Promise<void> {
 	rip.entriesClaimed += entryCount
 
 	if (rip.entriesClaimed === rip.config.entryCap) {
-		rip.status = RipStatus.CLAIMED
+		applyStatus(rip, RipStatus.CLAIMED, ctx)
 	}
 
 	entities.rips.set(ripIdStr, rip)
