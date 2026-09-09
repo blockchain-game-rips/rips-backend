@@ -2,12 +2,17 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Executor } from '../../../domain/entities/executor'
 import { OngoingRip, Rip, RipStatus } from '../../../domain/entities/rip'
 import { resolveUnclaimedAddresses } from '../../../domain/services/claim-utils'
+import { evmAddressFromWallet } from '../../../domain/services/evm'
 import { resolveUnrefundedAddresses } from '../../../domain/services/refund-utils'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
 import {
 	attemptTransactionId,
 	TransactionAttempt,
 } from '../../../domain/value-objects/transaction-attempt'
+import {
+	KeeperActionName,
+	KeeperMetricsService,
+} from '../../../infrastructure/metrics/keeper-metrics.service'
 import { ExecutorRepository } from '../../interfaces/repositories/executor.repository'
 import { UserRepository } from '../../interfaces/repositories/user.repository'
 import { RipsService } from '../../interfaces/rips.service'
@@ -28,6 +33,7 @@ export class KeeperService extends KeeperUseCase {
 		private readonly executorRepository: ExecutorRepository,
 		private readonly userRepository: UserRepository,
 		private readonly ripsService: RipsService,
+		private readonly keeperMetrics: KeeperMetricsService,
 	) {
 		super()
 	}
@@ -133,7 +139,7 @@ export class KeeperService extends KeeperUseCase {
 					{ ripId: action.rip.id },
 				)
 
-				this.logAttempt(attempt, 'Randomness request', {
+				this.recordAttempt(executor, 'request-vrf', attempt, {
 					ripId: action.rip.id,
 				})
 				break
@@ -150,7 +156,7 @@ export class KeeperService extends KeeperUseCase {
 					referrerAddress: user?.referrerAddress ?? null,
 				})
 
-				this.logAttempt(attempt, 'Payout claim', {
+				this.recordAttempt(executor, 'claim', attempt, {
 					userId: user?.id.toString(),
 					ripId: action.rip.id,
 					userAddress: action.userAddress,
@@ -164,7 +170,7 @@ export class KeeperService extends KeeperUseCase {
 					userAddress: action.userAddress,
 				})
 
-				this.logAttempt(attempt, 'Refund', {
+				this.recordAttempt(executor, 'refund', attempt, {
 					ripId: action.rip.id,
 					userAddress: action.userAddress,
 				})
@@ -173,23 +179,32 @@ export class KeeperService extends KeeperUseCase {
 		}
 	}
 
-	private logAttempt(
+	/**
+	 * The transport layer returns send failures as a value, so this is the one
+	 * place where a keeper action's outcome is known.
+	 */
+	private recordAttempt(
+		executor: Executor,
+		action: KeeperActionName,
 		attempt: TransactionAttempt,
-		action: string,
 		context: Record<string, unknown>,
 	): void {
-		const details = {
-			...context,
-			status: attempt.status,
-			txHash: attemptTransactionId(attempt),
-		}
+		this.keeperMetrics.countAction(
+			evmAddressFromWallet(executor.wallet),
+			action,
+			attempt,
+		)
 
-		if (attempt.status === 'succeeded') {
-			this.logger.log(details, `${action} succeeded`)
+		if (attempt.status === 'succeeded') return
 
-			return
-		}
-
-		this.logger.error(details, `${action} did not succeed`)
+		this.logger.error(
+			{
+				...context,
+				action,
+				status: attempt.status,
+				txHash: attemptTransactionId(attempt),
+			},
+			'Keeper action did not succeed',
+		)
 	}
 }
