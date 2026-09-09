@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Executor } from '../../../domain/entities/executor'
 import { OngoingRip, Rip, RipStatus } from '../../../domain/entities/rip'
 import { resolveUnclaimedAddresses } from '../../../domain/services/claim-utils'
+import { resolveUnrefundedAddresses } from '../../../domain/services/refund-utils'
 import { EvmAddress } from '../../../domain/value-objects/evm-address'
 import {
 	attemptTransactionId,
@@ -82,19 +83,14 @@ export class KeeperService extends KeeperUseCase {
 						}),
 					)
 
-				case RipStatus.REFUNDING: {
-					const refundedAddresses = new Set(
-						rip.actions.refunds.map((r) => r.userAddress),
-					)
-
-					return rip.actions.purchases
-						.filter((p) => !refundedAddresses.has(p.userAddress))
-						.map((p) => ({
+				case RipStatus.REFUNDING:
+					return resolveUnrefundedAddresses(rip.actions).map(
+						(userAddress) => ({
 							type: 'refund',
 							rip,
-							userAddress: p.userAddress,
-						}))
-				}
+							userAddress,
+						}),
+					)
 
 				default:
 					return []
