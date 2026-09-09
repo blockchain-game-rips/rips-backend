@@ -5,6 +5,6 @@ const projectFor = projectFactory(import.meta.dirname)
 
 export default defineConfig({
 	test: {
-		projects: [projectFor('e2e')],
+		projects: [projectFor('unit'), projectFor('e2e')],
 	},
 })
