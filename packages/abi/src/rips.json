@@ -92,6 +92,19 @@
 	},
 	{
 		"type": "function",
+		"name": "MIN_ENTRY_PRICE",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "OPERATOR_ROLE",
 		"inputs": [],
 		"outputs": [
@@ -144,6 +157,19 @@
 	},
 	{
 		"type": "function",
+		"name": "VRF_REQUEST_EXPIRY",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "callbackGasLimit",
 		"inputs": [],
 		"outputs": [
@@ -154,6 +180,19 @@
 			}
 		],
 		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "cancelRip",
+		"inputs": [
+			{
+				"name": "ripId",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
 	},
 	{
 		"type": "function",
@@ -870,6 +909,11 @@
 				"name": "vrfRequestStatus",
 				"type": "uint8",
 				"internalType": "enum IRips.VrfRequestStatus"
+			},
+			{
+				"name": "isCancelled",
+				"type": "bool",
+				"internalType": "bool"
 			},
 			{
 				"name": "randomA",
@@ -1713,6 +1757,19 @@
 	},
 	{
 		"type": "event",
+		"name": "RipCancelled",
+		"inputs": [
+			{
+				"name": "ripId",
+				"type": "uint256",
+				"indexed": true,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
 		"name": "RipCreated",
 		"inputs": [
 			{
@@ -1932,6 +1989,11 @@
 	},
 	{
 		"type": "error",
+		"name": "EntryPriceTooLow",
+		"inputs": []
+	},
+	{
+		"type": "error",
 		"name": "EthSentForERC20",
 		"inputs": []
 	},
@@ -2033,6 +2095,11 @@
 	{
 		"type": "error",
 		"name": "RipExpired",
+		"inputs": []
+	},
+	{
+		"type": "error",
+		"name": "RipNotCancellable",
 		"inputs": []
 	},
 	{
