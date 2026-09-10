@@ -39,6 +39,7 @@ const CONFIG_2_ID = '2'
 const PRESET_1_RIP_1_ID = '1'
 const PRESET_1_RIP_2_ID = '2'
 const PRESET_2_RIP_1_ID = '3'
+const PRESET_2_RIP_2_ID = '4'
 
 const TOTAL_PRESETS = 2
 
@@ -766,6 +767,55 @@ describe('indexer e2e', () => {
 			})
 			expect(BigInt(row.accrued as string)).toBeGreaterThan(0n)
 			expect(BigInt(row.withdrawn as string)).toBeGreaterThan(0n)
+		})
+	})
+
+	describe('cancelRip', () => {
+		const ENTRY_COUNT = 2n
+
+		let txHash: `0x${string}`
+
+		beforeAll(async () => {
+			// Preset 2's earlier rip sold out and settled, so entering again opens
+			// a fresh one rather than adding to it.
+			await buyEntriesPreset2(ENTRY_COUNT)
+
+			await waitForRow(
+				dataSource,
+				`SELECT * FROM rip WHERE id = '${PRESET_2_RIP_2_ID}' AND status = 'FILLING'`,
+			)
+
+			txHash = await walletClient.writeContract({
+				...ripsAbiAndAddress,
+				functionName: 'cancelRip',
+				args: [BigInt(PRESET_2_RIP_2_ID)],
+				gas: DEFAULT_GAS,
+			})
+			await waitForReceipt(publicClient, txHash)
+		})
+
+		it('moves the rip out of FILLING before its duration elapses', async () => {
+			const rip = await waitForRow(
+				dataSource,
+				`SELECT * FROM rip WHERE id = '${PRESET_2_RIP_2_ID}' AND status = 'REFUNDING'`,
+			)
+
+			expect(rip).toMatchObject({
+				id: PRESET_2_RIP_2_ID,
+				entries_sold: ENTRY_COUNT.toString(),
+			})
+		})
+
+		it('indexes the RipCancelled with correct fields', async () => {
+			const cancellation = await waitForRow(
+				dataSource,
+				`SELECT * FROM rip_cancelled WHERE rip_id = '${PRESET_2_RIP_2_ID}'`,
+			)
+
+			expect(cancellation).toMatchObject({
+				rip_id: PRESET_2_RIP_2_ID,
+				tx_hash: txHash,
+			})
 		})
 	})
 

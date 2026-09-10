@@ -1,9 +1,13 @@
 import { Rip, RipStatus } from 'src/model'
-import { applyStatus } from 'src/rip-status'
+import { applyStatus, startRefund } from 'src/rip-status'
 import { Mock, vi } from 'vitest'
 
 function makeRip(status: RipStatus): Rip {
 	return new Rip({ id: '1', status })
+}
+
+function makeFillingRip(entriesSold: bigint): Rip {
+	return new Rip({ id: '1', status: RipStatus.FILLING, entriesSold })
 }
 
 function makeCtx(): { ctx: { log: { error: Mock } }; error: Mock } {
@@ -69,4 +73,52 @@ describe('applyStatus', () => {
 			expect(error).not.toHaveBeenCalled()
 		},
 	)
+})
+
+describe('startRefund', () => {
+	it('sends a rip with entries sold to REFUNDING', () => {
+		const rip = makeFillingRip(3n)
+		const { ctx, error } = makeCtx()
+
+		expect(startRefund(rip, ctx)).toBe(true)
+		expect(rip.status).toBe(RipStatus.REFUNDING)
+		expect(error).not.toHaveBeenCalled()
+	})
+
+	// An empty rip has nothing to refund, so no RefundIssued will ever arrive to
+	// advance it out of REFUNDING.
+	it('sends an empty rip straight to REFUNDED', () => {
+		const rip = makeFillingRip(0n)
+		const { ctx, error } = makeCtx()
+
+		expect(startRefund(rip, ctx)).toBe(true)
+		expect(rip.status).toBe(RipStatus.REFUNDED)
+		expect(error).not.toHaveBeenCalled()
+	})
+
+	it('is a silent no-op for a rip already refunding', () => {
+		const rip = new Rip({
+			id: '1',
+			status: RipStatus.REFUNDING,
+			entriesSold: 3n,
+		})
+		const { ctx, error } = makeCtx()
+
+		expect(startRefund(rip, ctx)).toBe(false)
+		expect(rip.status).toBe(RipStatus.REFUNDING)
+		expect(error).not.toHaveBeenCalled()
+	})
+
+	it('rejects a rip past the refund branch', () => {
+		const rip = new Rip({
+			id: '1',
+			status: RipStatus.CLAIMED,
+			entriesSold: 3n,
+		})
+		const { ctx, error } = makeCtx()
+
+		expect(startRefund(rip, ctx)).toBe(false)
+		expect(rip.status).toBe(RipStatus.CLAIMED)
+		expect(error).toHaveBeenCalledOnce()
+	})
 })
