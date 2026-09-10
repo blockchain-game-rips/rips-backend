@@ -1,5 +1,5 @@
-module.exports = class Data1788460293454 {
-    name = 'Data1788460293454'
+module.exports = class Data1789051999710 {
+    name = 'Data1789051999710'
 
     async up(db) {
         await db.query(`CREATE TABLE "payout_tier" ("id" character varying NOT NULL, "tier_index" integer NOT NULL, "payout_count" numeric NOT NULL, "min_payout" numeric NOT NULL, "max_payout" numeric NOT NULL, "config_id" character varying, CONSTRAINT "PK_84aef8c273010587864706219e4" PRIMARY KEY ("id"))`)
@@ -10,6 +10,8 @@ module.exports = class Data1788460293454 {
         await db.query(`CREATE INDEX "IDX_f54f79f651c54024ce8f68d806" ON "payout_claim" ("rip_id") `)
         await db.query(`CREATE TABLE "refund" ("id" character varying NOT NULL, "user" text NOT NULL, "entry_count" numeric NOT NULL, "amount" numeric NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "rip_id" character varying, CONSTRAINT "PK_f1cefa2e60d99b206c46c1116e5" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_771580d815bc7da2921539efe5" ON "refund" ("rip_id") `)
+        await db.query(`CREATE TABLE "rip_cancelled" ("id" character varying NOT NULL, "block_number" numeric NOT NULL, "time" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_hash" text NOT NULL, "rip_id" character varying, CONSTRAINT "PK_e2c53efc630c3d0c0c5963295af" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_154ef1eb285f269d6f93428c0b" ON "rip_cancelled" ("rip_id") `)
         await db.query(`CREATE TABLE "rip" ("id" character varying NOT NULL, "start_time" TIMESTAMP WITH TIME ZONE NOT NULL, "entries_sold" numeric NOT NULL, "entries_claimed" numeric NOT NULL, "entries_refunded" numeric NOT NULL, "status" character varying(13) NOT NULL, "vrf_request_status" character varying(13) NOT NULL, "random_a" numeric, "random_b" numeric, "settle_block_number" numeric, "settle_log_index" integer, "vrf_request_id" numeric, "config_id" character varying, "preset_id" character varying, CONSTRAINT "PK_400d25b7399da5f0c0b8428b546" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_5b76bef547adc9cc3273eb014b" ON "rip" ("config_id") `)
         await db.query(`CREATE INDEX "IDX_48ff3965e27909f69d35ee5766" ON "rip" ("preset_id") `)
@@ -40,6 +42,7 @@ module.exports = class Data1788460293454 {
         await db.query(`ALTER TABLE "entry_purchase" ADD CONSTRAINT "FK_7ea7e6ba0b75e4d49ed06f7f4cc" FOREIGN KEY ("rip_id") REFERENCES "rip"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "payout_claim" ADD CONSTRAINT "FK_f54f79f651c54024ce8f68d806a" FOREIGN KEY ("rip_id") REFERENCES "rip"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "refund" ADD CONSTRAINT "FK_771580d815bc7da2921539efe50" FOREIGN KEY ("rip_id") REFERENCES "rip"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+        await db.query(`ALTER TABLE "rip_cancelled" ADD CONSTRAINT "FK_154ef1eb285f269d6f93428c0be" FOREIGN KEY ("rip_id") REFERENCES "rip"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "rip" ADD CONSTRAINT "FK_5b76bef547adc9cc3273eb014b0" FOREIGN KEY ("config_id") REFERENCES "config"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "rip" ADD CONSTRAINT "FK_48ff3965e27909f69d35ee57662" FOREIGN KEY ("preset_id") REFERENCES "preset"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "config" ADD CONSTRAINT "FK_fdef900a0897e034d4915860209" FOREIGN KEY ("preset_id") REFERENCES "preset"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -55,6 +58,7 @@ module.exports = class Data1788460293454 {
         await db.query(`ALTER TABLE "config" DROP CONSTRAINT "FK_fdef900a0897e034d4915860209"`)
         await db.query(`ALTER TABLE "rip" DROP CONSTRAINT "FK_48ff3965e27909f69d35ee57662"`)
         await db.query(`ALTER TABLE "rip" DROP CONSTRAINT "FK_5b76bef547adc9cc3273eb014b0"`)
+        await db.query(`ALTER TABLE "rip_cancelled" DROP CONSTRAINT "FK_154ef1eb285f269d6f93428c0be"`)
         await db.query(`ALTER TABLE "refund" DROP CONSTRAINT "FK_771580d815bc7da2921539efe50"`)
         await db.query(`ALTER TABLE "payout_claim" DROP CONSTRAINT "FK_f54f79f651c54024ce8f68d806a"`)
         await db.query(`ALTER TABLE "entry_purchase" DROP CONSTRAINT "FK_7ea7e6ba0b75e4d49ed06f7f4cc"`)
@@ -85,6 +89,8 @@ module.exports = class Data1788460293454 {
         await db.query(`DROP INDEX "public"."IDX_48ff3965e27909f69d35ee5766"`)
         await db.query(`DROP INDEX "public"."IDX_5b76bef547adc9cc3273eb014b"`)
         await db.query(`DROP TABLE "rip"`)
+        await db.query(`DROP INDEX "public"."IDX_154ef1eb285f269d6f93428c0b"`)
+        await db.query(`DROP TABLE "rip_cancelled"`)
         await db.query(`DROP INDEX "public"."IDX_771580d815bc7da2921539efe5"`)
         await db.query(`DROP TABLE "refund"`)
         await db.query(`DROP INDEX "public"."IDX_f54f79f651c54024ce8f68d806"`)

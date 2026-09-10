@@ -20,6 +20,7 @@ import {
 	ReferrerStateUpdated,
 	Refund,
 	Rip,
+	RipCancelled,
 	VrfKeyHashUpdated,
 	VrfRequestConfirmationsUpdated,
 	VrfSubscriptionIdUpdated,
@@ -34,6 +35,7 @@ export interface Entities {
 	entryPurchases: EntryPurchase[]
 	payoutClaims: PayoutClaim[]
 	refunds: Refund[]
+	ripCancellations: RipCancelled[]
 	feeRecipientUpdates: FeeRecipientUpdated[]
 	callbackGasLimitUpdates: CallbackGasLimitUpdated[]
 	vrfRequestConfirmationsUpdates: VrfRequestConfirmationsUpdated[]

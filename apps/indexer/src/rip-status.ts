@@ -49,3 +49,16 @@ export function applyStatus(
 
 	return true
 }
+
+/**
+ * Opens the refund branch for a rip, whether it expired on its own deadline or an
+ * admin cancelled it early. A rip that sold no entries skips REFUNDING: nothing
+ * can be refunded, so no RefundIssued would ever arrive to advance it, and it
+ * would otherwise sit in REFUNDING forever.
+ */
+export function startRefund(rip: Rip, ctx: ErrorLogger): boolean {
+	const next =
+		rip.entriesSold === 0n ? RipStatus.REFUNDED : RipStatus.REFUNDING
+
+	return applyStatus(rip, next, ctx)
+}

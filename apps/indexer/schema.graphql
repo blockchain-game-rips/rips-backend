@@ -98,6 +98,7 @@ type Rip @entity {
 	entryPurchases: [EntryPurchase!]! @derivedFrom(field: "rip")
 	payoutsClaimed: [PayoutClaim!]! @derivedFrom(field: "rip")
 	refunds: [Refund!]! @derivedFrom(field: "rip")
+	cancellations: [RipCancelled!]! @derivedFrom(field: "rip")
 }
 
 type EntryPurchase @entity {
@@ -129,6 +130,14 @@ type Refund @entity {
 	user: String!
 	entryCount: BigInt!
 	amount: BigInt!
+	blockNumber: BigInt!
+	time: DateTime!
+	txHash: String!
+}
+
+type RipCancelled @entity {
+	id: ID!
+	rip: Rip!
 	blockNumber: BigInt!
 	time: DateTime!
 	txHash: String!

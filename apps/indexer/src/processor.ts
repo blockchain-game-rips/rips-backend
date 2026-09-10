@@ -22,6 +22,7 @@ const TRACKED_EVENTS = [
 	rips.events.PresetUpdated.topic,
 	rips.events.PresetDeleted.topic,
 	rips.events.RipCreated.topic,
+	rips.events.RipCancelled.topic,
 	rips.events.RipEntered.topic,
 	rips.events.RandomnessRequested.topic,
 	rips.events.RandomnessFulfilled.topic,

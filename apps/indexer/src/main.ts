@@ -21,13 +21,14 @@ import { handleReferrerFeeSeized } from './handlers/handle-referrer-fee-seized'
 import { handleReferrerFeeWithdrawn } from './handlers/handle-referrer-fee-withdrawn'
 import { handleReferrerFreezeUpdated } from './handlers/handle-referrer-freeze-updated'
 import { handleRefundIssued } from './handlers/handle-refund-issued'
+import { handleRipCancelled } from './handlers/handle-rip-cancelled'
 import { handleRipCreated } from './handlers/handle-rip-created'
 import { handleVrfKeyHashUpdated } from './handlers/handle-vrf-key-hash-updated'
 import { handleVrfRequestConfirmationsUpdated } from './handlers/handle-vrf-request-confirmations-updated'
 import { handleVrfSubscriptionIdUpdated } from './handlers/handle-vrf-subscription-id-updated'
 import { Rip, RipStatus } from './model'
 import { Block, Context, processor } from './processor'
-import { applyStatus } from './rip-status'
+import { startRefund } from './rip-status'
 import { Entities, HandlerArgs } from './types'
 
 type Handler = (args: HandlerArgs) => void | Promise<void>
@@ -37,6 +38,7 @@ const handlers: Record<string, Handler> = {
 	[rips.events.PresetUpdated.topic]: handlePresetUpdated,
 	[rips.events.PresetDeleted.topic]: handlePresetDeleted,
 	[rips.events.RipCreated.topic]: handleRipCreated,
+	[rips.events.RipCancelled.topic]: handleRipCancelled,
 	[rips.events.RipEntered.topic]: handleEntriesPurchased,
 	[rips.events.RandomnessRequested.topic]: handleRandomnessRequested,
 	[rips.events.RandomnessFulfilled.topic]: handleRandomnessFulfilled,
@@ -65,7 +67,7 @@ const handlers: Record<string, Handler> = {
 
 const MILLISECONDS_PER_SECOND = 1000n
 
-async function handleFillingToRefunding(
+async function refundExpiredRips(
 	ctx: Context,
 	entities: Entities,
 	lastBlock: Block,
@@ -85,12 +87,11 @@ async function handleFillingToRefunding(
 			BigInt(target.startTime.getTime()) +
 			target.config.durationSeconds * MILLISECONDS_PER_SECOND
 
-		// The query above only saw pre-batch statuses, so a rip handlers already
-		// advanced past FILLING reaches here; applyStatus rejects and logs it.
-		if (
-			lastBlockTimestamp >= deadlineMs &&
-			applyStatus(target, RipStatus.REFUNDING, ctx)
-		) {
+		// The query above only saw pre-batch statuses, so a rip that handlers
+		// already advanced past FILLING reaches here. startRefund absorbs it: one
+		// cancelled this batch is already refunding and passes as a silent no-op,
+		// while a sealed one is rejected and logged.
+		if (lastBlockTimestamp >= deadlineMs && startRefund(target, ctx)) {
 			entities.rips.set(target.id, target)
 		}
 	}
@@ -105,6 +106,7 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 		entryPurchases: [],
 		payoutClaims: [],
 		refunds: [],
+		ripCancellations: [],
 		feeRecipientUpdates: [],
 		callbackGasLimitUpdates: [],
 		vrfRequestConfirmationsUpdates: [],
@@ -138,7 +140,7 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
 	}
 
 	const lastBlock = ctx.blocks[ctx.blocks.length - 1].header
-	await handleFillingToRefunding(ctx, entities, lastBlock)
+	await refundExpiredRips(ctx, entities, lastBlock)
 
 	for (const key of Object.keys(entities) as (keyof Entities)[]) {
 		const value = entities[key]
