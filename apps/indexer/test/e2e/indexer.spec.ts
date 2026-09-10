@@ -427,14 +427,17 @@ describe('indexer e2e', () => {
 		})
 
 		it('updates rip status to REFUNDING', async () => {
+			// The rip row exists from the moment it is entered, so the status has to
+			// be part of the predicate: matching on the id alone races the
+			// end-of-batch expiry pass and reads the rip while it is still FILLING.
 			const rip = await waitForRow(
 				dataSource,
-				`SELECT * FROM rip WHERE id = '${PRESET_1_RIP_2_ID}'`,
+				`SELECT * FROM rip WHERE id = '${PRESET_1_RIP_2_ID}' AND status = 'REFUNDING'`,
 			)
 
 			expect(rip).toMatchObject({
 				id: PRESET_1_RIP_2_ID,
-				status: 'REFUNDING',
+				entries_refunded: '0',
 			})
 		})
 	})
