@@ -30,9 +30,10 @@ CREATE UNIQUE INDEX "eligibility_policies_singleton_key" ON "eligibility_policie
 -- AddForeignKey
 ALTER TABLE "user_eligibility" ADD CONSTRAINT "user_eligibility_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- The policy singleton starts blocking nobody. The terms document is empty
--- until the admin bot uploads one, which is the same transaction that bumps
--- the version past 1 -- so an empty file and version 1 always travel together.
+-- The policy singleton starts blocking nobody, with an empty terms document
+-- pending the first admin upload. Nothing enforces that an empty file and
+-- version 1 travel together, so test "terms_file" for emptiness rather than
+-- inferring it from "terms_version".
 INSERT INTO "eligibility_policies" ("singleton", "blocked_countries", "terms_version", "terms_file", "updated_at")
 VALUES ('eligibility', '{}', 1, '\x', CURRENT_TIMESTAMP);
 
