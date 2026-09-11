@@ -8,13 +8,37 @@ datasource db {
 }
 
 model User {
-    id              BigInt     @id @default(autoincrement())
-    telegramId      BigInt     @unique @map("telegram_id")
-    referrerAddress String?    @map("referrer_address")
-    createdAt       DateTime   @default(now()) @map("created_at")
+    id              BigInt           @id @default(autoincrement())
+    telegramId      BigInt           @unique @map("telegram_id")
+    referrerAddress String?          @map("referrer_address")
+    createdAt       DateTime         @default(now()) @map("created_at")
     evmWallet       EvmWallet?
+    eligibility     UserEligibility?
 
     @@map("users")
+}
+
+// Absence of a row means the user has never been gated.
+model UserEligibility {
+    id           BigInt   @id @default(autoincrement())
+    country      String
+    termsVersion Int      @map("terms_version")
+    acceptedAt   DateTime @map("accepted_at")
+    userId       BigInt   @unique @map("user_id")
+    user         User     @relation(fields: [userId], references: [id])
+
+    @@map("user_eligibility")
+}
+
+model EligibilityPolicy {
+    id               BigInt   @id @default(autoincrement())
+    singleton        String   @unique @default("eligibility")
+    blockedCountries String[] @map("blocked_countries")
+    termsVersion     Int      @map("terms_version")
+    termsFile        Bytes    @map("terms_file")
+    updatedAt        DateTime @updatedAt @map("updated_at")
+
+    @@map("eligibility_policies")
 }
 
 model EvmWallet {
