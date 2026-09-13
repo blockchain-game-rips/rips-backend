@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { AdminWalletRepository } from '../../application/interfaces/repositories/admin-wallet.repository'
+import { EligibilityRepository } from '../../application/interfaces/repositories/eligibility.repository'
 import { EntryPayoutRepository } from '../../application/interfaces/repositories/entry-payout.repository'
 import { ExecutorRepository } from '../../application/interfaces/repositories/executor.repository'
 import { NotificationRepository } from '../../application/interfaces/repositories/notification.repository'
@@ -8,6 +9,7 @@ import { UserRepository } from '../../application/interfaces/repositories/user.r
 import { WalletRepository } from '../../application/interfaces/repositories/wallet.repository'
 import { MetricsModule } from '../metrics/metrics.module'
 import { PrismaAdminWalletRepository } from './admin-wallet.repository'
+import { PrismaEligibilityRepository } from './eligibility.repository'
 import { PrismaEntryPayoutRepository } from './entry-payout.repository'
 import { PrismaExecutorRepository } from './executor.repository'
 import { PrismaNotificationRepository } from './notification.repository'
@@ -37,6 +39,10 @@ import { PrismaWalletRepository } from './wallet.repository'
 			provide: NotificationRepository,
 			useClass: PrismaNotificationRepository,
 		},
+		{
+			provide: EligibilityRepository,
+			useClass: PrismaEligibilityRepository,
+		},
 	],
 	exports: [
 		PrismaService,
@@ -47,6 +53,7 @@ import { PrismaWalletRepository } from './wallet.repository'
 		EntryPayoutRepository,
 		RipSyncRepository,
 		NotificationRepository,
+		EligibilityRepository,
 	],
 })
 export class PrismaModule {}

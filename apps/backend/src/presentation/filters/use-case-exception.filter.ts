@@ -9,6 +9,8 @@ import {
 import { Response } from 'express'
 import { AdminWalletNotFoundError } from '../../domain/errors/admin-wallet-not-found.error'
 import { CurrenciesMismatchError } from '../../domain/errors/currencies-mismatch.error'
+import { EligibilityNotFoundError } from '../../domain/errors/eligibility-not-found.error'
+import { EligibilityPolicyNotFoundError } from '../../domain/errors/eligibility-policy-not-found.error'
 import { InsufficientBalanceError } from '../../domain/errors/insufficient-balance.error'
 import { AvailablePresetNotFoundError } from '../../domain/errors/preset-not-found.error'
 import { PresetTierCountMismatchError } from '../../domain/errors/preset-tier-count-mismatch.error'
@@ -22,6 +24,10 @@ type ErrorConstructor = new (...args: never[]) => ContextError
 const ERROR_STATUS_MAP: Map<ErrorConstructor, HttpStatus> = new Map([
 	[UserNotFoundError, HttpStatus.NOT_FOUND],
 	[AvailablePresetNotFoundError, HttpStatus.NOT_FOUND],
+	[EligibilityNotFoundError, HttpStatus.NOT_FOUND],
+	// A missing policy singleton is a broken deployment, not a bad request:
+	// initial setup creates it, so its absence means setup never ran.
+	[EligibilityPolicyNotFoundError, HttpStatus.INTERNAL_SERVER_ERROR],
 	[UserAlreadyExistsError, HttpStatus.CONFLICT],
 	[WalletAlreadyExistsError, HttpStatus.CONFLICT],
 	[InsufficientBalanceError, HttpStatus.UNPROCESSABLE_ENTITY],

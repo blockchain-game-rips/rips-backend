@@ -1,6 +1,7 @@
 import { Mocked, vi } from 'vitest'
 import { CurrencyService } from '../../src/application/interfaces/currency.service'
 import { EncryptionService } from '../../src/application/interfaces/encryption.service'
+import { EligibilityRepository } from '../../src/application/interfaces/repositories/eligibility.repository'
 import { EntryPayoutRepository } from '../../src/application/interfaces/repositories/entry-payout.repository'
 import { UserRepository } from '../../src/application/interfaces/repositories/user.repository'
 import { WalletReadService } from '../../src/application/interfaces/wallet-read.service'
@@ -10,15 +11,30 @@ import { BuyEntriesZapUseCase } from '../../src/application/use-cases/buy-entrie
 import { CreateUserUseCase } from '../../src/application/use-cases/create-user/create-user.use-case'
 import { ExportKeyUseCase } from '../../src/application/use-cases/export-key/export-key.use-case'
 import { GetBalanceUseCase } from '../../src/application/use-cases/get-balance/get-balance.use-case'
+import { GetEligibilityPolicyUseCase } from '../../src/application/use-cases/get-eligibility-policy/get-eligibility-policy.use-case'
 import { GetPayoutsUseCase } from '../../src/application/use-cases/get-payouts/get-payouts.use-case'
 import { GetSwapResultUseCase } from '../../src/application/use-cases/get-swap-result/get-swap-result.use-case'
+import { GetUserEligibilityUseCase } from '../../src/application/use-cases/get-user-eligibility/get-user-eligibility.use-case'
 import { GetUserUseCase } from '../../src/application/use-cases/get-user/get-user.use-case'
 import { QuoteSwapUseCase } from '../../src/application/use-cases/quote-swap/quote-swap.use-case'
 import { QuoteWithdrawUseCase } from '../../src/application/use-cases/quote-withdraw/quote-withdraw.use-case'
+import { RecordEligibilityUseCase } from '../../src/application/use-cases/record-eligibility/record-eligibility.use-case'
 import { RevealEntryPayoutsUseCase } from '../../src/application/use-cases/reveal-entry-payouts/reveal-entry-payouts.use-case'
+import { SetBlockedCountriesUseCase } from '../../src/application/use-cases/set-blocked-countries/set-blocked-countries.use-case'
 import { SwapUseCase } from '../../src/application/use-cases/swap/swap.use-case'
+import { UploadTermsDocumentUseCase } from '../../src/application/use-cases/upload-terms-document/upload-terms-document.use-case'
 import { WithdrawUseCase } from '../../src/application/use-cases/withdraw.ts/withdraw.use-case'
 import { ENCRYPTED_KEY } from '../fixtures/entities'
+
+export function makeMockEligibilityRepository(): Mocked<EligibilityRepository> {
+	return {
+		findPolicy: vi.fn(),
+		findByTelegramId: vi.fn(),
+		record: vi.fn(),
+		replaceBlockedCountries: vi.fn(),
+		replaceTermsDocument: vi.fn(),
+	}
+}
 
 export function makeMockUserRepository(): Mocked<UserRepository> {
 	return {
@@ -59,6 +75,26 @@ export function makeMockEncryptionService(): Mocked<EncryptionService> {
 		encrypt: vi.fn().mockResolvedValue(ENCRYPTED_KEY),
 		decrypt: vi.fn(),
 	}
+}
+
+export function makeMockGetEligibilityPolicyUseCase(): Mocked<GetEligibilityPolicyUseCase> {
+	return { execute: vi.fn() }
+}
+
+export function makeMockGetUserEligibilityUseCase(): Mocked<GetUserEligibilityUseCase> {
+	return { execute: vi.fn() }
+}
+
+export function makeMockRecordEligibilityUseCase(): Mocked<RecordEligibilityUseCase> {
+	return { execute: vi.fn() }
+}
+
+export function makeMockSetBlockedCountriesUseCase(): Mocked<SetBlockedCountriesUseCase> {
+	return { execute: vi.fn() }
+}
+
+export function makeMockUploadTermsDocumentUseCase(): Mocked<UploadTermsDocumentUseCase> {
+	return { execute: vi.fn() }
 }
 
 export function makeMockGetUserUseCase(): Mocked<GetUserUseCase> {
