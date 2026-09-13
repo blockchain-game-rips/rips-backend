@@ -122,6 +122,17 @@ export class PrismaEligibilityRepository extends EligibilityRepository {
 
 		return toDomainPolicy(record)
 	}
+
+	async findTermsDocument(): Promise<Uint8Array<ArrayBuffer> | null> {
+		const record = await this.prisma.eligibilityPolicy.findUnique({
+			where: { singleton: POLICY_SINGLETON },
+			select: { termsFile: true },
+		})
+
+		if (!record) return null
+
+		return record.termsFile
+	}
 }
 
 function toDomainPolicy(record: PolicyRecord): EligibilityPolicy {

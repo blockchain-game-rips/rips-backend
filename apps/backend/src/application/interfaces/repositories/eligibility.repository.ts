@@ -37,4 +37,15 @@ export abstract class EligibilityRepository {
 	abstract replaceTermsDocument(
 		termsFile: Uint8Array<ArrayBuffer>,
 	): Promise<EligibilityPolicy>
+
+	/**
+	 * Reads the document bytes on their own, deliberately not via
+	 * `EligibilityPolicy`. The entity omits them because the policy is read on
+	 * every gated action, so the bytes get their own query that only the
+	 * download route issues.
+	 *
+	 * `null` means the policy row is absent, which is distinct from a row
+	 * holding a zero-byte document.
+	 */
+	abstract findTermsDocument(): Promise<Uint8Array<ArrayBuffer> | null>
 }

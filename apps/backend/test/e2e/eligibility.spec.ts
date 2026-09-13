@@ -5,6 +5,10 @@ import {
 } from '../../src/infrastructure/prisma/eligibility.repository'
 import { PrismaService } from '../../src/infrastructure/prisma/prisma.service'
 import { SetupEligibilityPolicyService } from '../../src/infrastructure/provision/setup-eligibility-policy.service'
+import {
+	TERMS_CONTENT_TYPE,
+	TERMS_FILENAME,
+} from '../../src/presentation/eligibility/get-terms-document/get-terms-document.response'
 import { TERMS_FILE_FIELD } from '../../src/presentation/eligibility/upload-terms-document/upload-terms-document.request'
 import { ADMIN_API_KEY_HEADER } from '../../src/presentation/shared/access/admin-api-key.header'
 import { TEST_ADMIN_API_KEY } from '../utils/env'
@@ -354,6 +358,85 @@ describe('Eligibility E2E', () => {
 			expect(Array.from(policy.termsFile)).toEqual(
 				Array.from(TEST_TERMS_DOCUMENT),
 			)
+		})
+	})
+
+	describe('GET /eligibility/policy/terms', () => {
+		it('returns the stored document as PDF bytes', async () => {
+			const res = await userRequest(ctx.app.getHttpServer())
+				.get(TERMS_PATH)
+				.expect(200)
+				.expect('Content-Type', TERMS_CONTENT_TYPE)
+
+			expect(Array.from(res.body)).toEqual(
+				Array.from(TEST_TERMS_DOCUMENT),
+			)
+		})
+
+		it('offers the document under a filename the bot can forward', async () => {
+			const res = await userRequest(ctx.app.getHttpServer())
+				.get(TERMS_PATH)
+				.expect(200)
+
+			expect(res.headers['content-disposition']).toContain(TERMS_FILENAME)
+		})
+
+		// The download must follow an upload rather than serve a stale document,
+		// so the bytes a user receives always match the current terms version.
+		it('serves the document written by the most recent upload', async () => {
+			const replacement = Buffer.from('%PDF-1.4 replaced')
+
+			await adminRequest()
+				.post(TERMS_PATH)
+				.attach(TERMS_FILE_FIELD, replacement, 'terms.pdf')
+				.expect(201)
+
+			const res = await userRequest(ctx.app.getHttpServer())
+				.get(TERMS_PATH)
+				.expect(200)
+
+			expect(Buffer.from(res.body).toString()).toBe(
+				replacement.toString(),
+			)
+		})
+
+		/**
+		 * Setup refuses an empty document, so a zero-byte row is only reachable
+		 * by writing one directly. It is still a document rather than an
+		 * absence: the row exists, so the answer is an empty 200, not a 500.
+		 */
+		it('answers an empty body when the stored document is zero-byte', async () => {
+			await ctx.app.get(PrismaService).eligibilityPolicy.update({
+				where: { singleton: POLICY_SINGLETON },
+				data: { termsFile: new Uint8Array([]) },
+			})
+
+			const res = await userRequest(ctx.app.getHttpServer())
+				.get(TERMS_PATH)
+				.expect(200)
+
+			expect(Buffer.from(res.body).byteLength).toBe(0)
+		})
+
+		// Same broken-deployment signal the policy read gives: initial setup
+		// creates the row, so its absence is never a client's problem to retry.
+		it('answers 500 when initial setup has not created the policy', async () => {
+			await ctx.app.get(PrismaService).eligibilityPolicy.deleteMany()
+
+			await userRequest(ctx.app.getHttpServer())
+				.get(TERMS_PATH)
+				.expect(500)
+		})
+
+		it('rejects an absent api key', async () => {
+			await request(ctx.app.getHttpServer()).get(TERMS_PATH).expect(403)
+		})
+
+		it('rejects a wrong api key', async () => {
+			await request(ctx.app.getHttpServer())
+				.get(TERMS_PATH)
+				.set('x-user-key', 'wrong-key')
+				.expect(403)
 		})
 	})
 })

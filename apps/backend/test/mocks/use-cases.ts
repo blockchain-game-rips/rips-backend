@@ -14,6 +14,7 @@ import { GetBalanceUseCase } from '../../src/application/use-cases/get-balance/g
 import { GetEligibilityPolicyUseCase } from '../../src/application/use-cases/get-eligibility-policy/get-eligibility-policy.use-case'
 import { GetPayoutsUseCase } from '../../src/application/use-cases/get-payouts/get-payouts.use-case'
 import { GetSwapResultUseCase } from '../../src/application/use-cases/get-swap-result/get-swap-result.use-case'
+import { GetTermsDocumentUseCase } from '../../src/application/use-cases/get-terms-document/get-terms-document.use-case'
 import { GetUserEligibilityUseCase } from '../../src/application/use-cases/get-user-eligibility/get-user-eligibility.use-case'
 import { GetUserUseCase } from '../../src/application/use-cases/get-user/get-user.use-case'
 import { QuoteSwapUseCase } from '../../src/application/use-cases/quote-swap/quote-swap.use-case'
@@ -33,6 +34,7 @@ export function makeMockEligibilityRepository(): Mocked<EligibilityRepository> {
 		record: vi.fn(),
 		replaceBlockedCountries: vi.fn(),
 		replaceTermsDocument: vi.fn(),
+		findTermsDocument: vi.fn(),
 	}
 }
 
@@ -94,6 +96,10 @@ export function makeMockSetBlockedCountriesUseCase(): Mocked<SetBlockedCountries
 }
 
 export function makeMockUploadTermsDocumentUseCase(): Mocked<UploadTermsDocumentUseCase> {
+	return { execute: vi.fn() }
+}
+
+export function makeMockGetTermsDocumentUseCase(): Mocked<GetTermsDocumentUseCase> {
 	return { execute: vi.fn() }
 }
 

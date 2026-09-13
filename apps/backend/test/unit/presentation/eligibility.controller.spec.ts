@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common'
+import { BadRequestException, StreamableFile } from '@nestjs/common'
 import { EligibilityPolicyNotFoundError } from '../../../src/application/use-cases/get-eligibility-policy/get-eligibility-policy.use-case'
 import { EligibilityNotFoundError } from '../../../src/application/use-cases/get-user-eligibility/get-user-eligibility.use-case'
 import { toCountryCode } from '../../../src/domain/value-objects/country-code'
@@ -6,11 +6,22 @@ import { EligibilityController } from '../../../src/presentation/eligibility/eli
 import { TELEGRAM_ID } from '../../fixtures/entities'
 import {
 	makeMockGetEligibilityPolicyUseCase,
+	makeMockGetTermsDocumentUseCase,
 	makeMockGetUserEligibilityUseCase,
 	makeMockRecordEligibilityUseCase,
 	makeMockSetBlockedCountriesUseCase,
 	makeMockUploadTermsDocumentUseCase,
 } from '../../mocks/use-cases'
+
+async function readStreamableFile(file: StreamableFile): Promise<Uint8Array> {
+	const chunks: Uint8Array[] = []
+
+	for await (const chunk of file.getStream()) {
+		chunks.push(chunk)
+	}
+
+	return Buffer.concat(chunks)
+}
 
 const POLICY = {
 	blockedCountries: [toCountryCode('RU')],
@@ -42,9 +53,11 @@ describe('EligibilityController', () => {
 	const recordEligibility = makeMockRecordEligibilityUseCase()
 	const setBlockedCountries = makeMockSetBlockedCountriesUseCase()
 	const uploadTerms = makeMockUploadTermsDocumentUseCase()
+	const getTermsDocument = makeMockGetTermsDocumentUseCase()
 
 	const controller = new EligibilityController(
 		getPolicy,
+		getTermsDocument,
 		getUserEligibility,
 		recordEligibility,
 		setBlockedCountries,
@@ -151,6 +164,40 @@ describe('EligibilityController', () => {
 			)
 
 			expect(uploadTerms.execute).not.toHaveBeenCalled()
+		})
+	})
+
+	describe('GET /eligibility/policy/terms', () => {
+		it('should stream the stored document bytes', async () => {
+			const document = new Uint8Array([0x25, 0x50, 0x44, 0x46])
+
+			getTermsDocument.execute.mockResolvedValue(document)
+
+			const result = await controller.getTerms()
+
+			expect(result).toBeInstanceOf(StreamableFile)
+			expect(Array.from(await readStreamableFile(result))).toEqual(
+				Array.from(document),
+			)
+		})
+
+		it('should stream a zero-byte document as an empty body rather than an error', async () => {
+			getTermsDocument.execute.mockResolvedValue(new Uint8Array([]))
+
+			const result = await controller.getTerms()
+
+			expect(result).toBeInstanceOf(StreamableFile)
+			expect((await readStreamableFile(result)).byteLength).toBe(0)
+		})
+
+		it('should propagate a missing singleton', async () => {
+			getTermsDocument.execute.mockRejectedValue(
+				new EligibilityPolicyNotFoundError('missing'),
+			)
+
+			await expect(controller.getTerms()).rejects.toThrow(
+				EligibilityPolicyNotFoundError,
+			)
 		})
 	})
 })

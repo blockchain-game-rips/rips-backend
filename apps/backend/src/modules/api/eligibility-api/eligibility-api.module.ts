@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { EligibilityController } from '../../../presentation/eligibility/eligibility.controller'
 import { GetEligibilityPolicyModule } from '../../use-cases/get-eligibility-policy.module'
+import { GetTermsDocumentModule } from '../../use-cases/get-terms-document.module'
 import { GetUserEligibilityModule } from '../../use-cases/get-user-eligibility.module'
 import { RecordEligibilityModule } from '../../use-cases/record-eligibility.module'
 import { SetBlockedCountriesModule } from '../../use-cases/set-blocked-countries.module'
@@ -9,6 +10,7 @@ import { UploadTermsDocumentModule } from '../../use-cases/upload-terms-document
 @Module({
 	imports: [
 		GetEligibilityPolicyModule,
+		GetTermsDocumentModule,
 		GetUserEligibilityModule,
 		RecordEligibilityModule,
 		SetBlockedCountriesModule,

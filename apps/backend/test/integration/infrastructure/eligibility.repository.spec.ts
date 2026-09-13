@@ -134,4 +134,45 @@ describe('PrismaEligibilityRepository terms upload', () => {
 
 		expect(stored.blockedCountries).toEqual(['RU'])
 	})
+
+	/**
+	 * The bytes are read through their own method rather than off the policy
+	 * entity, which omits them so every gated action does not pay for a document
+	 * only the download route wants.
+	 */
+	describe('findTermsDocument', () => {
+		it('reads back the stored document', async () => {
+			const document = await repository.findTermsDocument()
+
+			expect(document && Array.from(document)).toEqual(
+				Array.from(EXISTING_DOCUMENT),
+			)
+		})
+
+		it('reads back a document written by an upload', async () => {
+			await repository.replaceTermsDocument(new Uint8Array([8, 8]))
+
+			const document = await repository.findTermsDocument()
+
+			expect(document && Array.from(document)).toEqual([8, 8])
+		})
+
+		it('distinguishes a missing policy row with a null', async () => {
+			await prisma.eligibilityPolicy.deleteMany()
+
+			expect(await repository.findTermsDocument()).toBeNull()
+		})
+
+		it('returns an empty document as empty bytes rather than as an absence', async () => {
+			await prisma.eligibilityPolicy.update({
+				where: { singleton: POLICY_SINGLETON },
+				data: { termsFile: new Uint8Array([]) },
+			})
+
+			const document = await repository.findTermsDocument()
+
+			expect(document).not.toBeNull()
+			expect(document?.byteLength).toBe(0)
+		})
+	})
 })

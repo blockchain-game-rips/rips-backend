@@ -1,5 +1,6 @@
 import { GetEligibilityPolicyService } from '../../../src/application/use-cases/get-eligibility-policy/get-eligibility-policy.service'
 import { EligibilityPolicyNotFoundError } from '../../../src/application/use-cases/get-eligibility-policy/get-eligibility-policy.use-case'
+import { GetTermsDocumentService } from '../../../src/application/use-cases/get-terms-document/get-terms-document.service'
 import { GetUserEligibilityService } from '../../../src/application/use-cases/get-user-eligibility/get-user-eligibility.service'
 import { EligibilityNotFoundError } from '../../../src/application/use-cases/get-user-eligibility/get-user-eligibility.use-case'
 import { RecordEligibilityService } from '../../../src/application/use-cases/record-eligibility/record-eligibility.service'
@@ -147,5 +148,42 @@ describe('UploadTermsDocumentService', () => {
 		await service.execute({ termsFile })
 
 		expect(repo.replaceTermsDocument).toHaveBeenCalledWith(termsFile)
+	})
+})
+
+describe('GetTermsDocumentService', () => {
+	const repo = makeMockEligibilityRepository()
+	const service = new GetTermsDocumentService(repo)
+
+	beforeEach(() => {
+		vi.clearAllMocks()
+	})
+
+	it('should return the stored bytes', async () => {
+		const termsFile = Buffer.from('pdf-bytes')
+
+		repo.findTermsDocument.mockResolvedValue(termsFile)
+
+		expect(await service.execute()).toEqual(termsFile)
+	})
+
+	/**
+	 * An empty document is a document: the row exists, so this is a real answer
+	 * about the policy rather than the broken-deployment signal a missing row is.
+	 */
+	it('should return an empty document rather than treating it as missing', async () => {
+		repo.findTermsDocument.mockResolvedValue(new Uint8Array([]))
+
+		const document = await service.execute()
+
+		expect(document.byteLength).toBe(0)
+	})
+
+	it('should throw when the singleton is missing', async () => {
+		repo.findTermsDocument.mockResolvedValue(null)
+
+		await expect(service.execute()).rejects.toThrow(
+			EligibilityPolicyNotFoundError,
+		)
 	})
 })
