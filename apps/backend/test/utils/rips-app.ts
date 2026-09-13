@@ -32,6 +32,7 @@ import { toPrivateKey } from '../../src/domain/value-objects/private-key'
 import { EVM_CLIENT_CONFIG } from '../../src/infrastructure/evm/evm-client/types'
 import { WARMUP_CURRENCY_IDS } from '../../src/infrastructure/price-provider/price-provider-warmup.service'
 import { ProvisionService } from '../../src/infrastructure/provision/provision.service'
+import { SetupEligibilityPolicyService } from '../../src/infrastructure/provision/setup-eligibility-policy.service'
 import {
 	RIPS_CONDUIT_CONTRACT,
 	RIPS_CONTRACT,
@@ -45,6 +46,12 @@ import { TestConfigModule } from './test-config.module'
 
 @Module({})
 class NoopScheduleModule {}
+
+/**
+ * Stands in for the real terms PDF an operator supplies at setup. Its only job
+ * is to be non-empty, so tests that upload a replacement can tell the two apart.
+ */
+export const TEST_TERMS_DOCUMENT = new Uint8Array([0x25, 0x50, 0x44, 0x46])
 
 const EXECUTOR_COUNT = 2
 const EXECUTOR_BALANCE = parseEther('10')
@@ -146,6 +153,10 @@ export function useRipsApp(
 		const executors = await provisionService.ensureExecutors(EXECUTOR_COUNT)
 
 		await setupExecutors(executors, result.publicClient, provisionService)
+
+		await result.app
+			.get(SetupEligibilityPolicyService)
+			.setup(TEST_TERMS_DOCUMENT)
 
 		await ensureIndexerSync(indexer, anvil)
 	})

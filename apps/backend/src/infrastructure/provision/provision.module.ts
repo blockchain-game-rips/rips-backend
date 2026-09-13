@@ -6,6 +6,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
 import { PrismaModule } from '../prisma/prisma.module'
 import { RipsModule } from '../rips/rips.module'
 import { ProvisionService } from './provision.service'
+import { SetupEligibilityPolicyService } from './setup-eligibility-policy.service'
 
 @Module({
 	imports: [
@@ -16,7 +17,7 @@ import { ProvisionService } from './provision.service'
 		CurrencyRegistryModule,
 		AppCacheModule,
 	],
-	providers: [ProvisionService],
-	exports: [ProvisionService],
+	providers: [ProvisionService, SetupEligibilityPolicyService],
+	exports: [ProvisionService, SetupEligibilityPolicyService],
 })
 export class ProvisionModule {}
