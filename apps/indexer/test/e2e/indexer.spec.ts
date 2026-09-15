@@ -596,7 +596,7 @@ describe('indexer e2e', () => {
 			)) as Record<string, unknown>
 
 			const tiers: unknown[] = await dataSource.query(
-				`SELECT * FROM referral_tier WHERE update_id = '${row.id}' ORDER BY min_volume`,
+				`SELECT * FROM referral_tier WHERE update_id = '${String(row.id)}' ORDER BY min_volume`,
 			)
 
 			expect(tiers).toMatchObject(

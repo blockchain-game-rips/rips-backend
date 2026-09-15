@@ -48,8 +48,6 @@ const BASE_CHAIN_ID = 8453
 const USDC_BASE_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
 const USDC_DECIMALS = 6
 
-const SLIPPAGE_SCALE = 10_000
-
 // Entries requested on top of the cap, so the rip has to leave some unsold.
 const OVERSHOOT_ENTRIES = 12
 

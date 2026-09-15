@@ -76,10 +76,12 @@ export function anvilTape(params: AnvilConfig): AnvilTape {
 
 		// Teardown runs even when the run died before anvil came up, and
 		// throwing here would bury that failure under one about cleanup.
-		stop: async () => {
+		stop: () => {
 			if (started) {
 				anvil.stop()
 			}
+
+			return Promise.resolve()
 		},
 
 		replayed: () => ({

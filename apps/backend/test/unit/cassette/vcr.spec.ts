@@ -42,8 +42,10 @@ function stubTape(): StubTape {
 		owns: () => true,
 
 		recorded: () => ({ rpcUrl: 'http://live' }),
-		record: async () => {
+		record: () => {
 			tape.started = true
+
+			return Promise.resolve()
 		},
 		stop: async () => {},
 
