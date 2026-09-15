@@ -10,12 +10,19 @@ import {
 	Transport,
 } from 'viem'
 import * as chains from 'viem/chains'
-import { HttpRpcClientOptions } from 'viem/utils'
 import { createCustomError } from '../../../utils/common'
 import { EvmRpcMetricsService } from '../../metrics/evm-rpc-metrics.service'
 import { EVM_CLIENT_CONFIG, ResolvedEvmClientConfig } from './types'
 
-const DEFAULT_BATCH_SIZE = 1_000
+// Batches are re-split across upstreams by the proxy, and a batch response is
+// HTTP 200 even when every sub-request inside it failed. Smaller batches keep
+// that blast radius small.
+const DEFAULT_BATCH_SIZE = 50
+
+// The proxy's own per-call budget is 2s, spent across its retries and hedges.
+// Sitting just above it means a slow call surfaces as the proxy's own error,
+// naming the upstream that failed, rather than as an opaque client-side abort.
+const REQUEST_TIMEOUT_MS = 2_500
 
 @Injectable()
 export class EvmClientService {
@@ -67,26 +74,6 @@ export class EvmClientService {
 		return client
 	}
 
-	/**
-	 * Removes retry-after header to prevent viem from using long retry delays
-	 */
-	private fetchFn: HttpRpcClientOptions['fetchFn'] = async (input, init) => {
-		const response = await fetch(input, init)
-
-		if (!response.headers.has('retry-after')) {
-			return response
-		}
-
-		const headers = new Headers(response.headers)
-		headers.delete('retry-after')
-
-		return new Response(response.body, {
-			status: response.status,
-			statusText: response.statusText,
-			headers,
-		})
-	}
-
 	getTransport(chainId: number): FallbackTransport {
 		const chain = this.findChainById(chainId)
 
@@ -96,11 +83,10 @@ export class EvmClientService {
 			this.config?.rpcSettings?.[chainId]?.batchSize || DEFAULT_BATCH_SIZE
 
 		const defaultTransportConfig: HttpTransportConfig = {
-			timeout: 6_000,
+			timeout: REQUEST_TIMEOUT_MS,
 			batch: {
 				batchSize: batchSize,
 			},
-			fetchFn: this.fetchFn,
 		}
 
 		const chainName = this.getChainNameById(chainId)
@@ -133,9 +119,11 @@ export class EvmClientService {
 
 		/* ======== Build Fallback Transport ======== */
 
+		// Retries belong to the proxy, which is the layer that knows which
+		// upstreams exist and which are currently healthy. Retrying here too
+		// would multiply against its attempts and blow the caller's budget.
 		return fallback(transports, {
-			retryCount: 3,
-			retryDelay: 500,
+			retryCount: 0,
 			// rank: true results in strange behavior
 			// significantly slows down process while doing many requests
 			rank: false,
