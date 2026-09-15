@@ -17,6 +17,10 @@ export const rpcSettingsSchema: z.ZodType<RpcSettings> = z.record(
 			),
 		),
 		disableDefaultRpcUrl: z.boolean().default(false),
+
+		// Absent from the schema until now, so a value in config.yaml was
+		// dropped on parse and the client always used its own default.
+		batchSize: z.number().int().positive().optional(),
 	}),
 )
 
