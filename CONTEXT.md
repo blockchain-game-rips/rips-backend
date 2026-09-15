@@ -2,6 +2,27 @@
 
 Glossary of domain terms. Definitions only — no implementation detail.
 
+## Initial setup
+
+The procedure that takes a deployed system from "running" to "ready to accept
+users". Its steps establish state that no migration and no startup path creates.
+
+Distinct from *bootstrap*, which is the application starting, and from
+*configuration*, which the running service reads. An input to initial setup is
+consumed once and never read again.
+
+Made of two kinds of step: seeding and provisioning.
+
+## Seeding
+
+An initial setup step that fills in known content, authored elsewhere and
+applied as-is. Cheap to repeat and cheap to undo.
+
+## Provisioning
+
+An initial setup step that creates resources or causes effects outside the
+system. Not reliably undoable, and its result is not confined to the database.
+
 ## Currency
 
 Anything that has a chain and an address. Identified by a CAIP-10 `CurrencyId`.

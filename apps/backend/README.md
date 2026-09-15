@@ -33,6 +33,45 @@ Run database migrations:
 yarn prisma migrate deploy
 ```
 
+## Initial setup
+
+Five pieces of state are required before the backend can serve users. No
+migration and no startup path creates them:
+
+1. **Admin wallet** — the key the backend signs administrative transactions
+   with, encrypted with the KEK and stored in the database.
+2. **Executors** — the keypairs the keeper sends transactions from.
+3. **Executor roles** — `grantOperatorRole` on the contract, one transaction per
+   executor, sent by the admin wallet. Requires step 1.
+4. **Card definitions** — the collection every rip draws from.
+5. **Eligibility policy** — the singleton row, created together with the terms
+   document the gate serves.
+
+All five are applied by one command, which ships in the image:
+
+```bash
+node dist/src/setup/setup.js <cards.json> <terms-document>
+```
+
+It prompts for:
+
+- **admin private key** — read without echo. Used once, to write the encrypted
+  database record; the backend reads the record, never this input.
+- **executor count** — defaults to 2 on an empty answer.
+
+The two file arguments are read once. See `ops/README.md` for where to put them
+on the deployed host and the exact invocation.
+
+Run it once, by hand, after the first deploy. Nothing enforces this: there is no
+re-run guard and no readiness endpoint. The steps tolerate repetition — the
+admin wallet upserts, executors top up to the requested count, the eligibility
+policy leaves an established row alone. If a run fails part-way, the steps before
+the failure have already been applied; finish the rest by hand.
+
+Dropping the database does not undo step 3. Executor roles live on the contract,
+so a rebuilt database means new executors and new grants, with the old grants
+still in place.
+
 ## Running
 
 ```bash
