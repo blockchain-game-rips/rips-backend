@@ -203,6 +203,13 @@ async function createAppContext(): Promise<AppContext> {
 	})
 }
 
+/**
+ * Mirrors the order in `apps/backend/src/setup/setup.ts`: admin wallet, then
+ * executors, then their roles (which the admin wallet has to exist to grant).
+ * The funding calls in between are local-only — Anvil hands out balances that a
+ * real deployment arrives with — which is why this runs the steps itself rather
+ * than calling the setup entrypoint.
+ */
 async function provision(app: AppContext, rpcUrl: string): Promise<void> {
 	const provisionService = app.get(ProvisionService)
 
