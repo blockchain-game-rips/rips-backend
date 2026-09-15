@@ -40,7 +40,6 @@ COPY .yarn/ ./.yarn/
 
 COPY apps/backend/package.json apps/backend/
 COPY packages/abi/package.json packages/abi/
-COPY packages/test-harness/package.json packages/test-harness/
 
 # The Prisma CLI applies the migrations on start, so the runner keeps the full
 # dependency tree rather than a production-only install.
