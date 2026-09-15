@@ -138,6 +138,16 @@ export class EvmTransactionService {
 				return { status: 'reverted', transaction, receipt }
 			}
 
+			this.logger.log(
+				{
+					...context,
+					status: 'succeeded',
+					txHash,
+					gasUsed: receipt.gasUsed.toString(),
+				},
+				'Transaction succeeded',
+			)
+
 			return { status: 'succeeded', transaction, receipt }
 		} catch (cause) {
 			return fail(SendPhase.Receipt, cause, txHash)
