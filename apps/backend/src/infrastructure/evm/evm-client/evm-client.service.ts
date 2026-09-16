@@ -24,6 +24,11 @@ const DEFAULT_BATCH_SIZE = 50
 // naming the upstream that failed, rather than as an opaque client-side abort.
 const REQUEST_TIMEOUT_MS = 2_500
 
+// Both values are what the client carried before retries were handed to the
+// proxy.
+const RETRY_COUNT = 3
+const RETRY_DELAY_MS = 500
+
 @Injectable()
 export class EvmClientService {
 	constructor(
@@ -119,11 +124,13 @@ export class EvmClientService {
 
 		/* ======== Build Fallback Transport ======== */
 
-		// Retries belong to the proxy, which is the layer that knows which
-		// upstreams exist and which are currently healthy. Retrying here too
-		// would multiply against its attempts and blow the caller's budget.
+		// Retries were handed to the proxy alone, and consecutive sends started
+		// failing with "nonce too low" right after. Restored here to test that
+		// connection: viem probes eth_fillTransaction before every send, and
+		// without a retry the first failure drops it onto a separate nonce read.
 		return fallback(transports, {
-			retryCount: 0,
+			retryCount: RETRY_COUNT,
+			retryDelay: RETRY_DELAY_MS,
 			// rank: true results in strange behavior
 			// significantly slows down process while doing many requests
 			rank: false,
