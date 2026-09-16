@@ -5,8 +5,12 @@ on:
     branches: [main]
     paths:
       - "apps/indexer/**"
-      # The backend manifest lands in the indexer image's install layer.
-      - "apps/backend/package.json"
+      # The backend manifest is deliberately absent, even though the image's
+      # install layer reads it: --immutable resolves the whole workspace graph,
+      # so the manifest is copied in but only its effect on the lockfile can
+      # change what gets installed. yarn.lock below covers that, which leaves
+      # edits this image cannot observe — a moved dependency line, a renamed
+      # script — no longer rebuilding it.
       - "packages/**"
       - "package.json"
       - "yarn.lock"
