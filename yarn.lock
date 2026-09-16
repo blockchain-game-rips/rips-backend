@@ -4800,7 +4800,6 @@ __metadata:
     "@prisma/adapter-pg": "npm:^7.5.0"
     "@prisma/client": "npm:^7.5.0"
     "@rips/abi": "workspace:*"
-    "@rips/test-harness": "workspace:*"
     "@swc/cli": "npm:^0.6.0"
     "@swc/core": "npm:^1.10.7"
     "@testcontainers/postgresql": "npm:^11.13.0"

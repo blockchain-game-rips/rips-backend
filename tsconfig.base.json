@@ -18,6 +18,15 @@
         // inside the dependency. Point the compiler at the shipped
         // declarations instead. Remove once moduleResolution moves to node16.
         "paths": {
+            // The harness is consumed only from test sources, so it is not a
+            // dependency of any app manifest — without which yarn links no
+            // node_modules entry for it. Map it to its sources directly, the
+            // way vitest.shared.mts already aliases it for the test runs.
+            "@rips/test-harness": ["./packages/test-harness/src/index.ts"],
+            "@rips/test-harness/state": [
+                "./packages/test-harness/src/state/index.ts"
+            ],
+
             "ox": ["./node_modules/ox/_types/index.d.ts"],
             "ox/tempo/*": ["./node_modules/ox/_types/tempo/*.d.ts"],
             "ox/core/*": ["./node_modules/ox/_types/core/*.d.ts"],
