@@ -336,9 +336,7 @@ export class DeBridgeService {
 			},
 		)
 
-		const gasLimit = BigInt(
-			swapResponse.estimatedTransactionFee.details.gasLimit,
-		)
+		const gasLimit = quotedGasLimit(swapResponse)
 
 		return {
 			amountOut: {
@@ -400,6 +398,7 @@ export class DeBridgeService {
 			to: swapResponse.tx.to,
 			data: swapResponse.tx.data,
 			value: BigInt(swapResponse.tx.value),
+			gas: quotedGasLimit(swapResponse),
 		}
 
 		const result = await this.evmTransactionService.sendTransaction(
@@ -554,9 +553,7 @@ export class DeBridgeService {
 	) {
 		const srcChainId = createTxResponse.estimation.srcChainTokenIn.chainId
 
-		const gasLimit = BigInt(
-			createTxResponse.estimatedTransactionFee.details.gasLimit,
-		)
+		const gasLimit = quotedGasLimit(createTxResponse)
 
 		return {
 			blockchainFee: await this.transactionFeeService.estimateFee(
@@ -573,6 +570,7 @@ export class DeBridgeService {
 			to: createTxResponse.tx.to,
 			data: createTxResponse.tx.data,
 			value: BigInt(createTxResponse.tx.value),
+			gas: quotedGasLimit(createTxResponse),
 		}
 	}
 
@@ -652,4 +650,17 @@ export class DeBridgeService {
 
 		return targetPayload
 	}
+}
+
+/* ======== helpers ======== */
+
+/**
+ * Both quote shapes report the gas the swap needs under the same field. It is
+ * carried into the request rather than estimated locally, so a send does not
+ * depend on the node having already seen the approve that precedes it.
+ */
+function quotedGasLimit(quote: {
+	estimatedTransactionFee: { details: { gasLimit: string } }
+}): bigint {
+	return BigInt(quote.estimatedTransactionFee.details.gasLimit)
 }
