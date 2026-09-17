@@ -12,8 +12,10 @@ import { evmAddressFromWallet } from '../../domain/services/evm'
 import { Transaction } from '../../domain/value-objects/transaction'
 import { Wallet } from '../../domain/value-objects/wallet'
 import { SignService } from '../sign/sign.service'
+import { ChainAccount } from './chain-account'
 import { EvmClientService } from './evm-client/evm-client.service'
 import { EvmCurrencyService } from './evm-currency.service'
+import { NonceManagerService } from './nonce-manager.service'
 import {
 	classifySendFailure,
 	SendFailure,
@@ -47,6 +49,7 @@ export class EvmTransactionService {
 		private readonly evmClientService: EvmClientService,
 		private readonly evmCurrencyService: EvmCurrencyService,
 		private readonly signService: SignService,
+		private readonly nonceManagerService: NonceManagerService,
 	) {}
 
 	/**
@@ -58,9 +61,12 @@ export class EvmTransactionService {
 		request: TransactionRequestEIP1559,
 		chainId: number,
 	): Promise<SendTransactionResult> {
+		const from = evmAddressFromWallet(wallet)
+		const sender: ChainAccount = { address: from, chainId }
+
 		const context = {
 			chainId,
-			from: evmAddressFromWallet(wallet),
+			from,
 			walletKind: wallet.kind,
 			to: request.to,
 			data: request.data,
@@ -93,14 +99,19 @@ export class EvmTransactionService {
 		try {
 			client = this.evmClientService.getClient(chainId)
 
+			const nonce = await this.nonceManagerService.reserve(sender)
+
 			const preparedTx = await client.prepareTransactionRequest({
 				...request,
-				account: evmAddressFromWallet(wallet),
+				account: from,
 				chainId,
+				nonce,
 			})
 
 			signedTx = await this.signService.signTx(wallet, preparedTx)
 		} catch (cause) {
+			await this.nonceManagerService.release(sender)
+
 			return fail(SendPhase.Preparation, cause)
 		}
 
@@ -111,6 +122,8 @@ export class EvmTransactionService {
 				serializedTransaction: signedTx,
 			})
 		} catch (cause) {
+			await this.nonceManagerService.release(sender)
+
 			return fail(SendPhase.Broadcast, cause)
 		}
 
