@@ -124,10 +124,6 @@ export class EvmClientService {
 
 		/* ======== Build Fallback Transport ======== */
 
-		// Retries were handed to the proxy alone, and consecutive sends started
-		// failing with "nonce too low" right after. Restored here to test that
-		// connection: viem probes eth_fillTransaction before every send, and
-		// without a retry the first failure drops it onto a separate nonce read.
 		return fallback(transports, {
 			retryCount: RETRY_COUNT,
 			retryDelay: RETRY_DELAY_MS,
