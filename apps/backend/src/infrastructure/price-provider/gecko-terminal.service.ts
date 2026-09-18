@@ -76,6 +76,10 @@ export class GeckoTerminalService {
 			const batch = addresses.slice(i, i + BATCH_SIZE)
 			const addressesString = batch.join(',')
 
+			console.log(
+				`gecko ${network}: batch ${i / BATCH_SIZE + 1}, ${batch.length} addresses`,
+			)
+
 			const { data } = await this.client
 				.get(`networks/${network}/tokens/multi/${addressesString}`)
 				.json<{ data: GeckoTerminalTokenData[] }>()

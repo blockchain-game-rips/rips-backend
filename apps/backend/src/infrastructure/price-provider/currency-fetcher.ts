@@ -115,8 +115,17 @@ export async function fetchCurrenciesData(
 	const result = new Map<ChainAddress, EnrichedCurrencyData>()
 	const networks = Array.from(byNetwork.entries())
 
+	console.log(
+		`Fetching ${chainAddresses.length} currencies across ${networks.length} networks`,
+	)
+
 	for (let i = 0; i < networks.length; i++) {
-		if (i > 0) await wait(INTER_NETWORK_DELAY_MS)
+		if (i > 0) {
+			console.log(
+				`Waiting ${INTER_NETWORK_DELAY_MS}ms before next network`,
+			)
+			await wait(INTER_NETWORK_DELAY_MS)
+		}
 
 		const [network, group] = networks[i]
 
@@ -124,7 +133,16 @@ export async function fetchCurrenciesData(
 			priceableAddress(Number(entry.chain.reference), entry.address),
 		)
 
+		console.log(
+			`[${i + 1}/${networks.length}] ${network}: requesting ${addresses.length} addresses`,
+		)
+
+		const startedAt = Date.now()
 		const tokens = await gecko.getTokensData(addresses, network)
+
+		console.log(
+			`[${i + 1}/${networks.length}] ${network}: got ${tokens.length} tokens in ${Date.now() - startedAt}ms`,
+		)
 
 		for (let j = 0; j < group.length; j++) {
 			const chainAddress = group[j]

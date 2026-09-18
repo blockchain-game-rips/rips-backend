@@ -48,7 +48,11 @@ async function main() {
 	const gecko = new GeckoTerminalService()
 	const rawCurrencies = loadRawInput()
 
+	console.log(`Loaded ${rawCurrencies.length} raw currencies`)
+
 	const dataByCurrency = await fetchCurrenciesData(gecko, rawCurrencies)
+
+	console.log(`Fetched data for ${dataByCurrency.size} currencies`)
 
 	const enriched: EnrichedCurrency[] = rawCurrencies.map((chainAddress) => {
 		const data = dataByCurrency.get(chainAddress)
