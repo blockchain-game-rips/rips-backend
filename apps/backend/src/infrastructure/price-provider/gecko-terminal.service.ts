@@ -35,10 +35,13 @@ interface GeckoTerminalChain {
 // docs say that you can retrieve up to 30 addresses in one request
 const BATCH_SIZE = 30
 
+const REQUEST_TIMEOUT_MS = 20_000
+
 @Injectable()
 export class GeckoTerminalService {
 	private readonly client = ky.create({
 		prefixUrl: 'https://api.geckoterminal.com/api/v2',
+		timeout: REQUEST_TIMEOUT_MS,
 	})
 
 	async getTokenData(
