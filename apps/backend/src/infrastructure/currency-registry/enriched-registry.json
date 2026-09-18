@@ -10,7 +10,7 @@
 			"name": "Wrapped BTC",
 			"decimals": 8
 		},
-		"lastKnownPrice": 65489.1922656772
+		"lastKnownPrice": 77948.1422601193
 	},
 	{
 		"chain": {
@@ -23,7 +23,7 @@
 			"name": "Wrapped Ether",
 			"decimals": 18
 		},
-		"lastKnownPrice": 1919.19
+		"lastKnownPrice": 2500.62
 	},
 	{
 		"chain": {
@@ -36,7 +36,7 @@
 			"name": "USD Coin",
 			"decimals": 6
 		},
-		"lastKnownPrice": 1.0005051373
+		"lastKnownPrice": 0.9990748524
 	},
 	{
 		"chain": {
@@ -49,7 +49,7 @@
 			"name": "Tether USD",
 			"decimals": 6
 		},
-		"lastKnownPrice": 1.0008359781
+		"lastKnownPrice": 0.9995287635
 	},
 	{
 		"chain": {
@@ -62,7 +62,7 @@
 			"name": "Wrapped BTC",
 			"decimals": 8
 		},
-		"lastKnownPrice": 65683.2637022291
+		"lastKnownPrice": 77934.4854497081
 	},
 	{
 		"chain": {
@@ -75,7 +75,7 @@
 			"name": "Wrapped BNB",
 			"decimals": 18
 		},
-		"lastKnownPrice": 570.06
+		"lastKnownPrice": 750.02
 	},
 	{
 		"chain": {
@@ -88,7 +88,7 @@
 			"name": "USD Coin",
 			"decimals": 18
 		},
-		"lastKnownPrice": 0.9997278167
+		"lastKnownPrice": 1.0002232544
 	},
 	{
 		"chain": {
@@ -101,7 +101,7 @@
 			"name": "Tether USD",
 			"decimals": 18
 		},
-		"lastKnownPrice": 1.0007558297
+		"lastKnownPrice": 0.9995089314
 	},
 	{
 		"chain": {
@@ -114,7 +114,7 @@
 			"name": "(PoS) Wrapped BTC",
 			"decimals": 8
 		},
-		"lastKnownPrice": 65599.5711203011
+		"lastKnownPrice": 77945.4409645677
 	},
 	{
 		"chain": {
@@ -127,7 +127,7 @@
 			"name": "Wrapped POL",
 			"decimals": 18
 		},
-		"lastKnownPrice": 0.07945932804
+		"lastKnownPrice": 0.0999557601
 	},
 	{
 		"chain": {
@@ -140,7 +140,7 @@
 			"name": "USD Coin",
 			"decimals": 6
 		},
-		"lastKnownPrice": 1.0006389661
+		"lastKnownPrice": 1.0003204989
 	},
 	{
 		"chain": {
@@ -153,7 +153,7 @@
 			"name": "(PoS) Tether USD",
 			"decimals": 6
 		},
-		"lastKnownPrice": 1.0028065591
+		"lastKnownPrice": 0.9987521374
 	},
 	{
 		"chain": {
@@ -166,7 +166,7 @@
 			"name": "Wrapped BTC",
 			"decimals": 8
 		},
-		"lastKnownPrice": 65538.0149207718
+		"lastKnownPrice": 78487.0950809583
 	},
 	{
 		"chain": {
@@ -179,7 +179,7 @@
 			"name": "Wrapped Ether",
 			"decimals": 18
 		},
-		"lastKnownPrice": 1918.76
+		"lastKnownPrice": 2501.7
 	},
 	{
 		"chain": {
@@ -192,7 +192,7 @@
 			"name": "USD Coin",
 			"decimals": 6
 		},
-		"lastKnownPrice": 1.0004588607
+		"lastKnownPrice": 0.9995227854
 	},
 	{
 		"chain": {
@@ -205,7 +205,7 @@
 			"name": "Tether USD",
 			"decimals": 6
 		},
-		"lastKnownPrice": 0.9988587465
+		"lastKnownPrice": 0.998617604
 	},
 	{
 		"chain": {
@@ -218,7 +218,7 @@
 			"name": "Wrapped BTC",
 			"decimals": 8
 		},
-		"lastKnownPrice": 65476.7289586087
+		"lastKnownPrice": 77556.6053370133
 	},
 	{
 		"chain": {
@@ -231,7 +231,7 @@
 			"name": "Wrapped AVAX",
 			"decimals": 18
 		},
-		"lastKnownPrice": 6.5
+		"lastKnownPrice": 7.93
 	},
 	{
 		"chain": {
@@ -244,7 +244,7 @@
 			"name": "USD Coin",
 			"decimals": 6
 		},
-		"lastKnownPrice": 0.9990687682
+		"lastKnownPrice": 0.9994341785
 	},
 	{
 		"chain": {
@@ -257,7 +257,7 @@
 			"name": "TetherToken",
 			"decimals": 6
 		},
-		"lastKnownPrice": 0.9990318571
+		"lastKnownPrice": 1.0008164893
 	},
 	{
 		"chain": {
@@ -270,7 +270,7 @@
 			"name": "Wrapped BTC",
 			"decimals": 8
 		},
-		"lastKnownPrice": 65451.5614018453
+		"lastKnownPrice": 77930.7470520094
 	},
 	{
 		"chain": {
@@ -283,7 +283,7 @@
 			"name": "Wrapped Ether",
 			"decimals": 18
 		},
-		"lastKnownPrice": 1918.76
+		"lastKnownPrice": 2503.24
 	},
 	{
 		"chain": {
@@ -296,7 +296,7 @@
 			"name": "USD Coin",
 			"decimals": 6
 		},
-		"lastKnownPrice": 1.0002496949
+		"lastKnownPrice": 1.0011741028
 	},
 	{
 		"chain": {
@@ -309,7 +309,7 @@
 			"name": "Tether USD",
 			"decimals": 6
 		},
-		"lastKnownPrice": 0.9999069079
+		"lastKnownPrice": 0.9985396122
 	},
 	{
 		"chain": {
@@ -322,7 +322,7 @@
 			"name": "Wrapped BTC",
 			"decimals": 8
 		},
-		"lastKnownPrice": 65405.0378385497
+		"lastKnownPrice": 77684.8615380144
 	},
 	{
 		"chain": {
@@ -335,7 +335,7 @@
 			"name": "Wrapped Ether",
 			"decimals": 18
 		},
-		"lastKnownPrice": 1918.72
+		"lastKnownPrice": 2501.53
 	},
 	{
 		"chain": {
@@ -348,7 +348,7 @@
 			"name": "USD Coin",
 			"decimals": 6
 		},
-		"lastKnownPrice": 0.9971964014
+		"lastKnownPrice": 0.9944672467
 	},
 	{
 		"chain": {
@@ -361,7 +361,7 @@
 			"name": "Ether",
 			"decimals": 18
 		},
-		"lastKnownPrice": 1919.19
+		"lastKnownPrice": 2500.62
 	},
 	{
 		"chain": {
@@ -374,7 +374,7 @@
 			"name": "Ether",
 			"decimals": 18
 		},
-		"lastKnownPrice": 1918.76
+		"lastKnownPrice": 2503.24
 	},
 	{
 		"chain": {
@@ -387,7 +387,7 @@
 			"name": "BNB",
 			"decimals": 18
 		},
-		"lastKnownPrice": 570.06
+		"lastKnownPrice": 750.02
 	},
 	{
 		"chain": {
@@ -400,7 +400,7 @@
 			"name": "POL",
 			"decimals": 18
 		},
-		"lastKnownPrice": 0.07945932804
+		"lastKnownPrice": 0.0999557601
 	},
 	{
 		"chain": {
@@ -413,7 +413,7 @@
 			"name": "Ether",
 			"decimals": 18
 		},
-		"lastKnownPrice": 1918.72
+		"lastKnownPrice": 2501.53
 	},
 	{
 		"chain": {
@@ -426,7 +426,7 @@
 			"name": "Ether",
 			"decimals": 18
 		},
-		"lastKnownPrice": 1918.76
+		"lastKnownPrice": 2501.7
 	},
 	{
 		"chain": {
@@ -439,6 +439,6 @@
 			"name": "Avalanche",
 			"decimals": 18
 		},
-		"lastKnownPrice": 6.5
+		"lastKnownPrice": 7.93
 	}
 ]
