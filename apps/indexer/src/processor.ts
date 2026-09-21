@@ -47,9 +47,19 @@ const TRACKED_EVENTS = [
 
 const gatewayUrl = process.env.GATEWAY_URL
 
+// The v2 archive stopped serving anonymous traffic on 19 May 2026. Without a
+// key it still answers, but throttled hard enough that the processor falls back
+// to RPC pace — a two-orders-of-magnitude slowdown that looks like nothing is
+// wrong in the logs.
+const gatewayApiKey = process.env.SQD_API_KEY
+
 if (!gatewayUrl) {
 	console.warn(
 		'GATEWAY_URL is not set — running in RPC-only mode. This is slower and not recommended for production.',
+	)
+} else if (!gatewayApiKey) {
+	console.warn(
+		'SQD_API_KEY is not set — the gateway will throttle history to RPC speed. Get one at https://portal.sqd.dev',
 	)
 }
 
@@ -67,7 +77,12 @@ const processorBuilder = new EvmBatchProcessor()
 	)
 
 export const processor = (
-	gatewayUrl ? processorBuilder.setGateway(gatewayUrl) : processorBuilder
+	gatewayUrl
+		? processorBuilder.setGateway({
+				url: gatewayUrl,
+				apiKey: gatewayApiKey,
+			})
+		: processorBuilder
 )
 	.setFinalityConfirmation(75)
 	.setFields({
