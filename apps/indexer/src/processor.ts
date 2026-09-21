@@ -47,10 +47,9 @@ const TRACKED_EVENTS = [
 
 const gatewayUrl = process.env.GATEWAY_URL
 
-// The v2 archive stopped serving anonymous traffic on 19 May 2026. Without a
-// key it still answers, but throttled hard enough that the processor falls back
-// to RPC pace — a two-orders-of-magnitude slowdown that looks like nothing is
-// wrong in the logs.
+// The v2 archive stopped serving anonymous traffic on 19 May 2026. The SDK also
+// reads SQD_API_KEY on its own; naming it here keeps the requirement visible
+// next to the url it authenticates.
 const gatewayApiKey = process.env.SQD_API_KEY
 
 if (!gatewayUrl) {
@@ -59,16 +58,26 @@ if (!gatewayUrl) {
 	)
 } else if (!gatewayApiKey) {
 	console.warn(
-		'SQD_API_KEY is not set — the gateway will throttle history to RPC speed. Get one at https://portal.sqd.dev',
+		'SQD_API_KEY is not set — the gateway rejects keyless traffic. Get one at https://portal.sqd.dev',
 	)
 }
 
 const headPollInterval = process.env.HEAD_POLL_INTERVAL_MS
 
+// Requests per second the processor is allowed to issue. It only bounds the RPC
+// path, so it decides how fast a range the gateway cannot serve gets synced —
+// the gateway trails the chain tip by weeks, which puts any recent history
+// entirely on RPC.
+const DEFAULT_RPC_RATE_LIMIT = 10
+
+const rpcRateLimit = process.env.RPC_RATE_LIMIT
+	? parseInt(process.env.RPC_RATE_LIMIT)
+	: DEFAULT_RPC_RATE_LIMIT
+
 const processorBuilder = new EvmBatchProcessor()
 	.setRpcEndpoint({
 		url: assertNotNull(process.env.RPC_ENDPOINT),
-		rateLimit: 10,
+		rateLimit: rpcRateLimit,
 	})
 	.setRpcDataIngestionSettings(
 		headPollInterval
